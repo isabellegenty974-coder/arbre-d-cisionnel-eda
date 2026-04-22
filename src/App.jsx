@@ -5,7 +5,21 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-// Add page imports here
+import Accueil from './pages/Accueil';
+import Apprentissage from './pages/Apprentissage';
+import Lecture from './pages/Lecture';
+import LectureInstallee from './pages/LectureInstallee';
+import HypoLecture from './pages/HypoLecture';
+import ActionsLecture from './pages/ActionsLecture';
+import Comportement from './pages/Comportement';
+import Anxiete from './pages/Anxiete';
+import AnxieteGen from './pages/AnxieteGen';
+import ActionsAnxiete from './pages/ActionsAnxiete';
+import Developpement from './pages/Developpement';
+import LangageOral from './pages/LangageOral';
+import Contexte from './pages/Contexte';
+import Famille from './pages/Famille';
+import ActionsFamille from './pages/ActionsFamille';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -33,7 +47,21 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route path="/" element={<Accueil />} />
+      <Route path="/Apprentissage" element={<Apprentissage />} />
+      <Route path="/Lecture" element={<Lecture />} />
+      <Route path="/LectureInstallee" element={<LectureInstallee />} />
+      <Route path="/HypoLecture" element={<HypoLecture />} />
+      <Route path="/ActionsLecture" element={<ActionsLecture />} />
+      <Route path="/Comportement" element={<Comportement />} />
+      <Route path="/Anxiete" element={<Anxiete />} />
+      <Route path="/AnxieteGen" element={<AnxieteGen />} />
+      <Route path="/ActionsAnxiete" element={<ActionsAnxiete />} />
+      <Route path="/Developpement" element={<Developpement />} />
+      <Route path="/LangageOral" element={<LangageOral />} />
+      <Route path="/Contexte" element={<Contexte />} />
+      <Route path="/Famille" element={<Famille />} />
+      <Route path="/ActionsFamille" element={<ActionsFamille />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
