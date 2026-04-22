@@ -14,6 +14,14 @@ export default function LangageExpr() {
           "Phrases courtes",
         ]}
       />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Intelligibilité",
+          "Complexité syntaxique",
+        ]}
+      />
       <ActionButton label="Actions recommandées" to="/developpement/langage-oral/expression/actions" />
     </ScreenLayout>
   );

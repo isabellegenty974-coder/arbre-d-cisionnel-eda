@@ -15,6 +15,14 @@ export default function Changements() {
           "Changement enseignant",
         ]}
       />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Réactions émotionnelles",
+          "Adaptation",
+        ]}
+      />
       <ActionButton label="Actions recommandées" to="/contexte/changements/actions" />
     </ScreenLayout>
   );

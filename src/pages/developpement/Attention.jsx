@@ -11,8 +11,15 @@ export default function Attention() {
         items={[
           "Distractibilité",
           "Hyperfocalisation",
-          "Variabilité",
-          "Fatigue cognitive",
+          "Variabilité attentionnelle",
+        ]}
+      />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Déclencheurs",
+          "Durée de concentration",
         ]}
       />
       <ActionButton label="Actions recommandées" to="/developpement/attention/actions" />

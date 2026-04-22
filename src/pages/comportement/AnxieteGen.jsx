@@ -4,14 +4,22 @@ import ActionButton from "../../components/tree/ActionButton";
 
 export default function AnxieteGen() {
   return (
-    <ScreenLayout title="Anxiété généralisée – Hypothèses">
+    <ScreenLayout title="Anxiété généralisée">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Hypothèses</h2>
       <InfoList
         type="hypothesis"
         items={[
-          "Anxiété de performance",
           "Anxiété sociale",
-          "Stress lié à un événement extérieur",
+          "Stress chronique",
           "Hypersensibilité émotionnelle",
+        ]}
+      />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Variabilité",
+          "Impact sur les apprentissages",
         ]}
       />
       <ActionButton label="Actions recommandées" to="/comportement/anxiete/actions" />

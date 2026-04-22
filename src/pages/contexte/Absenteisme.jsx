@@ -9,10 +9,17 @@ export default function Absenteisme() {
       <InfoList
         type="hypothesis"
         items={[
-          "Fatigue",
           "Désengagement",
           "Contexte familial",
           "Anxiété scolaire",
+        ]}
+      />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Fréquence",
+          "Moments d'absence",
         ]}
       />
       <ActionButton label="Actions recommandées" to="/contexte/absenteisme/actions" />

@@ -10,19 +10,25 @@ export default function Calcul() {
         type="hypothesis"
         items={[
           "Automatisation faible",
-          "Erreurs d'inattention",
           "Stress",
-          "Manque de stratégies",
+          "Erreurs d'inattention",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Actions</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Procédures utilisées",
+          "Rapidité / précision",
+        ]}
+      />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Interventions</h2>
       <InfoList
         type="action"
         items={[
-          "Tables",
-          "Jeux",
-          "Manipulations",
-          "Routines d'entraînement",
+          "Entraînement progressif",
+          "Jeux mathématiques",
+          "Routines d'automatisation",
         ]}
       />
     </ScreenLayout>

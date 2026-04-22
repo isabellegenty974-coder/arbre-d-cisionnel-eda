@@ -9,9 +9,17 @@ export default function LangageCompr() {
       <InfoList
         type="hypothesis"
         items={[
-          "Consignes difficiles",
-          "Vocabulaire limité",
+          "Trouble du langage oral (à explorer)",
           "Attention fluctuante",
+          "Vocabulaire limité",
+        ]}
+      />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Réactions aux consignes",
+          "Compréhension implicite",
         ]}
       />
       <ActionButton label="Actions recommandées" to="/developpement/langage-oral/comprehension/actions" />

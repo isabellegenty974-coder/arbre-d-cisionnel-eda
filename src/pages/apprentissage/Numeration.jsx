@@ -9,20 +9,27 @@ export default function Numeration() {
       <InfoList
         type="hypothesis"
         items={[
-          "Confusions",
-          "Manque de sens",
+          "Manque de sens du nombre",
           "Difficulté de manipulation",
-          "Anxiété",
+          "Anxiété mathématique",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Actions</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <InfoList
+        type="hypothesis"
+        items={[
+          "Stratégies utilisées",
+          "Erreurs récurrentes",
+        ]}
+      />
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Interventions</h2>
       <InfoList
         type="action"
         items={[
           "Manipulations",
           "Reprises de base",
           "Aides visuelles",
-          "Échanges enseignant",
+          "Travail du sens du nombre",
         ]}
       />
     </ScreenLayout>
