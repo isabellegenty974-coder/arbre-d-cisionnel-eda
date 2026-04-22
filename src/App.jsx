@@ -6,66 +6,48 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
-// Accueil
-import Accueil from '@/pages/Accueil';
-
+// Pages
+import Accueil from './pages/Accueil';
 // Apprentissage
-import Apprentissage from '@/pages/Apprentissage';
-import Lecture from '@/pages/Lecture';
-import LectureRecente from '@/pages/LectureRecente';
-import LectureInstallee from '@/pages/LectureInstallee';
-import HypoLecture from '@/pages/HypoLecture';
-import ActionsLecture from '@/pages/ActionsLecture';
-import Ecriture from '@/pages/Ecriture';
-import AnalyseEcriture from '@/pages/AnalyseEcriture';
-import HypoEcriture from '@/pages/HypoEcriture';
-import Maths from '@/pages/Maths';
-import AnalyseMaths from '@/pages/AnalyseMaths';
-import HypoMaths from '@/pages/HypoMaths';
-import GlobalApprentissage from '@/pages/GlobalApprentissage';
-import ActionsGlobalApprentissage from '@/pages/ActionsGlobalApprentissage';
-
+import Apprentissage from './pages/apprentissage/Apprentissage';
+import Lecture from './pages/apprentissage/Lecture';
+import LectureRecente from './pages/apprentissage/LectureRecente';
+import LectureInstallee from './pages/apprentissage/LectureInstallee';
+import HypoLecture from './pages/apprentissage/HypoLecture';
+import ActionsLecture from './pages/apprentissage/ActionsLecture';
+import Ecriture from './pages/apprentissage/Ecriture';
+import EcritureGeste from './pages/apprentissage/EcritureGeste';
+import EcritureProduction from './pages/apprentissage/EcritureProduction';
+import Maths from './pages/apprentissage/Maths';
+import GlobalApprentissage from './pages/apprentissage/GlobalApprentissage';
 // Comportement
-import Comportement from '@/pages/Comportement';
-import Inhibition from '@/pages/Inhibition';
-import Impulsivite from '@/pages/Impulsivite';
-import Anxiete from '@/pages/Anxiete';
-import AnxieteSit from '@/pages/AnxieteSit';
-import ActionsAnxieteSit from '@/pages/ActionsAnxieteSit';
-import AnxieteGen from '@/pages/AnxieteGen';
-import ActionsAnxiete from '@/pages/ActionsAnxiete';
-import Opposition from '@/pages/Opposition';
-
+import Comportement from './pages/comportement/Comportement';
+import Inhibition from './pages/comportement/Inhibition';
+import Impulsivite from './pages/comportement/Impulsivite';
+import Anxiete from './pages/comportement/Anxiete';
+import AnxieteSit from './pages/comportement/AnxieteSit';
+import AnxieteGen from './pages/comportement/AnxieteGen';
+import ActionsAnxiete from './pages/comportement/ActionsAnxiete';
+import Opposition from './pages/comportement/Opposition';
 // Développement
-import Developpement from '@/pages/Developpement';
-import LangageOral from '@/pages/LangageOral';
-import LangageCompr from '@/pages/LangageCompr';
-import ActionsLangageCompr from '@/pages/ActionsLangageCompr';
-import LangageExpr from '@/pages/LangageExpr';
-import ActionsLangageExpr from '@/pages/ActionsLangageExpr';
-import Motricite from '@/pages/Motricite';
-import MotriciteFine from '@/pages/MotriciteFine';
-import MotriciteGlobale from '@/pages/MotriciteGlobale';
-import Attention from '@/pages/Attention';
-import ActionsAttention from '@/pages/ActionsAttention';
-import Interactions from '@/pages/Interactions';
-import ActionsInteractions from '@/pages/ActionsInteractions';
-
+import Developpement from './pages/developpement/Developpement';
+import LangageOral from './pages/developpement/LangageOral';
+import LangageCompr from './pages/developpement/LangageCompr';
+import LangageExpr from './pages/developpement/LangageExpr';
+import Motricite from './pages/developpement/Motricite';
+import Attention from './pages/developpement/Attention';
+import Interactions from './pages/developpement/Interactions';
 // Contexte
-import Contexte from '@/pages/Contexte';
-import Famille from '@/pages/Famille';
-import ActionsFamille from '@/pages/ActionsFamille';
-import ClimatClasse from '@/pages/ClimatClasse';
-import ActionsClimatClasse from '@/pages/ActionsClimatClasse';
-import Changements from '@/pages/Changements';
-import ActionsChangements from '@/pages/ActionsChangements';
-import Absenteisme from '@/pages/Absenteisme';
-import ActionsAbsenteisme from '@/pages/ActionsAbsenteisme';
+import Contexte from './pages/contexte/Contexte';
+import Famille from './pages/contexte/Famille';
+import ActionsFamille from './pages/contexte/ActionsFamille';
+import ClimatClasse from './pages/contexte/ClimatClasse';
+import Changements from './pages/contexte/Changements';
+import Absenteisme from './pages/contexte/Absenteisme';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -74,79 +56,60 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <Routes>
       <Route path="/" element={<Accueil />} />
-      
-      <Route path="/Apprentissage" element={<Apprentissage />} />
-      <Route path="/Lecture" element={<Lecture />} />
-      <Route path="/LectureRecente" element={<LectureRecente />} />
-      <Route path="/LectureInstallee" element={<LectureInstallee />} />
-      <Route path="/HypoLecture" element={<HypoLecture />} />
-      <Route path="/ActionsLecture" element={<ActionsLecture />} />
-      <Route path="/Ecriture" element={<Ecriture />} />
-      <Route path="/AnalyseEcriture" element={<AnalyseEcriture />} />
-      <Route path="/HypoEcriture" element={<HypoEcriture />} />
-      <Route path="/Maths" element={<Maths />} />
-      <Route path="/AnalyseMaths" element={<AnalyseMaths />} />
-      <Route path="/HypoMaths" element={<HypoMaths />} />
-      <Route path="/GlobalApprentissage" element={<GlobalApprentissage />} />
-      <Route path="/ActionsGlobalApprentissage" element={<ActionsGlobalApprentissage />} />
-      
-      <Route path="/Comportement" element={<Comportement />} />
-      <Route path="/Inhibition" element={<Inhibition />} />
-      <Route path="/Impulsivite" element={<Impulsivite />} />
-      <Route path="/Anxiete" element={<Anxiete />} />
-      <Route path="/AnxieteSit" element={<AnxieteSit />} />
-      <Route path="/ActionsAnxieteSit" element={<ActionsAnxieteSit />} />
-      <Route path="/AnxieteGen" element={<AnxieteGen />} />
-      <Route path="/ActionsAnxiete" element={<ActionsAnxiete />} />
-      <Route path="/Opposition" element={<Opposition />} />
-      
-      <Route path="/Developpement" element={<Developpement />} />
-      <Route path="/LangageOral" element={<LangageOral />} />
-      <Route path="/LangageCompr" element={<LangageCompr />} />
-      <Route path="/ActionsLangageCompr" element={<ActionsLangageCompr />} />
-      <Route path="/LangageExpr" element={<LangageExpr />} />
-      <Route path="/ActionsLangageExpr" element={<ActionsLangageExpr />} />
-      <Route path="/Motricite" element={<Motricite />} />
-      <Route path="/MotriciteFine" element={<MotriciteFine />} />
-      <Route path="/MotriciteGlobale" element={<MotriciteGlobale />} />
-      <Route path="/Attention" element={<Attention />} />
-      <Route path="/ActionsAttention" element={<ActionsAttention />} />
-      <Route path="/Interactions" element={<Interactions />} />
-      <Route path="/ActionsInteractions" element={<ActionsInteractions />} />
-      
-      <Route path="/Contexte" element={<Contexte />} />
-      <Route path="/Famille" element={<Famille />} />
-      <Route path="/ActionsFamille" element={<ActionsFamille />} />
-      <Route path="/ClimatClasse" element={<ClimatClasse />} />
-      <Route path="/ActionsClimatClasse" element={<ActionsClimatClasse />} />
-      <Route path="/Changements" element={<Changements />} />
-      <Route path="/ActionsChangements" element={<ActionsChangements />} />
-      <Route path="/Absenteisme" element={<Absenteisme />} />
-      <Route path="/ActionsAbsenteisme" element={<ActionsAbsenteisme />} />
-      
+      {/* Apprentissage */}
+      <Route path="/apprentissage" element={<Apprentissage />} />
+      <Route path="/apprentissage/lecture" element={<Lecture />} />
+      <Route path="/apprentissage/lecture/recente" element={<LectureRecente />} />
+      <Route path="/apprentissage/lecture/installee" element={<LectureInstallee />} />
+      <Route path="/apprentissage/lecture/hypotheses" element={<HypoLecture />} />
+      <Route path="/apprentissage/lecture/actions" element={<ActionsLecture />} />
+      <Route path="/apprentissage/ecriture" element={<Ecriture />} />
+      <Route path="/apprentissage/ecriture/geste" element={<EcritureGeste />} />
+      <Route path="/apprentissage/ecriture/production" element={<EcritureProduction />} />
+      <Route path="/apprentissage/maths" element={<Maths />} />
+      <Route path="/apprentissage/global" element={<GlobalApprentissage />} />
+      {/* Comportement */}
+      <Route path="/comportement" element={<Comportement />} />
+      <Route path="/comportement/inhibition" element={<Inhibition />} />
+      <Route path="/comportement/impulsivite" element={<Impulsivite />} />
+      <Route path="/comportement/anxiete" element={<Anxiete />} />
+      <Route path="/comportement/anxiete/situationnelle" element={<AnxieteSit />} />
+      <Route path="/comportement/anxiete/generalisee" element={<AnxieteGen />} />
+      <Route path="/comportement/anxiete/actions" element={<ActionsAnxiete />} />
+      <Route path="/comportement/opposition" element={<Opposition />} />
+      {/* Développement */}
+      <Route path="/developpement" element={<Developpement />} />
+      <Route path="/developpement/langage-oral" element={<LangageOral />} />
+      <Route path="/developpement/langage-oral/comprehension" element={<LangageCompr />} />
+      <Route path="/developpement/langage-oral/expression" element={<LangageExpr />} />
+      <Route path="/developpement/motricite" element={<Motricite />} />
+      <Route path="/developpement/attention" element={<Attention />} />
+      <Route path="/developpement/interactions" element={<Interactions />} />
+      {/* Contexte */}
+      <Route path="/contexte" element={<Contexte />} />
+      <Route path="/contexte/famille" element={<Famille />} />
+      <Route path="/contexte/famille/actions" element={<ActionsFamille />} />
+      <Route path="/contexte/climat-classe" element={<ClimatClasse />} />
+      <Route path="/contexte/changements" element={<Changements />} />
+      <Route path="/contexte/absenteisme" element={<Absenteisme />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
