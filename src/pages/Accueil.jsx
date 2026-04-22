@@ -24,9 +24,9 @@ export default function Accueil() {
             Psychologue EN – EDA
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-            Arbre décisionnel
+            🌿 Arbre décisionnel
           </h1>
-          <p className="text-sm text-primary font-medium">version psychologue</p>
+          <p className="text-sm text-primary font-medium">Psychologue EN EDA (version stylisée)</p>
           <p className="mt-3 text-muted-foreground text-base sm:text-lg max-w-md mx-auto">
             Analyse guidée des situations d'élèves
           </p>

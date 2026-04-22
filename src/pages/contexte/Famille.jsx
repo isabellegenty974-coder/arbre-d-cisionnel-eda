@@ -4,21 +4,19 @@ import ActionButton from "../../components/tree/ActionButton";
 
 export default function Famille() {
   return (
-    <ScreenLayout title="Événement familial">
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Hypothèses</h2>
+    <ScreenLayout title="🏠 Événement familial">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">📌 Hypothèses</h2>
       <InfoList
         type="hypothesis"
         items={[
           "Impact émotionnel",
-          "Désorganisation temporaire",
-          "Fatigue psychique",
+          "Désorganisation",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">🔍 Observations</h2>
       <InfoList
         type="hypothesis"
         items={[
-          "Variabilité",
           "Signes émotionnels",
         ]}
       />

@@ -3,12 +3,12 @@ import QuestionOptions from "../../components/tree/QuestionOptions";
 
 export default function LangageOral() {
   return (
-    <ScreenLayout title="Langage oral – Analyse">
+    <ScreenLayout title="🗣️ Langage oral">
       <QuestionOptions
-        question="Les difficultés concernent-elles la compréhension ou l'expression ?"
+        question="Compréhension ou expression ?"
         options={[
-          { label: "Compréhension", to: "/developpement/langage-oral/comprehension" },
-          { label: "Expression", to: "/developpement/langage-oral/expression" },
+          { label: "🧩 Compréhension", to: "/developpement/langage-oral/comprehension" },
+          { label: "💬 Expression", to: "/developpement/langage-oral/expression" },
         ]}
       />
     </ScreenLayout>

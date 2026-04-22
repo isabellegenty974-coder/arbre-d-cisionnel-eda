@@ -4,22 +4,20 @@ import ActionButton from "../../components/tree/ActionButton";
 
 export default function ClimatClasse() {
   return (
-    <ScreenLayout title="Climat de classe">
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Hypothèses</h2>
+    <ScreenLayout title="🏫 Climat de classe">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">📌 Hypothèses</h2>
       <InfoList
         type="hypothesis"
         items={[
           "Bruit",
           "Conflits",
-          "Manque de repères",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">🔍 Observations</h2>
       <InfoList
         type="hypothesis"
         items={[
-          "Dynamique de groupe",
-          "Posture enseignant",
+          "Dynamique groupe",
         ]}
       />
       <ActionButton label="Actions recommandées" to="/contexte/climat-classe/actions" />

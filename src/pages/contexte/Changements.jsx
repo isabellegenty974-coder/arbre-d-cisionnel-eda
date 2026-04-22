@@ -4,22 +4,19 @@ import ActionButton from "../../components/tree/ActionButton";
 
 export default function Changements() {
   return (
-    <ScreenLayout title="Changements récents">
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Hypothèses</h2>
+    <ScreenLayout title="🔄 Changements">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">📌 Hypothèses</h2>
       <InfoList
         type="hypothesis"
         items={[
           "Déménagement",
           "Séparation",
-          "Décès",
-          "Changement enseignant",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">🔍 Observations</h2>
       <InfoList
         type="hypothesis"
         items={[
-          "Réactions émotionnelles",
           "Adaptation",
         ]}
       />

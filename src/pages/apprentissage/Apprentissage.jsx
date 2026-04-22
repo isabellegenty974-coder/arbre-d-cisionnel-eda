@@ -10,7 +10,7 @@ const items = [
 
 export default function Apprentissage() {
   return (
-    <ScreenLayout title="Difficultés d'apprentissage">
+    <ScreenLayout title="📘 Difficultés d'apprentissage">
       <NavCards items={items} />
     </ScreenLayout>
   );

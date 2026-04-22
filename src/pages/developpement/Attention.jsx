@@ -4,21 +4,19 @@ import ActionButton from "../../components/tree/ActionButton";
 
 export default function Attention() {
   return (
-    <ScreenLayout title="Attention">
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Hypothèses</h2>
+    <ScreenLayout title="🎯 Attention">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">📌 Hypothèses</h2>
       <InfoList
         type="hypothesis"
         items={[
           "Distractibilité",
           "Hyperfocalisation",
-          "Variabilité attentionnelle",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Observations</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">🔍 Observations</h2>
       <InfoList
         type="hypothesis"
         items={[
-          "Déclencheurs",
           "Durée de concentration",
         ]}
       />
