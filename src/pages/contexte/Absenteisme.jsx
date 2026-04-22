@@ -1,5 +1,6 @@
 import ScreenLayout from "../../components/tree/ScreenLayout";
 import InfoList from "../../components/tree/InfoList";
+import ActionButton from "../../components/tree/ActionButton";
 
 export default function Absenteisme() {
   return (
@@ -8,24 +9,13 @@ export default function Absenteisme() {
       <InfoList
         type="hypothesis"
         items={[
-          "Phobie scolaire",
-          "Difficultés familiales (organisation, santé)",
-          "Harcèlement scolaire",
-          "Troubles somatiques liés à l'anxiété",
-          "Déscolarisation progressive",
+          "Fatigue",
+          "Désengagement",
+          "Contexte familial",
+          "Anxiété scolaire",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Actions recommandées</h2>
-      <InfoList
-        type="action"
-        items={[
-          "Rencontre famille : comprendre les causes",
-          "Lien avec l'assistante sociale scolaire",
-          "Entretien élève : recueillir son vécu",
-          "Plan d'accompagnement pour le retour",
-          "Signalement si absentéisme chronique",
-        ]}
-      />
+      <ActionButton label="Actions recommandées" to="/contexte/absenteisme/actions" />
     </ScreenLayout>
   );
 }

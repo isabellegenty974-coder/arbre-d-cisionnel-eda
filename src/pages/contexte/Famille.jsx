@@ -5,13 +5,13 @@ import ActionButton from "../../components/tree/ActionButton";
 export default function Famille() {
   return (
     <ScreenLayout title="Événement familial">
-      <p className="text-muted-foreground mb-5">Hypothèses possibles :</p>
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Hypothèses</h2>
       <InfoList
         type="hypothesis"
         items={[
-          "Impact émotionnel sur l'élève",
+          "Impact émotionnel",
           "Désorganisation temporaire",
-          "Fatigue, anxiété, préoccupations",
+          "Fatigue ou préoccupations",
         ]}
       />
       <ActionButton label="Actions recommandées" to="/contexte/famille/actions" />

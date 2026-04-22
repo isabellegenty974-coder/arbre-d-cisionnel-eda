@@ -1,5 +1,6 @@
 import ScreenLayout from "../../components/tree/ScreenLayout";
 import InfoList from "../../components/tree/InfoList";
+import ActionButton from "../../components/tree/ActionButton";
 
 export default function Changements() {
   return (
@@ -8,23 +9,13 @@ export default function Changements() {
       <InfoList
         type="hypothesis"
         items={[
-          "Déménagement, changement d'école",
-          "Changement d'enseignant",
-          "Arrivée d'un nouveau membre dans la famille",
-          "Perte d'un proche",
+          "Déménagement",
+          "Séparation",
+          "Décès",
+          "Changement enseignant",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Actions recommandées</h2>
-      <InfoList
-        type="action"
-        items={[
-          "Entretien famille : repérer les changements récents",
-          "Entretien élève : expression du vécu",
-          "Accompagnement temporaire renforcé",
-          "Patience et bienveillance dans les attentes",
-          "Réévaluation après une période d'adaptation",
-        ]}
-      />
+      <ActionButton label="Actions recommandées" to="/contexte/changements/actions" />
     </ScreenLayout>
   );
 }

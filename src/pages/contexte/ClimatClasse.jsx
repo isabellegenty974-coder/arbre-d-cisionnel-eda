@@ -1,5 +1,6 @@
 import ScreenLayout from "../../components/tree/ScreenLayout";
 import InfoList from "../../components/tree/InfoList";
+import ActionButton from "../../components/tree/ActionButton";
 
 export default function ClimatClasse() {
   return (
@@ -8,23 +9,13 @@ export default function ClimatClasse() {
       <InfoList
         type="hypothesis"
         items={[
-          "Ambiance de classe dégradée",
-          "Relation enseignant-élève difficile",
-          "Harcèlement entre pairs",
-          "Manque de cadre sécurisant",
+          "Bruit",
+          "Conflits",
+          "Manque de repères",
+          "Stress",
         ]}
       />
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8 mb-3">Actions recommandées</h2>
-      <InfoList
-        type="action"
-        items={[
-          "Observation en classe",
-          "Entretien enseignant : dynamique de groupe",
-          "Médiation entre pairs si nécessaire",
-          "Proposer des outils de régulation collective",
-          "Signalement si situation de harcèlement",
-        ]}
-      />
+      <ActionButton label="Actions recommandées" to="/contexte/climat-classe/actions" />
     </ScreenLayout>
   );
 }

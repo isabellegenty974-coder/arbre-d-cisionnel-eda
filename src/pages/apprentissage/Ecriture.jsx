@@ -3,11 +3,15 @@ import QuestionOptions from "../../components/tree/QuestionOptions";
 
 export default function Ecriture() {
   return (
-    <ScreenLayout title="Écriture – Analyse">
+    <ScreenLayout
+      title="Écriture"
+      subtitle="Quel type de difficulté est observé ?"
+    >
       <QuestionOptions
-        question="Les difficultés concernent-elles le geste graphique ou la production écrite ?"
+        question="Quel type de difficulté est observé ?"
         options={[
-          { label: "Geste graphique", to: "/apprentissage/ecriture/geste" },
+          { label: "Graphisme", to: "/apprentissage/ecriture/graphisme" },
+          { label: "Orthographe", to: "/apprentissage/ecriture/orthographe" },
           { label: "Production écrite", to: "/apprentissage/ecriture/production" },
         ]}
       />
