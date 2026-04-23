@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, BookOpen, Cloud, Brain, Home as HomeIcon, FileText, Settings } from 'lucide-react';
+import { Menu, X, Home as HomeIcon, FileText, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EleveModal from './EleveModal';
+import FlipCard from '@/components/FlipCard';
 import { useDiagnostic } from '@/lib/DiagnosticContext';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isFlipped, setIsFlipped] = useState({});
   const [showEleveModal, setShowEleveModal] = useState(false);
   const { eleve } = useDiagnostic();
 
@@ -90,48 +90,10 @@ export default function HamburgerMenu() {
               <div>
                 <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-4">Modules</h3>
                 <div className="space-y-3">
-                  {modules.map((mod, idx) => (
-                    <motion.div
-                      key={mod.to}
-                      onClick={() => setIsFlipped(prev => ({ ...prev, [idx]: !prev[idx] }))}
-                      className="cursor-pointer"
-                      layout
-                    >
-                      <motion.div
-                        animate={{ rotateY: isFlipped[idx] ? 180 : 0 }}
-                        transition={{ duration: 0.3 }}
-                        style={{ perspective: 1000 }}
-                        className="relative h-32"
-                      >
-                        {/* Front */}
-                        <motion.div
-                          animate={{ opacity: isFlipped[idx] ? 0 : 1 }}
-                          className="absolute inset-0 p-4 rounded-lg bg-gradient-to-br border border-border flex flex-col items-center justify-center"
-                          style={{
-                            backgroundImage: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                            '--tw-gradient-stops': `var(--${mod.color.split(' ')[0]})`,
-                            backfaceVisibility: 'hidden'
-                          }}
-                        >
-                          <span className="text-4xl mb-2">{mod.emoji}</span>
-                          <p className="text-sm font-medium text-foreground text-center">{mod.label}</p>
-                        </motion.div>
-
-                        {/* Back */}
-                        <motion.div
-                          animate={{ opacity: isFlipped[idx] ? 1 : 0 }}
-                          className="absolute inset-0 p-4 rounded-lg bg-primary/15 border border-primary/20 flex items-center justify-center"
-                        >
-                          <Link
-                            to={mod.to}
-                            onClick={() => setIsOpen(false)}
-                            className="text-center text-sm font-medium text-primary hover:underline"
-                          >
-                            Accéder au module →
-                          </Link>
-                        </motion.div>
-                      </motion.div>
-                    </motion.div>
+                  {modules.map((mod) => (
+                    <div key={mod.to} onClick={() => setIsOpen(false)} className="h-32">
+                      <FlipCard {...mod} />
+                    </div>
                   ))}
                 </div>
               </div>
