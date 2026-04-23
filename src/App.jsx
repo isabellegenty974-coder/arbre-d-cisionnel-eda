@@ -14,6 +14,7 @@ import Resume from './pages/Resume';
 import Dashboard from './pages/Dashboard';
 import Historique from './pages/Historique';
 import FicheEleve from './pages/FicheEleve';
+import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -175,6 +176,7 @@ const AuthenticatedApp = () => {
         <Route path="/fiche-eleve" element={<FicheEleve />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/historique" element={<Historique />} />
+        <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
