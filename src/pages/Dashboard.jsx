@@ -4,11 +4,14 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Trash2, FileText, History } from 'lucide-react';
+import { Trash2, FileText, History, Save } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
+import { useDiagnostic } from '@/lib/DiagnosticContext';
 
 export default function Dashboard() {
+  const { eleve, setCurrentEleve } = useDiagnostic();
+  const [editingEleve, setEditingEleve] = useState(eleve || {});
   const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,6 +19,14 @@ export default function Dashboard() {
   useEffect(() => {
     loadDiagnostics();
   }, []);
+
+  useEffect(() => {
+    setEditingEleve(eleve || {});
+  }, [eleve]);
+
+  const handleSaveEleve = () => {
+    setCurrentEleve(editingEleve);
+  };
 
   const loadDiagnostics = async () => {
     try {
@@ -47,17 +58,67 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <HamburgerMenu />
-      <ScreenLayout title="📊 Gestion des diagnostics">
-        <div className="space-y-6">
-          {/* Search */}
-          <div className="flex gap-2">
-            <Input
-              placeholder="Chercher par nom ou classe..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
-            />
-          </div>
+      <ScreenLayout title="📊 Dashboard">
+        <div className="space-y-8">
+          {/* Infos élève modifiables */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 rounded-xl bg-primary/5 border-2 border-primary/20"
+          >
+            <h2 className="text-lg font-semibold text-foreground mb-4">👤 Élève courant</h2>
+            <div className="grid gap-4 sm:grid-cols-2 mb-4">
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-2">Prénom</label>
+                <Input
+                  value={editingEleve?.prenom || ''}
+                  onChange={(e) => setEditingEleve({ ...editingEleve, prenom: e.target.value })}
+                  placeholder="Prénom"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-2">Nom</label>
+                <Input
+                  value={editingEleve?.nom || ''}
+                  onChange={(e) => setEditingEleve({ ...editingEleve, nom: e.target.value })}
+                  placeholder="Nom"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-2">Âge</label>
+                <Input
+                  type="number"
+                  value={editingEleve?.age || ''}
+                  onChange={(e) => setEditingEleve({ ...editingEleve, age: e.target.value })}
+                  placeholder="Âge"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
+                <Input
+                  value={editingEleve?.classe || ''}
+                  onChange={(e) => setEditingEleve({ ...editingEleve, classe: e.target.value })}
+                  placeholder="Ex: CM2"
+                />
+              </div>
+            </div>
+            <Button onClick={handleSaveEleve} className="w-full gap-2 bg-primary hover:bg-primary/90">
+              <Save className="w-4 h-4" />
+              Enregistrer
+            </Button>
+          </motion.div>
+
+          {/* Search et diagnostics */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-foreground">📋 Diagnostics</h2>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Chercher par nom ou classe..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1"
+              />
+            </div>
 
           {/* List */}
           {loading ? (
@@ -108,7 +169,8 @@ export default function Dashboard() {
                 </motion.div>
               ))}
             </div>
-          )}
+            )}
+          </div>
         </div>
       </ScreenLayout>
     </div>
