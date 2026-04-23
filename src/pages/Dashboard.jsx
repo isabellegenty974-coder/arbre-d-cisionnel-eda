@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Trash2, FileText, History, Save } from 'lucide-react';
+import { Trash2, FileText, History, Save, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { useDiagnostic } from '@/lib/DiagnosticContext';
+import { exportResumePDF } from '@/lib/pdfExport';
 
 export default function Dashboard() {
-  const { eleve, setCurrentEleve } = useDiagnostic();
+  const { eleve, setCurrentEleve, selections, crossRecommendations } = useDiagnostic();
   const [editingEleve, setEditingEleve] = useState(eleve || {});
   const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +27,10 @@ export default function Dashboard() {
 
   const handleSaveEleve = () => {
     setCurrentEleve(editingEleve);
+  };
+
+  const handleExportPDF = () => {
+    exportResumePDF(eleve, selections, crossRecommendations);
   };
 
   const loadDiagnostics = async () => {
@@ -107,7 +112,19 @@ export default function Dashboard() {
                 <Save className="w-4 h-4" />
                 Enregistrer
               </Button>
+              <Link to="/resume">
+                <Button variant="outline" className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Résumé
+                </Button>
+              </Link>
             </div>
+            {Object.values(selections).some(arr => arr.length > 0) && (
+              <Button onClick={handleExportPDF} className="w-full gap-2 bg-accent hover:bg-accent/90">
+                <Download className="w-4 h-4" />
+                Exporter PDF
+              </Button>
+            )}
             <Link to="/apprentissage" className="block">
               <Button className="w-full gap-2 bg-chart-2 hover:bg-chart-2/90">
                 Explorer les hypothèses
