@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Trash2, FileText, History, Save, Download } from 'lucide-react';
+import { Trash2, FileText, Save, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { useDiagnostic } from '@/lib/DiagnosticContext';
