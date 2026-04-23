@@ -1,0 +1,40 @@
+{
+  "name": "Diagnostic",
+  "type": "object",
+  "properties": {
+    "eleve_nom": {
+      "type": "string",
+      "description": "Nom de l'\u00e9l\u00e8ve"
+    },
+    "eleve_prenom": {
+      "type": "string",
+      "description": "Pr\u00e9nom de l'\u00e9l\u00e8ve"
+    },
+    "eleve_age": {
+      "type": "number",
+      "description": "\u00c2ge de l'\u00e9l\u00e8ve"
+    },
+    "eleve_classe": {
+      "type": "string",
+      "description": "Classe de l'\u00e9l\u00e8ve"
+    },
+    "selections": {
+      "type": "object",
+      "description": "S\u00e9lections diagnostiques (questions et analyses)"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "en_cours",
+        "compl\u00e8te",
+        "archiv\u00e9e"
+      ],
+      "default": "en_cours",
+      "description": "Statut du diagnostic"
+    }
+  },
+  "required": [
+    "eleve_nom",
+    "eleve_prenom"
+  ]
+}
