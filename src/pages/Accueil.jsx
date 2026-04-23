@@ -109,7 +109,7 @@ export default function Accueil() {
             >
               <Link
                 to={mod.to}
-                className={`block h-44 rounded-3xl bg-gradient-to-br ${mod.color} p-6 shadow-2xl hover:shadow-3xl hover:-translate-y-2 transition-all duration-300 border-2 border-white/20 relative overflow-hidden`}
+                className={`block h-36 rounded-3xl bg-gradient-to-br ${mod.color} p-4 shadow-2xl hover:shadow-3xl hover:-translate-y-2 transition-all duration-300 border-2 border-white/20 relative overflow-hidden`}
               >
                 {/* Background Image */}
                 <div className="absolute inset-0 opacity-40">
@@ -117,9 +117,8 @@ export default function Accueil() {
                 </div>
                 
                 {/* Content */}
-                <div className="relative z-10 h-full flex flex-col items-center justify-between">
-                  <div></div>
-                  <p className={`text-xl font-bold text-center leading-tight ${mod.textColor}`}>
+                <div className="relative z-10 h-full flex flex-col items-center justify-center">
+                  <p className={`text-base font-bold text-center leading-tight ${mod.textColor}`}>
                     {mod.label}
                   </p>
                 </div>
