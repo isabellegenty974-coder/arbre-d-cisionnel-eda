@@ -132,21 +132,22 @@ export default function CircularMenu() {
                 </motion.span>
                 <span
                   style={{
-                    fontSize: 12,
-                    fontWeight: 600,
+                    fontSize: 14,
+                    fontWeight: 700,
                     color: isHovered ? "#2563EB" : "#333",
                     letterSpacing: "0.02em",
                     transition: "color 0.25s",
                     whiteSpace: "nowrap",
+                    textAlign: "center",
                   }}
                 >
                   {item.label}
                 </span>
                 <span
                   style={{
-                    fontSize: 10,
-                    fontWeight: 400,
-                    color: isHovered ? "#4A90E2" : "#888",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: isHovered ? "#4A90E2" : "#666",
                     letterSpacing: "0.01em",
                     transition: "color 0.25s",
                     whiteSpace: "nowrap",
