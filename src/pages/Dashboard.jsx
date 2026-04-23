@@ -83,39 +83,39 @@ export default function Dashboard() {
             {isEleveExpanded && (
               <div className="border-t border-primary/20 p-6 space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2 mb-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Prénom</label>
-                <Input
-                  value={editingEleve?.prenom || ''}
-                  onChange={(e) => setEditingEleve({ ...editingEleve, prenom: e.target.value })}
-                  placeholder="Prénom"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Nom</label>
-                <Input
-                  value={editingEleve?.nom || ''}
-                  onChange={(e) => setEditingEleve({ ...editingEleve, nom: e.target.value })}
-                  placeholder="Nom"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Âge</label>
-                <Input
-                  type="number"
-                  value={editingEleve?.age || ''}
-                  onChange={(e) => setEditingEleve({ ...editingEleve, age: e.target.value })}
-                  placeholder="Âge"
-                />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
-                <Input
-                  value={editingEleve?.classe || ''}
-                  onChange={(e) => setEditingEleve({ ...editingEleve, classe: e.target.value })}
-                  placeholder="Ex: CM2"
-                />
-                </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground block mb-2">Prénom</label>
+                    <Input
+                      value={editingEleve?.prenom || ''}
+                      onChange={(e) => setEditingEleve({ ...editingEleve, prenom: e.target.value })}
+                      placeholder="Prénom"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground block mb-2">Nom</label>
+                    <Input
+                      value={editingEleve?.nom || ''}
+                      onChange={(e) => setEditingEleve({ ...editingEleve, nom: e.target.value })}
+                      placeholder="Nom"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground block mb-2">Âge</label>
+                    <Input
+                      type="number"
+                      value={editingEleve?.age || ''}
+                      onChange={(e) => setEditingEleve({ ...editingEleve, age: e.target.value })}
+                      placeholder="Âge"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
+                    <Input
+                      value={editingEleve?.classe || ''}
+                      onChange={(e) => setEditingEleve({ ...editingEleve, classe: e.target.value })}
+                      placeholder="Ex: CM2"
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-3">
                   <Button onClick={handleSaveEleve} className="flex-1 gap-2 bg-primary hover:bg-primary/90">
