@@ -10,28 +10,32 @@ export default function Accueil() {
       to: "/apprentissage", 
       color: "from-cyan-400 to-cyan-500",
       bgColor: "bg-cyan-400",
-      textColor: "text-white"
+      textColor: "text-white",
+      image: "https://media.base44.com/images/public/69e918c1956306f5db6eaf3d/29b90f9eb_generated_image.png"
     },
     { 
       label: "Comportement", 
       to: "/comportement", 
       color: "from-yellow-300 to-orange-400",
       bgColor: "bg-yellow-300",
-      textColor: "text-gray-900"
+      textColor: "text-gray-900",
+      image: "https://media.base44.com/images/public/69e918c1956306f5db6eaf3d/14a4d0ce0_generated_image.png"
     },
     { 
       label: "Développement", 
       to: "/developpement", 
       color: "from-pink-500 to-pink-600",
       bgColor: "bg-pink-500",
-      textColor: "text-white"
+      textColor: "text-white",
+      image: "https://media.base44.com/images/public/69e918c1956306f5db6eaf3d/af03dfdb8_generated_image.png"
     },
     { 
       label: "Contexte", 
       to: "/contexte", 
       color: "from-lime-400 to-green-500",
       bgColor: "bg-lime-400",
-      textColor: "text-gray-900"
+      textColor: "text-gray-900",
+      image: "https://media.base44.com/images/public/69e918c1956306f5db6eaf3d/4a867233c_generated_image.png"
     },
   ];
 
@@ -105,16 +109,17 @@ export default function Accueil() {
             >
               <Link
                 to={mod.to}
-                className={`block h-56 rounded-3xl bg-gradient-to-br ${mod.color} p-8 shadow-2xl hover:shadow-3xl hover:-translate-y-2 transition-all duration-300 border-2 border-white/20`}
+                className={`block h-44 rounded-3xl bg-gradient-to-br ${mod.color} p-6 shadow-2xl hover:shadow-3xl hover:-translate-y-2 transition-all duration-300 border-2 border-white/20 relative overflow-hidden`}
               >
-                <div className="h-full flex flex-col items-center justify-center">
-                  <div className="text-6xl mb-4">
-                    {mod.label === "Apprentissage" && "📚"}
-                    {mod.label === "Comportement" && "🌦️"}
-                    {mod.label === "Développement" && "🧠"}
-                    {mod.label === "Contexte" && "🏠"}
-                  </div>
-                  <p className={`text-2xl font-bold ${mod.textColor}`}>
+                {/* Background Image */}
+                <div className="absolute inset-0 opacity-40">
+                  <img src={mod.image} alt={mod.label} className="w-full h-full object-cover" />
+                </div>
+                
+                {/* Content */}
+                <div className="relative z-10 h-full flex flex-col items-center justify-between">
+                  <div></div>
+                  <p className={`text-xl font-bold text-center leading-tight ${mod.textColor}`}>
                     {mod.label}
                   </p>
                 </div>
