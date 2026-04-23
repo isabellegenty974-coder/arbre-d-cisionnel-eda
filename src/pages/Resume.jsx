@@ -14,10 +14,10 @@ export default function Resume() {
     return (
       <div className="min-h-screen bg-background">
         <HamburgerMenu />
-        <ScreenLayout title="📋 Résumé diagnostique">
+        <ScreenLayout title="📋 Hypothèses diagnostiques">
           <div className="text-center p-8 rounded-lg bg-secondary/30 border border-secondary">
             <p className="text-muted-foreground">Aucune sélection pour le moment</p>
-            <p className="text-xs text-muted-foreground mt-2">Complétez l'arbre diagnostique pour voir les résultats</p>
+            <p className="text-xs text-muted-foreground mt-2">Sélectionnez des hypothèses dans l'arbre pour les voir ici</p>
           </div>
         </ScreenLayout>
       </div>
@@ -45,7 +45,7 @@ export default function Resume() {
   return (
     <div className="min-h-screen bg-background">
       <HamburgerMenu />
-      <ScreenLayout title="📋 Résumé diagnostique">
+      <ScreenLayout title="📋 Hypothèses diagnostiques">
       <div className="space-y-8">
         {/* Infos élève */}
         {eleve && (
@@ -79,7 +79,7 @@ export default function Resume() {
           </motion.div>
         )}
 
-        {/* Sélections par catégorie */}
+        {/* Hypothèses sélectionnées */}
         {totalSelections > 0 ? (
           <div className="space-y-6">
             {Object.entries(selections).map(([category, items]) => (
@@ -112,11 +112,11 @@ export default function Resume() {
         ) : (
           <div className="text-center p-8 rounded-lg bg-secondary/30 border border-secondary">
             <p className="text-muted-foreground">Aucune sélection pour le moment</p>
-            <p className="text-xs text-muted-foreground mt-2">Complétez l'arbre diagnostique pour voir les résultats</p>
+            <p className="text-xs text-muted-foreground mt-2">Sélectionnez des hypothèses dans l'arbre</p>
           </div>
         )}
 
-        {/* Diagnostic personnalisé */}
+        {/* Synthèse des hypothèses et recommandations */}
         <DiagnosticPersonalise />
 
         {/* Actions */}

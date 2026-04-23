@@ -23,14 +23,14 @@ export function DiagnosticProvider({ children }) {
   // Sauvegarder à chaque changement
   useEffect(() => {
     localStorage.setItem('diagnostic_selections', JSON.stringify(selections));
-    saveDiagnosticToDB();
+    saveHypothesesToDB();
   }, [selections]);
 
   useEffect(() => {
     localStorage.setItem('current_eleve', JSON.stringify(eleve));
   }, [eleve]);
 
-  const saveDiagnosticToDB = async () => {
+  const saveHypothesesToDB = async () => {
     if (!eleve?.prenom || !eleve?.nom) return;
     try {
       if (currentDiagnosticId) {
@@ -55,7 +55,7 @@ export function DiagnosticProvider({ children }) {
         localStorage.setItem('current_diagnostic_id', result.id);
       }
     } catch (error) {
-      console.error('Erreur sauvegarde BD:', error);
+      console.error('Erreur sauvegarde hypothèses:', error);
     }
   };
 

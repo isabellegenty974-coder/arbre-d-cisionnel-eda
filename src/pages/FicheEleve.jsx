@@ -75,13 +75,13 @@ export default function FicheEleve() {
             </div>
           </motion.div>
 
-          {/* Sélections diagnostiques */}
+          {/* Hypothèses sélectionnées */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h2 className="text-lg font-semibold text-foreground mb-4">Sélections diagnostiques</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Hypothèses diagnostiques sélectionnées</h2>
             
             {Object.values(selections).some(arr => arr.length > 0) ? (
               <div className="space-y-4">
@@ -132,9 +132,9 @@ export default function FicheEleve() {
               </div>
             ) : (
               <div className="p-6 rounded-lg bg-secondary/30 border border-secondary text-center">
-                <p className="text-muted-foreground">Aucune sélection pour le moment</p>
+                <p className="text-muted-foreground">Aucune hypothèse sélectionnée</p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Complétez l'arbre diagnostique pour voir apparaître les sélections ici
+                  Sélectionnez des hypothèses dans l'arbre pour les voir apparaître ici
                 </p>
               </div>
             )}
@@ -145,10 +145,10 @@ export default function FicheEleve() {
             <Button
               onClick={() => navigate('/apprentissage')}
               className="gap-2 bg-primary hover:bg-primary/90"
-            >
+              >
               <Plus className="w-4 h-4" />
-              Continuer le diagnostic
-            </Button>
+              Explorer les hypothèses
+              </Button>
           </div>
         </div>
       </ScreenLayout>
