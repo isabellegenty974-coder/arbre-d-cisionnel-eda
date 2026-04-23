@@ -82,7 +82,7 @@ export default function Dashboard() {
             </button>
             {isEleveExpanded && (
               <div className="border-t border-primary/20 p-6 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2 mb-4">
+                <div className="grid gap-4 sm:grid-cols-2 mb-4">
               <div>
                 <label className="text-sm font-medium text-foreground block mb-2">Prénom</label>
                 <Input
@@ -107,39 +107,39 @@ export default function Dashboard() {
                   onChange={(e) => setEditingEleve({ ...editingEleve, age: e.target.value })}
                   placeholder="Âge"
                 />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
                 <Input
                   value={editingEleve?.classe || ''}
                   onChange={(e) => setEditingEleve({ ...editingEleve, classe: e.target.value })}
                   placeholder="Ex: CM2"
                 />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button onClick={handleSaveEleve} className="flex-1 gap-2 bg-primary hover:bg-primary/90">
-                <Save className="w-4 h-4" />
-                Enregistrer
-              </Button>
-              <Link to="/resume">
-                <Button variant="outline" className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Résumé
-                </Button>
-              </Link>
-            </div>
-            {Object.values(selections).some(arr => arr.length > 0) && (
-              <Button onClick={handleExportPDF} className="w-full gap-2 bg-accent hover:bg-accent/90">
-                <Download className="w-4 h-4" />
-                Exporter PDF
-              </Button>
-            )}
-            <Link to="/apprentissage" className="block">
-              <Button className="w-full gap-2 bg-chart-2 hover:bg-chart-2/90">
-                Explorer les hypothèses
-              </Button>
-            </Link>
+                </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button onClick={handleSaveEleve} className="flex-1 gap-2 bg-primary hover:bg-primary/90">
+                    <Save className="w-4 h-4" />
+                    Enregistrer
+                  </Button>
+                  <Link to="/resume">
+                    <Button variant="outline" className="gap-2">
+                      <FileText className="w-4 h-4" />
+                      Résumé
+                    </Button>
+                  </Link>
+                </div>
+                {Object.values(selections).some(arr => arr.length > 0) && (
+                  <Button onClick={handleExportPDF} className="w-full gap-2 bg-accent hover:bg-accent/90">
+                    <Download className="w-4 h-4" />
+                    Exporter PDF
+                  </Button>
+                )}
+                <Link to="/apprentissage" className="block">
+                  <Button className="w-full gap-2 bg-chart-2 hover:bg-chart-2/90">
+                    Explorer les hypothèses
+                  </Button>
+                </Link>
               </div>
             )}
           </motion.div>
