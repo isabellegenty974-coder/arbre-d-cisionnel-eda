@@ -81,7 +81,7 @@ export default function Accueil() {
           </div>
 
           {/* Title */}
-          <h1 className="font-display text-5xl sm:text-6xl font-bold text-white leading-tight mb-4">
+          <h1 className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight mb-4">
             Arbre décisionnel
           </h1>
 
