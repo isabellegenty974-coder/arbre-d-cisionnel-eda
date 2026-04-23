@@ -21,6 +21,21 @@ import Graphisme from './pages/apprentissage/Graphisme';
 import Orthographe from './pages/apprentissage/Orthographe';
 import ProductionEcrite from './pages/apprentissage/ProductionEcrite';
 import Maths from './pages/apprentissage/Maths';
+import MathsQuestions from './pages/apprentissage/maths/MathsQuestions';
+import MathsQ19 from './pages/apprentissage/maths/Q19';
+import MathsQ20 from './pages/apprentissage/maths/Q20';
+import MathsQ21 from './pages/apprentissage/maths/Q21';
+import MathsQ22 from './pages/apprentissage/maths/Q22';
+import MathsQ23 from './pages/apprentissage/maths/Q23';
+import MathsQ24 from './pages/apprentissage/maths/Q24';
+import MathsQ25 from './pages/apprentissage/maths/Q25';
+import { Q19A, Q19B, Q19C, Q19D } from './pages/apprentissage/maths/analyses/Q19Analyses';
+import { Q20A, Q20B, Q20C, Q20D } from './pages/apprentissage/maths/analyses/Q20Analyses';
+import { Q21A, Q21B, Q21C, Q21D } from './pages/apprentissage/maths/analyses/Q21Analyses';
+import { Q22A, Q22B, Q22C, Q22D } from './pages/apprentissage/maths/analyses/Q22Analyses';
+import { Q23A, Q23B, Q23C, Q23D } from './pages/apprentissage/maths/analyses/Q23Analyses';
+import { Q24A, Q24B, Q24C, Q24D } from './pages/apprentissage/maths/analyses/Q24Analyses';
+import { Q25A, Q25B, Q25C, Q25D } from './pages/apprentissage/maths/analyses/Q25Analyses';
 import Numeration from './pages/apprentissage/Numeration';
 import Problemes from './pages/apprentissage/Problemes';
 import Calcul from './pages/apprentissage/Calcul';
@@ -195,6 +210,42 @@ const AuthenticatedApp = () => {
       <Route path="/apprentissage/ecriture/orthographe" element={<Orthographe />} />
       <Route path="/apprentissage/ecriture/production" element={<ProductionEcrite />} />
       <Route path="/apprentissage/maths" element={<Maths />} />
+      <Route path="/apprentissage/maths/questions" element={<MathsQuestions />} />
+      <Route path="/apprentissage/maths/questions/q19" element={<MathsQ19 />} />
+      <Route path="/apprentissage/maths/questions/q19/a" element={<Q19A />} />
+      <Route path="/apprentissage/maths/questions/q19/b" element={<Q19B />} />
+      <Route path="/apprentissage/maths/questions/q19/c" element={<Q19C />} />
+      <Route path="/apprentissage/maths/questions/q19/d" element={<Q19D />} />
+      <Route path="/apprentissage/maths/questions/q20" element={<MathsQ20 />} />
+      <Route path="/apprentissage/maths/questions/q20/a" element={<Q20A />} />
+      <Route path="/apprentissage/maths/questions/q20/b" element={<Q20B />} />
+      <Route path="/apprentissage/maths/questions/q20/c" element={<Q20C />} />
+      <Route path="/apprentissage/maths/questions/q20/d" element={<Q20D />} />
+      <Route path="/apprentissage/maths/questions/q21" element={<MathsQ21 />} />
+      <Route path="/apprentissage/maths/questions/q21/a" element={<Q21A />} />
+      <Route path="/apprentissage/maths/questions/q21/b" element={<Q21B />} />
+      <Route path="/apprentissage/maths/questions/q21/c" element={<Q21C />} />
+      <Route path="/apprentissage/maths/questions/q21/d" element={<Q21D />} />
+      <Route path="/apprentissage/maths/questions/q22" element={<MathsQ22 />} />
+      <Route path="/apprentissage/maths/questions/q22/a" element={<Q22A />} />
+      <Route path="/apprentissage/maths/questions/q22/b" element={<Q22B />} />
+      <Route path="/apprentissage/maths/questions/q22/c" element={<Q22C />} />
+      <Route path="/apprentissage/maths/questions/q22/d" element={<Q22D />} />
+      <Route path="/apprentissage/maths/questions/q23" element={<MathsQ23 />} />
+      <Route path="/apprentissage/maths/questions/q23/a" element={<Q23A />} />
+      <Route path="/apprentissage/maths/questions/q23/b" element={<Q23B />} />
+      <Route path="/apprentissage/maths/questions/q23/c" element={<Q23C />} />
+      <Route path="/apprentissage/maths/questions/q23/d" element={<Q23D />} />
+      <Route path="/apprentissage/maths/questions/q24" element={<MathsQ24 />} />
+      <Route path="/apprentissage/maths/questions/q24/a" element={<Q24A />} />
+      <Route path="/apprentissage/maths/questions/q24/b" element={<Q24B />} />
+      <Route path="/apprentissage/maths/questions/q24/c" element={<Q24C />} />
+      <Route path="/apprentissage/maths/questions/q24/d" element={<Q24D />} />
+      <Route path="/apprentissage/maths/questions/q25" element={<MathsQ25 />} />
+      <Route path="/apprentissage/maths/questions/q25/a" element={<Q25A />} />
+      <Route path="/apprentissage/maths/questions/q25/b" element={<Q25B />} />
+      <Route path="/apprentissage/maths/questions/q25/c" element={<Q25C />} />
+      <Route path="/apprentissage/maths/questions/q25/d" element={<Q25D />} />
       <Route path="/apprentissage/maths/numeration" element={<Numeration />} />
       <Route path="/apprentissage/maths/problemes" element={<Problemes />} />
       <Route path="/apprentissage/maths/calcul" element={<Calcul />} />

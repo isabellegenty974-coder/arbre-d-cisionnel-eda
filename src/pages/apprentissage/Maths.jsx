@@ -1,5 +1,5 @@
 import ScreenLayout from "../../components/tree/ScreenLayout";
-import QuestionOptions from "../../components/tree/QuestionOptions";
+import NavCards from "../../components/tree/NavCards";
 
 export default function Maths() {
   return (
@@ -7,9 +7,9 @@ export default function Maths() {
       title="🔢 Mathématiques"
       subtitle="Quel domaine pose difficulté ?"
     >
-      <QuestionOptions
-        question="Quel domaine pose difficulté ?"
-        options={[
+      <NavCards
+        items={[
+          { label: "🔍 Questions diagnostiques", to: "/apprentissage/maths/questions" },
           { label: "🔢 Numération", to: "/apprentissage/maths/numeration" },
           { label: "🧮 Problèmes", to: "/apprentissage/maths/problemes" },
           { label: "➗ Calcul", to: "/apprentissage/maths/calcul" },
