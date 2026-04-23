@@ -1,13 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FileText } from "lucide-react";
 import { useDiagnostic } from "@/lib/DiagnosticContext";
 import { motion } from "framer-motion";
 
 export default function ResumeButton() {
   const { selections } = useDiagnostic();
+  const { pathname } = useLocation();
   const hasSelections = Object.values(selections).some(arr => arr.length > 0);
 
-  if (!hasSelections) return null;
+  if (!hasSelections || pathname === "/") return null;
 
   return (
     <motion.div
