@@ -15,6 +15,13 @@ export default function EleveModal({ isOpen, onClose }) {
     onClose();
   };
 
+  const handleDelete = () => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette fiche élève ?')) {
+      setCurrentEleve(null);
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -79,13 +86,20 @@ export default function EleveModal({ isOpen, onClose }) {
               className="w-full"
             />
           </div>
-          <div className="flex gap-3 pt-4">
-            <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90">
-              Enregistrer
-            </Button>
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
-              Annuler
-            </Button>
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90">
+                Enregistrer
+              </Button>
+              <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+                Annuler
+              </Button>
+            </div>
+            {eleve?.prenom && (
+              <Button type="button" variant="destructive" className="w-full" onClick={handleDelete}>
+                Supprimer la fiche
+              </Button>
+            )}
           </div>
         </form>
       </motion.div>
