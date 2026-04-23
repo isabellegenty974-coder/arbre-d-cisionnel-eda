@@ -43,7 +43,7 @@ export default function CircularMenu() {
   return (
     <div
       className="relative flex items-center justify-center"
-      style={{ width: 700, height: 700 }}
+      style={{ width: 900, height: 900 }}
       onMouseMove={handleMouseMove}
     >
       {/* Background glow */}
