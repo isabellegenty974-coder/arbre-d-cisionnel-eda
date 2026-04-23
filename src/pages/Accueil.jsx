@@ -29,7 +29,7 @@ export default function Accueil() {
             </div>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-            🌿 Arbre décisionnel
+            Arbre décisionnel
           </h1>
           <p className="mt-3 text-muted-foreground text-base sm:text-lg max-w-md mx-auto">
             Analyse guidée des situations d'élèves
