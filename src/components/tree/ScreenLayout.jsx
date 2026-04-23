@@ -1,10 +1,22 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import HamburgerMenu from "../Navigation/HamburgerMenu";
 
 export default function ScreenLayout({ title, subtitle, children }) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const handleBack = () => {
+    // Si on est dans un sous-module, retour au module parent
+    const pathParts = pathname.split("/").filter(Boolean);
+    if (pathParts.length > 1) {
+      navigate(`/${pathParts[0]}`);
+    } else {
+      // Si on est dans un module racine, retour à l'Accueil
+      navigate("/");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -17,7 +29,7 @@ export default function ScreenLayout({ title, subtitle, children }) {
           className="flex items-center gap-2 mb-8"
         >
           <button
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="p-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
             title="Retour"
           >
