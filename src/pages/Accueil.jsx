@@ -1,75 +1,128 @@
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
+import { Link } from "react-router-dom";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
-import FlipCard from "@/components/FlipCard";
 
 export default function Accueil() {
   const modules = [
-    { label: "Apprentissage", emoji: "📘", to: "/apprentissage", color: "from-primary/20 to-primary/10" },
-    { label: "Comportement", emoji: "🌧️", to: "/comportement", color: "from-accent/20 to-accent/10" },
-    { label: "Développement", emoji: "🧠", to: "/developpement", color: "from-chart-2/20 to-chart-2/10" },
-    { label: "Contexte", emoji: "🏠", to: "/contexte", color: "from-chart-4/20 to-chart-4/10" },
+    { 
+      label: "Apprentissage", 
+      to: "/apprentissage", 
+      color: "from-cyan-400 to-cyan-500",
+      bgColor: "bg-cyan-400",
+      textColor: "text-white"
+    },
+    { 
+      label: "Comportement", 
+      to: "/comportement", 
+      color: "from-yellow-300 to-orange-400",
+      bgColor: "bg-yellow-300",
+      textColor: "text-gray-900"
+    },
+    { 
+      label: "Développement", 
+      to: "/developpement", 
+      color: "from-pink-500 to-pink-600",
+      bgColor: "bg-pink-500",
+      textColor: "text-white"
+    },
+    { 
+      label: "Contexte", 
+      to: "/contexte", 
+      color: "from-lime-400 to-green-500",
+      bgColor: "bg-lime-400",
+      textColor: "text-gray-900"
+    },
   ];
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center"
+      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
       style={{
-        background:
-          "radial-gradient(ellipse at 50% 40%, #f0f4fb 0%, #f7f8fa 55%, #efefef 100%)",
+        background: "linear-gradient(135deg, #001a4d 0%, #1a0a4d 30%, #5a1080 70%, #c41e7b 100%)",
       }}
     >
-      <HamburgerMenu />
+      {/* Optional animated background elements */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-20 right-10 w-40 h-40 bg-cyan-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-40 left-10 w-60 h-60 bg-pink-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-1/2 right-1/4 w-80 h-80 bg-purple-600 rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: "1s" }}></div>
+      </div>
 
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-12"
-      >
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
-          <Brain className="w-3.5 h-3.5" />
+      <div className="relative z-10">
+        <HamburgerMenu />
+
+        {/* Header Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute top-6 right-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium border border-white/30"
+        >
+          <Brain className="w-4 h-4" />
           Psychologue EN – EDA
-        </div>
-        <div className="mb-3 flex justify-center">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15 flex items-center justify-center shadow-sm">
-            <span
-              className="text-2xl font-light text-primary"
-              style={{ fontFamily: "Georgia, serif", letterSpacing: "0.05em" }}
-            >
-              Ψ
-            </span>
-          </div>
-        </div>
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-          Arbre décisionnel
-        </h1>
-        <p className="mt-2 text-muted-foreground text-base max-w-xs mx-auto">
-          Analyse guidée des situations d'élèves
-        </p>
-      </motion.div>
+        </motion.div>
 
-      {/* Flip Cards Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full max-w-xl px-4"
-      >
-        <div className="grid grid-cols-2 gap-4">
+        {/* Main Content */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16 mt-8"
+        >
+          {/* Icon */}
+          <div className="mb-6 flex justify-center">
+            <div className="w-20 h-20 rounded-full border-2 border-cyan-300/50 flex items-center justify-center bg-white/10 backdrop-blur-sm">
+              <span className="text-4xl font-light text-cyan-300">Ψ</span>
+            </div>
+          </div>
+
+          {/* Title */}
+          <h1 className="font-display text-5xl sm:text-6xl font-bold text-white leading-tight mb-4">
+            Arbre décisionnel
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-xl text-gray-200 max-w-md mx-auto">
+            Analyse guidée des situations d'élèves
+          </p>
+        </motion.div>
+
+        {/* Cards Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-2 gap-8 max-w-2xl px-6"
+        >
           {modules.map((mod, idx) => (
             <motion.div
               key={mod.to}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * idx }}
+              className="group"
             >
-              <FlipCard {...mod} />
+              <Link
+                to={mod.to}
+                className={`block h-56 rounded-3xl bg-gradient-to-br ${mod.color} p-8 shadow-2xl hover:shadow-3xl hover:-translate-y-2 transition-all duration-300 border-2 border-white/20`}
+              >
+                <div className="h-full flex flex-col items-center justify-center">
+                  <div className="text-6xl mb-4">
+                    {mod.label === "Apprentissage" && "📚"}
+                    {mod.label === "Comportement" && "🌦️"}
+                    {mod.label === "Développement" && "🧠"}
+                    {mod.label === "Contexte" && "🏠"}
+                  </div>
+                  <p className={`text-2xl font-bold ${mod.textColor}`}>
+                    {mod.label}
+                  </p>
+                </div>
+              </Link>
             </motion.div>
           ))}
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
