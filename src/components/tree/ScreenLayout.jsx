@@ -14,17 +14,20 @@ export default function ScreenLayout({ title, subtitle, children }) {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 mb-8"
+          className="flex items-center gap-2 mb-8"
         >
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-full bg-card border border-border hover:bg-secondary transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-sm"
+            title="Retour à la page précédente"
           >
-            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+            <ArrowLeft className="w-4 h-4" />
+            Retour
           </button>
           <button
             onClick={() => navigate("/")}
-            className="p-2 rounded-full bg-card border border-border hover:bg-secondary transition-colors"
+            className="p-2 rounded-lg bg-card border border-border hover:bg-secondary transition-colors"
+            title="Aller à l'accueil"
           >
             <Home className="w-4 h-4 text-muted-foreground" />
           </button>
