@@ -1,9 +1,16 @@
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
-import NavCards from "@/components/tree/NavCards";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
+import FlipCard from "@/components/FlipCard";
 
 export default function Accueil() {
+  const modules = [
+    { label: "Apprentissage", emoji: "📘", to: "/apprentissage", color: "from-primary/20 to-primary/10" },
+    { label: "Comportement", emoji: "🌧️", to: "/comportement", color: "from-accent/20 to-accent/10" },
+    { label: "Développement", emoji: "🧠", to: "/developpement", color: "from-chart-2/20 to-chart-2/10" },
+    { label: "Contexte", emoji: "🏠", to: "/contexte", color: "from-chart-4/20 to-chart-4/10" },
+  ];
+
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center"
@@ -13,12 +20,13 @@ export default function Accueil() {
       }}
     >
       <HamburgerMenu />
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-10"
+        className="text-center mb-12"
       >
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
           <Brain className="w-3.5 h-3.5" />
@@ -42,21 +50,25 @@ export default function Accueil() {
         </p>
       </motion.div>
 
-      {/* Menu */}
+      {/* Flip Cards Grid */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full max-w-md"
+        className="w-full max-w-2xl px-4"
       >
-        <NavCards
-          items={[
-            { label: "📘 Apprentissage", to: "/apprentissage" },
-            { label: "🌧️ Comportement", to: "/comportement" },
-            { label: "🧠 Développement", to: "/developpement" },
-            { label: "🏠 Contexte", to: "/contexte" },
-          ]}
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {modules.map((mod, idx) => (
+            <motion.div
+              key={mod.to}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * idx }}
+            >
+              <FlipCard {...mod} />
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
     </div>
   );
