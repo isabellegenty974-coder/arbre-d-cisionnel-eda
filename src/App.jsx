@@ -71,6 +71,21 @@ import { Q5A, Q5B, Q5C, Q5D } from './pages/apprentissage/lecture/analyses/Q5Ana
 
 // Comportement
 import Comportement from './pages/comportement/Comportement';
+import ComportementQuestions from './pages/comportement/questions/ComportementQuestions';
+import ComportementQ26 from './pages/comportement/questions/Q26';
+import ComportementQ27 from './pages/comportement/questions/Q27';
+import ComportementQ28 from './pages/comportement/questions/Q28';
+import ComportementQ29 from './pages/comportement/questions/Q29';
+import ComportementQ30 from './pages/comportement/questions/Q30';
+import ComportementQ31 from './pages/comportement/questions/Q31';
+import ComportementQ32 from './pages/comportement/questions/Q32';
+import { Q26A, Q26B, Q26C, Q26D } from './pages/comportement/questions/analyses/Q26Analyses';
+import { Q27A, Q27B, Q27C, Q27D } from './pages/comportement/questions/analyses/Q27Analyses';
+import { Q28A, Q28B, Q28C, Q28D } from './pages/comportement/questions/analyses/Q28Analyses';
+import { Q29A, Q29B, Q29C, Q29D } from './pages/comportement/questions/analyses/Q29Analyses';
+import { Q30A, Q30B, Q30C, Q30D } from './pages/comportement/questions/analyses/Q30Analyses';
+import { Q31A, Q31B, Q31C, Q31D } from './pages/comportement/questions/analyses/Q31Analyses';
+import { Q32A, Q32B, Q32C, Q32D } from './pages/comportement/questions/analyses/Q32Analyses';
 import Inhibition from './pages/comportement/Inhibition';
 import ActionsInhibition from './pages/comportement/ActionsInhibition';
 import Impulsivite from './pages/comportement/Impulsivite';
@@ -253,6 +268,42 @@ const AuthenticatedApp = () => {
       
       {/* Comportement */}
       <Route path="/comportement" element={<Comportement />} />
+      <Route path="/comportement/questions" element={<ComportementQuestions />} />
+      <Route path="/comportement/questions/q26" element={<ComportementQ26 />} />
+      <Route path="/comportement/questions/q26/a" element={<Q26A />} />
+      <Route path="/comportement/questions/q26/b" element={<Q26B />} />
+      <Route path="/comportement/questions/q26/c" element={<Q26C />} />
+      <Route path="/comportement/questions/q26/d" element={<Q26D />} />
+      <Route path="/comportement/questions/q27" element={<ComportementQ27 />} />
+      <Route path="/comportement/questions/q27/a" element={<Q27A />} />
+      <Route path="/comportement/questions/q27/b" element={<Q27B />} />
+      <Route path="/comportement/questions/q27/c" element={<Q27C />} />
+      <Route path="/comportement/questions/q27/d" element={<Q27D />} />
+      <Route path="/comportement/questions/q28" element={<ComportementQ28 />} />
+      <Route path="/comportement/questions/q28/a" element={<Q28A />} />
+      <Route path="/comportement/questions/q28/b" element={<Q28B />} />
+      <Route path="/comportement/questions/q28/c" element={<Q28C />} />
+      <Route path="/comportement/questions/q28/d" element={<Q28D />} />
+      <Route path="/comportement/questions/q29" element={<ComportementQ29 />} />
+      <Route path="/comportement/questions/q29/a" element={<Q29A />} />
+      <Route path="/comportement/questions/q29/b" element={<Q29B />} />
+      <Route path="/comportement/questions/q29/c" element={<Q29C />} />
+      <Route path="/comportement/questions/q29/d" element={<Q29D />} />
+      <Route path="/comportement/questions/q30" element={<ComportementQ30 />} />
+      <Route path="/comportement/questions/q30/a" element={<Q30A />} />
+      <Route path="/comportement/questions/q30/b" element={<Q30B />} />
+      <Route path="/comportement/questions/q30/c" element={<Q30C />} />
+      <Route path="/comportement/questions/q30/d" element={<Q30D />} />
+      <Route path="/comportement/questions/q31" element={<ComportementQ31 />} />
+      <Route path="/comportement/questions/q31/a" element={<Q31A />} />
+      <Route path="/comportement/questions/q31/b" element={<Q31B />} />
+      <Route path="/comportement/questions/q31/c" element={<Q31C />} />
+      <Route path="/comportement/questions/q31/d" element={<Q31D />} />
+      <Route path="/comportement/questions/q32" element={<ComportementQ32 />} />
+      <Route path="/comportement/questions/q32/a" element={<Q32A />} />
+      <Route path="/comportement/questions/q32/b" element={<Q32B />} />
+      <Route path="/comportement/questions/q32/c" element={<Q32C />} />
+      <Route path="/comportement/questions/q32/d" element={<Q32D />} />
       <Route path="/comportement/inhibition" element={<Inhibition />} />
       <Route path="/comportement/inhibition/actions" element={<ActionsInhibition />} />
       <Route path="/comportement/impulsivite" element={<Impulsivite />} />
