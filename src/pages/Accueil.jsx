@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
-import CircularMenu from "@/components/CircularMenu";
+import NavCards from "@/components/tree/NavCards";
 
 export default function Accueil() {
   return (
@@ -40,13 +40,21 @@ export default function Accueil() {
         </p>
       </motion.div>
 
-      {/* Circular menu */}
+      {/* Menu */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="w-full max-w-md"
       >
-        <CircularMenu />
+        <NavCards
+          items={[
+            { label: "📘 Apprentissage", to: "/apprentissage" },
+            { label: "🌧️ Comportement", to: "/comportement" },
+            { label: "🧠 Développement", to: "/developpement" },
+            { label: "🏠 Contexte", to: "/contexte" },
+          ]}
+        />
       </motion.div>
     </div>
   );
