@@ -23,10 +23,10 @@ export default function Accueil() {
             <Brain className="w-3.5 h-3.5" />
             Psychologue EN – EDA
           </div>
+          <div className="text-5xl mb-3">🧠</div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
             🌿 Arbre décisionnel
           </h1>
-          <p className="text-sm text-primary font-medium">Psychologue EN EDA (version stylisée)</p>
           <p className="mt-3 text-muted-foreground text-base sm:text-lg max-w-md mx-auto">
             Analyse guidée des situations d'élèves
           </p>
