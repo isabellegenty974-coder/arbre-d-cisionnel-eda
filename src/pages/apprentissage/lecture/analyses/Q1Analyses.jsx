@@ -1,5 +1,4 @@
-import ScreenLayout from "../../../../components/tree/ScreenLayout";
-import InfoList from "../../../../components/tree/InfoList";
+import AnalysisScreen from "../../../../components/AnalysisScreen";
 
 const analyses = {
   a: {
@@ -42,17 +41,17 @@ const analyses = {
 
 export function Q1A() {
   const d = analyses.a;
-  return <ScreenLayout title={d.title}><InfoList type="hypothesis" items={d.items} /></ScreenLayout>;
+  return <AnalysisScreen title={d.title} items={d.items} analysisType="Dyslexie" questionId="q1a" category="Lecture" />;
 }
 export function Q1B() {
   const d = analyses.b;
-  return <ScreenLayout title={d.title}><InfoList type="hypothesis" items={d.items} /></ScreenLayout>;
+  return <AnalysisScreen title={d.title} items={d.items} analysisType="Manque d'entraînement" questionId="q1b" category="Lecture" />;
 }
 export function Q1C() {
   const d = analyses.c;
-  return <ScreenLayout title={d.title}><InfoList type="hypothesis" items={d.items} /></ScreenLayout>;
+  return <AnalysisScreen title={d.title} items={d.items} analysisType="Anxiété" questionId="q1c" category="Lecture" />;
 }
 export function Q1D() {
   const d = analyses.d;
-  return <ScreenLayout title={d.title}><InfoList type="hypothesis" items={d.items} /></ScreenLayout>;
+  return <AnalysisScreen title={d.title} items={d.items} analysisType="Trouble attentionnel" questionId="q1d" category="Lecture" />;
 }
