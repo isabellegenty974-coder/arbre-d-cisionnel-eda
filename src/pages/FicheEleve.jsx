@@ -3,16 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 
 export default function FicheEleve() {
   const { eleve, setCurrentEleve, selections, addSelection } = useDiagnostic();
   const navigate = useNavigate();
+  const [formData, setFormData] = useState(eleve || {});
 
   const handleEleveChange = (field, value) => {
-    setCurrentEleve({ ...eleve, [field]: value });
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleSave = () => {
+    setCurrentEleve(formData);
+    setFormData({ prenom: '', nom: '', age: '', classe: '' });
   };
 
   const handleRemoveSelection = (category, index) => {
@@ -42,7 +49,7 @@ export default function FicheEleve() {
               <div>
                 <label className="text-sm font-medium text-foreground block mb-2">Prénom</label>
                 <Input
-                  value={eleve?.prenom || ''}
+                  value={formData?.prenom || ''}
                   onChange={(e) => handleEleveChange('prenom', e.target.value)}
                   placeholder="Prénom"
                 />
@@ -50,7 +57,7 @@ export default function FicheEleve() {
               <div>
                 <label className="text-sm font-medium text-foreground block mb-2">Nom</label>
                 <Input
-                  value={eleve?.nom || ''}
+                  value={formData?.nom || ''}
                   onChange={(e) => handleEleveChange('nom', e.target.value)}
                   placeholder="Nom"
                 />
@@ -59,7 +66,7 @@ export default function FicheEleve() {
                 <label className="text-sm font-medium text-foreground block mb-2">Âge</label>
                 <Input
                   type="number"
-                  value={eleve?.age || ''}
+                  value={formData?.age || ''}
                   onChange={(e) => handleEleveChange('age', e.target.value)}
                   placeholder="Âge"
                 />
@@ -67,12 +74,16 @@ export default function FicheEleve() {
               <div>
                 <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
                 <Input
-                  value={eleve?.classe || ''}
+                  value={formData?.classe || ''}
                   onChange={(e) => handleEleveChange('classe', e.target.value)}
                   placeholder="Ex: CM2"
                 />
               </div>
             </div>
+            <Button onClick={handleSave} className="w-full gap-2 bg-primary hover:bg-primary/90 mt-4">
+              <Save className="w-4 h-4" />
+              Enregistrer
+            </Button>
           </motion.div>
 
           {/* Hypothèses sélectionnées */}
