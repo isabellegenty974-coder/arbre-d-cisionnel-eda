@@ -98,7 +98,7 @@ export default function Accueil() {
             >
               <Link
                 to={mod.to}
-                className={`block h-36 rounded-3xl bg-gradient-to-br ${mod.color} p-4 shadow-2xl hover:shadow-3xl hover:-translate-y-2 transition-all duration-300 border-2 border-white/20 relative overflow-hidden`}
+                className={`block h-36 rounded-3xl bg-gradient-to-br ${mod.color} p-4 shadow-2xl hover:shadow-3xl hover:-translate-y-2 transition-all duration-300 border-2 border-white/20 relative overflow-hidden cursor-pointer`}
               >
                 {/* Background Image */}
                 <div className="absolute inset-0 opacity-40">
