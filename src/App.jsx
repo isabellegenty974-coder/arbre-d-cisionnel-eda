@@ -25,6 +25,17 @@ import Numeration from './pages/apprentissage/Numeration';
 import Problemes from './pages/apprentissage/Problemes';
 import Calcul from './pages/apprentissage/Calcul';
 import GlobalApprentissage from './pages/apprentissage/GlobalApprentissage';
+import LectureQuestions from './pages/apprentissage/LectureQuestions';
+import LectureQ1 from './pages/apprentissage/lecture/Q1';
+import LectureQ2 from './pages/apprentissage/lecture/Q2';
+import LectureQ3 from './pages/apprentissage/lecture/Q3';
+import LectureQ4 from './pages/apprentissage/lecture/Q4';
+import LectureQ5 from './pages/apprentissage/lecture/Q5';
+import { Q1A, Q1B, Q1C, Q1D } from './pages/apprentissage/lecture/analyses/Q1Analyses';
+import { Q2A, Q2B, Q2C, Q2D } from './pages/apprentissage/lecture/analyses/Q2Analyses';
+import { Q3A, Q3B, Q3C, Q3D } from './pages/apprentissage/lecture/analyses/Q3Analyses';
+import { Q4A, Q4B, Q4C, Q4D } from './pages/apprentissage/lecture/analyses/Q4Analyses';
+import { Q5A, Q5B, Q5C, Q5D } from './pages/apprentissage/lecture/analyses/Q5Analyses';
 
 // Comportement
 import Comportement from './pages/comportement/Comportement';
@@ -95,6 +106,32 @@ const AuthenticatedApp = () => {
       <Route path="/apprentissage/lecture/installee" element={<LectureInstallee />} />
       <Route path="/apprentissage/lecture/hypotheses" element={<HypoLecture />} />
       <Route path="/apprentissage/lecture/actions" element={<ActionsLecture />} />
+      <Route path="/apprentissage/lecture/questions" element={<LectureQuestions />} />
+      <Route path="/apprentissage/lecture/questions/q1" element={<LectureQ1 />} />
+      <Route path="/apprentissage/lecture/questions/q1/a" element={<Q1A />} />
+      <Route path="/apprentissage/lecture/questions/q1/b" element={<Q1B />} />
+      <Route path="/apprentissage/lecture/questions/q1/c" element={<Q1C />} />
+      <Route path="/apprentissage/lecture/questions/q1/d" element={<Q1D />} />
+      <Route path="/apprentissage/lecture/questions/q2" element={<LectureQ2 />} />
+      <Route path="/apprentissage/lecture/questions/q2/a" element={<Q2A />} />
+      <Route path="/apprentissage/lecture/questions/q2/b" element={<Q2B />} />
+      <Route path="/apprentissage/lecture/questions/q2/c" element={<Q2C />} />
+      <Route path="/apprentissage/lecture/questions/q2/d" element={<Q2D />} />
+      <Route path="/apprentissage/lecture/questions/q3" element={<LectureQ3 />} />
+      <Route path="/apprentissage/lecture/questions/q3/a" element={<Q3A />} />
+      <Route path="/apprentissage/lecture/questions/q3/b" element={<Q3B />} />
+      <Route path="/apprentissage/lecture/questions/q3/c" element={<Q3C />} />
+      <Route path="/apprentissage/lecture/questions/q3/d" element={<Q3D />} />
+      <Route path="/apprentissage/lecture/questions/q4" element={<LectureQ4 />} />
+      <Route path="/apprentissage/lecture/questions/q4/a" element={<Q4A />} />
+      <Route path="/apprentissage/lecture/questions/q4/b" element={<Q4B />} />
+      <Route path="/apprentissage/lecture/questions/q4/c" element={<Q4C />} />
+      <Route path="/apprentissage/lecture/questions/q4/d" element={<Q4D />} />
+      <Route path="/apprentissage/lecture/questions/q5" element={<LectureQ5 />} />
+      <Route path="/apprentissage/lecture/questions/q5/a" element={<Q5A />} />
+      <Route path="/apprentissage/lecture/questions/q5/b" element={<Q5B />} />
+      <Route path="/apprentissage/lecture/questions/q5/c" element={<Q5C />} />
+      <Route path="/apprentissage/lecture/questions/q5/d" element={<Q5D />} />
       <Route path="/apprentissage/ecriture" element={<Ecriture />} />
       <Route path="/apprentissage/ecriture/graphisme" element={<Graphisme />} />
       <Route path="/apprentissage/ecriture/orthographe" element={<Orthographe />} />
