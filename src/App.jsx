@@ -25,6 +25,23 @@ import Numeration from './pages/apprentissage/Numeration';
 import Problemes from './pages/apprentissage/Problemes';
 import Calcul from './pages/apprentissage/Calcul';
 import GlobalApprentissage from './pages/apprentissage/GlobalApprentissage';
+import EcritureQuestions from './pages/apprentissage/ecriture/EcritureQuestions';
+import EcritureQ11 from './pages/apprentissage/ecriture/Q11';
+import EcritureQ12 from './pages/apprentissage/ecriture/Q12';
+import EcritureQ13 from './pages/apprentissage/ecriture/Q13';
+import EcritureQ14 from './pages/apprentissage/ecriture/Q14';
+import EcritureQ15 from './pages/apprentissage/ecriture/Q15';
+import EcritureQ16 from './pages/apprentissage/ecriture/Q16';
+import EcritureQ17 from './pages/apprentissage/ecriture/Q17';
+import EcritureQ18 from './pages/apprentissage/ecriture/Q18';
+import { Q11A, Q11B, Q11C, Q11D } from './pages/apprentissage/ecriture/analyses/Q11Analyses';
+import { Q12A, Q12B, Q12C, Q12D } from './pages/apprentissage/ecriture/analyses/Q12Analyses';
+import { Q13A, Q13B, Q13C, Q13D } from './pages/apprentissage/ecriture/analyses/Q13Analyses';
+import { Q14A, Q14B, Q14C, Q14D } from './pages/apprentissage/ecriture/analyses/Q14Analyses';
+import { Q15A, Q15B, Q15C, Q15D } from './pages/apprentissage/ecriture/analyses/Q15Analyses';
+import { Q16A, Q16B, Q16C, Q16D } from './pages/apprentissage/ecriture/analyses/Q16Analyses';
+import { Q17A, Q17B, Q17C, Q17D } from './pages/apprentissage/ecriture/analyses/Q17Analyses';
+import { Q18A, Q18B, Q18C, Q18D } from './pages/apprentissage/ecriture/analyses/Q18Analyses';
 import LectureQuestions from './pages/apprentissage/LectureQuestions';
 import LectureQ1 from './pages/apprentissage/lecture/Q1';
 import LectureQ2 from './pages/apprentissage/lecture/Q2';
@@ -133,6 +150,47 @@ const AuthenticatedApp = () => {
       <Route path="/apprentissage/lecture/questions/q5/c" element={<Q5C />} />
       <Route path="/apprentissage/lecture/questions/q5/d" element={<Q5D />} />
       <Route path="/apprentissage/ecriture" element={<Ecriture />} />
+      <Route path="/apprentissage/ecriture/questions" element={<EcritureQuestions />} />
+      <Route path="/apprentissage/ecriture/questions/q11" element={<EcritureQ11 />} />
+      <Route path="/apprentissage/ecriture/questions/q11/a" element={<Q11A />} />
+      <Route path="/apprentissage/ecriture/questions/q11/b" element={<Q11B />} />
+      <Route path="/apprentissage/ecriture/questions/q11/c" element={<Q11C />} />
+      <Route path="/apprentissage/ecriture/questions/q11/d" element={<Q11D />} />
+      <Route path="/apprentissage/ecriture/questions/q12" element={<EcritureQ12 />} />
+      <Route path="/apprentissage/ecriture/questions/q12/a" element={<Q12A />} />
+      <Route path="/apprentissage/ecriture/questions/q12/b" element={<Q12B />} />
+      <Route path="/apprentissage/ecriture/questions/q12/c" element={<Q12C />} />
+      <Route path="/apprentissage/ecriture/questions/q12/d" element={<Q12D />} />
+      <Route path="/apprentissage/ecriture/questions/q13" element={<EcritureQ13 />} />
+      <Route path="/apprentissage/ecriture/questions/q13/a" element={<Q13A />} />
+      <Route path="/apprentissage/ecriture/questions/q13/b" element={<Q13B />} />
+      <Route path="/apprentissage/ecriture/questions/q13/c" element={<Q13C />} />
+      <Route path="/apprentissage/ecriture/questions/q13/d" element={<Q13D />} />
+      <Route path="/apprentissage/ecriture/questions/q14" element={<EcritureQ14 />} />
+      <Route path="/apprentissage/ecriture/questions/q14/a" element={<Q14A />} />
+      <Route path="/apprentissage/ecriture/questions/q14/b" element={<Q14B />} />
+      <Route path="/apprentissage/ecriture/questions/q14/c" element={<Q14C />} />
+      <Route path="/apprentissage/ecriture/questions/q14/d" element={<Q14D />} />
+      <Route path="/apprentissage/ecriture/questions/q15" element={<EcritureQ15 />} />
+      <Route path="/apprentissage/ecriture/questions/q15/a" element={<Q15A />} />
+      <Route path="/apprentissage/ecriture/questions/q15/b" element={<Q15B />} />
+      <Route path="/apprentissage/ecriture/questions/q15/c" element={<Q15C />} />
+      <Route path="/apprentissage/ecriture/questions/q15/d" element={<Q15D />} />
+      <Route path="/apprentissage/ecriture/questions/q16" element={<EcritureQ16 />} />
+      <Route path="/apprentissage/ecriture/questions/q16/a" element={<Q16A />} />
+      <Route path="/apprentissage/ecriture/questions/q16/b" element={<Q16B />} />
+      <Route path="/apprentissage/ecriture/questions/q16/c" element={<Q16C />} />
+      <Route path="/apprentissage/ecriture/questions/q16/d" element={<Q16D />} />
+      <Route path="/apprentissage/ecriture/questions/q17" element={<EcritureQ17 />} />
+      <Route path="/apprentissage/ecriture/questions/q17/a" element={<Q17A />} />
+      <Route path="/apprentissage/ecriture/questions/q17/b" element={<Q17B />} />
+      <Route path="/apprentissage/ecriture/questions/q17/c" element={<Q17C />} />
+      <Route path="/apprentissage/ecriture/questions/q17/d" element={<Q17D />} />
+      <Route path="/apprentissage/ecriture/questions/q18" element={<EcritureQ18 />} />
+      <Route path="/apprentissage/ecriture/questions/q18/a" element={<Q18A />} />
+      <Route path="/apprentissage/ecriture/questions/q18/b" element={<Q18B />} />
+      <Route path="/apprentissage/ecriture/questions/q18/c" element={<Q18C />} />
+      <Route path="/apprentissage/ecriture/questions/q18/d" element={<Q18D />} />
       <Route path="/apprentissage/ecriture/graphisme" element={<Graphisme />} />
       <Route path="/apprentissage/ecriture/orthographe" element={<Orthographe />} />
       <Route path="/apprentissage/ecriture/production" element={<ProductionEcrite />} />

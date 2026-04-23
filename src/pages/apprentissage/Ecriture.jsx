@@ -10,6 +10,7 @@ export default function Ecriture() {
       <QuestionOptions
         question="Quel type de difficulté est observé ?"
         options={[
+          { label: "🔍 Questions diagnostiques", to: "/apprentissage/ecriture/questions" },
           { label: "✏️ Graphisme", to: "/apprentissage/ecriture/graphisme" },
           { label: "🔤 Orthographe", to: "/apprentissage/ecriture/orthographe" },
           { label: "📝 Production écrite", to: "/apprentissage/ecriture/production" },
