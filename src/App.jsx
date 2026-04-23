@@ -124,6 +124,13 @@ import ActionsInteractions from './pages/developpement/ActionsInteractions';
 
 // Contexte
 import Contexte from './pages/contexte/Contexte';
+import ContexteQuestions from './pages/contexte/questions/ContexteQuestions';
+import ContexteQ38 from './pages/contexte/questions/Q38';
+import ContexteQ39 from './pages/contexte/questions/Q39';
+import ContexteQ40 from './pages/contexte/questions/Q40';
+import { Q38A, Q38B, Q38C, Q38D } from './pages/contexte/questions/analyses/Q38Analyses';
+import { Q39A, Q39B, Q39C, Q39D } from './pages/contexte/questions/analyses/Q39Analyses';
+import { Q40A, Q40B, Q40C, Q40D } from './pages/contexte/questions/analyses/Q40Analyses';
 import Famille from './pages/contexte/Famille';
 import ActionsFamille from './pages/contexte/ActionsFamille';
 import ClimatClasse from './pages/contexte/ClimatClasse';
@@ -368,6 +375,22 @@ const AuthenticatedApp = () => {
       
       {/* Contexte */}
       <Route path="/contexte" element={<Contexte />} />
+      <Route path="/contexte/questions" element={<ContexteQuestions />} />
+      <Route path="/contexte/questions/q38" element={<ContexteQ38 />} />
+      <Route path="/contexte/questions/q38/a" element={<Q38A />} />
+      <Route path="/contexte/questions/q38/b" element={<Q38B />} />
+      <Route path="/contexte/questions/q38/c" element={<Q38C />} />
+      <Route path="/contexte/questions/q38/d" element={<Q38D />} />
+      <Route path="/contexte/questions/q39" element={<ContexteQ39 />} />
+      <Route path="/contexte/questions/q39/a" element={<Q39A />} />
+      <Route path="/contexte/questions/q39/b" element={<Q39B />} />
+      <Route path="/contexte/questions/q39/c" element={<Q39C />} />
+      <Route path="/contexte/questions/q39/d" element={<Q39D />} />
+      <Route path="/contexte/questions/q40" element={<ContexteQ40 />} />
+      <Route path="/contexte/questions/q40/a" element={<Q40A />} />
+      <Route path="/contexte/questions/q40/b" element={<Q40B />} />
+      <Route path="/contexte/questions/q40/c" element={<Q40C />} />
+      <Route path="/contexte/questions/q40/d" element={<Q40D />} />
       <Route path="/contexte/famille" element={<Famille />} />
       <Route path="/contexte/famille/actions" element={<ActionsFamille />} />
       <Route path="/contexte/climat-classe" element={<ClimatClasse />} />

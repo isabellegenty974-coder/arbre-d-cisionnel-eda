@@ -6,6 +6,7 @@ export default function Contexte() {
     <ScreenLayout title="Facteurs contextuels / environnementaux">
       <NavCards
         items={[
+          { label: "🔍 Questions diagnostiques", to: "/contexte/questions" },
           { label: "Événement familial", to: "/contexte/famille" },
           { label: "Climat de classe", to: "/contexte/climat-classe" },
           { label: "Changements récents", to: "/contexte/changements" },
