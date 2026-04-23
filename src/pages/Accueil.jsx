@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Home } from "lucide-react";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
 export default function Accueil() {
+  const navigate = useNavigate();
   const modules = [
     { 
       label: "Apprentissage", 
@@ -54,6 +56,21 @@ export default function Accueil() {
       </div>
 
       <div className="relative z-10">
+        {/* Nav buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-4 left-4 flex items-center gap-2"
+        >
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            title="Retour"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        </motion.div>
+
         <HamburgerMenu />
 
         {/* Main Content */}
