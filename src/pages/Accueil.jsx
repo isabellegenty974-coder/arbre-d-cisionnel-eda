@@ -23,9 +23,9 @@ export default function Accueil() {
             <Brain className="w-3.5 h-3.5" />
             Psychologue EN – EDA
           </div>
-          <div className="mb-4 flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <span className="text-3xl font-bold text-primary">Ψ</span>
+          <div className="mb-5 flex justify-center">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15 flex items-center justify-center shadow-sm">
+              <span className="text-2xl font-light text-primary" style={{ fontFamily: "Georgia, serif", letterSpacing: "0.05em" }}>Ψ</span>
             </div>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground leading-tight">
