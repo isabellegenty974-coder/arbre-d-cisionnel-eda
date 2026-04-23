@@ -55,9 +55,9 @@ export default function Accueil() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full max-w-2xl px-4"
+        className="w-full max-w-xl px-4"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-4">
           {modules.map((mod, idx) => (
             <motion.div
               key={mod.to}

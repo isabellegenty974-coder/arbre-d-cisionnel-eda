@@ -9,7 +9,7 @@ export default function FlipCard({ label, emoji, to, color }) {
     <motion.div
       onHoverStart={() => setIsFlipped(true)}
       onHoverEnd={() => setIsFlipped(false)}
-      className="cursor-pointer h-48"
+      className="cursor-pointer h-28"
       layout
     >
       <motion.div
@@ -21,27 +21,27 @@ export default function FlipCard({ label, emoji, to, color }) {
         {/* Front */}
         <motion.div
           animate={{ opacity: isFlipped ? 0 : 1, pointerEvents: isFlipped ? 'none' : 'auto' }}
-          className={`absolute inset-0 rounded-xl bg-gradient-to-br ${color} border border-border flex flex-col items-center justify-center shadow-lg`}
+          className={`absolute inset-0 rounded-lg bg-gradient-to-br ${color} border border-border flex flex-col items-center justify-center shadow-md`}
         >
           <motion.span
             animate={{ scale: isFlipped ? 0.8 : 1 }}
-            className="text-6xl mb-4"
+            className="text-3xl mb-1.5"
           >
             {emoji}
           </motion.span>
-          <p className="text-lg font-semibold text-foreground text-center px-4">{label}</p>
+          <p className="text-sm font-semibold text-foreground text-center px-3">{label}</p>
         </motion.div>
 
         {/* Back */}
         <motion.div
           animate={{ opacity: isFlipped ? 1 : 0, pointerEvents: isFlipped ? 'auto' : 'none' }}
-          className="absolute inset-0 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center shadow-lg"
+          className="absolute inset-0 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center shadow-md"
         >
           <Link
             to={to}
-            className="text-center font-medium text-primary hover:text-primary/80 transition-colors px-6"
+            className="text-center text-xs font-medium text-primary hover:text-primary/80 transition-colors px-4"
           >
-            Accéder au module →
+            Accéder →
           </Link>
         </motion.div>
       </motion.div>
