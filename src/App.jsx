@@ -99,6 +99,17 @@ import ActionsOpposition from './pages/comportement/ActionsOpposition';
 
 // Développement
 import Developpement from './pages/developpement/Developpement';
+import DeveloppementQuestions from './pages/developpement/questions/DeveloppementQuestions';
+import DeveloppementQ33 from './pages/developpement/questions/Q33';
+import DeveloppementQ34 from './pages/developpement/questions/Q34';
+import DeveloppementQ35 from './pages/developpement/questions/Q35';
+import DeveloppementQ36 from './pages/developpement/questions/Q36';
+import DeveloppementQ37 from './pages/developpement/questions/Q37';
+import { Q33A, Q33B, Q33C, Q33D } from './pages/developpement/questions/analyses/Q33Analyses';
+import { Q34A, Q34B, Q34C, Q34D } from './pages/developpement/questions/analyses/Q34Analyses';
+import { Q35A, Q35B, Q35C, Q35D } from './pages/developpement/questions/analyses/Q35Analyses';
+import { Q36A, Q36B, Q36C, Q36D } from './pages/developpement/questions/analyses/Q36Analyses';
+import { Q37A, Q37B, Q37C, Q37D } from './pages/developpement/questions/analyses/Q37Analyses';
 import LangageOral from './pages/developpement/LangageOral';
 import LangageCompr from './pages/developpement/LangageCompr';
 import ActionsLangageCompr from './pages/developpement/ActionsLangageCompr';
@@ -317,6 +328,32 @@ const AuthenticatedApp = () => {
       
       {/* Développement */}
       <Route path="/developpement" element={<Developpement />} />
+      <Route path="/developpement/questions" element={<DeveloppementQuestions />} />
+      <Route path="/developpement/questions/q33" element={<DeveloppementQ33 />} />
+      <Route path="/developpement/questions/q33/a" element={<Q33A />} />
+      <Route path="/developpement/questions/q33/b" element={<Q33B />} />
+      <Route path="/developpement/questions/q33/c" element={<Q33C />} />
+      <Route path="/developpement/questions/q33/d" element={<Q33D />} />
+      <Route path="/developpement/questions/q34" element={<DeveloppementQ34 />} />
+      <Route path="/developpement/questions/q34/a" element={<Q34A />} />
+      <Route path="/developpement/questions/q34/b" element={<Q34B />} />
+      <Route path="/developpement/questions/q34/c" element={<Q34C />} />
+      <Route path="/developpement/questions/q34/d" element={<Q34D />} />
+      <Route path="/developpement/questions/q35" element={<DeveloppementQ35 />} />
+      <Route path="/developpement/questions/q35/a" element={<Q35A />} />
+      <Route path="/developpement/questions/q35/b" element={<Q35B />} />
+      <Route path="/developpement/questions/q35/c" element={<Q35C />} />
+      <Route path="/developpement/questions/q35/d" element={<Q35D />} />
+      <Route path="/developpement/questions/q36" element={<DeveloppementQ36 />} />
+      <Route path="/developpement/questions/q36/a" element={<Q36A />} />
+      <Route path="/developpement/questions/q36/b" element={<Q36B />} />
+      <Route path="/developpement/questions/q36/c" element={<Q36C />} />
+      <Route path="/developpement/questions/q36/d" element={<Q36D />} />
+      <Route path="/developpement/questions/q37" element={<DeveloppementQ37 />} />
+      <Route path="/developpement/questions/q37/a" element={<Q37A />} />
+      <Route path="/developpement/questions/q37/b" element={<Q37B />} />
+      <Route path="/developpement/questions/q37/c" element={<Q37C />} />
+      <Route path="/developpement/questions/q37/d" element={<Q37D />} />
       <Route path="/developpement/langage-oral" element={<LangageOral />} />
       <Route path="/developpement/langage-oral/comprehension" element={<LangageCompr />} />
       <Route path="/developpement/langage-oral/comprehension/actions" element={<ActionsLangageCompr />} />

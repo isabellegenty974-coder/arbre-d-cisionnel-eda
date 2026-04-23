@@ -6,6 +6,7 @@ export default function Developpement() {
     <ScreenLayout title="Difficultés liées au développement">
       <NavCards
         items={[
+          { label: "🔍 Questions diagnostiques", to: "/developpement/questions" },
           { label: "Langage oral", to: "/developpement/langage-oral" },
           { label: "Motricité", to: "/developpement/motricite" },
           { label: "Attention", to: "/developpement/attention" },
