@@ -86,17 +86,7 @@ export default function HamburgerMenu() {
                 </button>
               </div>
 
-              {/* Modules */}
-              <div>
-                <h3 className="text-xs font-semibold uppercase text-muted-foreground mb-4">Modules</h3>
-                <div className="space-y-3">
-                  {modules.map((mod) => (
-                    <div key={mod.to} onClick={() => setIsOpen(false)} className="h-32">
-                      <FlipCard {...mod} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+
             </motion.div>
           </>
         )}
