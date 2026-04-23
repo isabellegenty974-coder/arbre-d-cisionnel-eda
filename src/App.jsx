@@ -5,9 +5,12 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { DiagnosticProvider } from '@/lib/DiagnosticContext';
+import ResumeButton from '@/components/tree/ResumeButton';
 
 // Pages
 import Accueil from './pages/Accueil';
+import Resume from './pages/Resume';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -161,8 +164,11 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Accueil />} />
+    <>
+      <ResumeButton />
+      <Routes>
+        <Route path="/" element={<Accueil />} />
+        <Route path="/resume" element={<Resume />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
@@ -402,6 +408,7 @@ const AuthenticatedApp = () => {
       
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </>
   );
 };
 
@@ -409,9 +416,11 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
+        <DiagnosticProvider>
+          <Router>
+            <AuthenticatedApp />
+          </Router>
+        </DiagnosticProvider>
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>

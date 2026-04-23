@@ -1,0 +1,30 @@
+{
+  "name": "Eleve",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "description": "Nom de l'\u00e9l\u00e8ve"
+    },
+    "prenom": {
+      "type": "string",
+      "description": "Pr\u00e9nom de l'\u00e9l\u00e8ve"
+    },
+    "age": {
+      "type": "number",
+      "description": "\u00c2ge de l'\u00e9l\u00e8ve"
+    },
+    "classe": {
+      "type": "string",
+      "description": "Classe de l'\u00e9l\u00e8ve"
+    },
+    "donnees_diagnostic": {
+      "type": "object",
+      "description": "Donn\u00e9es du diagnostic (questions s\u00e9lectionn\u00e9es, hypoth\u00e8ses, actions)"
+    }
+  },
+  "required": [
+    "nom",
+    "prenom"
+  ]
+}
