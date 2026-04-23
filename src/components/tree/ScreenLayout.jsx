@@ -18,10 +18,10 @@ export default function ScreenLayout({ title, subtitle, children }) {
         >
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            className="p-2 rounded-lg text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
             title="Retour"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => navigate("/")}
