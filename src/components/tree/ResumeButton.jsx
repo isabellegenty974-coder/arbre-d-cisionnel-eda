@@ -8,7 +8,7 @@ export default function ResumeButton() {
   const { pathname } = useLocation();
   const hasSelections = Object.values(selections).some(arr => arr.length > 0);
 
-  if (!hasSelections || pathname === "/") return null;
+  if (!hasSelections || (pathname !== "/dashboard" && pathname !== "/fiche-eleve")) return null;
 
   return (
     <motion.div
