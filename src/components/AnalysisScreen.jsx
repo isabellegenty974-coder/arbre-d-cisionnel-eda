@@ -11,6 +11,7 @@ export default function AnalysisScreen({ title, items, analysisType, questionId,
   const { addSelection, selections } = useDiagnostic();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const handleAddToDiagnostic = () => {
     addSelection(category, questionId, title, analysisType);
@@ -18,12 +19,16 @@ export default function AnalysisScreen({ title, items, analysisType, questionId,
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const handleSelectItems = (items) => {
+    setSelectedItems(items);
+  };
+
   const hasSelections = Object.values(selections).some(arr => arr.length > 0);
 
   return (
     <ScreenLayout title={title}>
       <div className="space-y-6">
-        <InfoList type="hypothesis" items={items} />
+        <InfoList type="hypothesis" items={items} onSelectItems={handleSelectItems} />
         
         <motion.div
           initial={{ opacity: 0, y: 10 }}
