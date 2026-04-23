@@ -1,7 +1,7 @@
 import { useDiagnostic } from "@/lib/DiagnosticContext";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, FileText } from "lucide-react";
+import { Trash2, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportResumePDF } from "@/lib/pdfExport";
@@ -23,18 +23,6 @@ export default function Resume() {
       </div>
     );
   }
-
-  const handleExportJSON = () => {
-    const data = {
-      eleve,
-      selections,
-      date: new Date().toLocaleString('fr-FR')
-    };
-    const element = document.createElement('a');
-    element.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
-    element.download = `diagnostic_${eleve?.nom || 'eleve'}.json`;
-    element.click();
-  };
 
   const handleExportPDF = () => {
     exportResumePDF(eleve, selections, crossRecommendations);
@@ -125,10 +113,6 @@ export default function Resume() {
             <Button onClick={handleExportPDF} className="gap-2 bg-primary hover:bg-primary/90">
               <FileText className="w-4 h-4" />
               Exporter PDF
-            </Button>
-            <Button onClick={handleExportJSON} variant="outline" className="gap-2">
-              <Download className="w-4 h-4" />
-              Exporter JSON
             </Button>
             <Button onClick={clearAll} variant="outline" className="gap-2">
               <Trash2 className="w-4 h-4" />
