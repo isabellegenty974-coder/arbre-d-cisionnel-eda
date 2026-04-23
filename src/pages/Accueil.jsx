@@ -56,16 +56,6 @@ export default function Accueil() {
       <div className="relative z-10">
         <HamburgerMenu />
 
-        {/* Header Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute top-6 right-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium border border-white/30"
-        >
-          Psychologue EN – EDA
-        </motion.div>
-
         {/* Main Content */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
