@@ -3,9 +3,24 @@ import ScreenLayout from "@/components/tree/ScreenLayout";
 import { Button } from "@/components/ui/button";
 import { Download, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
 export default function Resume() {
   const { selections, eleve, clearAll, crossRecommendations } = useDiagnostic();
+
+  if (!Object.values(selections).some(arr => arr.length > 0)) {
+    return (
+      <div className="min-h-screen bg-background">
+        <HamburgerMenu />
+        <ScreenLayout title="📋 Résumé diagnostique">
+          <div className="text-center p-8 rounded-lg bg-secondary/30 border border-secondary">
+            <p className="text-muted-foreground">Aucune sélection pour le moment</p>
+            <p className="text-xs text-muted-foreground mt-2">Complétez l'arbre diagnostique pour voir les résultats</p>
+          </div>
+        </ScreenLayout>
+      </div>
+    );
+  }
 
   const handleExport = () => {
     const data = {
@@ -22,7 +37,9 @@ export default function Resume() {
   const totalSelections = Object.values(selections).reduce((sum, arr) => sum + arr.length, 0);
 
   return (
-    <ScreenLayout title="📋 Résumé diagnostique">
+    <div className="min-h-screen bg-background">
+      <HamburgerMenu />
+      <ScreenLayout title="📋 Résumé diagnostique">
       <div className="space-y-8">
         {/* Infos élève */}
         {eleve && (
@@ -107,6 +124,7 @@ export default function Resume() {
           </div>
         )}
       </div>
-    </ScreenLayout>
+      </ScreenLayout>
+    </div>
   );
 }

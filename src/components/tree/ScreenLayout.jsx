@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Home } from "lucide-react";
 import { motion } from "framer-motion";
+import HamburgerMenu from "../Navigation/HamburgerMenu";
 
 export default function ScreenLayout({ title, subtitle, children }) {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
+      <HamburgerMenu />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Nav */}
         <motion.div

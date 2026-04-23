@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Brain } from "lucide-react";
 import NavCards from "@/components/tree/NavCards";
+import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
 export default function Accueil() {
   return (
@@ -11,6 +12,7 @@ export default function Accueil() {
           "radial-gradient(ellipse at 50% 40%, #f0f4fb 0%, #f7f8fa 55%, #efefef 100%)",
       }}
     >
+      <HamburgerMenu />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
