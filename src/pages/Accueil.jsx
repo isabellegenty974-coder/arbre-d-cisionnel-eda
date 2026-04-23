@@ -87,7 +87,7 @@ export default function Accueil() {
 
           {/* Subtitle */}
           <p className="text-xl text-gray-200 max-w-md mx-auto">
-            Analyse guidée des situations d'élèves
+            Psychologue EN-EDA
           </p>
         </motion.div>
 
