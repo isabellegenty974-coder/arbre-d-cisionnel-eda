@@ -13,6 +13,7 @@ import Accueil from './pages/Accueil';
 import Resume from './pages/Resume';
 import Dashboard from './pages/Dashboard';
 import Historique from './pages/Historique';
+import FicheEleve from './pages/FicheEleve';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -171,6 +172,7 @@ const AuthenticatedApp = () => {
       <Routes>
         <Route path="/" element={<Accueil />} />
         <Route path="/resume" element={<Resume />} />
+        <Route path="/fiche-eleve" element={<FicheEleve />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/historique" element={<Historique />} />
       

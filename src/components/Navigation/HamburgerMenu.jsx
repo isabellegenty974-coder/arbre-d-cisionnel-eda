@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Home as HomeIcon, FileText, Settings } from 'lucide-react';
+import { Menu, X, Home as HomeIcon, FileText, Settings, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EleveModal from './EleveModal';
 import FlipCard from '@/components/FlipCard';
@@ -67,6 +67,14 @@ export default function HamburgerMenu() {
                   Accueil
                 </Link>
                 <Link
+                  to="/fiche-eleve"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
+                >
+                  <User className="w-4 h-4" />
+                  Fiche élève
+                </Link>
+                <Link
                   to="/resume"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
@@ -82,16 +90,6 @@ export default function HamburgerMenu() {
                   <FileText className="w-4 h-4" />
                   Dashboard
                 </Link>
-                <button
-                  onClick={() => {
-                    setShowEleveModal(true);
-                    setIsOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
-                >
-                  <Settings className="w-4 h-4" />
-                  Élève
-                </button>
               </div>
 
 
