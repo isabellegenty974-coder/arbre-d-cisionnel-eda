@@ -3,10 +3,10 @@ import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const items = [
-  { label: "Apprentissage", emoji: "📘", to: "/apprentissage", angle: -90 },
-  { label: "Comportement",  emoji: "🌧️", to: "/comportement",  angle: 0   },
-  { label: "Développement", emoji: "🧠", to: "/developpement", angle: 90  },
-  { label: "Contexte",      emoji: "🏠", to: "/contexte",      angle: 180 },
+  { label: "Apprentissage", emoji: "📘", to: "/apprentissage", angle: -90, stat: "18 questions" },
+  { label: "Comportement",  emoji: "🌧️", to: "/comportement",  angle: 0,   stat: "7 questions" },
+  { label: "Développement", emoji: "🧠", to: "/developpement", angle: 90,  stat: "5 questions" },
+  { label: "Contexte",      emoji: "🏠", to: "/contexte",      angle: 180, stat: "3 questions" },
 ];
 
 const RADIUS = 170;
@@ -110,21 +110,33 @@ export default function CircularMenu() {
                 <motion.span
                   animate={{ opacity: [1, 0.82, 1] }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ fontSize: 48, lineHeight: 1 }}
+                  style={{ fontSize: 44, lineHeight: 1 }}
                 >
                   {item.emoji}
                 </motion.span>
                 <span
                   style={{
                     fontSize: 12,
-                    fontWeight: 500,
-                    color: isHovered ? "#2563EB" : "#444",
+                    fontWeight: 600,
+                    color: isHovered ? "#2563EB" : "#333",
                     letterSpacing: "0.02em",
                     transition: "color 0.25s",
                     whiteSpace: "nowrap",
                   }}
                 >
                   {item.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 400,
+                    color: isHovered ? "#4A90E2" : "#888",
+                    letterSpacing: "0.01em",
+                    transition: "color 0.25s",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {item.stat}
                 </span>
               </motion.div>
             </motion.button>
