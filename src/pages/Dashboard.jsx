@@ -102,10 +102,17 @@ export default function Dashboard() {
                 />
               </div>
             </div>
-            <Button onClick={handleSaveEleve} className="w-full gap-2 bg-primary hover:bg-primary/90">
-              <Save className="w-4 h-4" />
-              Enregistrer
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={handleSaveEleve} className="flex-1 gap-2 bg-primary hover:bg-primary/90">
+                <Save className="w-4 h-4" />
+                Enregistrer
+              </Button>
+            </div>
+            <Link to="/apprentissage" className="block">
+              <Button className="w-full gap-2 bg-chart-2 hover:bg-chart-2/90">
+                Explorer les hypothèses
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Search et diagnostics */}
