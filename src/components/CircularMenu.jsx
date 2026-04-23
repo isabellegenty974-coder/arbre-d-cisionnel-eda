@@ -85,11 +85,11 @@ export default function CircularMenu() {
                 height: 140,
                 borderRadius: "50%",
                 transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-                background: "rgba(255,255,255,0.92)",
-                border: `1.5px solid ${isHovered ? "#4A90E2" : "#CCCCCC"}`,
+                background: `radial-gradient(135deg at 30% 30%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 40%, rgba(245,248,255,0.90) 100%)`,
+                border: `2px solid ${isHovered ? "#4A90E2" : "#DDD"}`,
                 boxShadow: isHovered
-                  ? "0 0 0 4px rgba(74,144,226,0.18), 0 4px 24px rgba(74,144,226,0.22), 0 4px 12px rgba(0,0,0,0.10)"
-                  : "0 4px 12px rgba(0,0,0,0.15)",
+                  ? "0 0 0 4px rgba(74,144,226,0.18), inset -2px -2px 6px rgba(0,0,0,0.06), 0 12px 32px rgba(74,144,226,0.25), 0 2px 8px rgba(0,0,0,0.12)"
+                  : "inset -2px -2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -97,7 +97,7 @@ export default function CircularMenu() {
                 gap: 6,
                 cursor: "pointer",
                 outline: "none",
-                transition: "border-color 0.25s, box-shadow 0.25s",
+                transition: "border-color 0.25s, box-shadow 0.25s, background 0.25s",
               }}
             >
               {/* Counter-rotate so emoji stays upright */}
