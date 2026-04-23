@@ -28,7 +28,7 @@ export default function CircularMenu() {
   return (
     <div
       className="relative flex items-center justify-center"
-      style={{ width: 500, height: 500 }}
+      style={{ width: 550, height: 550 }}
     >
       {/* Background glow */}
       <div
@@ -36,6 +36,17 @@ export default function CircularMenu() {
         style={{
           background:
             "radial-gradient(circle at 50% 50%, rgba(74,144,226,0.10) 0%, rgba(74,144,226,0.03) 45%, transparent 70%)",
+        }}
+      />
+
+      {/* Outer rotating circle */}
+      <motion.div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+        style={{
+          border: "1.5px dashed rgba(74,144,226,0.25)",
+          margin: 20,
         }}
       />
 
