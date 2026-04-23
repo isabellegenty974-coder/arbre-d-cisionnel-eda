@@ -9,7 +9,7 @@ const items = [
   { label: "Contexte",      emoji: "🏠", to: "/contexte",      angle: 180, stat: "3 questions" },
 ];
 
-const RADIUS = 220;
+const RADIUS = 280;
 
 function toRad(deg) {
   return (deg * Math.PI) / 180;
