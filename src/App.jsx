@@ -11,6 +11,8 @@ import ResumeButton from '@/components/tree/ResumeButton';
 // Pages
 import Accueil from './pages/Accueil';
 import Resume from './pages/Resume';
+import Dashboard from './pages/Dashboard';
+import Historique from './pages/Historique';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -169,6 +171,8 @@ const AuthenticatedApp = () => {
       <Routes>
         <Route path="/" element={<Accueil />} />
         <Route path="/resume" element={<Resume />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/historique" element={<Historique />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
