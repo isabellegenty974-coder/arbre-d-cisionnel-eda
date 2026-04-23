@@ -5,6 +5,7 @@ import { Download, Trash2, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportResumePDF } from "@/lib/pdfExport";
+import DiagnosticPersonalise from "@/components/DiagnosticPersonalise";
 
 export default function Resume() {
   const { selections, eleve, clearAll, crossRecommendations } = useDiagnostic();
@@ -114,6 +115,9 @@ export default function Resume() {
             <p className="text-xs text-muted-foreground mt-2">Complétez l'arbre diagnostique pour voir les résultats</p>
           </div>
         )}
+
+        {/* Diagnostic personnalisé */}
+        <DiagnosticPersonalise />
 
         {/* Actions */}
         {totalSelections > 0 && (
