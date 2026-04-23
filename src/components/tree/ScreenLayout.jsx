@@ -18,18 +18,17 @@ export default function ScreenLayout({ title, subtitle, children }) {
         >
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-medium text-sm"
-            title="Retour à la page précédente"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            title="Retour"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour
           </button>
           <button
             onClick={() => navigate("/")}
-            className="p-2 rounded-lg bg-card border border-border hover:bg-secondary transition-colors"
-            title="Aller à l'accueil"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            title="Accueil"
           >
-            <Home className="w-4 h-4 text-muted-foreground" />
+            <Home className="w-4 h-4" />
           </button>
         </motion.div>
 
