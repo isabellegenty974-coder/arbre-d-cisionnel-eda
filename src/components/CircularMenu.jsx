@@ -19,6 +19,21 @@ export default function CircularMenu() {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
   const [clicked, setClicked] = useState(null);
+  const [rotation, setRotation] = useState(0);
+  const controls = useAnimation();
+
+  const handleMouseMove = (e) => {
+    const container = e.currentTarget;
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    const angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+    const newRotation = (angle * 180) / Math.PI + 90;
+    setRotation(newRotation);
+  };
 
   const handleClick = (item) => {
     setClicked(item.to);
@@ -29,6 +44,7 @@ export default function CircularMenu() {
     <div
       className="relative flex items-center justify-center"
       style={{ width: 550, height: 550 }}
+      onMouseMove={handleMouseMove}
     >
       {/* Background glow */}
       <div
@@ -42,8 +58,8 @@ export default function CircularMenu() {
       {/* Outer rotating circle */}
       <motion.div
         className="absolute inset-0 rounded-full pointer-events-none"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+        animate={{ rotate: rotation }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         style={{
           border: "1.5px dashed rgba(74,144,226,0.25)",
           margin: 20,
@@ -53,8 +69,8 @@ export default function CircularMenu() {
       {/* Rotating ring */}
       <motion.div
         className="absolute inset-0"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+        animate={{ rotate: rotation }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
         {items.map((item) => {
           const rad = toRad(item.angle);
@@ -102,8 +118,8 @@ export default function CircularMenu() {
             >
               {/* Counter-rotate so emoji stays upright */}
               <motion.div
-                animate={{ rotate: -360 }}
-                transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+                animate={{ rotate: -rotation }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
               >
                 {/* Pulsing emoji */}
