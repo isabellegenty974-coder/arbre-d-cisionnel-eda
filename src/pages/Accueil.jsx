@@ -63,7 +63,6 @@ export default function Accueil() {
           transition={{ duration: 0.5 }}
           className="absolute top-6 right-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium border border-white/30"
         >
-          <Brain className="w-4 h-4" />
           Psychologue EN – EDA
         </motion.div>
 
