@@ -62,7 +62,7 @@ export default function CircularMenu() {
         transition={{ duration: 0.3, ease: "easeOut" }}
         style={{
           border: "1.5px dashed rgba(74,144,226,0.25)",
-          margin: 20,
+          margin: 60,
         }}
       />
 
