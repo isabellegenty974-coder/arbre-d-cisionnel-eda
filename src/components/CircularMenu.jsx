@@ -69,7 +69,6 @@ export default function CircularMenu() {
       {/* Fixed menu ring */}
       <div
         className="absolute inset-0"
-        style={{ pointerEvents: "none" }}
       >
         {items.map((item, index) => {
            const angleStep = 360 / items.length;
