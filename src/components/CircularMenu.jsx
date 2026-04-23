@@ -66,18 +66,18 @@ export default function CircularMenu() {
         }}
       />
 
-      {/* Rotating ring */}
-      <motion.div
+      {/* Fixed menu ring */}
+      <div
         className="absolute inset-0"
-        animate={{ rotate: rotation }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        {items.map((item) => {
-          const rad = toRad(item.angle);
-          const x = RADIUS * Math.cos(rad);
-          const y = RADIUS * Math.sin(rad);
-          const isHovered = hovered === item.to;
-          const isClicked = clicked === item.to;
+        {items.map((item, index) => {
+           const angleStep = 360 / items.length;
+           const angle = index * angleStep;
+           const rad = toRad(angle);
+           const x = RADIUS * Math.cos(rad);
+           const y = RADIUS * Math.sin(rad);
+           const isHovered = hovered === item.to;
+           const isClicked = clicked === item.to;
 
           return (
             <motion.button
@@ -116,10 +116,8 @@ export default function CircularMenu() {
                 transition: "border-color 0.25s, box-shadow 0.25s, background 0.25s",
               }}
             >
-              {/* Counter-rotate so emoji stays upright */}
-              <motion.div
-                animate={{ rotate: -rotation }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+              {/* No rotation needed */}
+              <div
                 style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
               >
                 {/* Pulsing emoji */}
@@ -154,11 +152,11 @@ export default function CircularMenu() {
                 >
                   {item.stat}
                 </span>
-              </motion.div>
+              </div>
             </motion.button>
           );
         })}
-      </motion.div>
+      </div>
 
       {/* Central glow dot */}
       <motion.div
