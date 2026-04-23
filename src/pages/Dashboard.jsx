@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isEleveExpanded, setIsEleveExpanded] = useState(false);
 
   useEffect(() => {
     loadDiagnostics();
@@ -69,9 +70,18 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-xl bg-primary/5 border-2 border-primary/20"
+            className="rounded-xl bg-primary/5 border-2 border-primary/20 overflow-hidden"
           >
-            <h2 className="text-lg font-semibold text-foreground mb-4">👤 Élève courant</h2>
+            <button
+              onClick={() => setIsEleveExpanded(!isEleveExpanded)}
+              className="w-full px-6 py-4 text-left hover:bg-primary/10 transition-colors"
+            >
+              <h2 className="text-lg font-semibold text-foreground">
+                👤 {eleve?.prenom && eleve?.nom ? `${eleve.prenom} ${eleve.nom}` : 'Élève courant'}
+              </h2>
+            </button>
+            {isEleveExpanded && (
+              <div className="border-t border-primary/20 p-6 space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 mb-4">
               <div>
                 <label className="text-sm font-medium text-foreground block mb-2">Prénom</label>
@@ -130,6 +140,8 @@ export default function Dashboard() {
                 Explorer les hypothèses
               </Button>
             </Link>
+              </div>
+            )}
           </motion.div>
 
           {/* Search et diagnostics */}
