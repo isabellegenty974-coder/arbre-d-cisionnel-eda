@@ -1,17 +1,9 @@
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import CircularMenu from "@/components/CircularMenu";
-import { Plus, Users, BarChart2 } from "lucide-react";
-
-const NAV_CARDS = [
-  { label: "Nouvelle fiche élève", icon: Plus, to: "/fiche-eleve", highlight: true },
-  { label: "Liste des élèves", icon: Users, to: "/liste-eleves" },
-  { label: "Statistiques annuelles", icon: BarChart2, to: "/stats-annuelles" },
-];
+import CircularMenuPro from "@/components/CircularMenuPro";
 
 export default function Accueil() {
-  const navigate = useNavigate();
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
@@ -42,7 +34,7 @@ export default function Accueil() {
           <p className="text-xl text-gray-200">Psychologue EN-EDA</p>
         </motion.div>
 
-        {/* Circular Menu — fadeIn 0.9s, slight delay */}
+        {/* Circular Menu EDA — fadeIn 0.9s, slight delay */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -51,29 +43,14 @@ export default function Accueil() {
           <CircularMenu />
         </motion.div>
 
-        {/* Dashboard cards */}
+        {/* Circular Menu Pro — fadeIn delay */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
-          className="mt-10 w-full max-w-sm px-4 space-y-3"
+          className="mt-4"
         >
-          {NAV_CARDS.map(({ label, icon: Icon, to, highlight }) => (
-            <button
-              key={to}
-              onClick={() => navigate(to)}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl border transition-all text-left ${
-                highlight
-                  ? "bg-white/20 border-white/40 hover:bg-white/30 text-white"
-                  : "bg-white/10 border-white/20 hover:bg-white/20 text-white/90"
-              }`}
-            >
-              <div className={`p-2 rounded-lg ${highlight ? "bg-white/20" : "bg-white/10"}`}>
-                <Icon className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-medium text-sm">{label}</span>
-            </button>
-          ))}
+          <CircularMenuPro />
         </motion.div>
       </div>
     </div>
