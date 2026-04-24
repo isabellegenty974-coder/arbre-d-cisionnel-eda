@@ -26,6 +26,7 @@ import ItemsContexte from './pages/ItemsContexte';
 import AnalyseEDA from './pages/AnalyseEDA';
 import ListeEleves from './pages/ListeEleves';
 import DetailEleve from './pages/DetailEleve';
+import HistoriqueEleve from './pages/HistoriqueEleve';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -199,6 +200,7 @@ const AuthenticatedApp = () => {
         <Route path="/analyse-eda" element={<AnalyseEDA />} />
         <Route path="/liste-eleves" element={<ListeEleves />} />
         <Route path="/detail-eleve" element={<DetailEleve />} />
+        <Route path="/historique-eleve" element={<HistoriqueEleve />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
