@@ -26,7 +26,7 @@ function MenuItem({ item, index, scrollY }) {
   };
 
   const { x, y } = getPosition(index);
-  const parallaxY = scrollY * 0.3 * (index % 2 === 0 ? 1 : -1);
+  const parallaxY = scrollY * 0.8 * (index % 2 === 0 ? 1 : -1);
 
   return (
     <motion.div
