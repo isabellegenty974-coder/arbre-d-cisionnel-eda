@@ -6,7 +6,7 @@ import CircularMenuEDA from "@/components/CircularMenuEDA";
 
 export default function Accueil() {
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-slate-50 pb-20">
       <HamburgerMenu />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         {/* Header */}
@@ -16,10 +16,10 @@ export default function Accueil() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h1 className="font-display text-4xl sm:text-5xl font-bold text-foreground mb-3">
+          <h1 className="font-display text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-700 to-slate-900 bg-clip-text text-transparent mb-3">
             Tableau de bord EDA
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-slate-600">
             Outils professionnels d'analyse et de suivi
           </p>
         </motion.div>

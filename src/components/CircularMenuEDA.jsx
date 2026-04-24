@@ -14,14 +14,14 @@ import {
 } from 'lucide-react';
 
 const MENU_ITEMS = [
-  { label: 'Apprentissages', icon: BookOpen, target: '/items-apprentissages', color: 'from-blue-300 to-blue-500' },
-  { label: 'Comportement', icon: Heart, target: '/items-comportement', color: 'from-purple-300 to-purple-500' },
-  { label: 'Développement', icon: Sprout, target: '/items-developpement', color: 'from-cyan-300 to-cyan-500' },
-  { label: 'Contexte', icon: Home, target: '/items-contexte', color: 'from-emerald-300 to-emerald-500' },
-  { label: 'Analyse', icon: Brain, target: '/analyse-eda', color: 'from-pink-300 to-pink-500' },
-  { label: 'Statistiques', icon: BarChart2, target: '/stats-annuelles', color: 'from-yellow-300 to-yellow-500' },
-  { label: 'Nouvel élève', icon: UserPlus, target: '/fiche-eleve', color: 'from-orange-300 to-orange-500' },
-  { label: 'Élèves', icon: Users, target: '/liste-eleves', color: 'from-red-300 to-red-500' },
+  { label: 'Apprentissages', icon: BookOpen, target: '/items-apprentissages', color: 'from-blue-400 to-blue-600' },
+  { label: 'Comportement', icon: Heart, target: '/items-comportement', color: 'from-rose-400 to-rose-600' },
+  { label: 'Développement', icon: Sprout, target: '/items-developpement', color: 'from-teal-400 to-teal-600' },
+  { label: 'Contexte', icon: Home, target: '/items-contexte', color: 'from-emerald-400 to-emerald-600' },
+  { label: 'Analyse', icon: Brain, target: '/analyse-eda', color: 'from-violet-400 to-violet-600' },
+  { label: 'Statistiques', icon: BarChart2, target: '/stats-annuelles', color: 'from-amber-400 to-amber-600' },
+  { label: 'Nouvel élève', icon: UserPlus, target: '/fiche-eleve', color: 'from-indigo-400 to-indigo-600' },
+  { label: 'Élèves', icon: Users, target: '/liste-eleves', color: 'from-cyan-400 to-cyan-600' },
 ];
 
 const RADIUS = 120;
@@ -36,7 +36,7 @@ export default function CircularMenuEDA() {
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-400 via-blue-500 to-slate-600">
+    <div className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800">
       {/* Menu Items - Fixed */}
       <motion.div className="absolute inset-0 pointer-events-none flex items-center justify-center">
         {MENU_ITEMS.map((item, index) => {
