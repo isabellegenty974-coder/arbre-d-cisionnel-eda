@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
-import CircularMenuPro from "@/components/CircularMenuPro";
-import { Plus, Users, BarChart2, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import CircularMenuEDA from "@/components/CircularMenuEDA";
+import { Plus, Users, BarChart2 } from "lucide-react";
 
 function Card({ icon: Icon, title, subtitle, to, highlight = false }) {
   return (
@@ -82,14 +81,14 @@ export default function Accueil() {
           />
         </motion.div>
 
-        {/* Menu avancé */}
+        {/* Menu Circulaire EDA */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-8"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="flex justify-center mt-12 mb-8 h-96"
         >
-          <CircularMenuPro />
+          <CircularMenuEDA />
         </motion.div>
       </div>
     </div>
