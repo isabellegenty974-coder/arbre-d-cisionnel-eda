@@ -9,9 +9,14 @@ module.exports = {
   			display: ['var(--font-display)']
   		},
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			lg: '12px',
+  			md: '10px',
+  			sm: '8px'
+  		},
+  		boxShadow: {
+  			soft: '0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)',
+  			'soft-md': '0 4px 20px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)',
+  			'soft-lg': '0 8px 32px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.07)',
   		},
   		colors: {
   			background: 'hsl(var(--background))',
