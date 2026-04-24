@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 const DOMAINS = [
   { label: "Apprentissages",            icon: Book,    to: "/items-apprentissages", style: "primary" },
   { label: "Comportement / Émotionnel", icon: Smile,   to: "/items-comportement",   style: "primary" },
-  { label: "Développement",             icon: Baby,    to: "/developpement",        style: "primary" },
+  { label: "Développement",             icon: Baby,    to: "/items-developpement",  style: "primary" },
   { label: "Contexte",                  icon: Home,    to: "/contexte",             style: "primary" },
 ];
 

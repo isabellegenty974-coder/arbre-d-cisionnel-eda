@@ -21,6 +21,7 @@ import Resultats from './pages/Resultats';
 import EvaluationDomains from './pages/EvaluationDomains';
 import ItemsApprentissages from './pages/ItemsApprentissages';
 import ItemsComportement from './pages/ItemsComportement';
+import ItemsDeveloppement from './pages/ItemsDeveloppement';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -189,6 +190,7 @@ const AuthenticatedApp = () => {
         <Route path="/evaluation-domains" element={<EvaluationDomains />} />
         <Route path="/items-apprentissages" element={<ItemsApprentissages />} />
         <Route path="/items-comportement" element={<ItemsComportement />} />
+        <Route path="/items-developpement" element={<ItemsDeveloppement />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
