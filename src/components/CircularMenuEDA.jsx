@@ -14,14 +14,14 @@ import {
 } from 'lucide-react';
 
 const MENU_ITEMS = [
-  { label: 'Apprentissages', icon: Book, target: '/items-apprentissages' },
-  { label: 'Comportement', icon: Smile, target: '/items-comportement' },
-  { label: 'Développement', icon: Baby, target: '/items-developpement' },
-  { label: 'Contexte', icon: Home, target: '/items-contexte' },
-  { label: 'Analyse', icon: Brain, target: '/analyse-eda' },
-  { label: 'Statistiques', icon: BarChart2, target: '/stats-annuelles' },
-  { label: 'Nouvel élève', icon: Plus, target: '/fiche-eleve' },
-  { label: 'Élèves', icon: Users, target: '/liste-eleves' },
+  { label: 'Apprentissages', icon: Book, target: '/items-apprentissages', color: 'from-blue-300 to-blue-500' },
+  { label: 'Comportement', icon: Smile, target: '/items-comportement', color: 'from-purple-300 to-purple-500' },
+  { label: 'Développement', icon: Baby, target: '/items-developpement', color: 'from-cyan-300 to-cyan-500' },
+  { label: 'Contexte', icon: Home, target: '/items-contexte', color: 'from-emerald-300 to-emerald-500' },
+  { label: 'Analyse', icon: Brain, target: '/analyse-eda', color: 'from-pink-300 to-pink-500' },
+  { label: 'Statistiques', icon: BarChart2, target: '/stats-annuelles', color: 'from-yellow-300 to-yellow-500' },
+  { label: 'Nouvel élève', icon: Plus, target: '/fiche-eleve', color: 'from-orange-300 to-orange-500' },
+  { label: 'Élèves', icon: Users, target: '/liste-eleves', color: 'from-red-300 to-red-500' },
 ];
 
 const RADIUS = 120;
@@ -64,7 +64,7 @@ export default function CircularMenuEDA() {
                 <motion.button
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.92 }}
-                  className="flex flex-col items-center justify-center gap-2 w-20 h-20 rounded-full bg-gradient-to-br from-white/35 to-white/15 backdrop-blur-md text-slate-700 border border-white/40 shadow-lg hover:from-white/45 hover:to-white/25 transition-all"
+                  className={`flex flex-col items-center justify-center gap-2 w-20 h-20 rounded-full bg-gradient-to-br ${item.color} text-white border border-white/60 shadow-lg hover:shadow-xl transition-all`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-[9px] font-medium text-center leading-tight">
