@@ -19,7 +19,7 @@ export default function ScreenLayout({ title, subtitle, children }) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Nav */}

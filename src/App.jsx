@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { DiagnosticProvider } from '@/lib/DiagnosticContext';
 import ResumeButton from '@/components/tree/ResumeButton';
+import BottomBar from '@/components/Navigation/BottomBar';
 
 // Pages
 import Accueil from './pages/Accueil';
@@ -172,6 +173,7 @@ const AuthenticatedApp = () => {
   return (
     <>
       <ResumeButton />
+      <BottomBar />
       <Routes>
         <Route path="/" element={<Accueil />} />
         <Route path="/resume" element={<Resume />} />
