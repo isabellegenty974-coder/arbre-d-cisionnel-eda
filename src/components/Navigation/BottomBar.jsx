@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2, FileText } from 'lucide-react';
+import { Home, Users, BarChart2 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { icon: Home,     label: 'Accueil',      to: '/' },
-  { icon: BarChart2, label: 'Statistiques', to: '/stats-annuelles' },
-  { icon: FileText,  label: 'Résultats',    to: '/resultats' },
+  { icon: Home,     label: 'Accueil', to: '/' },
+  { icon: Users,    label: 'Élèves',  to: '/liste-eleves' },
+  { icon: BarChart2, label: 'Stats',  to: '/stats-annuelles' },
 ];
 
 export default function BottomBar() {
