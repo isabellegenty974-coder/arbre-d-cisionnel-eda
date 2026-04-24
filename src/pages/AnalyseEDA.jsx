@@ -61,24 +61,32 @@ function computeHypotheses(sel) {
   return h;
 }
 
-function computeRecommandations(sel) {
+function computeRecommandations(hypotheses) {
   const r = [];
-  const scoreApp = score(sel, "apprentissage");
+  const inc = (kw) => hypotheses.some(h => h.includes(kw));
 
-  if (scoreApp >= 3)
-    r.push("Proposer un bilan orthophonique");
-  if (has(sel, "developpement", "Difficultés de motricité fine"))
-    r.push("Proposer un bilan psychomoteur");
-  if (has(sel, "comportement", "Signes d'anxiété"))
-    r.push("Proposer un accompagnement psychologique");
-  if (has(sel, "comportement", "Difficultés d'attention"))
-    r.push("Mettre en place des aménagements attentionnels");
-  if (has(sel, "contexte", "Difficultés socio-économiques"))
-    r.push("Renforcer le lien famille-école");
-  if (has(sel, "contexte", "Absences fréquentes"))
-    r.push("Établir un plan de suivi des absences");
+  // Apprentissage
+  if (inc("dyslexie"))     r.push("Proposer un bilan orthophonique");
+  if (inc("dysgraphie"))   r.push("Proposer un bilan en psychomotricité");
+  if (inc("dyscalculie"))  r.push("Mettre en place des aides en mathématiques");
 
-  return r;
+  // Comportement
+  if (inc("TDA/H"))                   r.push("Mettre en place des aménagements attentionnels");
+  if (inc("Anxiété"))                  r.push("Proposer un accompagnement psychologique");
+  if (inc("Troubles du comportement")) r.push("Mettre en place un cadre renforcé et cohérent");
+
+  // Développement
+  if (inc("TDC"))                   r.push("Proposer un bilan psychomoteur");
+  if (inc("Trouble du langage oral")) r.push("Proposer un bilan orthophonique");
+  if (inc("sensorielle"))           r.push("Adapter l'environnement sensoriel");
+
+  // Contexte
+  if (inc("absences"))        r.push("Mettre en place un suivi des absences");
+  if (inc("socio-économiques")) r.push("Renforcer le lien famille-école");
+  if (inc("émotionnel"))      r.push("Proposer un espace d'expression émotionnelle");
+
+  // Dédoublonner
+  return [...new Set(r)];
 }
 
 function HypCard({ text, index }) {
@@ -114,7 +122,7 @@ export default function AnalyseEDA() {
   const { selections } = useDiagnostic();
 
   const hypotheses      = computeHypotheses(selections);
-  const recommandations = computeRecommandations(selections);
+  const recommandations = computeRecommandations(hypotheses);
   const hasData = hypotheses.length > 0 || recommandations.length > 0;
 
   return (
