@@ -17,7 +17,7 @@ const MENU_ITEMS = [
 const RADIUS = 120;
 const ANGLE_STEP = (2 * Math.PI) / MENU_ITEMS.length;
 
-function MenuItem({ item, index, scrollY }) {
+function MenuItem({ item, index, scrollY, rotation }) {
   const getPosition = (idx) => {
     const angle = idx * ANGLE_STEP - Math.PI / 2;
     const x = Math.cos(angle) * RADIUS;
@@ -32,7 +32,7 @@ function MenuItem({ item, index, scrollY }) {
     <motion.div
       key={index}
       initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
+      animate={{ scale: 1, opacity: 1, rotate: -rotation }}
       transition={{
         duration: 0.4,
         delay: index * 0.04,
@@ -119,7 +119,7 @@ export default function CircularMenuEDA() {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         {MENU_ITEMS.map((item, index) => (
-          <MenuItem key={index} item={item} index={index} scrollY={scrollY} />
+          <MenuItem key={index} item={item} index={index} scrollY={scrollY} rotation={rotation} />
         ))}
       </motion.div>
 
