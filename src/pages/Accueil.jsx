@@ -21,12 +21,13 @@ export default function Accueil() {
       <HamburgerMenu />
 
       <div className="relative z-10 flex flex-col items-center">
-        {/* Logo / Title — fadeIn 0.9s */}
+        {/* Logo / Title — fadeIn intro animation */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="text-center mb-12"
+          id="logoEDA"
         >
           <h1 className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight mb-2">
             Arbre décisionnel
@@ -34,11 +35,12 @@ export default function Accueil() {
           <p className="text-xl text-gray-200">Psychologue EN-EDA</p>
         </motion.div>
 
-        {/* Circular Menu EDA — fadeIn 0.9s, slight delay */}
+        {/* Circular Menu EDA — fadeIn intro animation */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}
+          id="accueil"
         >
           <CircularMenu />
         </motion.div>
