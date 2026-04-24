@@ -28,6 +28,7 @@ import ListeEleves from './pages/ListeEleves';
 import DetailEleve from './pages/DetailEleve';
 import HistoriqueEleve from './pages/HistoriqueEleve';
 import ExportAnnuel from './pages/ExportAnnuel';
+import EditEleve from './pages/EditEleve';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -203,6 +204,7 @@ const AuthenticatedApp = () => {
         <Route path="/detail-eleve" element={<DetailEleve />} />
         <Route path="/historique-eleve" element={<HistoriqueEleve />} />
         <Route path="/export-annuel" element={<ExportAnnuel />} />
+        <Route path="/edit-eleve" element={<EditEleve />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
