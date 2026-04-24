@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard';
 import Historique from './pages/Historique';
 import FicheEleve from './pages/FicheEleve';
 import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite';
+import StatsAnnuelles from './pages/StatsAnnuelles';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -177,6 +178,7 @@ const AuthenticatedApp = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/historique" element={<Historique />} />
         <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+        <Route path="/stats-annuelles" element={<StatsAnnuelles />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
