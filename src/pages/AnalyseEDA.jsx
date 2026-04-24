@@ -21,40 +21,40 @@ function computeHypotheses(sel) {
   const scoreApp = score(sel, "apprentissage");
 
   // Apprentissages
-  if (scoreApp >= 3)
-    h.push("Suspicion de trouble des apprentissages (lecture/écriture/mathématiques)");
   if (has(sel, "apprentissage", "Confusions phonologiques"))
-    h.push("Hypothèse : Trouble spécifique du langage écrit (dyslexie)");
+    h.push("Trouble spécifique du langage écrit (dyslexie)");
   if (has(sel, "apprentissage", "Écriture désorganisée / illisible"))
-    h.push("Hypothèse : Trouble de l'écriture (dysgraphie)");
+    h.push("Trouble de l'écriture (dysgraphie)");
   if (has(sel, "apprentissage", "Difficultés en numération") || has(sel, "apprentissage", "Difficultés dans la résolution de problèmes"))
-    h.push("Hypothèse : Trouble du calcul (dyscalculie)");
+    h.push("Trouble du calcul (dyscalculie)");
+  if (scoreApp >= 3)
+    h.push("Suspicion de trouble des apprentissages");
 
   // Comportement
   const inattention = has(sel, "comportement", "Difficultés d'attention");
   const agitation   = has(sel, "comportement", "Agitation / hyperactivité");
   if (inattention && agitation)
-    h.push("Hypothèse : TDA/H (profil mixte)");
+    h.push("TDA/H - profil mixte");
   else if (inattention)
-    h.push("Hypothèse : TDA/H (profil inattentif)");
+    h.push("TDA/H - profil inattentif");
   if (has(sel, "comportement", "Signes d'anxiété"))
-    h.push("Hypothèse : Anxiété impactant les apprentissages");
+    h.push("Anxiété impactant les apprentissages");
   if (has(sel, "comportement", "Comportements oppositionnels"))
-    h.push("Hypothèse : Troubles du comportement (à préciser)");
+    h.push("Troubles du comportement");
 
   // Développement
   if (has(sel, "developpement", "Difficultés de motricité fine") || has(sel, "developpement", "Manque de coordination"))
-    h.push("Hypothèse : Trouble développemental de la coordination (dyspraxie/TDC)");
+    h.push("Trouble développemental de la coordination (TDC)");
   if (has(sel, "developpement", "Retard de langage"))
-    h.push("Hypothèse : Trouble du langage oral");
+    h.push("Trouble du langage oral");
   if (has(sel, "developpement", "Hypersensibilité / hyposensibilité sensorielle"))
-    h.push("Hypothèse : Particularités sensorielles (à explorer)");
+    h.push("Particularités sensorielles");
 
   // Contexte
   if (has(sel, "contexte", "Absences fréquentes"))
-    h.push("Impact possible des absences sur les apprentissages");
+    h.push("Impact des absences sur les apprentissages");
   if (has(sel, "contexte", "Difficultés socio-économiques"))
-    h.push("Facteurs socio-économiques influençant la scolarité");
+    h.push("Facteurs socio-économiques influents");
   if (has(sel, "contexte", "Événements stressants récents"))
     h.push("Impact émotionnel d'événements récents");
 
