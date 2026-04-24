@@ -18,6 +18,8 @@ import FicheEleve from './pages/FicheEleve';
 import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite';
 import StatsAnnuelles from './pages/StatsAnnuelles';
 import Resultats from './pages/Resultats';
+import EvaluationDomains from './pages/EvaluationDomains';
+import ItemsApprentissages from './pages/ItemsApprentissages';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -183,6 +185,8 @@ const AuthenticatedApp = () => {
         <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
         <Route path="/stats-annuelles" element={<StatsAnnuelles />} />
         <Route path="/resultats" element={<Resultats />} />
+        <Route path="/evaluation-domains" element={<EvaluationDomains />} />
+        <Route path="/items-apprentissages" element={<ItemsApprentissages />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
