@@ -5,6 +5,7 @@ import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { useDiagnostic } from "@/lib/DiagnosticContext";
 import { motion } from "framer-motion";
+import { base44 } from "@/api/base44Client";
 
 // Vérifie si un label est présent dans une catégorie
 function has(selections, category, label) {
@@ -119,7 +120,7 @@ function RecCard({ text, index }) {
 
 export default function AnalyseEDA() {
   const navigate = useNavigate();
-  const { selections, saveAnalyse } = useDiagnostic();
+  const { selections, saveAnalyse, eleve } = useDiagnostic();
 
   const hypotheses      = computeHypotheses(selections);
   const recommandations = computeRecommandations(hypotheses);
@@ -127,6 +128,21 @@ export default function AnalyseEDA() {
 
   const handleSave = async () => {
     await saveAnalyse(hypotheses, recommandations);
+
+    // Sauvegarde dans HistoriqueEDA
+    await base44.entities.HistoriqueEDA.create({
+      eleve_id: eleve?.id || `${eleve?.prenom}-${eleve?.nom}`,
+      date: new Date().toISOString().split("T")[0],
+      hypotheses,
+      recommandations,
+      scores: {
+        apprentissages: score(selections, "apprentissage"),
+        comportement:   score(selections, "comportement"),
+        developpement:  score(selections, "developpement"),
+        contexte:       score(selections, "contexte"),
+      },
+    });
+
     navigate("/stats-annuelles");
   };
 
