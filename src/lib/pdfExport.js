@@ -177,3 +177,39 @@ export function exportFullPDF(eleve, selections, crossRecommendations, diagnosti
 export const exportResumePDF = (eleve, selections, crossRecommendations) => {
   exportFullPDF(eleve, selections, crossRecommendations, []);
 };
+
+/** Export rapport annuel EDA depuis HistoriqueEDA */
+export function exportAnnuelPDF({ data, nbEleves, hypCounts, monthly }) {
+  const ctx = makeDoc();
+  const { doc, section, line, bullet, divider } = ctx;
+
+  addHeader(ctx, 'ARBRE EDA — RAPPORT ANNUEL');
+
+  // 1. Vue d'ensemble
+  section('Vue d\'ensemble');
+  line(`Nombre d'élèves évalués : ${nbEleves}`, 5);
+  line(`Total d'évaluations : ${data.length}`, 5);
+  divider();
+
+  // 2. Stats hypothèses
+  section('Répartition des hypothèses');
+  const sortedHyp = Object.entries(hypCounts).sort((a, b) => b[1] - a[1]);
+  if (sortedHyp.length === 0) {
+    line('Aucune hypothèse enregistrée.', 5);
+  } else {
+    sortedHyp.forEach(([h, count]) => bullet(`${h} : ${count} fois`, 5));
+  }
+  divider();
+
+  // 3. Stats mensuelles
+  section('Évaluations mensuelles');
+  const sortedMonths = Object.entries(monthly).sort((a, b) => a[0].localeCompare(b[0]));
+  if (sortedMonths.length === 0) {
+    line('Aucune donnée mensuelle.', 5);
+  } else {
+    sortedMonths.forEach(([m, count]) => bullet(`${m} : ${count} évaluation${count > 1 ? 's' : ''}`, 5));
+  }
+  divider();
+
+  doc.save(`rapport_annuel_EDA_${new Date().toISOString().split('T')[0]}.pdf`);
+}
