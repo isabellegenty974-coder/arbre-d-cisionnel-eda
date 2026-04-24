@@ -18,8 +18,6 @@ const RADIUS = 120;
 const ANGLE_STEP = (2 * Math.PI) / MENU_ITEMS.length;
 
 function MenuItem({ item, index, scrollY }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
   const getPosition = (idx) => {
     const angle = idx * ANGLE_STEP - Math.PI / 2;
     const x = Math.cos(angle) * RADIUS;
@@ -50,8 +48,6 @@ function MenuItem({ item, index, scrollY }) {
         marginTop: -40,
       }}
       className="pointer-events-auto"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={item.target}>
         <motion.button
@@ -65,22 +61,6 @@ function MenuItem({ item, index, scrollY }) {
           </span>
         </motion.button>
       </Link>
-
-      {/* Tooltip */}
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
-            animate={{ opacity: 1, y: -50, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 px-3 py-2 rounded-lg bg-white/95 backdrop-blur text-slate-800 text-xs font-medium whitespace-nowrap shadow-lg z-50 pointer-events-none"
-          >
-            {item.description}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-white/95 transform rotate-45"></div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }
