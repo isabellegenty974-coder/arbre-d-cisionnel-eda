@@ -24,7 +24,7 @@ const MENU_ITEMS = [
   { label: 'Élèves', icon: Users, target: '/liste-eleves' },
 ];
 
-const RADIUS = 180;
+const RADIUS = 120;
 const ANGLE_STEP = (2 * Math.PI) / MENU_ITEMS.length;
 
 export default function CircularMenuEDA() {
@@ -72,19 +72,21 @@ export default function CircularMenuEDA() {
                   position: 'absolute',
                   left: '50%',
                   top: '50%',
-                  x: x - 20,
-                  y: y - 20,
+                  x: x - 28,
+                  y: y - 28,
                 }}
                 className="pointer-events-auto"
               >
                 <Link to={item.target} onClick={() => setIsOpen(false)}>
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-10 h-10 rounded-full bg-accent text-accent-foreground shadow-soft hover:shadow-soft-md transition-shadow flex items-center justify-center"
-                    title={item.label}
+                    className="flex flex-col items-center gap-1 w-14 p-2 rounded-full bg-accent text-accent-foreground shadow-soft hover:shadow-soft-md transition-shadow"
                   >
                     <Icon className="w-4 h-4" />
+                    <span className="text-[10px] font-medium text-center leading-tight whitespace-nowrap">
+                      {item.label.split(' ')[0]}
+                    </span>
                   </motion.button>
                 </Link>
               </motion.div>
