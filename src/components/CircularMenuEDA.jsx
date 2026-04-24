@@ -67,6 +67,9 @@ function MenuItem({ item, index, scrollY }) {
 
 export default function CircularMenuEDA() {
   const [scrollY, setScrollY] = useState(0);
+  const [rotation, setRotation] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,10 +80,44 @@ export default function CircularMenuEDA() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartY(e.clientY);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const delta = e.clientY - startY;
+    setRotation(prev => prev + delta * 0.5);
+    setStartY(e.clientY);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, startY]);
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800">
+    <div 
+      className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800 cursor-grab active:cursor-grabbing"
+      onMouseDown={handleMouseDown}
+    >
       {/* Menu Items */}
-      <motion.div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+      <motion.div 
+        className="absolute inset-0 pointer-events-none flex items-center justify-center"
+        animate={{ rotate: rotation }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      >
         {MENU_ITEMS.map((item, index) => (
           <MenuItem key={index} item={item} index={index} scrollY={scrollY} />
         ))}
