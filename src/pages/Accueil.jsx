@@ -21,11 +21,11 @@ export default function Accueil() {
       <HamburgerMenu />
 
       <div className="relative z-10 flex flex-col items-center">
-        {/* Title */}
+        {/* Logo / Title — fadeIn 0.9s */}
         <motion.div
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
           className="text-center mb-12"
         >
           <h1 className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight mb-2">
@@ -34,8 +34,14 @@ export default function Accueil() {
           <p className="text-xl text-gray-200">Psychologue EN-EDA</p>
         </motion.div>
 
-        {/* Circular Menu */}
-        <CircularMenu />
+        {/* Circular Menu — fadeIn 0.9s, slight delay */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}
+        >
+          <CircularMenu />
+        </motion.div>
       </div>
     </div>
   );
