@@ -96,6 +96,11 @@ export default function CircularMenuEDA() {
     setIsDragging(false);
   };
 
+  const handleCrankMouseDown = (e) => {
+    setIsDragging(true);
+    setStartY(e.clientY);
+  };
+
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
@@ -123,19 +128,27 @@ export default function CircularMenuEDA() {
         ))}
       </motion.div>
 
-      {/* Center Button with Luminescent Border */}
+      {/* Center Button with Crank Handle */}
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative z-20 w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-md text-slate-600 hover:from-white/50 hover:to-white/30 transition-all flex flex-col items-center justify-center gap-1 border-2 border-white/60 shadow-lg pointer-events-auto"
+        onMouseDown={handleCrankMouseDown}
+        className="relative z-20 w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-md text-slate-600 hover:from-white/50 hover:to-white/30 transition-all flex flex-col items-center justify-center gap-1 border-2 border-white/60 shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing"
         style={{
           boxShadow: '0 0 20px rgba(147, 197, 253, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
         }}
-        disabled
       >
-        <Menu className="w-5 h-5" />
-        <span className="text-[8px] font-medium">Menu</span>
+        {/* Crank Handle */}
+        <motion.div
+          animate={{ rotate: rotation }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="absolute w-8 h-1.5 bg-white/70 rounded-full"
+          style={{
+            transformOrigin: '-12px center',
+          }}
+        />
+        <span className="text-[8px] font-medium">Manivelle</span>
       </motion.button>
     </div>
   );
