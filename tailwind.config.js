@@ -10,8 +10,9 @@ module.exports = {
   		},
   		borderRadius: {
   			lg: '12px',
-  			md: '10px',
-  			sm: '8px'
+  			md: '12px',
+  			sm: '12px',
+  			DEFAULT: '12px'
   		},
   		boxShadow: {
   			soft: '0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)',
