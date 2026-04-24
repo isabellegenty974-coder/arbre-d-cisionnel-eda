@@ -2,42 +2,42 @@ import { useDiagnostic } from "@/lib/DiagnosticContext";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { analyseEDA } from "@/lib/analyseEDA";
+import { exportFullPDF } from "@/lib/pdfExport";
 import { motion } from "framer-motion";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Resultats() {
-  const { selections } = useDiagnostic();
+  const { selections, eleve, crossRecommendations } = useDiagnostic();
 
   // Convertit les sélections en reponsesQCM pour analyseEDA
   const reponsesQCM = {};
   Object.values(selections).forEach((items) => {
     items.forEach((item) => {
       if (item.questionId) {
-        // On déduit la réponse depuis le questionId (ex: "q1b" → qId="q1", rep="b")
         const match = item.questionId.match(/^(q\d+)([a-d])$/);
-        if (match) {
-          reponsesQCM[match[1]] = match[2];
-        }
+        if (match) reponsesQCM[match[1]] = match[2];
       }
     });
   });
 
   const { hypotheses, scores } = analyseEDA(reponsesQCM);
 
-  // Liste des hypothèses manuelles depuis les sélections
+  // Hypothèses issues des sélections manuelles
   const hypothesesManuelles = [];
   Object.values(selections).forEach((items) => {
     items.forEach((item) => {
       if (item.analysisType) {
-        hypothesesManuelles.push({
-          label: item.label,
-          analysisType: item.analysisType,
-        });
+        hypothesesManuelles.push({ label: item.label, analysisType: item.analysisType });
       }
     });
   });
 
   const hasData = hypotheses.length > 0 || hypothesesManuelles.length > 0;
+
+  const handleExport = () => {
+    exportFullPDF(eleve, selections, crossRecommendations, []);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,7 +55,7 @@ export default function Resultats() {
             </div>
           )}
 
-          {/* Hypothèses générées automatiquement par analyseEDA */}
+          {/* Hypothèses auto analyseEDA */}
           {hypotheses.length > 0 && (
             <section>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
@@ -78,7 +78,7 @@ export default function Resultats() {
             </section>
           )}
 
-          {/* Hypothèses issues des sélections manuelles */}
+          {/* Hypothèses manuelles */}
           {hypothesesManuelles.length > 0 && (
             <section>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
@@ -106,7 +106,7 @@ export default function Resultats() {
             </section>
           )}
 
-          {/* Scores par catégorie */}
+          {/* Scores par domaine */}
           {Object.keys(scores).length > 0 && (
             <section>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
@@ -127,6 +127,14 @@ export default function Resultats() {
                 ))}
               </div>
             </section>
+          )}
+
+          {/* Export PDF */}
+          {hasData && (
+            <Button onClick={handleExport} className="w-full gap-2">
+              <Download className="w-4 h-4" />
+              Exporter le rapport PDF complet
+            </Button>
           )}
 
         </div>

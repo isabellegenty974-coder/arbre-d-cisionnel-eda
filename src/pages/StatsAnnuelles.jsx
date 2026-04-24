@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
+import { exportFullPDF } from "@/lib/pdfExport";
+import { useDiagnostic } from "@/lib/DiagnosticContext";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -27,12 +31,17 @@ function StatCard({ title, children, delay = 0 }) {
 export default function StatsAnnuelles() {
   const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { eleve, selections, crossRecommendations } = useDiagnostic();
 
   useEffect(() => {
     base44.entities.Diagnostic.list("-created_date", 500)
       .then(setDiagnostics)
       .finally(() => setLoading(false));
   }, []);
+
+  const handleExport = () => {
+    exportFullPDF(eleve, selections, crossRecommendations, diagnostics);
+  };
 
   // --- stats_hypotheses : nombre de sélections par catégorie ---
   const statsHypotheses = (() => {
@@ -98,6 +107,10 @@ export default function StatsAnnuelles() {
       <HamburgerMenu />
       <ScreenLayout title="📊 Statistiques annuelles">
         <div className="space-y-6">
+          <Button onClick={handleExport} variant="outline" className="w-full gap-2">
+            <Download className="w-4 h-4" />
+            Exporter le rapport PDF complet
+          </Button>
 
           {/* Bar chart — hypothèses par catégorie */}
           <StatCard title="Hypothèses par catégorie" delay={0}>

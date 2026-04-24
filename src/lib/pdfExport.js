@@ -1,107 +1,179 @@
 import jsPDF from 'jspdf';
+import { analyseEDA } from './analyseEDA';
 
-export const exportResumePDF = (eleve, selections, crossRecommendations) => {
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function makeDoc() {
   const doc = new jsPDF();
-  let yPosition = 20;
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+  let y = 20;
   const margin = 15;
-  const maxWidth = pageWidth - 2 * margin;
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const maxW = pageW - 2 * margin;
 
-  const addPage = () => {
-    doc.addPage();
-    yPosition = 20;
+  const checkBreak = (h = 20) => {
+    if (y + h > pageH - 15) { doc.addPage(); y = 20; }
   };
 
-  const checkPageBreak = (heightNeeded = 20) => {
-    if (yPosition + heightNeeded > pageHeight - 15) {
-      addPage();
-    }
-  };
-
-  // Header
-  doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
-  doc.text('RÉSUMÉ DIAGNOSTIQUE', margin, yPosition);
-  yPosition += 12;
-
-  // Date
-  doc.setFontSize(10);
-  doc.setFont(undefined, 'normal');
-  doc.text(`Généré le: ${new Date().toLocaleDateString('fr-FR')}`, margin, yPosition);
-  yPosition += 10;
-
-  // Info élève
-  checkPageBreak(30);
-  doc.setFontSize(12);
-  doc.setFont(undefined, 'bold');
-  doc.text('Informations élève', margin, yPosition);
-  yPosition += 8;
-
-  doc.setFontSize(10);
-  doc.setFont(undefined, 'normal');
-  if (eleve) {
-    doc.text(`Nom: ${eleve.nom}`, margin, yPosition);
-    yPosition += 6;
-    doc.text(`Prénom: ${eleve.prenom}`, margin, yPosition);
-    yPosition += 6;
-    if (eleve.age) {
-      doc.text(`Âge: ${eleve.age} ans`, margin, yPosition);
-      yPosition += 6;
-    }
-    if (eleve.classe) {
-      doc.text(`Classe: ${eleve.classe}`, margin, yPosition);
-      yPosition += 6;
-    }
-  }
-  yPosition += 4;
-
-  // Sélections
-  checkPageBreak(30);
-  doc.setFontSize(12);
-  doc.setFont(undefined, 'bold');
-  doc.text('Sélections diagnostiques', margin, yPosition);
-  yPosition += 8;
-
-  doc.setFontSize(9);
-  Object.entries(selections).forEach(([category, items]) => {
-    checkPageBreak(15);
-    doc.setFont(undefined, 'bold');
-    doc.text(`${category}:`, margin, yPosition);
-    yPosition += 6;
-
-    doc.setFont(undefined, 'normal');
-    items.forEach((item) => {
-      checkPageBreak(10);
-      const text = `• ${item.label}`;
-      const wrappedText = doc.splitTextToSize(text, maxWidth - 5);
-      doc.text(wrappedText, margin + 5, yPosition);
-      yPosition += wrappedText.length * 5 + 2;
-    });
-    yPosition += 2;
-  });
-
-  // Recommandations croisées
-  if (Object.keys(crossRecommendations).length > 0) {
-    checkPageBreak(30);
+  const section = (title) => {
+    checkBreak(18);
+    // Accent bar
+    doc.setFillColor(74, 144, 226);
+    doc.rect(margin, y - 1, 3, 8, 'F');
     doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
-    doc.text('Recommandations croisées', margin, yPosition);
-    yPosition += 8;
+    doc.setTextColor(26, 26, 26);
+    doc.text(title, margin + 6, y + 6);
+    y += 14;
+  };
 
+  const line = (text, indent = 0, size = 9, bold = false) => {
+    checkBreak(8);
+    doc.setFontSize(size);
+    doc.setFont(undefined, bold ? 'bold' : 'normal');
+    doc.setTextColor(60, 60, 60);
+    const wrapped = doc.splitTextToSize(text, maxW - indent);
+    doc.text(wrapped, margin + indent, y);
+    y += wrapped.length * (size * 0.45) + 2;
+  };
+
+  const bullet = (text, indent = 5) => {
+    checkBreak(8);
     doc.setFontSize(9);
-    Object.entries(crossRecommendations).forEach(([qId, reason]) => {
-      checkPageBreak(15);
-      doc.setFont(undefined, 'bold');
-      doc.text(`${qId.toUpperCase()}`, margin, yPosition);
-      yPosition += 5;
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(60, 60, 60);
+    const wrapped = doc.splitTextToSize(`• ${text}`, maxW - indent - 4);
+    doc.text(wrapped, margin + indent, y);
+    y += wrapped.length * 4.5 + 2;
+  };
 
-      doc.setFont(undefined, 'normal');
-      const wrappedReason = doc.splitTextToSize(reason, maxWidth - 5);
-      doc.text(wrappedReason, margin + 5, yPosition);
-      yPosition += wrappedReason.length * 4 + 3;
-    });
+  const divider = () => {
+    checkBreak(6);
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, pageW - margin, y);
+    y += 6;
+  };
+
+  const getY = () => y;
+  const setY = (val) => { y = val; };
+
+  return { doc, section, line, bullet, divider, checkBreak, getY, setY, margin, maxW };
+}
+
+// ─── Header ────────────────────────────────────────────────────────────────
+
+function addHeader(ctx, title) {
+  const { doc, margin } = ctx;
+  // Top banner
+  doc.setFillColor(26, 26, 26);
+  doc.rect(0, 0, doc.internal.pageSize.getWidth(), 28, 'F');
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text(title, margin, 18);
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(180, 180, 180);
+  doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')}`, margin, 24);
+  ctx.setY(38);
+}
+
+// ─── Exports ───────────────────────────────────────────────────────────────
+
+/** Export complet : hypothèses + recommandations + stats annuelles */
+export function exportFullPDF(eleve, selections, crossRecommendations, diagnosticsAll = []) {
+  const ctx = makeDoc();
+  const { doc, section, line, bullet, divider } = ctx;
+
+  addHeader(ctx, 'ARBRE EDA — RAPPORT COMPLET');
+
+  // 1. Infos élève
+  if (eleve?.nom || eleve?.prenom) {
+    section('Informations élève');
+    if (eleve.prenom || eleve.nom) line(`${eleve.prenom || ''} ${eleve.nom || ''}`.trim(), 0, 10, true);
+    if (eleve.age)    line(`Âge : ${eleve.age} ans`);
+    if (eleve.classe) line(`Classe : ${eleve.classe}`);
+    divider();
   }
 
-  doc.save(`diagnostic_${eleve?.nom || 'eleve'}_${new Date().toISOString().split('T')[0]}.pdf`);
+  // 2. Hypothèses (analyseEDA automatique)
+  const reponsesQCM = {};
+  Object.values(selections).forEach((items) => {
+    items.forEach((item) => {
+      if (item.questionId) {
+        const m = item.questionId.match(/^(q\d+)([a-d])$/);
+        if (m) reponsesQCM[m[1]] = m[2];
+      }
+    });
+  });
+  const { hypotheses, scores } = analyseEDA(reponsesQCM);
+
+  section('Hypothèses diagnostiques');
+  if (hypotheses.length === 0) {
+    line('Aucune hypothèse automatique générée.', 5);
+  } else {
+    hypotheses.forEach((h) => bullet(h));
+  }
+  divider();
+
+  // 3. Sélections manuelles
+  const hasSelections = Object.values(selections).some(a => a.length > 0);
+  if (hasSelections) {
+    section('Sélections diagnostiques');
+    Object.entries(selections).forEach(([cat, items]) => {
+      if (!items.length) return;
+      line(cat.charAt(0).toUpperCase() + cat.slice(1), 0, 9, true);
+      items.forEach((item) => bullet(item.label, 8));
+    });
+    divider();
+  }
+
+  // 4. Recommandations croisées
+  if (Object.keys(crossRecommendations).length > 0) {
+    section('Recommandations croisées');
+    Object.entries(crossRecommendations).forEach(([qId, reason]) => {
+      line(qId.toUpperCase(), 0, 9, true);
+      bullet(reason, 8);
+    });
+    divider();
+  }
+
+  // 5. Scores par domaine
+  if (Object.keys(scores).length > 0) {
+    section('Scores par domaine');
+    Object.entries(scores).forEach(([cat, score]) => {
+      line(`${cat.charAt(0).toUpperCase() + cat.slice(1)} : ${score} point${score > 1 ? 's' : ''}`, 5);
+    });
+    divider();
+  }
+
+  // 6. Stats annuelles (si fourni)
+  if (diagnosticsAll.length > 0) {
+    section('Statistiques annuelles');
+    line(`Total diagnostics : ${diagnosticsAll.length}`, 5);
+
+    // Comptage par catégorie
+    const catCounts = {};
+    diagnosticsAll.forEach((d) => {
+      Object.entries(d.selections || {}).forEach(([cat, items]) => {
+        if (Array.isArray(items) && items.length) {
+          catCounts[cat] = (catCounts[cat] || 0) + items.length;
+        }
+      });
+    });
+    if (Object.keys(catCounts).length > 0) {
+      line('Hypothèses par catégorie :', 5, 9, true);
+      Object.entries(catCounts)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([cat, count]) => bullet(`${cat} : ${count}`, 8));
+    }
+    divider();
+  }
+
+  doc.save(`rapport_EDA_${eleve?.nom || 'eleve'}_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+/** Export résumé simple (rétrocompatible) */
+export const exportResumePDF = (eleve, selections, crossRecommendations) => {
+  exportFullPDF(eleve, selections, crossRecommendations, []);
 };
