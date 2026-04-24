@@ -91,18 +91,6 @@ export default function Accueil() {
         >
           <CircularMenuPro />
         </motion.div>
-
-        {/* Secondary button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Button variant="outline" className="w-full gap-2 h-11">
-            <Menu className="w-5 h-5" />
-            Menu avancé
-          </Button>
-        </motion.div>
       </div>
     </div>
   );
