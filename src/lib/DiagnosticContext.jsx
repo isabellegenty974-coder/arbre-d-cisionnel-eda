@@ -75,6 +75,29 @@ export function DiagnosticProvider({ children }) {
     });
   };
 
+  const saveAnalyse = async (hypotheses, recommandations) => {
+    if (!eleve?.prenom || !eleve?.nom) return;
+    try {
+      const payload = { hypotheses, recommandations, statut: 'complète' };
+      if (currentDiagnosticId) {
+        await base44.entities.Diagnostic.update(currentDiagnosticId, { selections: { ...selections, _analyse: payload } });
+      } else {
+        const result = await base44.entities.Diagnostic.create({
+          selections: { ...selections, _analyse: payload },
+          eleve_prenom: eleve.prenom,
+          eleve_nom: eleve.nom,
+          eleve_age: eleve.age,
+          eleve_classe: eleve.classe,
+          statut: 'complète'
+        });
+        setCurrentDiagnosticId(result.id);
+        localStorage.setItem('current_diagnostic_id', result.id);
+      }
+    } catch (error) {
+      console.error('Erreur sauvegarde analyse:', error);
+    }
+  };
+
   const clearAll = () => {
     setSelections({});
     localStorage.removeItem('diagnostic_selections');
@@ -85,7 +108,7 @@ export function DiagnosticProvider({ children }) {
   };
 
   return (
-    <DiagnosticContext.Provider value={{ selections, addSelection, clearAll, eleve, setCurrentEleve, crossRecommendations, currentDiagnosticId }}>
+    <DiagnosticContext.Provider value={{ selections, addSelection, clearAll, eleve, setCurrentEleve, crossRecommendations, currentDiagnosticId, saveAnalyse }}>
       {children}
     </DiagnosticContext.Provider>
   );

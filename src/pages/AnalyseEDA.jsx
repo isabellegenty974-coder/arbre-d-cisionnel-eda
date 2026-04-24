@@ -119,11 +119,16 @@ function RecCard({ text, index }) {
 
 export default function AnalyseEDA() {
   const navigate = useNavigate();
-  const { selections } = useDiagnostic();
+  const { selections, saveAnalyse } = useDiagnostic();
 
   const hypotheses      = computeHypotheses(selections);
   const recommandations = computeRecommandations(hypotheses);
   const hasData = hypotheses.length > 0 || recommandations.length > 0;
+
+  const handleSave = async () => {
+    await saveAnalyse(hypotheses, recommandations);
+    navigate("/stats-annuelles");
+  };
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -170,7 +175,7 @@ export default function AnalyseEDA() {
           {/* Boutons */}
           <div className="space-y-3 pt-2">
             <Button
-              onClick={() => navigate("/stats-annuelles")}
+              onClick={handleSave}
               className="w-full gap-2 bg-primary hover:bg-primary/90"
             >
               <BarChart2 className="w-4 h-4" />
