@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Home as HomeIcon, FileText, Settings, User } from 'lucide-react';
+import { Menu, X, Home as HomeIcon, FileText, User, BarChart2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EleveModal from './EleveModal';
 import FlipCard from '@/components/FlipCard';
@@ -82,6 +82,14 @@ export default function HamburgerMenu() {
                 >
                   <FileText className="w-4 h-4" />
                   Dashboard
+                </Link>
+                <Link
+                  to="/stats-annuelles"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
+                >
+                  <BarChart2 className="w-4 h-4" />
+                  Statistiques
                 </Link>
               </div>
 
