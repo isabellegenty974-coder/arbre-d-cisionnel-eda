@@ -5,7 +5,8 @@ import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportFullPDF } from "@/lib/pdfExport";
 import { useDiagnostic } from "@/lib/DiagnosticContext";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, ArrowLeft, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -32,6 +33,7 @@ export default function StatsAnnuelles() {
   const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
   const { eleve, selections, crossRecommendations } = useDiagnostic();
+  const navigate = useNavigate();
 
   useEffect(() => {
     base44.entities.Diagnostic.list("-created_date", 500)
@@ -43,42 +45,26 @@ export default function StatsAnnuelles() {
     exportFullPDF(eleve, selections, crossRecommendations, diagnostics);
   };
 
-  // --- stats_hypotheses : nombre de sélections par catégorie ---
+  const nbEleves = new Set(diagnostics.map(d => `${d.eleve_prenom} ${d.eleve_nom}`)).size;
+
+  // --- stats_hypotheses : fréquence des hypothèses sauvegardées ---
   const statsHypotheses = (() => {
     const counts = {};
     diagnostics.forEach((d) => {
-      const selections = d.selections || {};
-      Object.entries(selections).forEach(([cat, items]) => {
-        if (Array.isArray(items) && items.length > 0) {
-          counts[cat] = (counts[cat] || 0) + items.length;
-        }
-      });
-    });
-    return Object.entries(counts).map(([name, total]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      total,
-    }));
-  })();
-
-  // --- stats_orientations : types d'analyses les plus fréquentes ---
-  const statsOrientations = (() => {
-    const counts = {};
-    diagnostics.forEach((d) => {
-      const selections = d.selections || {};
-      Object.values(selections).forEach((items) => {
-        if (Array.isArray(items)) {
-          items.forEach((item) => {
-            const key = item.analysisType || "Non défini";
-            counts[key] = (counts[key] || 0) + 1;
-          });
-        }
-      });
+      const analyse = d.selections?._analyse;
+      if (analyse?.hypotheses && Array.isArray(analyse.hypotheses)) {
+        analyse.hypotheses.forEach((h) => {
+          counts[h] = (counts[h] || 0) + 1;
+        });
+      }
     });
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 7)
-      .map(([name, value]) => ({ name, value }));
+      .map(([name, total]) => ({ name, total }));
   })();
+
+  // --- stats_orientations : répartition des hypothèses (pour pie) ---
+  const statsOrientations = statsHypotheses.slice(0, 7).map(({ name, total }) => ({ name, value: total }));
 
   // --- stats_evolution : diagnostics créés par mois ---
   const statsEvolution = (() => {
@@ -107,13 +93,24 @@ export default function StatsAnnuelles() {
       <HamburgerMenu />
       <ScreenLayout title="📊 Statistiques annuelles">
         <div className="space-y-6">
-          <Button onClick={handleExport} variant="outline" className="w-full gap-2">
-            <Download className="w-4 h-4" />
-            Exporter le rapport PDF complet
-          </Button>
 
-          {/* Bar chart — hypothèses par catégorie */}
-          <StatCard title="Hypothèses par catégorie" delay={0}>
+          {/* Compteur élèves */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 p-5 rounded-xl bg-primary/10 border border-primary/20"
+          >
+            <div className="p-3 rounded-lg bg-primary/20">
+              <Users className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{nbEleves}</p>
+              <p className="text-sm text-muted-foreground">Élèves évalués</p>
+            </div>
+          </motion.div>
+
+          {/* Bar chart — hypothèses */}
+          <StatCard title="Répartition des hypothèses" delay={0}>
             {statsHypotheses.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">Aucune donnée disponible</p>
             ) : (
@@ -132,8 +129,8 @@ export default function StatsAnnuelles() {
             )}
           </StatCard>
 
-          {/* Pie chart — orientations / types d'analyses */}
-          <StatCard title="Répartition des types d'analyses" delay={0.1}>
+          {/* Pie chart — répartition */}
+          <StatCard title="Répartition (top 7)" delay={0.1}>
             {statsOrientations.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">Aucune donnée disponible</p>
             ) : (
@@ -188,6 +185,18 @@ export default function StatsAnnuelles() {
               </ResponsiveContainer>
             )}
           </StatCard>
+
+          {/* Boutons */}
+          <div className="space-y-3 pt-2">
+            <Button onClick={handleExport} className="w-full gap-2 bg-primary hover:bg-primary/90">
+              <Download className="w-4 h-4" />
+              Exporter le rapport annuel PDF
+            </Button>
+            <Button onClick={() => navigate("/analyse-eda")} variant="outline" className="w-full gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              Retour à l'analyse
+            </Button>
+          </div>
 
         </div>
       </ScreenLayout>
