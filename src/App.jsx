@@ -20,6 +20,7 @@ import StatsAnnuelles from './pages/StatsAnnuelles';
 import Resultats from './pages/Resultats';
 import EvaluationDomains from './pages/EvaluationDomains';
 import ItemsApprentissages from './pages/ItemsApprentissages';
+import ItemsComportement from './pages/ItemsComportement';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -187,6 +188,7 @@ const AuthenticatedApp = () => {
         <Route path="/resultats" element={<Resultats />} />
         <Route path="/evaluation-domains" element={<EvaluationDomains />} />
         <Route path="/items-apprentissages" element={<ItemsApprentissages />} />
+        <Route path="/items-comportement" element={<ItemsComportement />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
