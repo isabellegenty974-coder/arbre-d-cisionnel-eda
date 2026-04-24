@@ -1,58 +1,107 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
-import CircularMenu from "@/components/CircularMenu";
 import CircularMenuPro from "@/components/CircularMenuPro";
+import { Plus, Users, BarChart2, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function Card({ icon: Icon, title, subtitle, to, highlight = false }) {
+  return (
+    <Link to={to}>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        whileHover={{ scale: 1.02 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`p-6 rounded-xl border transition-all cursor-pointer ${
+          highlight
+            ? "bg-primary text-primary-foreground border-primary shadow-soft-md"
+            : "bg-card border-border hover:border-primary/40 hover:shadow-soft"
+        }`}
+      >
+        <div className="flex items-start gap-4">
+          <div className={`p-3 rounded-lg ${highlight ? "bg-primary-foreground/20" : "bg-primary/10"}`}>
+            <Icon className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-base">{title}</h3>
+            <p className={`text-sm mt-1 ${highlight ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+              {subtitle}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </Link>
+  );
+}
 
 export default function Accueil() {
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #001a4d 0%, #1a0a4d 30%, #5a1080 70%, #c41e7b 100%)",
-      }}
-    >
-      {/* Animated background glows */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-20 right-10 w-40 h-40 bg-cyan-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-40 left-10 w-60 h-60 bg-pink-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-1/2 right-1/4 w-80 h-80 bg-purple-600 rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: "1s" }}></div>
-      </div>
-
+    <div className="min-h-screen bg-background pb-20">
       <HamburgerMenu />
-
-      <div className="relative z-10 flex flex-col items-center">
-        {/* Logo / Title — fadeIn intro animation */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.9, ease: "easeOut" }}
-          className="text-center mb-12"
-          id="logoEDA"
-        >
-          <h1 className="font-display text-4xl sm:text-5xl font-bold text-white leading-tight mb-2">
-            Arbre décisionnel
-          </h1>
-          <p className="text-xl text-gray-200">Psychologue EN-EDA</p>
-        </motion.div>
-
-        {/* Circular Menu EDA — fadeIn intro animation */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}
-          id="accueil"
-        >
-          <CircularMenu />
-        </motion.div>
-
-        {/* Circular Menu Pro — fadeIn delay */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
-          className="mt-4"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h1 className="font-display text-4xl sm:text-5xl font-bold text-foreground mb-3">
+            Tableau de bord EDA
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Outils professionnels d'analyse et de suivi
+          </p>
+        </motion.div>
+
+        {/* Cards Grid */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, staggerChildren: 0.1 }}
+          className="grid gap-6 mb-8"
+        >
+          <Card
+            icon={Plus}
+            title="Nouvelle fiche élève"
+            subtitle="Créer une nouvelle évaluation"
+            to="/fiche-eleve"
+            highlight
+          />
+          <Card
+            icon={Users}
+            title="Élèves"
+            subtitle="Consulter, modifier, exporter"
+            to="/liste-eleves"
+          />
+          <Card
+            icon={BarChart2}
+            title="Statistiques annuelles"
+            subtitle="Synthèse et rapport annuel"
+            to="/stats-annuelles"
+          />
+        </motion.div>
+
+        {/* Menu avancé */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-8"
         >
           <CircularMenuPro />
+        </motion.div>
+
+        {/* Secondary button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Button variant="outline" className="w-full gap-2 h-11">
+            <Menu className="w-5 h-5" />
+            Menu avancé
+          </Button>
         </motion.div>
       </div>
     </div>
