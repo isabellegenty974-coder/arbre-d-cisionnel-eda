@@ -88,7 +88,7 @@ export default function CircularMenuEDA() {
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     const delta = e.clientY - startY;
-    setRotation(prev => prev + delta * 0.5);
+    setRotation(prev => prev + delta * 0.2);
     setStartY(e.clientY);
   };
 
