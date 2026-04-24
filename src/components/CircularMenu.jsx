@@ -1,179 +1,158 @@
 import { useNavigate } from "react-router-dom";
-import { motion, useAnimation } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { BookOpen, Smile, Baby, Home, Brain } from "lucide-react";
+
+const RADIUS = 180;
 
 const items = [
-  { label: "Apprentissage", emoji: "📘", to: "/apprentissage", angle: -90, stat: "18 questions" },
-  { label: "Comportement",  emoji: "🌧️", to: "/comportement",  angle: 0,   stat: "7 questions" },
-  { label: "Développement", emoji: "🧠", to: "/developpement", angle: 90,  stat: "5 questions" },
-  { label: "Contexte",      emoji: "🏠", to: "/contexte",      angle: 180, stat: "3 questions" },
+  { label: "Apprentissages", icon: BookOpen, to: "/apprentissage", color: "#22d3ee", bg: "rgba(34,211,238,0.15)" },
+  { label: "Comportement",   icon: Smile,    to: "/comportement",  color: "#facc15", bg: "rgba(250,204,21,0.15)" },
+  { label: "Développement",  icon: Baby,     to: "/developpement", color: "#f472b6", bg: "rgba(244,114,182,0.15)" },
+  { label: "Contexte",       icon: Home,     to: "/contexte",      color: "#a3e635", bg: "rgba(163,230,53,0.15)" },
 ];
-
-const RADIUS = 280;
 
 function toRad(deg) {
   return (deg * Math.PI) / 180;
 }
 
+const fadeInScale = {
+  hidden: { opacity: 0, scale: 0.4 },
+  visible: (i) => ({
+    opacity: 1,
+    scale: 1,
+    transition: { delay: i * 0.1 + 0.2, duration: 0.45, ease: [0.34, 1.56, 0.64, 1] },
+  }),
+};
+
 export default function CircularMenu() {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
-  const [clicked, setClicked] = useState(null);
-  const [rotation, setRotation] = useState(0);
-  const controls = useAnimation();
-
-  const handleMouseMove = (e) => {
-    const container = e.currentTarget;
-    const rect = container.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    const angle = Math.atan2(mouseY - centerY, mouseX - centerX);
-    const newRotation = (angle * 180) / Math.PI + 90;
-    setRotation(newRotation);
-  };
 
   const handleClick = (item) => {
-    setClicked(item.to);
-    setTimeout(() => navigate(item.to), 220);
+    setTimeout(() => navigate(item.to), 180);
   };
 
   return (
     <div
       className="relative flex items-center justify-center"
-      style={{ width: 1000, height: 1000 }}
-      onMouseMove={handleMouseMove}
+      style={{ width: RADIUS * 2 + 180, height: RADIUS * 2 + 180 }}
     >
-      {/* Background glow */}
+      {/* Subtle orbit ring */}
       <div
-        className="absolute inset-0 rounded-full pointer-events-none"
+        className="absolute rounded-full pointer-events-none"
         style={{
-          background:
-            "radial-gradient(circle at 50% 50%, rgba(74,144,226,0.10) 0%, rgba(74,144,226,0.03) 45%, transparent 70%)",
+          width: RADIUS * 2,
+          height: RADIUS * 2,
+          border: "1.5px dashed rgba(255,255,255,0.15)",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
         }}
       />
 
-      {/* Outer rotating circle */}
-      <motion.div
-        className="absolute inset-0 rounded-full pointer-events-none"
-        animate={{ rotate: rotation }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        style={{
-          border: "1.5px dashed rgba(74,144,226,0.25)",
-          margin: 60,
-        }}
-      />
+      {/* Items */}
+      {items.map((item, index) => {
+        const angleStep = 360 / items.length;
+        const angle = index * angleStep - 90; // start from top
+        const rad = toRad(angle);
+        const x = RADIUS * Math.cos(rad);
+        const y = RADIUS * Math.sin(rad);
+        const isHovered = hovered === item.to;
+        const Icon = item.icon;
 
-      {/* Fixed menu ring */}
-      <div
-        className="absolute inset-0"
-      >
-        {items.map((item, index) => {
-           const angleStep = 360 / items.length;
-           const angle = index * angleStep;
-           const rad = toRad(angle);
-           const x = RADIUS * Math.cos(rad);
-           const y = RADIUS * Math.sin(rad);
-           const isHovered = hovered === item.to;
-           const isClicked = clicked === item.to;
-
-          return (
-            <motion.button
-              key={item.to}
-              onClick={() => handleClick(item)}
-              onMouseEnter={() => setHovered(item.to)}
-              onMouseLeave={() => setHovered(null)}
-              animate={
-                isClicked
-                  ? { scale: 1.08, opacity: 0.7 }
-                  : isHovered
-                  ? { scale: 1.06 }
-                  : { scale: 1, opacity: 1 }
-              }
-              transition={{ duration: 0.2, ease: "easeOut" }}
+        return (
+          <motion.button
+            key={item.to}
+            custom={index}
+            variants={fadeInScale}
+            initial="hidden"
+            animate="visible"
+            onClick={() => handleClick(item)}
+            onMouseEnter={() => setHovered(item.to)}
+            onMouseLeave={() => setHovered(null)}
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              width: 100,
+              height: 100,
+              borderRadius: "50%",
+              transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+              background: isHovered
+                ? `radial-gradient(circle at 40% 40%, ${item.color}33, ${item.color}18)`
+                : "rgba(255,255,255,0.08)",
+              border: `2px solid ${isHovered ? item.color : "rgba(255,255,255,0.2)"}`,
+              boxShadow: isHovered
+                ? `0 0 20px ${item.color}55, 0 4px 16px rgba(0,0,0,0.3)`
+                : "0 4px 16px rgba(0,0,0,0.2)",
+              backdropFilter: "blur(8px)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              cursor: "pointer",
+              outline: "none",
+              transition: "border-color 0.25s, box-shadow 0.25s, background 0.25s",
+              zIndex: 10,
+            }}
+          >
+            <Icon
               style={{
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                width: 140,
-                height: 140,
-                borderRadius: "50%",
-                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-                background: `radial-gradient(135deg at 30% 30%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 40%, rgba(245,248,255,0.90) 100%)`,
-                border: `2px solid ${isHovered ? "#4A90E2" : "#DDD"}`,
-                boxShadow: isHovered
-                  ? "0 0 0 4px rgba(74,144,226,0.18), inset -2px -2px 6px rgba(0,0,0,0.06), 0 12px 32px rgba(74,144,226,0.25), 0 2px 8px rgba(0,0,0,0.12)"
-                  : "inset -2px -2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-                cursor: "pointer",
-                outline: "none",
-                transition: "border-color 0.25s, box-shadow 0.25s, background 0.25s",
-                pointerEvents: "auto",
-                zIndex: 10,
+                width: 28,
+                height: 28,
+                color: isHovered ? item.color : "rgba(255,255,255,0.85)",
+                transition: "color 0.25s",
+              }}
+            />
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: isHovered ? item.color : "rgba(255,255,255,0.85)",
+                letterSpacing: "0.03em",
+                textAlign: "center",
+                lineHeight: 1.2,
+                transition: "color 0.25s",
+                whiteSpace: "nowrap",
               }}
             >
-              {/* No rotation needed */}
-              <div
-                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
-              >
-                {/* Pulsing emoji */}
-                <motion.span
-                  animate={{ opacity: [1, 0.82, 1] }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ fontSize: 44, lineHeight: 1 }}
-                >
-                  {item.emoji}
-                </motion.span>
-                <span
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: isHovered ? "#2563EB" : "#333",
-                    letterSpacing: "0.02em",
-                    transition: "color 0.25s",
-                    whiteSpace: "nowrap",
-                    textAlign: "center",
-                  }}
-                >
-                  {item.label}
-                </span>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: isHovered ? "#4A90E2" : "#666",
-                    letterSpacing: "0.01em",
-                    transition: "color 0.25s",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {item.stat}
-                </span>
-              </div>
-            </motion.button>
-          );
-        })}
-      </div>
+              {item.label}
+            </span>
+          </motion.button>
+        );
+      })}
 
-      {/* Central glow dot */}
+      {/* Center brain icon */}
       <motion.div
-        animate={{ opacity: [0.5, 0.9, 0.5], scale: [1, 1.08, 1] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
         style={{
-          width: 16,
-          height: 16,
+          width: 80,
+          height: 80,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(74,144,226,0.5) 0%, transparent 80%)",
-          boxShadow: "0 0 18px 6px rgba(74,144,226,0.18)",
-          pointerEvents: "none",
+          background: "rgba(255,255,255,0.12)",
+          border: "2px solid rgba(255,255,255,0.3)",
+          backdropFilter: "blur(12px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 0 30px rgba(255,255,255,0.15), 0 4px 20px rgba(0,0,0,0.3)",
+          zIndex: 20,
+          position: "relative",
         }}
-      />
+      >
+        <motion.div
+          animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.06, 1] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Brain style={{ width: 36, height: 36, color: "rgba(255,255,255,0.9)" }} />
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
