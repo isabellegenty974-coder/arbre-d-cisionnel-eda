@@ -47,7 +47,7 @@ export default function EvaluationDomains() {
           </div>
 
           <div className="pt-2">
-            <Link to="/resultats">
+            <Link to="/analyse-eda">
               <Button variant="outline" className="w-full justify-start gap-3 h-12">
                 <ArrowRight className="w-5 h-5" />
                 Passer à l'analyse
