@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
   Book,
@@ -38,62 +38,67 @@ export default function CircularMenuEDA() {
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      {/* Center Button */}
+    <div className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-400 via-blue-500 to-slate-600 p-8">
+      {/* Center Button with Luminescent Border */}
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative z-20 w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-soft-lg hover:shadow-soft-lg transition-shadow flex items-center justify-center"
+        className="relative z-20 w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-md text-slate-600 hover:from-white/50 hover:to-white/30 transition-all flex items-center justify-center border-2 border-white/60 shadow-lg"
+        style={{
+          boxShadow: '0 0 20px rgba(147, 197, 253, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+        }}
       >
-        <Menu className="w-6 h-6" />
+        <Menu className="w-7 h-7" />
       </motion.button>
 
       {/* Menu Items */}
-      {isOpen && (
-        <motion.div className="absolute inset-0 pointer-events-none">
-          {MENU_ITEMS.map((item, index) => {
-            const { x, y } = getPosition(index);
-            const Icon = item.icon;
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div className="absolute inset-0 pointer-events-none">
+            {MENU_ITEMS.map((item, index) => {
+              const { x, y } = getPosition(index);
+              const Icon = item.icon;
 
-            return (
-              <motion.div
-                key={index}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.05,
-                  ease: 'easeOut',
-                }}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  x: x - 28,
-                  y: y - 28,
-                }}
-                className="pointer-events-auto"
-              >
-                <Link to={item.target} onClick={() => setIsOpen(false)}>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex flex-col items-center gap-1 w-14 p-2 rounded-full bg-accent text-accent-foreground shadow-soft hover:shadow-soft-md transition-shadow"
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-[10px] font-medium text-center leading-tight whitespace-nowrap">
-                      {item.label.split(' ')[0]}
-                    </span>
-                  </motion.button>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      )}
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.04,
+                    ease: 'easeOut',
+                  }}
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    x: x - 32,
+                    y: y - 32,
+                  }}
+                  className="pointer-events-auto"
+                >
+                  <Link to={item.target} onClick={() => setIsOpen(false)}>
+                    <motion.button
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.92 }}
+                      className="flex flex-col items-center justify-center gap-2 w-20 h-20 rounded-full bg-gradient-to-br from-white/35 to-white/15 backdrop-blur-md text-slate-700 border border-white/40 shadow-lg hover:from-white/45 hover:to-white/25 transition-all"
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-[9px] font-medium text-center leading-tight">
+                        {item.label}
+                      </span>
+                    </motion.button>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
