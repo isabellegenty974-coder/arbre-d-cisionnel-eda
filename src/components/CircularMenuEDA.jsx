@@ -76,8 +76,8 @@ export default function CircularMenuEDA() {
                     position: 'absolute',
                     left: '50%',
                     top: '50%',
-                    x: x - 32,
-                    y: y - 32,
+                    x: x - 40,
+                    y: y - 40,
                   }}
                   className="pointer-events-auto"
                 >
