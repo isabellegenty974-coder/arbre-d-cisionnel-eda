@@ -3,24 +3,24 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
-  Book,
-  Smile,
-  Baby,
+  BookOpen,
+  Heart,
+  Sprout,
   Home,
   Brain,
   BarChart2,
-  Plus,
+  UserPlus,
   Users,
 } from 'lucide-react';
 
 const MENU_ITEMS = [
-  { label: 'Apprentissages', icon: Book, target: '/items-apprentissages', color: 'from-blue-300 to-blue-500' },
-  { label: 'Comportement', icon: Smile, target: '/items-comportement', color: 'from-purple-300 to-purple-500' },
-  { label: 'Développement', icon: Baby, target: '/items-developpement', color: 'from-cyan-300 to-cyan-500' },
+  { label: 'Apprentissages', icon: BookOpen, target: '/items-apprentissages', color: 'from-blue-300 to-blue-500' },
+  { label: 'Comportement', icon: Heart, target: '/items-comportement', color: 'from-purple-300 to-purple-500' },
+  { label: 'Développement', icon: Sprout, target: '/items-developpement', color: 'from-cyan-300 to-cyan-500' },
   { label: 'Contexte', icon: Home, target: '/items-contexte', color: 'from-emerald-300 to-emerald-500' },
   { label: 'Analyse', icon: Brain, target: '/analyse-eda', color: 'from-pink-300 to-pink-500' },
   { label: 'Statistiques', icon: BarChart2, target: '/stats-annuelles', color: 'from-yellow-300 to-yellow-500' },
-  { label: 'Nouvel élève', icon: Plus, target: '/fiche-eleve', color: 'from-orange-300 to-orange-500' },
+  { label: 'Nouvel élève', icon: UserPlus, target: '/fiche-eleve', color: 'from-orange-300 to-orange-500' },
   { label: 'Élèves', icon: Users, target: '/liste-eleves', color: 'from-red-300 to-red-500' },
 ];
 
