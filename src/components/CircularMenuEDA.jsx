@@ -36,7 +36,7 @@ export default function CircularMenuEDA() {
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-400 via-blue-500 to-slate-600 p-8">
+    <div className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-400 via-blue-500 to-slate-600">
       {/* Menu Items - Fixed */}
       <motion.div className="absolute inset-0 pointer-events-none flex items-center justify-center">
         {MENU_ITEMS.map((item, index) => {
@@ -82,13 +82,14 @@ export default function CircularMenuEDA() {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative z-20 w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-md text-slate-600 hover:from-white/50 hover:to-white/30 transition-all flex items-center justify-center border-2 border-white/60 shadow-lg pointer-events-auto"
+        className="relative z-20 w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-md text-slate-600 hover:from-white/50 hover:to-white/30 transition-all flex flex-col items-center justify-center gap-1 border-2 border-white/60 shadow-lg pointer-events-auto"
         style={{
           boxShadow: '0 0 20px rgba(147, 197, 253, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
         }}
         disabled
       >
-        <Menu className="w-7 h-7" />
+        <Menu className="w-5 h-5" />
+        <span className="text-[8px] font-medium">Menu</span>
       </motion.button>
     </div>
   );
