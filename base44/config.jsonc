@@ -1,0 +1,9 @@
+{
+  "name": "Arbre D\u00e9cisionnel EDA",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
