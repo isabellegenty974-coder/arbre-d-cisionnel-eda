@@ -1,108 +1,108 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
+import { Home, Globe, Calendar, TrendingDown } from "lucide-react";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
-import { useDiagnostic } from "@/lib/DiagnosticContext";
-import { motion } from "framer-motion";
 
-const TOGGLES = [
-  { id: "absences",               label: "Absences fréquentes" },
-  { id: "changements_famille",    label: "Changements familiaux récents" },
-  { id: "difficultes_socio",      label: "Difficultés socio-économiques" },
-  { id: "manque_soutien",         label: "Manque de soutien scolaire" },
-  { id: "bilinguisme",            label: "Bilinguisme / plurilinguisme" },
-  { id: "trajectoire_atypique",   label: "Trajectoire scolaire atypique" },
-  { id: "evenements_stressants",  label: "Événements stressants récents" },
+const FICHES = [
+  {
+    icon: Home,
+    color: "bg-emerald-50 border-emerald-200",
+    iconColor: "text-emerald-600",
+    title: "Contexte familial",
+    description: "L'environnement familial joue un rôle central dans la stabilité émotionnelle et les apprentissages.",
+    signes: [
+      "Séparation ou recomposition familiale récente",
+      "Deuil ou événement traumatisant dans la famille",
+      "Instabilité du logement ou précarité",
+      "Manque de soutien aux devoirs et à la scolarité",
+    ],
+    pistes: "Un accompagnement social ou familial peut être pertinent. Collaborer avec les parents pour comprendre le contexte de vie de l'enfant.",
+  },
+  {
+    icon: Globe,
+    color: "bg-blue-50 border-blue-200",
+    iconColor: "text-blue-500",
+    title: "Bilinguisme / Plurilinguisme",
+    description: "La pratique de plusieurs langues peut influencer le développement du langage écrit et oral.",
+    signes: [
+      "Langue principale différente du français",
+      "Mélanges de langues dans les productions orales",
+      "Retard apparent de langage en français uniquement",
+      "Confusions orthographiques liées à une autre langue",
+    ],
+    pistes: "Distinguer ce qui relève du bilinguisme normal et ce qui signale une difficulté réelle. L'évaluation doit tenir compte du contexte linguistique.",
+  },
+  {
+    icon: Calendar,
+    color: "bg-amber-50 border-amber-200",
+    iconColor: "text-amber-500",
+    title: "Absentéisme / Trajectoire scolaire",
+    description: "Un parcours scolaire chaotique ou interrompu laisse des lacunes importantes dans les apprentissages.",
+    signes: [
+      "Absences répétées ou injustifiées",
+      "Changements fréquents d'école",
+      "Classe de niveau non adapté à l'âge",
+      "Retard scolaire cumulé sur plusieurs années",
+    ],
+    pistes: "Faire le point sur les lacunes réelles via une évaluation des acquis. Mettre en place un plan de soutien individualisé (PPRE, PAP…).",
+  },
+  {
+    icon: TrendingDown,
+    color: "bg-red-50 border-red-200",
+    iconColor: "text-red-500",
+    title: "Événements stressants / Changements",
+    description: "Des événements de vie récents peuvent fragiliser l'élève et impacter fortement ses capacités d'apprentissage.",
+    signes: [
+      "Déménagement ou changement d'école récent",
+      "Naissance d'un frère/sœur, maladie dans la famille",
+      "Rupture de lien affectif important",
+      "Situation de harcèlement ou de conflit",
+    ],
+    pistes: "Un soutien psychologique peut aider l'enfant à traverser la période. L'enseignant peut adapter les exigences sur le court terme.",
+  },
 ];
 
 export default function ItemsContexte() {
-  const navigate = useNavigate();
-  const { addSelection } = useDiagnostic();
-  const [active, setActive] = useState({});
-  const [observations, setObservations] = useState("");
-
-  const toggle = (id) => setActive(prev => ({ ...prev, [id]: !prev[id] }));
-  const score = Object.values(active).filter(Boolean).length;
-
-  const handleValidate = () => {
-    TOGGLES.forEach(({ id, label }) => {
-      if (active[id]) {
-        addSelection("contexte", { label, analysisType: "Item contexte", timestamp: Date.now() });
-      }
-    });
-    if (observations.trim()) {
-      addSelection("contexte", { label: `Obs: ${observations.trim()}`, analysisType: "Observation", timestamp: Date.now() });
-    }
-    navigate("/evaluation-domains");
-  };
-
   return (
     <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
-      <ScreenLayout title="Contexte">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="max-w-md mx-auto space-y-4"
-          style={{ padding: 20 }}
-        >
-          <p className="text-base font-semibold text-foreground">
-            Sélectionnez les éléments contextuels
-          </p>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Score :</span>
-            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-              {score} / {TOGGLES.length}
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            {TOGGLES.map(({ id, label }, i) => (
-              <motion.button
-                key={id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                onClick={() => toggle(id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
-                  active[id]
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card border-border hover:border-primary/40 text-foreground"
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
-                  active[id] ? "bg-primary-foreground border-primary-foreground" : "border-muted-foreground"
-                }`}>
-                  {active[id] && <Check className="w-3 h-3 text-primary" />}
+      <ScreenLayout title="🏠 Contexte" subtitle="Fiches informatives sur les facteurs contextuels">
+        <div className="space-y-5">
+          {FICHES.map(({ icon: Icon, color, iconColor, title, description, signes, pistes }, i) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
+              className={`rounded-2xl border p-5 ${color}`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-xl bg-white/70 ${iconColor}`}>
+                  <Icon className="w-5 h-5" />
                 </div>
-                <span className="text-sm font-medium">{label}</span>
-              </motion.button>
-            ))}
-          </div>
+                <h3 className="font-semibold text-foreground text-lg">{title}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">{description}</p>
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Observations complémentaires
-            </label>
-            <Textarea
-              value={observations}
-              onChange={e => setObservations(e.target.value)}
-              placeholder="Observations complémentaires"
-              rows={3}
-              className="resize-none"
-            />
-          </div>
+              <div className="mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Signes à observer</p>
+                <ul className="space-y-1.5">
+                  {signes.map((s, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm text-foreground">
+                      <span className="mt-1 w-1.5 h-1.5 rounded-full bg-current shrink-0 opacity-50" />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <Button onClick={handleValidate} className="w-full gap-2 bg-primary hover:bg-primary/90">
-            <Check className="w-4 h-4" />
-            Valider ce domaine
-          </Button>
-        </motion.div>
+              <div className="p-3 rounded-xl bg-white/60">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Pistes d'exploration</p>
+                <p className="text-sm text-foreground">{pistes}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </ScreenLayout>
     </div>
   );

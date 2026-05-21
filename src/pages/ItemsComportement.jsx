@@ -1,108 +1,108 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
+import { Zap, Wind, Heart, ShieldAlert } from "lucide-react";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
-import { useDiagnostic } from "@/lib/DiagnosticContext";
-import { motion } from "framer-motion";
 
-const TOGGLES = [
-  { id: "agitation",         label: "Agitation / hyperactivité" },
-  { id: "impulsivite",       label: "Impulsivité marquée" },
-  { id: "inattention",       label: "Difficultés d'attention" },
-  { id: "anxiete",           label: "Signes d'anxiété" },
-  { id: "retrait",           label: "Retrait social" },
-  { id: "opposition",        label: "Comportements oppositionnels" },
-  { id: "emotions_instables", label: "Instabilité émotionnelle" },
+const FICHES = [
+  {
+    icon: Zap,
+    color: "bg-rose-50 border-rose-200",
+    iconColor: "text-rose-500",
+    title: "Agitation / Hyperactivité",
+    description: "Niveau élevé d'activité motrice difficilement contrôlable, persistant dans différents contextes.",
+    signes: [
+      "Se lève souvent, ne peut rester assis",
+      "Gesticule en permanence, touche tout",
+      "Court ou grimpe dans des situations inappropriées",
+      "Parle excessivement, bruit continuel",
+    ],
+    pistes: "Explorer une suspicion de TDAH, une hypersensibilité sensorielle ou une anxiété sous-jacente. Évaluation pédopsychiatrique ou neuropsychologique conseillée.",
+  },
+  {
+    icon: Wind,
+    color: "bg-amber-50 border-amber-200",
+    iconColor: "text-amber-500",
+    title: "Impulsivité",
+    description: "Difficulté à inhiber ses réponses, agit avant de réfléchir.",
+    signes: [
+      "Coupe la parole, répond avant la fin des questions",
+      "Ne peut attendre son tour",
+      "Passe d'une activité à l'autre très vite",
+      "Réactions émotionnelles disproportionnées",
+    ],
+    pistes: "Évaluer les fonctions d'inhibition et de contrôle exécutif. Peut être associé au TDAH ou à des difficultés de régulation émotionnelle.",
+  },
+  {
+    icon: Heart,
+    color: "bg-sky-50 border-sky-200",
+    iconColor: "text-sky-500",
+    title: "Anxiété / Retrait",
+    description: "Manifestations d'inquiétude excessive ou d'isolement social entravant les apprentissages.",
+    signes: [
+      "Pleurs fréquents, inquiétudes répétées",
+      "Évitement de situations scolaires",
+      "Plaintes somatiques (ventre, tête)",
+      "Retrait des interactions avec les pairs",
+    ],
+    pistes: "Distinguer anxiété situationnelle et anxiété généralisée. Un suivi psychologique ou un bilan pédopsychiatrique peut être indiqué.",
+  },
+  {
+    icon: ShieldAlert,
+    color: "bg-orange-50 border-orange-200",
+    iconColor: "text-orange-500",
+    title: "Opposition / Instabilité émotionnelle",
+    description: "Refus systématique, conflits récurrents avec les adultes ou difficultés de régulation des émotions.",
+    signes: [
+      "Refus de consignes ou de tâches scolaires",
+      "Crises de colère fréquentes et intenses",
+      "Provocation délibérée envers adultes ou pairs",
+      "Humeur très variable au cours de la journée",
+    ],
+    pistes: "Explorer les troubles oppositionnels, les difficultés émotionnelles ou un contexte familial difficile. Guidance parentale souvent utile.",
+  },
 ];
 
 export default function ItemsComportement() {
-  const navigate = useNavigate();
-  const { addSelection } = useDiagnostic();
-  const [active, setActive] = useState({});
-  const [observations, setObservations] = useState("");
-
-  const toggle = (id) => setActive(prev => ({ ...prev, [id]: !prev[id] }));
-  const score = Object.values(active).filter(Boolean).length;
-
-  const handleValidate = () => {
-    TOGGLES.forEach(({ id, label }) => {
-      if (active[id]) {
-        addSelection("comportement", { label, analysisType: "Item comportement", timestamp: Date.now() });
-      }
-    });
-    if (observations.trim()) {
-      addSelection("comportement", { label: `Obs: ${observations.trim()}`, analysisType: "Observation", timestamp: Date.now() });
-    }
-    navigate("/evaluation-domains");
-  };
-
   return (
     <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
-      <ScreenLayout title="Comportement / Émotionnel">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="max-w-md mx-auto space-y-4"
-          style={{ padding: 20 }}
-        >
-          <p className="text-base font-semibold text-foreground">
-            Sélectionnez les items observés
-          </p>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Score :</span>
-            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-              {score} / {TOGGLES.length}
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            {TOGGLES.map(({ id, label }, i) => (
-              <motion.button
-                key={id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                onClick={() => toggle(id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
-                  active[id]
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card border-border hover:border-primary/40 text-foreground"
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
-                  active[id] ? "bg-primary-foreground border-primary-foreground" : "border-muted-foreground"
-                }`}>
-                  {active[id] && <Check className="w-3 h-3 text-primary" />}
+      <ScreenLayout title="💝 Comportement" subtitle="Fiches informatives sur les profils comportementaux">
+        <div className="space-y-5">
+          {FICHES.map(({ icon: Icon, color, iconColor, title, description, signes, pistes }, i) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
+              className={`rounded-2xl border p-5 ${color}`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-xl bg-white/70 ${iconColor}`}>
+                  <Icon className="w-5 h-5" />
                 </div>
-                <span className="text-sm font-medium">{label}</span>
-              </motion.button>
-            ))}
-          </div>
+                <h3 className="font-semibold text-foreground text-lg">{title}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">{description}</p>
 
-          <div>
-            <label className="text-sm font-medium text-foreground block mb-1.5">
-              Observations complémentaires
-            </label>
-            <Textarea
-              value={observations}
-              onChange={e => setObservations(e.target.value)}
-              placeholder="Observations complémentaires"
-              rows={3}
-              className="resize-none"
-            />
-          </div>
+              <div className="mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Signes à observer</p>
+                <ul className="space-y-1.5">
+                  {signes.map((s, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm text-foreground">
+                      <span className="mt-1 w-1.5 h-1.5 rounded-full bg-current shrink-0 opacity-50" />
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <Button onClick={handleValidate} className="w-full gap-2 bg-primary hover:bg-primary/90">
-            <Check className="w-4 h-4" />
-            Valider ce domaine
-          </Button>
-        </motion.div>
+              <div className="p-3 rounded-xl bg-white/60">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Pistes d'exploration</p>
+                <p className="text-sm text-foreground">{pistes}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </ScreenLayout>
     </div>
   );
