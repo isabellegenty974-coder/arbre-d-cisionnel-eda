@@ -1,4 +1,6 @@
 import { useDiagnostic } from '@/lib/DiagnosticContext';
+import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,9 +18,16 @@ export default function FicheEleve() {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (formData.prenom && formData.nom) {
       setCurrentEleve(formData);
+      await base44.entities.FicheEleve.create({
+        nom: formData.nom,
+        prenom: formData.prenom,
+        age: formData.age ? Number(formData.age) : undefined,
+        classe: formData.classe,
+        date: new Date().toISOString().split('T')[0],
+      });
       setFormData({ prenom: '', nom: '', age: '', classe: '' });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
