@@ -14,7 +14,7 @@ export default function Resultats() {
   const reponsesQCM = {};
   Object.values(selections).forEach((items) => {
     items.forEach((item) => {
-      if (item.questionId) {
+      if (item.questionId && typeof item.questionId === 'string') {
         const match = item.questionId.match(/^(q\d+)([a-d])$/);
         if (match) reponsesQCM[match[1]] = match[2];
       }
