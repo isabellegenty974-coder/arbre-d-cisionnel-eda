@@ -25,7 +25,7 @@ export default function ListeEleves() {
         <div className="max-w-md mx-auto space-y-4" style={{ padding: 20 }}>
 
           <Button
-            onClick={() => navigate("/fiche-eleve-form")}
+            onClick={() => navigate("/fiche-eleve")}
             className="w-full gap-2 bg-primary hover:bg-primary/90"
           >
             <Plus className="w-4 h-4" />
