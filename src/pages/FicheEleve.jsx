@@ -10,7 +10,16 @@ import { useState } from 'react';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 
 export default function FicheEleve() {
-  const { setCurrentEleve } = useDiagnostic();
+  const { setCurrentEleve, selections } = useDiagnostic();
+
+  const DOMAIN_LABELS = {
+    apprentissages: '📚 Apprentissages',
+    comportement: '💝 Comportement',
+    developpement: '🌱 Développement',
+    contexte: '🏠 Contexte',
+  };
+
+  const hasSelections = Object.values(selections).some(arr => arr.length > 0);
   const [formData, setFormData] = useState({ prenom: '', nom: '', age: '', classe: '' });
   const [saved, setSaved] = useState(false);
 
@@ -78,6 +87,32 @@ export default function FicheEleve() {
               />
             </div>
           </div>
+
+          {hasSelections && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-5 rounded-xl bg-secondary/40 border border-border space-y-3"
+            >
+              <p className="text-sm font-semibold text-foreground">📝 Items cochés</p>
+              {Object.entries(DOMAIN_LABELS).map(([key, label]) => {
+                const items = selections[key] || [];
+                if (!items.length) return null;
+                return (
+                  <div key={key}>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">{label}</p>
+                    <ul className="space-y-1">
+                      {items.map((item, i) => (
+                        <li key={i} className="text-sm text-foreground pl-2 border-l-2 border-primary/30">
+                          {item.label}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
 
           <Button
             onClick={handleSave}
