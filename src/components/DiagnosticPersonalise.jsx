@@ -124,7 +124,7 @@ export default function DiagnosticPersonalise() {
 
       {/* Lien vers le résumé complet */}
       <div className="pt-4">
-        <Link to="/resume">
+        <Link to="/resultats">
           <Button className="w-full gap-2">
             📋 Voir le résumé complet
           </Button>
