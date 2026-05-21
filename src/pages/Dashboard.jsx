@@ -148,11 +148,23 @@ export default function Dashboard() {
                     Exporter PDF
                   </Button>
                 )}
-                <Link to="/apprentissage" className="block">
-                  <Button className="w-full gap-2 bg-chart-2 hover:bg-chart-2/90">
-                    Explorer les hypothèses
-                  </Button>
-                </Link>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Explorer les hypothèses :</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link to="/items-apprentissages">
+                      <Button variant="outline" className="w-full gap-2 text-blue-600 border-blue-300 hover:bg-blue-50">📚 Apprentissages</Button>
+                    </Link>
+                    <Link to="/items-comportement">
+                      <Button variant="outline" className="w-full gap-2 text-rose-600 border-rose-300 hover:bg-rose-50">💝 Comportement</Button>
+                    </Link>
+                    <Link to="/items-developpement">
+                      <Button variant="outline" className="w-full gap-2 text-teal-600 border-teal-300 hover:bg-teal-50">🌱 Développement</Button>
+                    </Link>
+                    <Link to="/items-contexte">
+                      <Button variant="outline" className="w-full gap-2 text-emerald-600 border-emerald-300 hover:bg-emerald-50">🏠 Contexte</Button>
+                    </Link>
+                  </div>
+                </div>
               </div>
             )}
           </motion.div>
