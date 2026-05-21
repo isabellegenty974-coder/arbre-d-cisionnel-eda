@@ -11,8 +11,11 @@ import { useDiagnostic } from '@/lib/DiagnosticContext';
 import { exportResumePDF } from '@/lib/pdfExport';
 
 export default function Dashboard() {
-  const { eleve, setCurrentEleve, selections, crossRecommendations } = useDiagnostic();
-  const [editingEleve, setEditingEleve] = useState(eleve || {});
+  const urlParams = new URLSearchParams(window.location.search);
+  const eleveId = urlParams.get('id');
+  const { eleve: ctxEleve, setCurrentEleve, selections, crossRecommendations } = useDiagnostic();
+  const [eleve, setEleve] = useState(null);
+  const [editingEleve, setEditingEleve] = useState({});
   const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,14 +23,24 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDiagnostics();
-  }, []);
+    if (eleveId) {
+      base44.entities.FicheEleve.get(eleveId).then(data => {
+        setEleve(data);
+        setEditingEleve(data);
+        setCurrentEleve(data);
+      });
+    } else {
+      setEleve(ctxEleve);
+      setEditingEleve(ctxEleve || {});
+    }
+  }, [eleveId]);
 
-  useEffect(() => {
-    setEditingEleve(eleve || {});
-  }, [eleve]);
-
-  const handleSaveEleve = () => {
+  const handleSaveEleve = async () => {
     setCurrentEleve(editingEleve);
+    if (eleveId) {
+      await base44.entities.FicheEleve.update(eleveId, editingEleve);
+      setEleve(editingEleve);
+    }
   };
 
   const handleExportPDF = () => {
