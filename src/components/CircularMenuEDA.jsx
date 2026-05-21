@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+const CENTER_ITEM = { label: 'Élèves', target: '/liste-eleves', color: 'from-cyan-400 to-cyan-600', icon: '👥' };
+
 const MENU_ITEMS = [
   { label: 'Apprentissages', target: '/items-apprentissages', color: 'from-blue-400 to-blue-600', icon: '📚' },
   { label: 'Comportement', target: '/items-comportement', color: 'from-rose-400 to-rose-600', icon: '💝' },
@@ -9,7 +11,6 @@ const MENU_ITEMS = [
   { label: 'Analyse', target: '/analyse-eda', color: 'from-violet-400 to-violet-600', icon: '🧠' },
   { label: 'Statistiques', target: '/stats-annuelles', color: 'from-amber-400 to-amber-600', icon: '📊' },
   { label: 'Nouvel élève', target: '/fiche-eleve', color: 'from-indigo-400 to-indigo-600', icon: '👤' },
-  { label: 'Élèves', target: '/liste-eleves', color: 'from-cyan-400 to-cyan-600', icon: '👥' },
 ];
 
 const RADIUS = 120;
@@ -55,14 +56,24 @@ export default function CircularMenuEDA() {
         })}
       </div>
 
-      {/* Center dot */}
+      {/* Center Item */}
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative z-20 w-10 h-10 rounded-full bg-white/30 backdrop-blur-md border-2 border-white/60 shadow-lg"
-        style={{ boxShadow: '0 0 20px rgba(147, 197, 253, 0.6)' }}
-      />
+        className="relative z-20"
+      >
+        <Link to={CENTER_ITEM.target}>
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            className={`flex flex-col items-center justify-center gap-1 w-20 h-20 rounded-full bg-gradient-to-br ${CENTER_ITEM.color} text-white border-2 border-white/50 shadow-lg hover:shadow-xl transition-all`}
+          >
+            <span className="text-2xl">{CENTER_ITEM.icon}</span>
+            <span className="text-[8px] font-bold text-center leading-tight">{CENTER_ITEM.label}</span>
+          </motion.button>
+        </Link>
+      </motion.div>
     </div>
   );
 }
