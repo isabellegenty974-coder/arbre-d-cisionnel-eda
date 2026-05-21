@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const CENTER_ITEM = { label: 'Dashboard', target: '/dashboard', color: 'from-cyan-400 to-cyan-600', icon: '📋' };
+const CENTER_ITEM = { label: 'Tableau de bord', target: '/dashboard', color: 'from-cyan-400 to-cyan-600', icon: '📋' };
 
 const MENU_ITEMS = [
   { label: 'Apprentissages', target: '/items-apprentissages', color: 'from-blue-400 to-blue-600', icon: '📚' },

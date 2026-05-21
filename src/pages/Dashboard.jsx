@@ -77,7 +77,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <HamburgerMenu />
-      <ScreenLayout title="📊 Dashboard">
+      <ScreenLayout title="📊 Tableau de bord">
         <div className="space-y-8">
           {/* Infos élève modifiables */}
           <motion.div
