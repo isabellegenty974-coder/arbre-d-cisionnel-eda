@@ -59,7 +59,13 @@ export function DiagnosticProvider({ children }) {
     }
   };
 
-  const addSelection = (category, questionId, label, analysisType) => {
+  const addSelection = (category, questionIdOrItem, labelArg, analysisTypeArg) => {
+    // Support 2-arg form: addSelection(category, {label, analysisType, ...})
+    // or 4-arg form: addSelection(category, questionId, label, analysisType)
+    const isObject = typeof questionIdOrItem === 'object' && questionIdOrItem !== null;
+    const questionId = isObject ? questionIdOrItem.id || null : questionIdOrItem;
+    const label = isObject ? questionIdOrItem.label : labelArg;
+    const analysisType = isObject ? questionIdOrItem.analysisType : analysisTypeArg;
     setSelections(prev => {
       const updated = {
         ...prev,
