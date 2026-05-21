@@ -16,6 +16,7 @@ export const generateDiagnosticSynthesis = (selections) => {
   const problems = {};
   Object.entries(selections).forEach(([category, items]) => {
     items.forEach((item) => {
+      if (!item.questionId || typeof item.questionId !== 'string') return;
       const profile = profileMap[item.questionId.toLowerCase()];
       if (profile) {
         problems[profile.category] = (problems[profile.category] || 0) + 1;
