@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -16,104 +15,54 @@ const MENU_ITEMS = [
 const RADIUS = 120;
 const ANGLE_STEP = (2 * Math.PI) / MENU_ITEMS.length;
 
-function MenuItem({ item, index, rotation }) {
-  const angle = index * ANGLE_STEP - Math.PI / 2;
-  const x = Math.cos(angle) * RADIUS;
-  const y = Math.sin(angle) * RADIUS;
-
-  return (
-    <motion.div
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1, rotate: -rotation }}
-      transition={{ duration: 0.4, delay: index * 0.04, ease: 'easeOut' }}
-      style={{
-        position: 'absolute',
-        left: '50%',
-        top: '50%',
-        x: x,
-        y: y,
-        marginLeft: -40,
-        marginTop: -40,
-      }}
-      className="pointer-events-auto"
-    >
-      <Link to={item.target}>
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          className={`flex flex-col items-center justify-center gap-1 w-20 h-20 rounded-full bg-gradient-to-br ${item.color} text-white border-2 border-white/50 shadow-lg hover:shadow-xl transition-all`}
-        >
-          <span className="text-2xl">{item.icon}</span>
-          <span className="text-[8px] font-bold text-center leading-tight">{item.label}</span>
-        </motion.button>
-      </Link>
-    </motion.div>
-  );
-}
-
 export default function CircularMenuEDA() {
-  const [rotation, setRotation] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartY(e.clientY);
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    const delta = e.clientY - startY;
-    setRotation(prev => prev + delta * 0.2);
-    setStartY(e.clientY);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, startY]);
-
   return (
-    <div
-      className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800 cursor-grab active:cursor-grabbing"
-      onMouseDown={handleMouseDown}
-    >
-      <motion.div
-        className="absolute inset-0 pointer-events-none flex items-center justify-center"
-        animate={{ rotate: rotation }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      >
-        {MENU_ITEMS.map((item, index) => (
-          <MenuItem key={index} item={item} index={index} rotation={rotation} />
-        ))}
-      </motion.div>
+    <div className="relative w-full h-full flex items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800">
+      {/* Menu Items */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {MENU_ITEMS.map((item, index) => {
+          const angle = index * ANGLE_STEP - Math.PI / 2;
+          const x = Math.cos(angle) * RADIUS;
+          const y = Math.sin(angle) * RADIUS;
+          return (
+            <motion.div
+              key={index}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4, delay: index * 0.04, ease: 'easeOut' }}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                x: x,
+                y: y,
+                marginLeft: -40,
+                marginTop: -40,
+              }}
+            >
+              <Link to={item.target}>
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                  className={`flex flex-col items-center justify-center gap-1 w-20 h-20 rounded-full bg-gradient-to-br ${item.color} text-white border-2 border-white/50 shadow-lg hover:shadow-xl transition-all`}
+                >
+                  <span className="text-2xl">{item.icon}</span>
+                  <span className="text-[8px] font-bold text-center leading-tight">{item.label}</span>
+                </motion.button>
+              </Link>
+            </motion.div>
+          );
+        })}
+      </div>
 
-      <motion.button
+      {/* Center dot */}
+      <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        onMouseDown={handleMouseDown}
-        className="relative z-20 w-20 h-20 rounded-full bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-md hover:from-white/50 hover:to-white/30 transition-all flex flex-col items-center justify-center gap-1 border-2 border-white/60 shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing"
-        style={{ boxShadow: '0 0 20px rgba(147, 197, 253, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6)' }}
-      >
-        <motion.div
-          animate={{ rotate: rotation }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="absolute w-8 h-1.5 bg-white/70 rounded-full"
-          style={{ transformOrigin: '-12px center' }}
-        />
-        <span className="text-[8px] font-medium text-white">Manivelle</span>
-      </motion.button>
+        className="relative z-20 w-10 h-10 rounded-full bg-white/30 backdrop-blur-md border-2 border-white/60 shadow-lg"
+        style={{ boxShadow: '0 0 20px rgba(147, 197, 253, 0.6)' }}
+      />
     </div>
   );
 }
