@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Download, Users, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
-  BarChart, Bar, Cell, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  BarChart, Bar, Cell, LineChart, Line, PieChart, Pie,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 import { motion } from "framer-motion";
 
@@ -28,11 +28,11 @@ const BAR_COLORS = [
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-soft-md text-sm">
-      <p className="font-medium text-foreground mb-1">{label}</p>
+    <div className="bg-foreground/95 rounded-xl px-3 py-2 shadow-lg text-xs border border-border/50">
+      <p className="font-semibold text-white mb-0.5">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color || p.fill }} className="font-semibold">
-          {p.value} occurrence{p.value > 1 ? "s" : ""}
+        <p key={i} style={{ color: p.color || p.fill }} className="font-medium">
+          {p.value} {typeof p.value === 'number' && p.value > 1 ? 'occ.' : 'occ.'}
         </p>
       ))}
     </div>
@@ -45,13 +45,13 @@ function StatCard({ title, subtitle, children, delay = 0 }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card border border-border rounded-2xl overflow-hidden shadow-soft"
+      className="bg-gradient-to-br from-card to-card/80 border border-border/60 rounded-2xl overflow-hidden shadow-soft-md hover:shadow-soft-lg transition-shadow"
     >
-      <div className="px-5 pt-5 pb-3 border-b border-border/50">
-        <h2 className="font-semibold text-foreground">{title}</h2>
-        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+      <div className="px-6 pt-6 pb-4 border-b border-border/40 bg-gradient-to-r from-transparent via-primary/5 to-transparent">
+        <h2 className="font-bold text-foreground text-base">{title}</h2>
+        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
       </div>
-      <div className="p-5">{children}</div>
+      <div className="p-6">{children}</div>
     </motion.div>
   );
 }
@@ -197,22 +197,52 @@ export default function StatsAnnuelles() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 gap-3"
+            className="grid grid-cols-3 gap-3 sm:gap-4"
           >
             {[
-              { icon: Users, label: "Élèves", value: nbEleves, color: "text-primary", bg: "bg-primary/10" },
-              { icon: ClipboardList, label: "Hypothèse(s) diagnostique(s)", value: nbDiagnostics, color: "text-violet-500", bg: "bg-violet-500/10" },
-            ].map(({ icon: Icon, label, value, color, bg }) => (
-              <div key={label} className={`flex flex-col items-center gap-1 p-4 rounded-2xl border border-border ${bg}`}>
-                <Icon className={`w-5 h-5 ${color}`} />
-                <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                <p className="text-xs text-muted-foreground text-center">{label}</p>
-              </div>
+              { icon: Users, label: "Élèves", value: nbEleves, color: "from-blue-500 to-blue-600", textColor: "text-blue-600", bg: "bg-gradient-to-br from-blue-50 to-blue-100/50" },
+              { icon: ClipboardList, label: "Diagnostics", value: nbDiagnostics, color: "from-violet-500 to-violet-600", textColor: "text-violet-600", bg: "bg-gradient-to-br from-violet-50 to-violet-100/50" },
+              { icon: ClipboardList, label: "Items observés", value: nbItems, color: "from-emerald-500 to-emerald-600", textColor: "text-emerald-600", bg: "bg-gradient-to-br from-emerald-50 to-emerald-100/50" },
+            ].map(({ icon: Icon, label, value, textColor, bg }) => (
+              <motion.div
+                key={label}
+                whileHover={{ y: -4 }}
+                className={`flex flex-col items-center justify-center gap-2 p-4 sm:p-5 rounded-2xl border border-border/50 ${bg} backdrop-blur-sm`}
+              >
+                <Icon className={`w-6 h-6 ${textColor}`} />
+                <p className={`text-2xl sm:text-3xl font-bold ${textColor}`}>{value}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground text-center font-medium">{label}</p>
+              </motion.div>
             ))}
           </motion.div>
 
+          {/* Répartition par domaine */}
+          <StatCard title="Répartition par domaine" subtitle="Distribution des observations" delay={0.1}>
+            {domaines.filter(d => d.value > 0).length === 0 ? <EmptyState /> : (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Pie
+                    data={domaines.filter(d => d.value > 0)}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {domaines.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={Object.values(DOMAIN_COLORS)[index % 4]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </StatCard>
+
           {/* Top 10 items */}
-          <StatCard title="Top 10 observations les plus fréquentes" subtitle="Tous diagnostics confondus" delay={0.1}>
+          <StatCard title="Top 10 observations fréquentes" subtitle="Items les plus observés" delay={0.15}>
             {topItems.length === 0 ? <EmptyState /> : (
               <ResponsiveContainer width="100%" height={topItems.length * 36 + 20}>
                 <BarChart
@@ -243,7 +273,7 @@ export default function StatsAnnuelles() {
           </StatCard>
 
           {/* Évolution mensuelle */}
-          <StatCard title="Évolution mensuelle" subtitle="12 derniers mois" delay={0.15}>
+          <StatCard title="Évolution des diagnostics" subtitle="Tendance sur 12 mois" delay={0.2}>
             {evolution.length === 0 ? <EmptyState /> : (
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={evolution} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
@@ -265,16 +295,21 @@ export default function StatsAnnuelles() {
           </StatCard>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-1">
-            <Button onClick={handleExport} className="flex-1 gap-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="flex flex-col sm:flex-row gap-3 pt-4"
+          >
+            <Button onClick={handleExport} className="flex-1 gap-2 h-10 shadow-md hover:shadow-lg transition-shadow">
               <Download className="w-4 h-4" />
               Exporter PDF
             </Button>
-            <Button onClick={() => navigate("/dashboard")} variant="outline" className="flex-1 gap-2">
+            <Button onClick={() => navigate("/dashboard")} variant="outline" className="flex-1 gap-2 h-10 hover:bg-secondary/80 transition-colors">
               <Users className="w-4 h-4" />
-              Mes élèves
+              Tableau de bord
             </Button>
-          </div>
+          </motion.div>
 
         </div>
       </ScreenLayout>
