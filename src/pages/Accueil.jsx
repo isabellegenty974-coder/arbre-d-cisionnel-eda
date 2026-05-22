@@ -1,9 +1,31 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, ChevronRight, Menu, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, ChevronRight } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
 export default function Accueil() {
+  const [eleves, setEleves] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
+      base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
+    ]).then(([fiches, diagnostics]) => {
+      const map = new Map();
+      fiches.forEach(f => {
+        const key = `${f.prenom}|${f.nom}`.toLowerCase();
+        map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe });
+      });
+      diagnostics.forEach(d => {
+        const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
+        if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom });
+      });
+      setEleves([...map.values()]);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F0F4F8] pb-24">
       <HamburgerMenu />
@@ -81,16 +103,23 @@ export default function Accueil() {
                     <span className="text-white text-[9px] font-bold">Ψ</span>
                   </div>
                   <span className="text-xs font-semibold text-foreground">Mes élèves</span>
+                  <span className="ml-auto text-[10px] text-blue-600 font-semibold">{eleves.length} élève{eleves.length !== 1 ? 's' : ''}</span>
                 </div>
-                <div className="space-y-1.5">
-                  {["Dernières fiches", "Élèves à suivre", "Activités récentes"].map((label) => (
-                    <div key={label} className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-200 shrink-0" />
-                      <div className="flex-1 h-2 bg-blue-100 rounded-full" />
-                      <div className="w-10 h-2 bg-blue-50 rounded-full" />
-                    </div>
-                  ))}
-                </div>
+                {eleves.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground text-center py-2">Aucun élève enregistré</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {eleves.slice(0, 3).map((e, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center shrink-0">
+                          <span className="text-[8px] font-bold text-blue-700">{e.prenom?.[0]}{e.nom?.[0]}</span>
+                        </div>
+                        <span className="text-[10px] text-foreground font-medium">{e.prenom} {e.nom}</span>
+                        {e.classe && <span className="text-[9px] text-muted-foreground ml-auto">{e.classe}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </Link>
