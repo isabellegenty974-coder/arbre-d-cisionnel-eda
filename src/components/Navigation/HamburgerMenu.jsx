@@ -81,7 +81,7 @@ export default function HamburgerMenu() {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
                 >
                   <FileText className="w-4 h-4" />
-                  Dashboard
+                  Tableau de bord
                 </Link>
                 <Link
                   to="/stats-annuelles"
