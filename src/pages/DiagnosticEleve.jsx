@@ -199,9 +199,30 @@ Date : ${dateStr}
 Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois analyser les observations suivantes chez cet élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé synthétique des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations d'évaluation complémentaire recommandées\n4. Les recommandations d'accompagnement et d'aménagements\n\nRemplace chaque occurrence de "Patient" par "L'élève" ou "l'élève". Sois professionnel, rigoureux et clair. Évite de poser un diagnostic définitif.`;
 
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
-      const texte = result || "Le rapport n'a pas pu être généré.";
-      setRapport(texte);
-      setGeneratedRapport(texte);
+
+      // Analyse croisée
+      const lignesAnalyse = [];
+      Object.entries(checked).forEach(([key, items]) => {
+        if (items && items.length > 0) {
+          const DOMAIN_NAMES = { apprentissages: 'Apprentissages', comportement: 'Comportement', developpement: 'Développement', contexte: 'Contexte' };
+          lignesAnalyse.push(`${DOMAIN_NAMES[key]}: ${items.join(', ')}`);
+        }
+      });
+
+      const promptAnalyseCroisee = `Basé sur le rapport clinique suivant, analyse les LIENS et INTERACTIONS entre les différents domaines (apprentissages, comportement, développement, contexte).
+
+Rapport:
+${result}
+
+Observations par domaine:
+${lignesAnalyse.join('\n')}
+
+Fournissez une courte analyse croisée (3-5 points) montrant comment les difficultés dans un domaine impactent les autres. Format: - Point 1\n- Point 2\n...`;
+
+      const analyseResult = await base44.integrations.Core.InvokeLLM({ prompt: promptAnalyseCroisee });
+      const rapportEnrichi = `${result}\n\n## Analyse croisée des domaines\n${analyseResult}`;
+      setRapport(rapportEnrichi);
+      setGeneratedRapport(rapportEnrichi);
     } catch (err) {
       console.error(err);
       setRapport("Une erreur est survenue lors de la génération du rapport.");

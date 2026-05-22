@@ -31,6 +31,7 @@ import ExportAnnuel from './pages/ExportAnnuel';
 import EditEleve from './pages/EditEleve';
 import ItemsProfessionnels from './pages/ItemsProfessionnels';
 import DiagnosticEleve from './pages/DiagnosticEleve';
+import TableauSynthese from './pages/TableauSynthese';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -209,6 +210,7 @@ const AuthenticatedApp = () => {
         <Route path="/edit-eleve" element={<EditEleve />} />
         <Route path="/items-professionnels" element={<ItemsProfessionnels />} />
         <Route path="/diagnostic-eleve" element={<DiagnosticEleve />} />
+        <Route path="/tableau-synthese" element={<TableauSynthese />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
