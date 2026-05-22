@@ -64,8 +64,9 @@ export default function HamburgerMenu() {
                   <HomeIcon className="w-4 h-4" /> Accueil
                 </Link>
                 <Link to="/dashboard" onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
-                  <User className="w-4 h-4" /> Mes élèves
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
+                  title="Tableau de bord">
+                  <User className="w-4 h-4" /> Tableau de bord
                 </Link>
                 <Link to="/fiche-eleve" onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">

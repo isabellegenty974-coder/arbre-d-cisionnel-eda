@@ -88,6 +88,7 @@ export default function Accueil() {
             <div
               className="flex items-center gap-3 px-4 pt-4 pb-3 cursor-pointer hover:bg-blue-50/50 transition-colors"
               onClick={() => navigate('/dashboard')}
+              title="Tableau de bord"
             >
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1565C0] to-[#1E88E5] flex items-center justify-center shadow shrink-0">
                 <Users className="w-6 h-6 text-white" />
