@@ -95,7 +95,7 @@ export default function FicheEleve() {
               <Input
                 {...register('age', { ...eleveValidationRules.age, valueAsNumber: true })}
                 type="number"
-                placeholder="Âge (2-25 ans)"
+                placeholder="Âge (3-12 ans)"
                 className={errors.age ? 'border-destructive' : ''}
               />
               {errors.age && (
