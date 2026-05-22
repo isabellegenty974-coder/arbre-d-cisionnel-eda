@@ -18,7 +18,7 @@ export default function Accueil() {
       const map = new Map();
       fiches.forEach(f => {
         const key = `${f.prenom}|${f.nom}`.toLowerCase();
-        map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date });
+        map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date, profession: f.createdByProfession });
       });
       diagnostics.forEach(d => {
         const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
@@ -124,9 +124,12 @@ export default function Accueil() {
                       <div className="w-5 h-5 rounded-full bg-blue-950/20 flex items-center justify-center shrink-0">
                         <span className="text-[8px] font-bold text-blue-950">{e.prenom?.[0]}{e.nom?.[0]}</span>
                       </div>
-                      <span className="text-[10px] text-foreground font-medium">{e.prenom} {e.nom}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] text-foreground font-medium block">{e.prenom} {e.nom}</span>
+                        {e.profession && <span className="text-[8px] text-muted-foreground">{e.profession}</span>}
+                      </div>
                       {e.lastDate && (
-                        <span className="text-[9px] text-muted-foreground ml-auto">
+                        <span className="text-[9px] text-muted-foreground ml-auto shrink-0">
                           {new Date(e.lastDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                         </span>
                       )}
