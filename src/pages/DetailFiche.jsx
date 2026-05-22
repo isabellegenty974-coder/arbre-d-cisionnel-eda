@@ -44,6 +44,15 @@ export default function DetailFiche() {
       .finally(() => setLoading(false));
   }, [ficheId]);
 
+  // Refresh la fiche toutes les 2 secondes pour détecter les mises à jour du rapport
+  useEffect(() => {
+    if (!ficheId) return;
+    const interval = setInterval(() => {
+      base44.entities.FicheEleve.get(ficheId).then(setFiche);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [ficheId]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
