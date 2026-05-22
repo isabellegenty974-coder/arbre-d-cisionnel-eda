@@ -94,12 +94,12 @@ export default function Dashboard() {
             <div className="grid gap-3">
               {filtered.map((eleve, idx) => (
                 <motion.div
-                  key={eleve.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * idx }}
-                  className="p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
-                >
+                   key={eleve.id}
+                   initial={{ opacity: 0, y: 10 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ delay: Math.min(0.02 * idx, 0.1), duration: 0.2 }}
+                   className="p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
+                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground">{eleve.prenom} {eleve.nom}</h3>

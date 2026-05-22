@@ -38,6 +38,7 @@ export default function HamburgerMenu() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               onClick={() => setIsOpen(false)}
               className="fixed inset-0 bg-black/40 z-30"
             />
@@ -45,7 +46,7 @@ export default function HamburgerMenu() {
               initial={{ x: -400 }}
               animate={{ x: 0 }}
               exit={{ x: -400 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: 'tween', duration: 0.2 }}
               className="fixed left-0 top-0 h-screen w-80 bg-card border-r border-border z-40 overflow-y-auto p-6"
             >
               {/* Header */}

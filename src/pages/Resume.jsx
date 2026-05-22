@@ -33,7 +33,7 @@ function DiagnosticView({ diag }) {
   return (
     <div className="space-y-8">
       {/* Infos élève */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
         className="p-5 rounded-xl bg-primary/5 border border-primary/10">
         <h3 className="font-semibold text-foreground mb-1">{diag.eleve_prenom} {diag.eleve_nom}</h3>
         {diag.eleve_age && <p className="text-sm text-muted-foreground">Âge: {diag.eleve_age} ans</p>}
@@ -43,7 +43,7 @@ function DiagnosticView({ diag }) {
 
       {/* Items cochés */}
       {totalItems > 0 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.2 }}
           className="space-y-4">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">📝 Items cochés</h3>
           {Object.entries(DOMAIN_LABELS).map(([key, label]) => {
@@ -68,7 +68,7 @@ function DiagnosticView({ diag }) {
 
       {/* Hypothèse diagnostique */}
       {synthesis.mainCategory && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.2 }}
           className="p-5 rounded-xl bg-card border-2 border-primary/30">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-primary mt-1 shrink-0" />
@@ -90,7 +90,7 @@ function DiagnosticView({ diag }) {
 
       {/* Professionnels */}
       {synthesis.professionals.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.2 }}
           className="p-5 rounded-xl bg-chart-2/10 border border-chart-2/20">
           <div className="flex items-start gap-3">
             <Users className="w-5 h-5 text-chart-2 mt-1 shrink-0" />
@@ -108,7 +108,7 @@ function DiagnosticView({ diag }) {
 
       {/* Préconisations */}
       {recommendations.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.2 }}
           className="p-5 rounded-xl bg-accent/10 border border-accent/20">
           <div className="flex items-start gap-3">
             <Lightbulb className="w-5 h-5 text-accent mt-1 shrink-0" />
