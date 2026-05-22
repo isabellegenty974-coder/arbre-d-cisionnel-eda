@@ -11,8 +11,10 @@ export default function DetailFiche() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [fiche, setFiche] = useState(null);
+  const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showRapport, setShowRapport] = useState(false);
+  const [selectedRapport, setSelectedRapport] = useState(null);
 
   const ficheId = searchParams.get('id');
 
@@ -22,8 +24,20 @@ export default function DetailFiche() {
       return;
     }
 
-    base44.entities.FicheEleve.get(ficheId)
-      .then(setFiche)
+    Promise.all([
+      base44.entities.FicheEleve.get(ficheId),
+      base44.entities.Diagnostic.filter({ createdByName: { $exists: true } }, '-created_date')
+    ])
+      .then(([ficheData, allDiagnostics]) => {
+        setFiche(ficheData);
+        if (ficheData && allDiagnostics) {
+          const related = allDiagnostics.filter(
+            d => d.eleve_nom?.toLowerCase() === ficheData.nom?.toLowerCase() &&
+                 d.eleve_prenom?.toLowerCase() === ficheData.prenom?.toLowerCase()
+          );
+          setDiagnostics(related);
+        }
+      })
       .catch(() => setFiche(null))
       .finally(() => setLoading(false));
   }, [ficheId]);
@@ -117,6 +131,48 @@ export default function DetailFiche() {
             )}
           </motion.div>
 
+          {/* Rapports générés */}
+          {diagnostics.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className="space-y-3"
+            >
+              <h2 className="font-semibold text-foreground">Rapports générés</h2>
+              <div className="space-y-2">
+                {diagnostics.map((diag, idx) => (
+                  <motion.div
+                    key={diag.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 + idx * 0.05 }}
+                    className="flex items-center justify-between gap-3 p-3 bg-card border border-border rounded-lg"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {new Date(diag.created_date).toLocaleDateString('fr-FR')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{diag.statut || 'Non spécifié'}</p>
+                    </div>
+                    {diag.rapport && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          setSelectedRapport(diag);
+                          setShowRapport(true);
+                        }}
+                      >
+                        Voir
+                      </Button>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {/* Actions */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -138,19 +194,10 @@ export default function DetailFiche() {
             >
               Observation
             </Button>
-            {fiche.rapport && (
-              <Button
-                variant="secondary"
-                onClick={() => setShowRapport(true)}
-                className="gap-2"
-              >
-                Rapport
-              </Button>
-            )}
           </motion.div>
 
           {/* Modal Rapport */}
-          {fiche.rapport && showRapport && (
+          {showRapport && selectedRapport && (
             <div
               className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
               onClick={() => setShowRapport(false)}
@@ -158,11 +205,14 @@ export default function DetailFiche() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-card rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto p-6 border border-border"
+                className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 border border-border"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="font-semibold text-foreground mb-4">Rapport</h2>
-                <p className="text-sm text-foreground whitespace-pre-wrap mb-4">{fiche.rapport}</p>
+                <h2 className="font-semibold text-foreground mb-2">Rapport</h2>
+                <p className="text-xs text-muted-foreground mb-4">
+                  {new Date(selectedRapport.created_date).toLocaleDateString('fr-FR')}
+                </p>
+                <p className="text-sm text-foreground whitespace-pre-wrap mb-4">{selectedRapport.rapport}</p>
                 <Button
                   variant="outline"
                   onClick={() => setShowRapport(false)}
