@@ -15,6 +15,7 @@ export default function DetailFiche() {
   const [loading, setLoading] = useState(true);
   const [showRapport, setShowRapport] = useState(false);
   const [selectedRapport, setSelectedRapport] = useState(null);
+  const [selectedDiagnosticId, setSelectedDiagnosticId] = useState(null);
 
   const ficheId = searchParams.get('id');
 
@@ -102,12 +103,23 @@ export default function DetailFiche() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
-              className="space-y-2"
+              className="flex items-center justify-between gap-3 p-3 bg-card border border-border rounded-lg"
             >
-              <h2 className="font-semibold text-foreground">Rapport</h2>
-              <div className="text-sm text-foreground bg-card border border-border rounded-lg p-3 whitespace-pre-wrap">
-                {fiche.rapport}
+              <div>
+                <h2 className="font-semibold text-foreground">Rapport</h2>
+                <p className="text-xs text-muted-foreground mt-1">{new Date(fiche.created_date).toLocaleDateString('fr-FR')}</p>
               </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setSelectedRapport(fiche);
+                  setSelectedDiagnosticId(null);
+                  setShowRapport(true);
+                }}
+              >
+                Voir
+              </Button>
             </motion.div>
           )}
 
@@ -161,6 +173,7 @@ export default function DetailFiche() {
                         variant="secondary"
                         onClick={() => {
                           setSelectedRapport(diag);
+                          setSelectedDiagnosticId(diag.id);
                           setShowRapport(true);
                         }}
                       >
@@ -208,7 +221,9 @@ export default function DetailFiche() {
                 className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 border border-border"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="font-semibold text-foreground mb-2">Rapport</h2>
+                <h2 className="font-semibold text-foreground mb-2">
+                  {selectedDiagnosticId ? 'Rapport - Diagnostic' : 'Rapport - Fiche élève'}
+                </h2>
                 <p className="text-xs text-muted-foreground mb-4">
                   {new Date(selectedRapport.created_date).toLocaleDateString('fr-FR')}
                 </p>
