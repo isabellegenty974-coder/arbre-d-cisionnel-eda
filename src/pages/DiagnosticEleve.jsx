@@ -4,8 +4,8 @@ import { base44 } from "@/api/base44Client";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
-import { Save, ChevronDown, ChevronUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { Save, ChevronDown, ChevronUp, FileText, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
   {
@@ -95,6 +95,8 @@ export default function DiagnosticEleve() {
   const [openSections, setOpenSections] = useState({ apprentissages: true, comportement: true, developpement: true, contexte: true });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [rapport, setRapport] = useState(null);
 
   useEffect(() => {
     if (eleveId) {
@@ -120,6 +122,32 @@ export default function DiagnosticEleve() {
   const toggleSection = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
   const totalChecked = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
+
+  const handleGenerateRapport = async () => {
+    setGenerating(true);
+    const lignes = [];
+    CATEGORIES.forEach(cat => {
+      const items = checked[cat.key] || [];
+      if (items.length > 0) {
+        lignes.push(`**${cat.label}** : ${items.join(" ; ")}`);
+      }
+    });
+    const prompt = `Tu es un professionnel de l'éducation spécialisée. Un enseignant a observé les signes suivants chez un élève :
+
+${lignes.join("\n")}
+
+Génère un rapport clinique structuré en français avec :
+1. Un résumé des observations
+2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)
+3. Les orientations recommandées (professionnels à consulter, aménagements pédagogiques)
+4. Un message de vigilance à destination de l'enseignant
+
+Sois professionnel, bienveillant et clair. Évite de poser un diagnostic définitif.`;
+
+    const result = await base44.integrations.Core.InvokeLLM({ prompt });
+    setRapport(result);
+    setGenerating(false);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -204,18 +232,58 @@ export default function DiagnosticEleve() {
             );
           })}
 
-          <div className="pt-2">
+          <div className="pt-2 flex flex-col gap-3">
+            <Button
+              onClick={handleGenerateRapport}
+              disabled={totalChecked === 0 || generating}
+              variant="outline"
+              className="w-full gap-2 border-primary/40 text-primary hover:bg-primary/5"
+            >
+              <FileText className="w-4 h-4" />
+              {generating ? "Génération du rapport..." : `Générer le rapport (${totalChecked} item${totalChecked > 1 ? "s" : ""})`}
+            </Button>
             <Button
               onClick={handleSave}
               disabled={totalChecked === 0 || saving || saved}
               className={`w-full gap-2 transition-all ${saved ? "bg-green-600 hover:bg-green-700" : ""}`}
             >
               <Save className="w-4 h-4" />
-              {saved ? "✓ Enregistré !" : saving ? "Enregistrement..." : `Enregistrer le diagnostic (${totalChecked} item${totalChecked > 1 ? "s" : ""})`}
+              {saved ? "✓ Enregistré !" : saving ? "Enregistrement..." : `Enregistrer`}
             </Button>
           </div>
         </div>
       </ScreenLayout>
+
+      {/* Rapport Modal */}
+      <AnimatePresence>
+        {rapport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4"
+            onClick={() => setRapport(null)}
+          >
+            <motion.div
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-card rounded-2xl border border-border w-full max-w-2xl max-h-[85vh] flex flex-col shadow-soft-lg"
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+                <h2 className="font-display font-semibold text-lg">📋 Rapport — {eleve?.prenom} {eleve?.nom}</h2>
+                <button onClick={() => setRapport(null)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="overflow-y-auto px-6 py-5">
+                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{rapport}</div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
