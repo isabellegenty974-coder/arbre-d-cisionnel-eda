@@ -28,7 +28,18 @@ export default function Dashboard() {
   }, []);
 
   const handleDelete = async (fiche) => {
-    if (window.confirm('Supprimer cette fiche élève ?')) {
+    if (window.confirm('Supprimer cette fiche élève ? Tous les diagnostics liés seront aussi supprimés.')) {
+      // Supprimer tous les diagnostics liés à cet élève
+      const diagnostics = await base44.entities.Diagnostic.filter({
+        eleve_nom: fiche.nom,
+        eleve_prenom: fiche.prenom
+      }).catch(() => []);
+      
+      for (const diag of diagnostics) {
+        await base44.entities.Diagnostic.delete(diag.id).catch(() => {});
+      }
+      
+      // Supprimer la fiche élève
       await base44.entities.FicheEleve.delete(fiche.id);
       await loadEleves();
     }
