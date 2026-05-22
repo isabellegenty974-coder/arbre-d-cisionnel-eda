@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
-import { Save, ChevronDown, ChevronUp, FileText, X } from "lucide-react";
+import { Save, ChevronDown, ChevronUp, FileText, X, Download } from "lucide-react";
+import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
@@ -277,8 +278,32 @@ Sois professionnel, bienveillant et clair. Évite de poser un diagnostic défini
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="overflow-y-auto px-6 py-5">
+              <div className="overflow-y-auto px-6 py-5 flex-1">
                 <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{rapport}</div>
+              </div>
+              <div className="px-6 py-4 border-t border-border shrink-0">
+                <Button
+                  className="w-full gap-2"
+                  onClick={() => {
+                    const doc = new jsPDF();
+                    const name = `${eleve?.prenom || ''} ${eleve?.nom || ''}`.trim();
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Rapport - Hypothese(s) diagnostique(s)`, 15, 20);
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'normal');
+                    if (name) doc.text(`Eleve : ${name}`, 15, 30);
+                    if (eleve?.classe) doc.text(`Classe : ${eleve.classe}`, 15, 37);
+                    doc.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`, 15, eleve?.classe ? 44 : 37);
+                    const lines = doc.splitTextToSize(rapport, 180);
+                    doc.setFontSize(10);
+                    doc.text(lines, 15, eleve?.classe ? 54 : 47);
+                    doc.save(`rapport_${(name || 'eleve').replace(/\s+/g, '_')}.pdf`);
+                  }}
+                >
+                  <Download className="w-4 h-4" />
+                  Enregistrer en PDF
+                </Button>
               </div>
             </motion.div>
           </motion.div>
