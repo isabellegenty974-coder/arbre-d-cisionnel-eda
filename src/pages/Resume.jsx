@@ -2,7 +2,7 @@ import { useDiagnostic } from "@/lib/DiagnosticContext";
 import RapportContent from "@/components/RapportContent";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import { Button } from "@/components/ui/button";
-import { Trash2, FileText, AlertCircle, CheckCircle2, Users, Lightbulb } from "lucide-react";
+import { Trash2, FileText, AlertCircle, CheckCircle2, Users, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportResumePDF } from "@/lib/pdfExport";
@@ -20,6 +20,7 @@ const DOMAIN_LABELS = {
 
 function DiagnosticView({ diag }) {
   const selections = diag.selections || {};
+  const [rapportOpen, setRapportOpen] = useState(false);
 
   // Détecter si le format est "nouveau" (strings simples) ou "ancien" (objets)
   const isNewFormat = Object.values(selections).some(arr => Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'string');
@@ -123,9 +124,22 @@ function DiagnosticView({ diag }) {
 
       {diag.rapport && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-          className="p-5 rounded-xl bg-card border border-border">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">📋 Rapport généré</h3>
-          <RapportContent text={diag.rapport} />
+          className="rounded-xl border-2 border-primary/30 overflow-hidden">
+          <button
+            onClick={() => setRapportOpen(o => !o)}
+            className="w-full flex items-center justify-between px-5 py-4 bg-primary/5 hover:bg-primary/10 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-primary" />
+              <span className="font-semibold text-foreground">🎯 Hypothèses diagnostiques</span>
+            </div>
+            {rapportOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+          </button>
+          {rapportOpen && (
+            <div className="px-5 py-4 bg-card">
+              <RapportContent text={diag.rapport} />
+            </div>
+          )}
         </motion.div>
       )}
 
