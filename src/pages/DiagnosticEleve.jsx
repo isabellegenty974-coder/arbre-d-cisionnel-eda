@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Save, ChevronDown, ChevronUp, FileText, X, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
+import RapportContent from "@/components/RapportContent";
 
 const CATEGORIES = [
   {
@@ -312,7 +313,7 @@ Sois professionnel, bienveillant et clair. Évite de poser un diagnostic défini
                 </button>
               </div>
               <div className="overflow-y-auto px-6 py-5 flex-1">
-                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{rapport}</div>
+                <RapportContent text={rapport} />
               </div>
               <div className="px-6 py-4 border-t border-border shrink-0">
                 <Button
