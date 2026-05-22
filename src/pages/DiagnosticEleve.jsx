@@ -207,7 +207,7 @@ Sois professionnel, bienveillant et clair. Évite de poser un diagnostic défini
     <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
       <ScreenLayout
-        title={`🔍 Hypothèse(s) diagnostique(s)`}
+        title={`🔍 Éléments d'observation`}
         subtitle={eleve ? `${eleve.prenom} ${eleve.nom}${eleve.classe ? ` — ${eleve.classe}` : ""}` : ""}
       >
         <div className="space-y-4">
