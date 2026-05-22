@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Trash2, ClipboardList, Plus } from 'lucide-react';
+import { Trash2, ClipboardList, Plus, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 
@@ -26,11 +26,13 @@ export default function Dashboard() {
         const key = `${f.prenom}|${f.nom}`.toLowerCase();
         map.set(key, { prenom: f.prenom, nom: f.nom, age: f.age, classe: f.classe, ficheId: f.id });
       });
-      // Add students from Diagnostic if not already present
+      // Add students from Diagnostic if not already present, and track last diagId
       diagnostics.forEach(d => {
         const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
         if (!map.has(key)) {
-          map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, age: d.eleve_age, classe: d.eleve_classe, ficheId: null });
+          map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, age: d.eleve_age, classe: d.eleve_classe, ficheId: null, lastDiagId: d.id });
+        } else if (!map.get(key).lastDiagId) {
+          map.get(key).lastDiagId = d.id;
         }
       });
       setEleves([...map.values()]);
@@ -96,6 +98,17 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      {eleve.lastDiagId && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5"
+                          onClick={() => navigate(`/resume?id=${eleve.lastDiagId}`)}
+                        >
+                          <FileText className="w-4 h-4" />
+                          Rapport
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         className="gap-1.5"
