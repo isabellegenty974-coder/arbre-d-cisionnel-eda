@@ -3,17 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, ClipboardList, Users, AlertCircle } from 'lucide-react';
+import { Plus, ClipboardList, Users, AlertCircle, Camera } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { useForm } from 'react-hook-form';
 import { eleveValidationRules } from '@/lib/formValidation';
+import PhotoEEUpload from '@/components/PhotoEEUpload';
 
 export default function FicheEleve() {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [savedId, setSavedId] = useState(null);
+  const [photoUrl, setPhotoUrl] = useState(null);
   const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({
     mode: 'onChange',
     defaultValues: { prenom: '', nom: '', age: '', classe: '' },
@@ -118,6 +120,20 @@ export default function FicheEleve() {
               )}
             </div>
           </motion.div>
+
+          {saved && savedId && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-6 rounded-xl bg-accent/5 border-2 border-accent/20"
+            >
+              <PhotoEEUpload 
+                ficheId={savedId} 
+                initialPhotoUrl={photoUrl}
+                onPhotoUploaded={setPhotoUrl}
+              />
+            </motion.div>
+          )}
 
           {!saved ? (
             <Button
