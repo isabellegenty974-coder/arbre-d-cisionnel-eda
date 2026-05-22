@@ -14,43 +14,47 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    Promise.all([
+  const loadEleves = async () => {
+    const [fiches, diagnostics] = await Promise.all([
       base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
       base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
-    ]).then(([fiches, diagnostics]) => {
-      // Build a unique student list from both sources
-      const map = new Map();
-      // FicheEleve records have priority (they have ficheId)
-      fiches.forEach(f => {
-        const key = `${f.prenom}|${f.nom}`.toLowerCase();
-        map.set(key, { prenom: f.prenom, nom: f.nom, age: f.age, classe: f.classe, ficheId: f.id });
-      });
-      // Add students from Diagnostic if not already present, and track last diagId
-      diagnostics.forEach(d => {
-        const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
-        if (!map.has(key)) {
-          map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, age: d.eleve_age, classe: d.eleve_classe, ficheId: null, lastDiagId: d.id });
-        } else if (!map.get(key).lastDiagId) {
-          map.get(key).lastDiagId = d.id;
-        }
-      });
-      setEleves([...map.values()]);
-      setLoading(false);
+    ]);
+    const map = new Map();
+    fiches.forEach(f => {
+      const key = `${f.prenom}|${f.nom}`.toLowerCase();
+      map.set(key, { prenom: f.prenom, nom: f.nom, age: f.age, classe: f.classe, ficheId: f.id });
     });
+    diagnostics.forEach(d => {
+      const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, age: d.eleve_age, classe: d.eleve_classe, ficheId: null, lastDiagId: d.id });
+      } else if (!map.get(key).lastDiagId) {
+        map.get(key).lastDiagId = d.id;
+      }
+    });
+    setEleves([...map.values()]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadEleves();
+    const unsubFiche = base44.entities.FicheEleve.subscribe(() => loadEleves());
+    const unsubDiag = base44.entities.Diagnostic.subscribe(() => loadEleves());
+    return () => {
+      unsubFiche();
+      unsubDiag();
+    };
   }, []);
 
   const handleDelete = async (eleve) => {
     if (window.confirm('Supprimer cet élève et tous ses diagnostics ?')) {
-      // Supprime la fiche élève
       if (eleve.ficheId) await base44.entities.FicheEleve.delete(eleve.ficheId);
-      // Supprime tous les diagnostics liés
       const diags = await base44.entities.Diagnostic.filter({
         eleve_prenom: eleve.prenom,
         eleve_nom: eleve.nom,
       });
       await Promise.all(diags.map(d => base44.entities.Diagnostic.delete(d.id)));
-      setEleves(eleves.filter(e => `${e.prenom}|${e.nom}` !== `${eleve.prenom}|${eleve.nom}`));
+      await loadEleves();
     }
   };
 
