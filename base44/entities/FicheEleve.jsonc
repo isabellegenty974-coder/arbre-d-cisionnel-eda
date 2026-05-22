@@ -22,6 +22,10 @@
       "type": "string",
       "description": "Observations compl\u00e9mentaires"
     },
+    "notes": {
+      "type": "string",
+      "description": "Notes libres et observations rapides lors des entretiens"
+    },
     "score_apprentissages": {
       "type": "number",
       "description": "Score du domaine Apprentissages"

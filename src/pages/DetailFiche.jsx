@@ -17,6 +17,8 @@ export default function DetailFiche() {
   const [showRapport, setShowRapport] = useState(false);
   const [selectedRapport, setSelectedRapport] = useState(null);
   const [selectedDiagnosticId, setSelectedDiagnosticId] = useState(null);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notes, setNotes] = useState('');
 
   const ficheId = searchParams.get('id');
 
@@ -52,6 +54,13 @@ export default function DetailFiche() {
     }, 2000);
     return () => clearInterval(interval);
   }, [ficheId]);
+
+  const handleNotesChange = async () => {
+    if (!fiche) return;
+    await base44.entities.FicheEleve.update(fiche.id, { notes });
+    setFiche({ ...fiche, notes });
+    setEditingNotes(false);
+  };
 
   if (loading) {
     return (
@@ -195,6 +204,63 @@ export default function DetailFiche() {
               </div>
             </motion.div>
           )}
+
+          {/* Notes Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="p-6 rounded-xl bg-gradient-to-br from-amber-50 to-amber-50/50 dark:from-amber-950/20 dark:to-amber-950/10 border border-amber-200/30 dark:border-amber-800/30"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                📝 Notes libres
+              </h3>
+              {!editingNotes && (
+                <button
+                  onClick={() => {
+                    setNotes(fiche?.notes || '');
+                    setEditingNotes(true);
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Éditer
+                </button>
+              )}
+            </div>
+            {editingNotes ? (
+              <div className="space-y-3">
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Inscrivez vos observations rapides lors des entretiens..."
+                  className="w-full min-h-32 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => setEditingNotes(false)}
+                    className="px-4 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition-colors text-sm font-medium"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleNotesChange}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="min-h-32 p-4 rounded-lg bg-white/50 dark:bg-foreground/5 border border-amber-200/20 dark:border-amber-800/20">
+                {fiche?.notes ? (
+                  <p className="text-foreground whitespace-pre-wrap text-sm leading-relaxed">{fiche.notes}</p>
+                ) : (
+                  <p className="text-muted-foreground text-sm italic">Aucune note pour le moment</p>
+                )}
+              </div>
+            )}
+          </motion.div>
 
           {/* Actions */}
           <motion.div
