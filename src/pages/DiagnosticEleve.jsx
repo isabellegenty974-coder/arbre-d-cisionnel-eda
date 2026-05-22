@@ -5,7 +5,7 @@ import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { Save, ChevronDown, ChevronUp, FileText, X, Download } from "lucide-react";
-import jsPDF from "jspdf";
+import { jsPDF } from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
