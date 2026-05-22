@@ -44,7 +44,7 @@ export default function Historique() {
           <Link to="/dashboard">
             <Button variant="outline" className="gap-2 mb-4">
               <ArrowLeft className="w-4 h-4" />
-              Retour au dashboard
+              Retour vers tableau de bord
             </Button>
           </Link>
 
