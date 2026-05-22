@@ -53,6 +53,19 @@ export default function DetailFiche() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-2xl mx-auto space-y-6"
         >
+          {/* Âge */}
+          {fiche.age && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="p-3 rounded-lg bg-secondary/50 border border-border"
+            >
+              <p className="text-sm text-muted-foreground mb-1">Âge</p>
+              <p className="font-semibold text-foreground">{fiche.age} ans</p>
+            </motion.div>
+          )}
+
           {/* Observations */}
           {fiche.observations && (
             <motion.div
@@ -103,12 +116,12 @@ export default function DetailFiche() {
             )}
           </motion.div>
 
-          {/* Retour */}
+          {/* Actions */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex gap-2"
+            className="flex gap-2 flex-wrap"
           >
             <Button
               variant="outline"
@@ -118,7 +131,56 @@ export default function DetailFiche() {
               <ArrowLeft className="w-4 h-4" />
               Retour
             </Button>
+            <Button
+              onClick={() => navigate(`/diagnostic-eleve?id=${ficheId}`)}
+              className="gap-2"
+            >
+              Observation
+            </Button>
+            {fiche.rapport && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  const modal = document.getElementById('rapportModal');
+                  if (modal) modal.classList.remove('hidden');
+                }}
+                className="gap-2"
+              >
+                Rapport
+              </Button>
+            )}
           </motion.div>
+
+          {/* Modal Rapport */}
+          {fiche.rapport && (
+            <div
+              id="rapportModal"
+              className="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={(e) => {
+                if (e.target.id === 'rapportModal') {
+                  e.currentTarget.classList.add('hidden');
+                }
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-card rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto p-6 border border-border"
+              >
+                <h2 className="font-semibold text-foreground mb-4">Rapport</h2>
+                <p className="text-sm text-foreground whitespace-pre-wrap mb-4">{fiche.rapport}</p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    document.getElementById('rapportModal')?.classList.add('hidden');
+                  }}
+                  className="w-full"
+                >
+                  Fermer
+                </Button>
+              </motion.div>
+            </div>
+          )}
         </motion.div>
       </ScreenLayout>
     </div>
