@@ -7,13 +7,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUrl }) {
   const [preview, setPreview] = useState(initialPhotoUrl || null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
   const handleFileSelect = async (file) => {
     if (!file) return;
+    if (!ficheId) {
+      setError('ID de fiche manquant');
+      return;
+    }
 
     setIsLoading(true);
+    setError(null);
     try {
       // Afficher l'aperçu
       const reader = new FileReader();
@@ -23,15 +29,20 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
       // Upload le fichier
       const response = await base44.integrations.Core.UploadFile({ file });
       
+      if (!response?.file_url) {
+        throw new Error('URL du fichier manquante');
+      }
+
       // Sauvegarde l'URL
       await base44.entities.FicheEleve.update(ficheId, {
         photo_ee_url: response.file_url
       });
 
       onPhotoUploaded?.(response.file_url);
-    } catch (error) {
-      console.error('Erreur upload photo:', error);
+    } catch (err) {
+      console.error('Erreur upload photo:', err);
       setPreview(null);
+      setError(err?.message || 'Erreur lors de l\'upload');
     } finally {
       setIsLoading(false);
     }
@@ -40,6 +51,16 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
   return (
     <div className="space-y-3">
       <label className="text-sm font-medium text-foreground block">Photo de synthèse EE</label>
+      
+      {error && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm"
+        >
+          {error}
+        </motion.div>
+      )}
       
       <AnimatePresence>
         {preview && (
@@ -53,6 +74,7 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
             <button
               onClick={() => {
                 setPreview(null);
+                setError(null);
                 base44.entities.FicheEleve.update(ficheId, { photo_ee_url: null });
               }}
               className="absolute top-2 right-2 p-1.5 rounded-lg bg-destructive/90 hover:bg-destructive transition-colors"
