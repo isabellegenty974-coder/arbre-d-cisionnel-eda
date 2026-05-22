@@ -73,7 +73,7 @@ export default function Accueil() {
             Arbre décisionnel EDA
           </h1>
           <p className="mt-2 text-muted-foreground text-sm sm:text-base max-w-xs mx-auto leading-relaxed">
-            Outil d’aide à la formulation d’hypothèses diagnostiques pour les enseignants
+            Outil d’aide à la formulation d’hypothèses diagnostiques
           </p>
         </motion.div>
 
