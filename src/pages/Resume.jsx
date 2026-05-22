@@ -2,7 +2,7 @@ import { useDiagnostic } from "@/lib/DiagnosticContext";
 import RapportContent from "@/components/RapportContent";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import { Button } from "@/components/ui/button";
-import { Trash2, FileText, AlertCircle, CheckCircle2, Users, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, FileText, AlertCircle, CheckCircle2, Users, Lightbulb, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportResumePDF } from "@/lib/pdfExport";
@@ -21,6 +21,8 @@ const DOMAIN_LABELS = {
 function DiagnosticView({ diag }) {
   const selections = diag.selections || {};
   const [rapportOpen, setRapportOpen] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
+  const [rapport, setRapport] = useState(diag.rapport);
 
   // Détecter si le format est "nouveau" (strings simples) ou "ancien" (objets)
   const isNewFormat = Object.values(selections).some(arr => Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'string');
@@ -126,15 +128,51 @@ function DiagnosticView({ diag }) {
       {isNewFormat && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="rounded-xl border-2 border-primary/30 overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 bg-primary/5">
-            <AlertCircle className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">🎯 Hypothèses diagnostiques</span>
+          <div className="flex items-center justify-between gap-2 px-5 py-4 bg-primary/5">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-primary" />
+              <span className="font-semibold text-foreground">🎯 Hypothèses diagnostiques</span>
+            </div>
+            {totalItems > 0 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={async () => {
+                  setRegenerating(true);
+                  try {
+                    const lignes = [];
+                    const CATEGORIES_MAP = {
+                      apprentissages: '📚 Apprentissages',
+                      comportement: '💝 Comportement',
+                      developpement: '🌱 Développement',
+                      contexte: '🏠 Contexte',
+                    };
+                    Object.entries(selections).forEach(([key, items]) => {
+                      if (items && items.length > 0) {
+                        lignes.push(`**${CATEGORIES_MAP[key]}** : ${items.join(" ; ")}`);
+                      }
+                    });
+                    const prompt = `Tu es un professionnel de l\'\u00e9ducation spécialisée. Un enseignant a observé les signes suivants chez un élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations recommandées (professionnels à consulter, aménagements pédagogiques)\n4. Un message de vigilance à destination de l\'enseignant\n\nSois professionnel, bienveillant et clair. Évite de poser un diagnostic définitif.`;
+                    const result = await base44.integrations.Core.InvokeLLM({ prompt });
+                    setRapport(result);
+                    await base44.entities.Diagnostic.update(diag.id, { rapport: result });
+                  } finally {
+                    setRegenerating(false);
+                  }
+                }}
+                disabled={regenerating}
+                className="gap-1"
+              >
+                <RefreshCw className={`w-4 h-4 ${regenerating ? 'animate-spin' : ''}`} />
+                {regenerating ? 'Génération...' : 'Regénérer'}
+              </Button>
+            )}
           </div>
           <div className="px-5 py-4 bg-card">
-            {diag.rapport ? (
-              <RapportContent text={diag.rapport} />
+            {rapport ? (
+              <RapportContent text={rapport} />
             ) : (
-              <p className="text-sm text-muted-foreground italic">Aucun rapport généré. Retournez sur la fiche d’observation et cliquez sur "Générer le rapport" avant d’enregistrer.</p>
+              <p className="text-sm text-muted-foreground italic">Aucun rapport généré. Cliquez sur "Regénérer" pour en créer un.</p>
             )}
           </div>
         </motion.div>
@@ -151,6 +189,12 @@ function DiagnosticView({ diag }) {
 
 export default function Resume() {
   const { selections, eleve, clearAll, crossRecommendations } = useDiagnostic();
+  const CATEGORIES_MAP = {
+    apprentissages: '📚 Apprentissages',
+    comportement: '💝 Comportement',
+    developpement: '🌱 Développement',
+    contexte: '🏠 Contexte',
+  };
   const urlParams = new URLSearchParams(window.location.search);
   const diagId = urlParams.get('id');
   const [loadedDiag, setLoadedDiag] = useState(null);
@@ -170,14 +214,14 @@ export default function Resume() {
     return (
       <div className="min-h-screen bg-background">
         <HamburgerMenu />
-        <ScreenLayout title="📋 Résumé diagnostic">
+        <ScreenLayout title="📋 Hypothèses diagnostiques">
           {loadingDiag ? (
             <div className="text-center py-12 text-muted-foreground">Chargement...</div>
           ) : loadedDiag ? (
             <DiagnosticView diag={loadedDiag} />
           ) : (
             <div className="text-center p-8 rounded-lg bg-secondary/30 border border-secondary">
-              <p className="text-muted-foreground">Diagnostic introuvable</p>
+              <p className="text-muted-foreground">Hypothèses diagnostiques introuvables</p>
             </div>
           )}
         </ScreenLayout>
