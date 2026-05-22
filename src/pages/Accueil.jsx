@@ -147,6 +147,13 @@ export default function Accueil() {
 
         {/* Secondary 3-col grid */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="grid grid-cols-3 gap-3">
+          <Link to="/invite-users" className="group bg-white rounded-2xl border border-border p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
+            <div className="w-10 h-10 rounded-full bg-[#F0F4F8] border border-border flex items-center justify-center mb-2 group-hover:border-green-300 transition-colors">
+              <Users className="w-5 h-5 text-muted-foreground group-hover:text-green-600 transition-colors" />
+            </div>
+            <p className="font-bold text-foreground text-xs mb-1">Inviter</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">Ajouter utilisateurs</p>
+          </Link>
           <Link to="/stats-annuelles" className="group bg-white rounded-2xl border border-border p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
             <div className="w-10 h-10 rounded-full bg-[#F0F4F8] border border-border flex items-center justify-center mb-2 group-hover:border-blue-300 transition-colors">
               <BarChart2 className="w-5 h-5 text-muted-foreground group-hover:text-blue-600 transition-colors" />
