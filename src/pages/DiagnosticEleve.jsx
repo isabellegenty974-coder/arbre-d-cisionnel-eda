@@ -223,6 +223,15 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
       const rapportEnrichi = `${result}\n\n## Analyse croisée des domaines\n${analyseResult}`;
       setRapport(rapportEnrichi);
       setGeneratedRapport(rapportEnrichi);
+
+      // Sauvegarde immédiatement le rapport dans FicheEleve
+      if (eleveId) {
+        try {
+          await base44.entities.FicheEleve.update(eleveId, { rapport: rapportEnrichi });
+        } catch (err) {
+          console.error('Erreur sauvegarde rapport FicheEleve:', err);
+        }
+      }
     } catch (err) {
       console.error(err);
       setRapport("Une erreur est survenue lors de la génération du rapport.");
