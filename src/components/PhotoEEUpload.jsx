@@ -14,27 +14,32 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
     if (!file) return;
 
     setIsLoading(true);
-    
-    // Afficher l'aperçu
-    const reader = new FileReader();
-    reader.onload = (e) => setPreview(e.target.result);
-    reader.readAsDataURL(file);
+    try {
+      // Afficher l'aperçu
+      const reader = new FileReader();
+      reader.onload = (e) => setPreview(e.target.result);
+      reader.readAsDataURL(file);
 
-    // Upload le fichier
-    const response = await base44.integrations.Core.UploadFile({ file });
-    
-    // Sauvegarde l'URL
-    await base44.entities.FicheEleve.update(ficheId, {
-      photo_ee_url: response.file_url
-    });
+      // Upload le fichier
+      const response = await base44.integrations.Core.UploadFile({ file });
+      
+      // Sauvegarde l'URL
+      await base44.entities.FicheEleve.update(ficheId, {
+        photo_ee_url: response.file_url
+      });
 
-    onPhotoUploaded?.(response.file_url);
-    setIsLoading(false);
+      onPhotoUploaded?.(response.file_url);
+    } catch (error) {
+      console.error('Erreur upload photo:', error);
+      setPreview(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="space-y-3">
-      <label className="text-sm font-medium text-foreground block">Photo des EE</label>
+      <label className="text-sm font-medium text-foreground block">Photo de synthèse EE</label>
       
       <AnimatePresence>
         {preview && (
