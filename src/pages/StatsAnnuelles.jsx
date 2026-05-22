@@ -46,24 +46,49 @@ export default function StatsAnnuelles() {
   };
 
   const nbEleves = new Set(diagnostics.map(d => `${d.eleve_prenom} ${d.eleve_nom}`)).size;
+  const nbDiagnostics = diagnostics.length;
 
-  // --- stats_hypotheses : fréquence des hypothèses sauvegardées ---
+  // --- stats_hypotheses : fréquence des items observés (nouveau format) ---
   const statsHypotheses = (() => {
     const counts = {};
     diagnostics.forEach((d) => {
-      const analyse = d.selections?._analyse;
+      const sel = d.selections || {};
+      // Nouveau format : { apprentissages: [...], comportement: [...], ... }
+      ['apprentissages', 'comportement', 'developpement', 'contexte'].forEach(cat => {
+        const items = sel[cat];
+        if (Array.isArray(items)) {
+          items.forEach(item => {
+            const label = typeof item === 'string' ? item : item?.label;
+            if (label) counts[label] = (counts[label] || 0) + 1;
+          });
+        }
+      });
+      // Ancien format : _analyse.hypotheses
+      const analyse = sel._analyse;
       if (analyse?.hypotheses && Array.isArray(analyse.hypotheses)) {
-        analyse.hypotheses.forEach((h) => {
-          counts[h] = (counts[h] || 0) + 1;
-        });
+        analyse.hypotheses.forEach(h => { counts[h] = (counts[h] || 0) + 1; });
       }
     });
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .map(([name, total]) => ({ name, total }));
+      .slice(0, 15)
+      .map(([name, total]) => ({ name: name.length > 30 ? name.slice(0, 30) + '…' : name, total }));
   })();
 
-  // --- stats_orientations : répartition des hypothèses (pour pie) ---
+  // --- stats par domaine ---
+  const statsDomaines = (() => {
+    const counts = { Apprentissages: 0, Comportement: 0, Développement: 0, Contexte: 0 };
+    diagnostics.forEach(d => {
+      const sel = d.selections || {};
+      if ((sel.apprentissages || []).length > 0) counts['Apprentissages']++;
+      if ((sel.comportement || []).length > 0) counts['Comportement']++;
+      if ((sel.developpement || []).length > 0) counts['Développement']++;
+      if ((sel.contexte || []).length > 0) counts['Contexte']++;
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  })();
+
+  // --- stats_orientations : répartition des items (pour pie) ---
   const statsOrientations = statsHypotheses.slice(0, 7).map(({ name, total }) => ({ name, value: total }));
 
   // --- stats_evolution : diagnostics créés par mois ---
@@ -94,18 +119,25 @@ export default function StatsAnnuelles() {
       <ScreenLayout title="📊 Statistiques annuelles">
         <div className="space-y-6">
 
-          {/* Compteur élèves */}
+          {/* Compteurs */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 p-5 rounded-xl bg-primary/10 border border-primary/20"
+            className="grid grid-cols-2 gap-3"
           >
-            <div className="p-3 rounded-lg bg-primary/20">
-              <Users className="w-6 h-6 text-primary" />
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
+              <Users className="w-5 h-5 text-primary shrink-0" />
+              <div>
+                <p className="text-2xl font-bold text-foreground">{nbEleves}</p>
+                <p className="text-xs text-muted-foreground">Élèves</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">{nbEleves}</p>
-              <p className="text-sm text-muted-foreground">Élèves évalués</p>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-accent/10 border border-accent/20">
+              <Download className="w-5 h-5 text-accent shrink-0" />
+              <div>
+                <p className="text-2xl font-bold text-foreground">{nbDiagnostics}</p>
+                <p className="text-xs text-muted-foreground">Diagnostics</p>
+              </div>
             </div>
           </motion.div>
 
