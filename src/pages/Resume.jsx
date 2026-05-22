@@ -122,22 +122,28 @@ function DiagnosticView({ diag }) {
         </motion.div>
       )}
 
-      {diag.rapport && (
+      {isNewFormat && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
           className="rounded-xl border-2 border-primary/30 overflow-hidden">
           <button
-            onClick={() => setRapportOpen(o => !o)}
-            className="w-full flex items-center justify-between px-5 py-4 bg-primary/5 hover:bg-primary/10 transition-colors"
+            onClick={() => diag.rapport && setRapportOpen(o => !o)}
+            className={`w-full flex items-center justify-between px-5 py-4 bg-primary/5 transition-colors ${diag.rapport ? 'hover:bg-primary/10 cursor-pointer' : 'cursor-default'}`}
           >
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-primary" />
               <span className="font-semibold text-foreground">🎯 Hypothèses diagnostiques</span>
             </div>
-            {rapportOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+            {diag.rapport && (rapportOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />)}
           </button>
-          {rapportOpen && (
+          {diag.rapport ? (
+            rapportOpen && (
+              <div className="px-5 py-4 bg-card">
+                <RapportContent text={diag.rapport} />
+              </div>
+            )
+          ) : (
             <div className="px-5 py-4 bg-card">
-              <RapportContent text={diag.rapport} />
+              <p className="text-sm text-muted-foreground italic">Aucun rapport généré pour ce diagnostic. Retournez sur la page d’observation pour en générer un avant d’enregistrer.</p>
             </div>
           )}
         </motion.div>
