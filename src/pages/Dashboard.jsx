@@ -108,7 +108,17 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1">
                          <div className="flex items-center gap-3 mb-1">
-                           <h3 className="font-semibold text-foreground">{eleve.prenom} {eleve.nom}</h3>
+                             <button
+                               onClick={() => {
+                                 const fiche = eleves.find(e => e.id === eleve.id);
+                               if (fiche?.ficheId) {
+                                 navigate(`/detail-fiche?id=${fiche.ficheId}`);
+                               }
+                               }}
+                               className="font-semibold text-foreground hover:text-primary hover:underline transition-colors cursor-pointer"
+                             >
+                               {eleve.prenom} {eleve.nom}
+                             </button>
                            {eleve.statut && (
                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                                eleve.statut === 'complète' ? 'bg-green-100 text-green-800' :

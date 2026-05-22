@@ -1,0 +1,144 @@
+import { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import ScreenLayout from '@/components/tree/ScreenLayout';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Loader } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export default function DetailFiche() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [fiche, setFiche] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const ficheId = searchParams.get('id');
+
+  useEffect(() => {
+    if (!ficheId) {
+      setLoading(false);
+      return;
+    }
+
+    base44.entities.FicheEleve.get(ficheId)
+      .then(setFiche)
+      .catch(() => setFiche(null))
+      .finally(() => setLoading(false));
+  }, [ficheId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!fiche) {
+    return (
+      <div className="min-h-screen bg-background">
+        <ScreenLayout title="Fiche non trouvée">
+          <p className="text-center text-muted-foreground">Cette fiche n'existe pas.</p>
+        </ScreenLayout>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-16">
+      <ScreenLayout title={`${fiche.prenom} ${fiche.nom}`} subtitle={fiche.classe ? `Classe: ${fiche.classe}` : ''}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-2xl mx-auto space-y-6"
+        >
+          {/* Infos élève */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-card border border-border"
+          >
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Prénom</p>
+              <p className="font-semibold text-foreground">{fiche.prenom}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Nom</p>
+              <p className="font-semibold text-foreground">{fiche.nom}</p>
+            </div>
+            {fiche.age && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Âge</p>
+                <p className="font-semibold text-foreground">{fiche.age} ans</p>
+              </div>
+            )}
+            {fiche.classe && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Classe</p>
+                <p className="font-semibold text-foreground">{fiche.classe}</p>
+              </div>
+            )}
+            {fiche.createdByProfession && (
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground mb-1">Créée par ({fiche.createdByProfession})</p>
+                <p className="font-semibold text-foreground">{fiche.createdByName}</p>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Photo des EE */}
+          {fiche.photo_ee_url && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-2"
+            >
+              <h2 className="font-semibold text-foreground">Photo des EE</h2>
+              <div className="rounded-lg overflow-hidden border-2 border-primary/20 bg-secondary/30">
+                <img
+                  src={fiche.photo_ee_url}
+                  alt="Photo EE"
+                  className="w-full h-auto max-h-96 object-cover"
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Observations */}
+          {fiche.observations && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-2"
+            >
+              <h2 className="font-semibold text-foreground">Observations</h2>
+              <p className="text-sm text-foreground bg-card border border-border rounded-lg p-3">
+                {fiche.observations}
+              </p>
+            </motion.div>
+          )}
+
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="flex gap-2"
+          >
+            <Button
+              variant="outline"
+              onClick={() => navigate('/dashboard')}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Retour
+            </Button>
+          </motion.div>
+        </motion.div>
+      </ScreenLayout>
+    </div>
+  );
+}

@@ -26,6 +26,7 @@ import ItemsContexte from './pages/ItemsContexte';
 import AnalyseEDA from './pages/AnalyseEDA';
 import ListeEleves from './pages/ListeEleves';
 import DetailEleve from './pages/DetailEleve';
+import DetailFiche from './pages/DetailFiche';
 import HistoriqueEleve from './pages/HistoriqueEleve';
 import ExportAnnuel from './pages/ExportAnnuel';
 import EditEleve from './pages/EditEleve';
@@ -208,6 +209,7 @@ const AuthenticatedApp = () => {
         <Route path="/analyse-eda" element={<AnalyseEDA />} />
         <Route path="/liste-eleves" element={<ListeEleves />} />
         <Route path="/detail-eleve" element={<DetailEleve />} />
+        <Route path="/detail-fiche" element={<DetailFiche />} />
         <Route path="/historique-eleve" element={<HistoriqueEleve />} />
         <Route path="/export-annuel" element={<ExportAnnuel />} />
         <Route path="/edit-eleve" element={<EditEleve />} />
