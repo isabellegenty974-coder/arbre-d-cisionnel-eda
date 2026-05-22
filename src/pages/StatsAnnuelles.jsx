@@ -157,12 +157,11 @@ export default function StatsAnnuelles() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-3 gap-3"
+            className="grid grid-cols-2 gap-3"
           >
             {[
               { icon: Users, label: "Élèves", value: nbEleves, color: "text-primary", bg: "bg-primary/10" },
               { icon: ClipboardList, label: "Diagnostics", value: nbDiagnostics, color: "text-violet-500", bg: "bg-violet-500/10" },
-              { icon: Download, label: "Observations", value: nbItems, color: "text-emerald-500", bg: "bg-emerald-500/10" },
             ].map(({ icon: Icon, label, value, color, bg }) => (
               <div key={label} className={`flex flex-col items-center gap-1 p-4 rounded-2xl border border-border ${bg}`}>
                 <Icon className={`w-5 h-5 ${color}`} />
@@ -171,36 +170,6 @@ export default function StatsAnnuelles() {
               </div>
             ))}
           </motion.div>
-
-          {/* Répartition par domaine */}
-          <StatCard title="Observations par domaine" subtitle="Nombre total d'items cochés" delay={0.05}>
-            {domaines.every(d => d.value === 0) ? <EmptyState /> : (
-              <div className="space-y-3">
-                {domaines.map(({ name, value }) => {
-                  const max = Math.max(...domaines.map(d => d.value), 1);
-                  const pct = Math.round((value / max) * 100);
-                  const color = DOMAIN_COLORS[name] || "#4A90E2";
-                  return (
-                    <div key={name}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium text-foreground">{name}</span>
-                        <span className="text-sm font-bold" style={{ color }}>{value}</span>
-                      </div>
-                      <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ duration: 0.7, delay: 0.1 }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: color }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </StatCard>
 
           {/* Top 10 items */}
           <StatCard title="Top 10 observations les plus fréquentes" subtitle="Tous diagnostics confondus" delay={0.1}>
