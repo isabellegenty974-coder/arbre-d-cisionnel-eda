@@ -1,7 +1,15 @@
 export default function RapportContent({ text }) {
   if (!text) return null;
 
-  const lines = text.split("\n");
+  // Remplace "Patient" et "patient" par "L'élève" / "l'élève"
+  const cleanedText = text
+    .replace(/\bPatient\b/g, "L'élève")
+    .replace(/\bpatient\b/g, "l'élève")
+    .replace(/\bPATIENT\b/g, "L'ÉLÈVE")
+    .replace(/\bpatients\b/g, "élèves")
+    .replace(/\bPatients\b/g, "Élèves");
+
+  const lines = cleanedText.split("\n");
   const elements = [];
   let i = 0;
 
@@ -73,9 +81,10 @@ export default function RapportContent({ text }) {
     // Regular paragraph
     const rendered = line
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/L'élève/g, "<strong>l'élève</strong>") // Highlight élève mentions
     elements.push(
-      <p key={i} className="text-sm text-foreground/90 leading-relaxed mb-1.5"
+      <p key={i} className="text-sm text-foreground/90 leading-relaxed mb-2.5"
         dangerouslySetInnerHTML={{ __html: rendered }} />
     );
     i++;

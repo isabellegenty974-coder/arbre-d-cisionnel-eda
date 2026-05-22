@@ -2,7 +2,7 @@ import { useDiagnostic } from "@/lib/DiagnosticContext";
 import RapportContent from "@/components/RapportContent";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import { Button } from "@/components/ui/button";
-import { Trash2, FileText, AlertCircle, CheckCircle2, Users, Lightbulb, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { Trash2, FileText, AlertCircle, CheckCircle2, Users, Lightbulb, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportResumePDF } from "@/lib/pdfExport";
@@ -19,16 +19,55 @@ const DOMAIN_LABELS = {
 };
 
 function DiagnosticView({ diag }) {
-  const selections = diag.selections || {};
-  const [rapportOpen, setRapportOpen] = useState(true);
   const [regenerating, setRegenerating] = useState(false);
   const [rapport, setRapport] = useState(diag.rapport);
 
-  // Détecter si le format est "nouveau" (strings simples) ou "ancien" (objets)
+  const selections = diag.selections || {};
   const isNewFormat = Object.values(selections).some(arr => Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'string');
   const synthesis = isNewFormat ? { mainCategory: null, secondaryCategories: [], professionals: [] } : generateDiagnosticSynthesis(selections);
   const recommendations = isNewFormat ? [] : generateRecommendations(synthesis.mainCategory, selections);
   const totalItems = Object.values(selections).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0);
+
+  const handleGenerateRapport = async () => {
+    setRegenerating(true);
+    try {
+      const lignes = [];
+      const CATEGORIES_MAP = {
+        apprentissages: '📚 Apprentissages',
+        comportement: '💝 Comportement',
+        developpement: '🌱 Développement',
+        contexte: '🏠 Contexte',
+      };
+      Object.entries(selections).forEach(([key, items]) => {
+        if (items && items.length > 0) {
+          lignes.push(`**${CATEGORIES_MAP[key]}** : ${items.join(" ; ")}`);
+        }
+      });
+      const user = await base44.auth.me();
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('fr-FR');
+      const prompt = `Élève : ${diag.eleve_prenom} ${diag.eleve_nom}
+Âge : ${diag.eleve_age || 'N/A'} ans
+Classe : ${diag.eleve_classe || 'N/A'}
+Examinateur : ${user?.full_name || 'N/A'}
+Date : ${dateStr}
+
+Tu es un professionnel spécialisé en psychopédagogie et en diagnostic des troubles de l'apprentissage. Analyse les observations suivantes :\n\n${lignes.join("\n")}\n\nRédige un rapport clinique structuré et élégant en français. Inclus les informations de l'élève et de la date en début de rapport. Remplace chaque occurrence de "Patient" par "L'élève" ou "l'élève".
+
+Structure :
+1. Synthèse des observations clés
+2. Hypothèses diagnostiques prioritaires avec justification clinique
+3. Orientations d'évaluation complémentaires recommandées
+4. Pistes d'accompagnement et aménagements pédagogiques
+
+Sois rigoureux, clair et précis. Adopte un ton professionnel et factuel. Évite de poser un diagnostic définitif.`;
+      const result = await base44.integrations.Core.InvokeLLM({ prompt });
+      setRapport(result);
+      await base44.entities.Diagnostic.update(diag.id, { rapport: result });
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -137,29 +176,7 @@ function DiagnosticView({ diag }) {
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={async () => {
-                  setRegenerating(true);
-                  try {
-                    const lignes = [];
-                    const CATEGORIES_MAP = {
-                      apprentissages: '📚 Apprentissages',
-                      comportement: '💝 Comportement',
-                      developpement: '🌱 Développement',
-                      contexte: '🏠 Contexte',
-                    };
-                    Object.entries(selections).forEach(([key, items]) => {
-                      if (items && items.length > 0) {
-                        lignes.push(`**${CATEGORIES_MAP[key]}** : ${items.join(" ; ")}`);
-                      }
-                    });
-                    const prompt = `Tu es un professionnel spécialisé en psychopédagogie et en diagnostic des troubles de l'apprentissage. Analyse les observations suivantes :\n\n${lignes.join("\n")}\n\nRédige un rapport clinique structuré et élégant en français :\n1. Synthèse des observations clés\n2. Hypothèses diagnostiques prioritaires avec justification clinique\n3. Orientations d'évaluation complémentaires recommandées\n4. Pistes d'accompagnement et aménagements pédagogiques\n\nSois rigoureux, clair et précis. Adopte un ton professionnel et factuel. Évite de poser un diagnostic définitif.`;
-                    const result = await base44.integrations.Core.InvokeLLM({ prompt });
-                    setRapport(result);
-                    await base44.entities.Diagnostic.update(diag.id, { rapport: result });
-                  } finally {
-                    setRegenerating(false);
-                  }
-                }}
+                onClick={handleGenerateRapport}
                 disabled={regenerating}
                 className="gap-1"
               >
