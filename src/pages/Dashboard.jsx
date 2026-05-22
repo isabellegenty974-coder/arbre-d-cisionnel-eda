@@ -41,8 +41,15 @@ export default function Dashboard() {
   }, []);
 
   const handleDelete = async (eleve) => {
-    if (window.confirm('Supprimer cet élève ?')) {
+    if (window.confirm('Supprimer cet élève et tous ses diagnostics ?')) {
+      // Supprime la fiche élève
       if (eleve.ficheId) await base44.entities.FicheEleve.delete(eleve.ficheId);
+      // Supprime tous les diagnostics liés
+      const diags = await base44.entities.Diagnostic.filter({
+        eleve_prenom: eleve.prenom,
+        eleve_nom: eleve.nom,
+      });
+      await Promise.all(diags.map(d => base44.entities.Diagnostic.delete(d.id)));
       setEleves(eleves.filter(e => `${e.prenom}|${e.nom}` !== `${eleve.prenom}|${eleve.nom}`));
     }
   };
