@@ -11,6 +11,7 @@ const MENU_ITEMS = [
   { label: 'Analyse', target: '/analyse-eda', color: 'from-violet-400 to-violet-600', icon: '🧠' },
   { label: 'Statistiques', target: '/stats-annuelles', color: 'from-amber-400 to-amber-600', icon: '📊' },
   { label: 'Nouvel élève', target: '/fiche-eleve', color: 'from-indigo-400 to-indigo-600', icon: '👤' },
+  { label: 'Professionnels', target: '/items-professionnels', color: 'from-pink-400 to-pink-600', icon: '👩‍⚕️' },
 ];
 
 const RADIUS = 120;
