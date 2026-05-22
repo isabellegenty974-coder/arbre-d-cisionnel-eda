@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PhotoEEUpload from '@/components/PhotoEEUpload';
+import RapportContent from '@/components/RapportContent';
 
 export default function DetailFiche() {
   const [searchParams] = useSearchParams();
@@ -227,7 +228,9 @@ export default function DetailFiche() {
                 <p className="text-xs text-muted-foreground mb-4">
                   {new Date(selectedRapport.created_date).toLocaleDateString('fr-FR')}
                 </p>
-                <p className="text-sm text-foreground whitespace-pre-wrap mb-4">{selectedRapport.rapport}</p>
+                <div className="mb-4">
+                  <RapportContent text={selectedRapport.rapport} />
+                </div>
                 <Button
                   variant="outline"
                   onClick={() => setShowRapport(false)}
