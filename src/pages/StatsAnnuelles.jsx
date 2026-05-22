@@ -70,6 +70,7 @@ function EmptyState() {
 export default function StatsAnnuelles() {
   const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProfession, setSelectedProfession] = useState(null);
   const { eleve, selections, crossRecommendations } = useDiagnostic();
   const navigate = useNavigate();
 
@@ -81,11 +82,16 @@ export default function StatsAnnuelles() {
 
   const handleExport = () => exportFullPDF(eleve, selections, crossRecommendations, diagnostics);
 
-  const nbEleves = new Set(diagnostics.map(d => `${d.eleve_prenom} ${d.eleve_nom}`)).size;
-  const nbDiagnostics = diagnostics.length;
+  // Filtrer par profession si sélectionnée
+  const filteredDiagnostics = selectedProfession 
+    ? diagnostics.filter(d => d.createdByProfession === selectedProfession)
+    : diagnostics;
+
+  const nbEleves = new Set(filteredDiagnostics.map(d => `${d.eleve_prenom} ${d.eleve_nom}`)).size;
+  const nbDiagnostics = filteredDiagnostics.length;
   const nbItems = (() => {
     let n = 0;
-    diagnostics.forEach(d => {
+    filteredDiagnostics.forEach(d => {
       ['apprentissages','comportement','developpement','contexte'].forEach(cat => {
         n += (d.selections?.[cat] || []).length;
       });
@@ -96,7 +102,7 @@ export default function StatsAnnuelles() {
   // Top items observés (horizontal bar)
   const topItems = (() => {
     const counts = {};
-    diagnostics.forEach(d => {
+    filteredDiagnostics.forEach(d => {
       const sel = d.selections || {};
       ['apprentissages','comportement','developpement','contexte'].forEach(cat => {
         (sel[cat] || []).forEach(item => {
@@ -115,7 +121,7 @@ export default function StatsAnnuelles() {
   // Répartition par domaine
   const domaines = (() => {
     const counts = { Apprentissages: 0, Comportement: 0, Développement: 0, Contexte: 0 };
-    diagnostics.forEach(d => {
+    filteredDiagnostics.forEach(d => {
       const sel = d.selections || {};
       counts['Apprentissages'] += (sel.apprentissages || []).length;
       counts['Comportement']   += (sel.comportement   || []).length;
@@ -128,7 +134,7 @@ export default function StatsAnnuelles() {
   // Évolution mensuelle
   const evolution = (() => {
     const months = {};
-    diagnostics.forEach(d => {
+    filteredDiagnostics.forEach(d => {
       const date = new Date(d.created_date);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       months[key] = (months[key] || 0) + 1;
@@ -152,6 +158,40 @@ export default function StatsAnnuelles() {
       <HamburgerMenu />
       <ScreenLayout title="📊 Statistiques">
         <div className="space-y-5">
+
+          {/* Filtre par profession */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex gap-2 flex-wrap"
+          >
+            <button
+              onClick={() => setSelectedProfession(null)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                selectedProfession === null
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-foreground hover:bg-secondary/80'
+              }`}
+            >
+              Tous ({diagnostics.length})
+            </button>
+            {['MaDP', 'MaDR', 'Psy EN EDA'].map(prof => {
+              const count = diagnostics.filter(d => d.createdByProfession === prof).length;
+              return (
+                <button
+                  key={prof}
+                  onClick={() => setSelectedProfession(prof)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedProfession === prof
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  {prof} ({count})
+                </button>
+              );
+            })}
+          </motion.div>
 
           {/* KPIs */}
           <motion.div
