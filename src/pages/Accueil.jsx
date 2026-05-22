@@ -2,10 +2,12 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
 export default function Accueil() {
+  const navigate = useNavigate();
   const [eleves, setEleves] = useState([]);
 
   useEffect(() => {
@@ -16,11 +18,12 @@ export default function Accueil() {
       const map = new Map();
       fiches.forEach(f => {
         const key = `${f.prenom}|${f.nom}`.toLowerCase();
-        map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe });
+        map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date });
       });
       diagnostics.forEach(d => {
         const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
-        if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom });
+        if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, lastDate: d.created_date });
+        else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
       });
       setEleves([...map.values()]);
     });
@@ -80,49 +83,58 @@ export default function Accueil() {
 
         {/* Mes élèves — full width */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <Link to="/dashboard" className="group block">
-            <div className="bg-white rounded-2xl border-2 border-[#1565C0] shadow-sm hover:shadow-md transition-all overflow-hidden">
-              {/* Top row */}
-              <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1565C0] to-[#1E88E5] flex items-center justify-center shadow shrink-0">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-foreground">Mes élèves</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Gestion</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">Fiches et historique des diagnostics</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-blue-600 transition-colors shrink-0" />
+          <div className="bg-white rounded-2xl border-2 border-[#1565C0] shadow-sm overflow-hidden">
+            {/* Top row */}
+            <div
+              className="flex items-center gap-3 px-4 pt-4 pb-3 cursor-pointer hover:bg-blue-50/50 transition-colors"
+              onClick={() => navigate('/dashboard')}
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1565C0] to-[#1E88E5] flex items-center justify-center shadow shrink-0">
+                <Users className="w-6 h-6 text-white" />
               </div>
-              {/* Preview strip */}
-              <div className="mx-4 mb-4 rounded-xl bg-[#F0F4F8] border border-blue-100 p-3">
-                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-blue-100">
-                  <div className="w-5 h-5 rounded bg-[#1565C0] flex items-center justify-center">
-                    <span className="text-white text-[9px] font-bold">Ψ</span>
-                  </div>
-                  <span className="text-xs font-semibold text-foreground">Mes élèves</span>
-                  <span className="ml-auto text-[10px] text-blue-600 font-semibold">{eleves.length} élève{eleves.length !== 1 ? 's' : ''}</span>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-foreground">Mes élèves</span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Gestion</span>
                 </div>
-                {eleves.length === 0 ? (
-                  <p className="text-[10px] text-muted-foreground text-center py-2">Aucun élève enregistré</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {eleves.slice(0, 3).map((e, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center shrink-0">
-                          <span className="text-[8px] font-bold text-blue-700">{e.prenom?.[0]}{e.nom?.[0]}</span>
-                        </div>
-                        <span className="text-[10px] text-foreground font-medium">{e.prenom} {e.nom}</span>
-                        {e.classe && <span className="text-[9px] text-muted-foreground ml-auto">{e.classe}</span>}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <p className="text-xs text-muted-foreground mt-0.5">Fiches et historique des diagnostics</p>
               </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
             </div>
-          </Link>
+            {/* Preview strip */}
+            <div className="mx-4 mb-4 rounded-xl bg-[#F0F4F8] border border-blue-100 p-3">
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-blue-100">
+                <div className="w-5 h-5 rounded bg-[#1565C0] flex items-center justify-center">
+                  <span className="text-white text-[9px] font-bold">Ψ</span>
+                </div>
+                <span className="text-xs font-semibold text-foreground">Mes élèves</span>
+                <span className="ml-auto text-[10px] text-blue-600 font-semibold">{eleves.length} élève{eleves.length !== 1 ? 's' : ''}</span>
+              </div>
+              {eleves.length === 0 ? (
+                <p className="text-[10px] text-muted-foreground text-center py-2">Aucun élève enregistré</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {eleves.slice(0, 3).map((e, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 cursor-pointer hover:bg-blue-100/60 rounded-lg px-1 py-0.5 transition-colors"
+                      onClick={() => navigate(`/historique?eleve=${encodeURIComponent(`${e.prenom} ${e.nom}`)}`)}
+                    >
+                      <div className="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center shrink-0">
+                        <span className="text-[8px] font-bold text-blue-700">{e.prenom?.[0]}{e.nom?.[0]}</span>
+                      </div>
+                      <span className="text-[10px] text-foreground font-medium">{e.prenom} {e.nom}</span>
+                      {e.lastDate && (
+                        <span className="text-[9px] text-muted-foreground ml-auto">
+                          {new Date(e.lastDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </motion.div>
 
         {/* Divider */}
