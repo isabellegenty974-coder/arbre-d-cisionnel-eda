@@ -131,7 +131,8 @@ export default function DiagnosticEleve() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [rapport, setRapport] = useState(null);
+  const [rapport, setRapport] = useState(null); // rapport affiché dans la modale
+  const [generatedRapport, setGeneratedRapport] = useState(''); // rapport persistant pour la sauvegarde
 
   useEffect(() => {
     if (eleveId) {
@@ -171,7 +172,9 @@ export default function DiagnosticEleve() {
       const prompt = `Tu es un professionnel de l'éducation spécialisée. Un enseignant a observé les signes suivants chez un élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations recommandées (professionnels à consulter, aménagements pédagogiques)\n4. Un message de vigilance à destination de l'enseignant\n\nSois professionnel, bienveillant et clair. Évite de poser un diagnostic définitif.`;
 
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
-      setRapport(result || "Le rapport n'a pas pu être généré.");
+      const texte = result || "Le rapport n'a pas pu être généré.";
+      setRapport(texte);
+      setGeneratedRapport(texte);
     } catch (err) {
       console.error(err);
       setRapport("Une erreur est survenue lors de la génération du rapport.");
@@ -191,7 +194,7 @@ export default function DiagnosticEleve() {
       eleve_age: eleve?.age,
       eleve_classe: eleve?.classe || "",
       selections,
-      rapport: rapport || "",
+      rapport: generatedRapport || "",
       statut: "complète",
     });
 

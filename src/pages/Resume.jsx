@@ -20,8 +20,11 @@ const DOMAIN_LABELS = {
 
 function DiagnosticView({ diag }) {
   const selections = diag.selections || {};
-  const synthesis = generateDiagnosticSynthesis(selections);
-  const recommendations = generateRecommendations(synthesis.mainCategory, selections);
+
+  // Détecter si le format est "nouveau" (strings simples) ou "ancien" (objets)
+  const isNewFormat = Object.values(selections).some(arr => Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'string');
+  const synthesis = isNewFormat ? { mainCategory: null, secondaryCategories: [], professionals: [] } : generateDiagnosticSynthesis(selections);
+  const recommendations = isNewFormat ? [] : generateRecommendations(synthesis.mainCategory, selections);
   const totalItems = Object.values(selections).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0);
 
   return (
