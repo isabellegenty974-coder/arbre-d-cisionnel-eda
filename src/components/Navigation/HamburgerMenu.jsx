@@ -57,39 +57,30 @@ export default function HamburgerMenu() {
               </div>
 
               {/* Quick Actions */}
-              <div className="space-y-2 mb-8">
-                <Link
-                  to="/"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
-                >
-                  <HomeIcon className="w-4 h-4" />
-                  Accueil
+              <div className="space-y-1.5 mb-8">
+                <Link to="/" onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
+                  <HomeIcon className="w-4 h-4" /> Accueil
                 </Link>
-                <Link
-                  to="/fiche-eleve"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
-                >
-                  <User className="w-4 h-4" />
-                  Fiche élève
+                <Link to="/dashboard" onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
+                  <User className="w-4 h-4" /> Mes élèves
                 </Link>
-
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
-                >
-                  <FileText className="w-4 h-4" />
-                  Tableau de bord
+                <Link to="/fiche-eleve" onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
+                  <FileText className="w-4 h-4" /> Nouvelle observation
                 </Link>
-                <Link
-                  to="/stats-annuelles"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium"
-                >
-                  <BarChart2 className="w-4 h-4" />
-                  Statistiques
+                <Link to="/evaluation-domains" onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
+                  <BarChart2 className="w-4 h-4" /> Arbre décisionnel
+                </Link>
+                <Link to="/stats-annuelles" onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
+                  <BarChart2 className="w-4 h-4" /> Statistiques
+                </Link>
+                <Link to="/items-professionnels" onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
+                  <FileText className="w-4 h-4" /> Fiches ressources
                 </Link>
               </div>
 

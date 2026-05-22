@@ -1,64 +1,101 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield } from "lucide-react";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
-import CircularMenuEDA from "@/components/CircularMenuEDA";
 
+const MAIN_ACTIONS = [
+  {
+    icon: Users,
+    label: "Mes élèves",
+    desc: "Gérer les fiches et diagnostics",
+    to: "/dashboard",
+    color: "from-blue-500 to-blue-600",
+  },
+  {
+    icon: ClipboardList,
+    label: "Nouvelle observation",
+    desc: "Créer une fiche et observer",
+    to: "/fiche-eleve",
+    color: "from-emerald-500 to-emerald-600",
+  },
+  {
+    icon: TreePine,
+    label: "Arbre décisionnel",
+    desc: "Analyse approfondie par domaine",
+    to: "/evaluation-domains",
+    color: "from-amber-500 to-orange-500",
+  },
+];
+
+const SECONDARY_ACTIONS = [
+  { icon: BarChart2, label: "Statistiques", to: "/stats-annuelles" },
+  { icon: BookOpen, label: "Fiches ressources", to: "/items-professionnels" },
+  { icon: Shield, label: "Confidentialité", to: "/politique-confidentialite" },
+];
 
 export default function Accueil() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       <HamburgerMenu />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        {/* Hero Section */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16 space-y-4"
+          className="text-center mb-10"
         >
-          <div className="inline-block px-4 py-2 rounded-full bg-blue-500/20 border border-blue-400/40 mb-4">
-            <p className="text-sm font-medium text-blue-300">Plateforme EDA</p>
-          </div>
-          <h1 className="font-display text-5xl sm:text-6xl font-bold text-white mb-4">
-            Tableau de bord d'analyse
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-2">
+            Arbre EDA
           </h1>
-          <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Solution professionnelle intégrée pour l'évaluation dynamique et l'analyse du profil d'apprentissage
+          <p className="text-muted-foreground text-base">
+            Évaluation dynamique des apprentissages
           </p>
         </motion.div>
 
-        {/* Menu Circulaire EDA */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.7 }}
-          className="flex justify-center h-96 mb-12"
-        >
-          <CircularMenuEDA />
-        </motion.div>
+        {/* Main Actions */}
+        <div className="space-y-4 mb-10">
+          {MAIN_ACTIONS.map((action, i) => (
+            <motion.div
+              key={action.to}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 * i }}
+            >
+              <Link
+                to={action.to}
+                className="flex items-center gap-4 p-5 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-soft transition-all group"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shrink-0`}>
+                  <action.icon className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {action.label}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{action.desc}</p>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
 
-        {/* Info Cards */}
+        {/* Secondary Actions */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+          transition={{ delay: 0.4 }}
+          className="flex flex-wrap gap-3 justify-center"
         >
-          <div className="p-6 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-            <div className="text-3xl mb-3">📊</div>
-            <h3 className="font-semibold text-white mb-2">Analyses pointues</h3>
-            <p className="text-sm text-slate-400">Quatre domaines d'évaluation détaillés</p>
-          </div>
-          <div className="p-6 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-            <div className="text-3xl mb-3">🎯</div>
-            <h3 className="font-semibold text-white mb-2">Recommandations</h3>
-            <p className="text-sm text-slate-400">Propositions d'action personnalisées</p>
-          </div>
-          <div className="p-6 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-            <div className="text-3xl mb-3">📈</div>
-            <h3 className="font-semibold text-white mb-2">Suivi annuel</h3>
-            <p className="text-sm text-slate-400">Vue d'ensemble et statistiques</p>
-          </div>
+          {SECONDARY_ACTIONS.map((action) => (
+            <Link
+              key={action.to}
+              to={action.to}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/60 hover:bg-secondary text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <action.icon className="w-4 h-4" />
+              {action.label}
+            </Link>
+          ))}
         </motion.div>
       </div>
     </div>
