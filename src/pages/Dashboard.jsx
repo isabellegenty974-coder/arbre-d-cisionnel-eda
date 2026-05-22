@@ -1,227 +1,96 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Trash2, FileText, Save, Download } from 'lucide-react';
+import { Trash2, ClipboardList, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
-import { useDiagnostic } from '@/lib/DiagnosticContext';
-import { exportResumePDF } from '@/lib/pdfExport';
 
 export default function Dashboard() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const eleveId = urlParams.get('id');
-  const { eleve: ctxEleve, setCurrentEleve, selections, crossRecommendations } = useDiagnostic();
-  const [eleve, setEleve] = useState(null);
-  const [editingEleve, setEditingEleve] = useState({});
-  const [diagnostics, setDiagnostics] = useState([]);
+  const navigate = useNavigate();
+  const [eleves, setEleves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isEleveExpanded, setIsEleveExpanded] = useState(false);
 
   useEffect(() => {
-    loadDiagnostics();
-    if (eleveId) {
-      base44.entities.FicheEleve.get(eleveId).then(data => {
-        setEleve(data);
-        setEditingEleve(data);
-        setCurrentEleve(data);
-      });
-    } else {
-      setEleve(ctxEleve);
-      setEditingEleve(ctxEleve || {});
-    }
-  }, [eleveId]);
-
-  const handleSaveEleve = async () => {
-    setCurrentEleve(editingEleve);
-    if (eleveId) {
-      await base44.entities.FicheEleve.update(eleveId, editingEleve);
-      setEleve(editingEleve);
-    }
-  };
-
-  const handleExportPDF = () => {
-    exportResumePDF(eleve, selections, crossRecommendations);
-  };
-
-  const loadDiagnostics = async () => {
-    try {
-      const data = await base44.entities.Diagnostic.list('-updated_date', 50);
-      setDiagnostics(data);
-    } catch (error) {
-      console.error('Erreur chargement diagnostics:', error);
-    } finally {
+    base44.entities.FicheEleve.list('-created_date', 100).then(data => {
+      setEleves(data);
       setLoading(false);
-    }
-  };
+    });
+  }, []);
 
   const handleDelete = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce diagnostic ?')) {
-      try {
-        await base44.entities.Diagnostic.delete(id);
-        setDiagnostics(diagnostics.filter(d => d.id !== id));
-      } catch (error) {
-        console.error('Erreur suppression:', error);
-      }
+    if (window.confirm('Supprimer cet élève ?')) {
+      await base44.entities.FicheEleve.delete(id);
+      setEleves(eleves.filter(e => e.id !== id));
     }
   };
 
-  const filtered = diagnostics.filter(d =>
-    `${d.eleve_prenom} ${d.eleve_nom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.eleve_classe?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = eleves.filter(e =>
+    `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    e.classe?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-background">
       <HamburgerMenu />
-      <ScreenLayout title="📊 Tableau de bord">
-        <div className="space-y-8">
-          {/* Infos élève modifiables */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl bg-primary/5 border-2 border-primary/20 overflow-hidden"
-          >
-            <button
-              onClick={() => setIsEleveExpanded(!isEleveExpanded)}
-              className="w-full px-6 py-4 text-left hover:bg-primary/10 transition-colors"
-            >
-              <h2 className="text-lg font-semibold text-foreground">
-                👤 {eleve?.prenom && eleve?.nom ? `${eleve.prenom} ${eleve.nom}` : 'Élève courant'}
-              </h2>
-            </button>
-            {isEleveExpanded && (
-              <div className="border-t border-primary/20 p-6 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2 mb-4">
-                  <div>
-                    <label className="text-sm font-medium text-foreground block mb-2">Prénom</label>
-                    <Input
-                      value={editingEleve?.prenom || ''}
-                      onChange={(e) => setEditingEleve({ ...editingEleve, prenom: e.target.value })}
-                      placeholder="Prénom"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground block mb-2">Nom</label>
-                    <Input
-                      value={editingEleve?.nom || ''}
-                      onChange={(e) => setEditingEleve({ ...editingEleve, nom: e.target.value })}
-                      placeholder="Nom"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground block mb-2">Âge</label>
-                    <Input
-                      type="number"
-                      value={editingEleve?.age || ''}
-                      onChange={(e) => setEditingEleve({ ...editingEleve, age: e.target.value })}
-                      placeholder="Âge"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
-                    <Input
-                      value={editingEleve?.classe || ''}
-                      onChange={(e) => setEditingEleve({ ...editingEleve, classe: e.target.value })}
-                      placeholder="Ex: CM2"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <Button onClick={handleSaveEleve} className="flex-1 gap-2 bg-primary hover:bg-primary/90">
-                    <Save className="w-4 h-4" />
-                    Enregistrer
-                  </Button>
-                  <Link to="/resume">
-                    <Button variant="outline" className="gap-2">
-                      <FileText className="w-4 h-4" />
-                      Résumé
-                    </Button>
-                  </Link>
-                </div>
-                {Object.values(selections).some(arr => arr.length > 0) && (
-                  <Button onClick={handleExportPDF} className="w-full gap-2 bg-accent hover:bg-accent/90">
-                    <Download className="w-4 h-4" />
-                    Exporter PDF
-                  </Button>
-                )}
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Explorer les hypothèses :</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link to="/items-apprentissages">
-                      <Button variant="outline" className="w-full gap-2 text-blue-600 border-blue-300 hover:bg-blue-50">📚 Apprentissages</Button>
-                    </Link>
-                    <Link to="/items-comportement">
-                      <Button variant="outline" className="w-full gap-2 text-rose-600 border-rose-300 hover:bg-rose-50">💝 Comportement</Button>
-                    </Link>
-                    <Link to="/items-developpement">
-                      <Button variant="outline" className="w-full gap-2 text-teal-600 border-teal-300 hover:bg-teal-50">🌱 Développement</Button>
-                    </Link>
-                    <Link to="/items-contexte">
-                      <Button variant="outline" className="w-full gap-2 text-emerald-600 border-emerald-300 hover:bg-emerald-50">🏠 Contexte</Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
-          </motion.div>
+      <ScreenLayout title="📊 Tableau de bord" subtitle="Liste de vos élèves">
+        <div className="space-y-5">
+          <div className="flex gap-3">
+            <Input
+              placeholder="Chercher par nom ou classe..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+            />
+            <Link to="/fiche-eleve">
+              <Button className="gap-2 shrink-0">
+                <Plus className="w-4 h-4" />
+                Nouvel élève
+              </Button>
+            </Link>
+          </div>
 
-          {/* Search et diagnostics */}
-          <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-foreground">📋 Diagnostics</h2>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Chercher par nom ou classe..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1"
-              />
-            </div>
-
-          {/* List */}
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Chargement...</div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-8 p-6 rounded-lg bg-secondary/30 border border-secondary">
-              <p className="text-muted-foreground">Aucun diagnostic trouvé</p>
-              <p className="text-xs text-muted-foreground mt-2">Créez un nouveau diagnostic pour commencer</p>
+              <p className="text-muted-foreground">Aucun élève trouvé</p>
+              <p className="text-xs text-muted-foreground mt-2">Créez une fiche élève pour commencer</p>
             </div>
           ) : (
             <div className="grid gap-3">
-              {filtered.map((diag, idx) => (
+              {filtered.map((eleve, idx) => (
                 <motion.div
-                  key={diag.id}
+                  key={eleve.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 * idx }}
-                  className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-all"
+                  className="p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-foreground">
-                        {diag.eleve_prenom} {diag.eleve_nom}
-                      </h3>
-                      <div className="text-xs text-muted-foreground mt-1 space-y-1">
-                        {diag.eleve_classe && <p>Classe: {diag.eleve_classe}</p>}
-                        {diag.eleve_age && <p>Âge: {diag.eleve_age} ans</p>}
-                        <p>Créé: {new Date(diag.created_date).toLocaleDateString('fr-FR')}</p>
-                        <p>Mis à jour: {new Date(diag.updated_date).toLocaleDateString('fr-FR')}</p>
+                      <h3 className="font-semibold text-foreground">{eleve.prenom} {eleve.nom}</h3>
+                      <div className="text-xs text-muted-foreground mt-1 flex gap-3">
+                        {eleve.classe && <span>Classe : {eleve.classe}</span>}
+                        {eleve.age && <span>{eleve.age} ans</span>}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Link to={`/resume?id=${diag.id}`}>
-                        <Button variant="outline" size="sm" className="gap-2">
-                          <FileText className="w-4 h-4" />
-                          Voir
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => navigate(`/diagnostic-eleve?id=${eleve.id}`)}
+                      >
+                        <ClipboardList className="w-4 h-4" />
+                        Diagnostic
+                      </Button>
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDelete(diag.id)}
+                        onClick={() => handleDelete(eleve.id)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -230,8 +99,7 @@ export default function Dashboard() {
                 </motion.div>
               ))}
             </div>
-            )}
-          </div>
+          )}
         </div>
       </ScreenLayout>
     </div>
