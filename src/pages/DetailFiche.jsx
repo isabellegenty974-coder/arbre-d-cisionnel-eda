@@ -12,6 +12,7 @@ export default function DetailFiche() {
   const navigate = useNavigate();
   const [fiche, setFiche] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showRapport, setShowRapport] = useState(false);
 
   const ficheId = searchParams.get('id');
 
@@ -140,10 +141,7 @@ export default function DetailFiche() {
             {fiche.rapport && (
               <Button
                 variant="secondary"
-                onClick={() => {
-                  const modal = document.getElementById('rapportModal');
-                  if (modal) modal.classList.remove('hidden');
-                }}
+                onClick={() => setShowRapport(true)}
                 className="gap-2"
               >
                 Rapport
@@ -152,28 +150,22 @@ export default function DetailFiche() {
           </motion.div>
 
           {/* Modal Rapport */}
-          {fiche.rapport && (
+          {fiche.rapport && showRapport && (
             <div
-              id="rapportModal"
-              className="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-              onClick={(e) => {
-                if (e.target.id === 'rapportModal') {
-                  e.currentTarget.classList.add('hidden');
-                }
-              }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowRapport(false)}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="bg-card rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto p-6 border border-border"
+                onClick={(e) => e.stopPropagation()}
               >
                 <h2 className="font-semibold text-foreground mb-4">Rapport</h2>
                 <p className="text-sm text-foreground whitespace-pre-wrap mb-4">{fiche.rapport}</p>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    document.getElementById('rapportModal')?.classList.add('hidden');
-                  }}
+                  onClick={() => setShowRapport(false)}
                   className="w-full"
                 >
                   Fermer
