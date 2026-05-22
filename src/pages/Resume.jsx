@@ -164,7 +164,7 @@ function DiagnosticView({ diag }) {
                 className="gap-1"
               >
                 <RefreshCw className={`w-4 h-4 ${regenerating ? 'animate-spin' : ''}`} />
-                {regenerating ? 'Génération...' : 'Regénérer'}
+                {regenerating ? 'Génération...' : 'Générer'}
               </Button>
             )}
           </div>
@@ -172,7 +172,7 @@ function DiagnosticView({ diag }) {
             {rapport ? (
               <RapportContent text={rapport} />
             ) : (
-              <p className="text-sm text-muted-foreground italic">Aucun rapport généré. Cliquez sur "Regénérer" pour en créer un.</p>
+              <p className="text-sm text-muted-foreground italic">Aucun rapport généré. Cliquez sur "Générer" pour en créer un.</p>
             )}
           </div>
         </motion.div>
