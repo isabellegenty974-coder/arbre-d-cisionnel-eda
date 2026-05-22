@@ -152,7 +152,7 @@ function DiagnosticView({ diag }) {
                         lignes.push(`**${CATEGORIES_MAP[key]}** : ${items.join(" ; ")}`);
                       }
                     });
-                    const prompt = `Tu es un professionnel de l\'\u00e9ducation spécialisée. Un enseignant a observé les signes suivants chez un élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations recommandées (professionnels à consulter, aménagements pédagogiques)\n4. Un message de vigilance à destination de l\'enseignant\n\nSois professionnel, bienveillant et clair. Évite de poser un diagnostic définitif.`;
+                    const prompt = `Tu es un professionnel spécialisé en psychopédagogie et en diagnostic des troubles de l'apprentissage. Analyse les observations suivantes :\n\n${lignes.join("\n")}\n\nRédige un rapport clinique structuré et élégant en français :\n1. Synthèse des observations clés\n2. Hypothèses diagnostiques prioritaires avec justification clinique\n3. Orientations d'évaluation complémentaires recommandées\n4. Pistes d'accompagnement et aménagements pédagogiques\n\nSois rigoureux, clair et précis. Adopte un ton professionnel et factuel. Évite de poser un diagnostic définitif.`;
                     const result = await base44.integrations.Core.InvokeLLM({ prompt });
                     setRapport(result);
                     await base44.entities.Diagnostic.update(diag.id, { rapport: result });
