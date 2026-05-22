@@ -169,7 +169,7 @@ export default function DiagnosticEleve() {
           lignes.push(`**${cat.label}** : ${items.join(" ; ")}`);
         }
       });
-      const prompt = `Tu es un professionnel de l'éducation spécialisée. Un enseignant a observé les signes suivants chez un élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations recommandées (professionnels à consulter, aménagements pédagogiques)\n4. Un message de vigilance à destination de l'enseignant\n\nSois professionnel, bienveillant et clair. Évite de poser un diagnostic définitif.`;
+      const prompt = `Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois analyser les observations suivantes chez un élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé synthétique des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations d'évaluation complémentaire recommandées\n4. Les recommandations d'accompagnement et d'aménagements\n\nSois professionnel, rigoureux et clair. Évite de poser un diagnostic définitif.`;
 
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
       const texte = result || "Le rapport n'a pas pu être généré.";
