@@ -70,6 +70,15 @@ const CATEGORIES = [
       { label: "Repli affectif / affect plat", desc: "Visage inexpressif, peu de réactions émotionnelles, isolement, regard vide, indifférence aux activités" },
       { label: "Difficulté à tolérer la frustration", desc: "Réagit fortement à tout obstacle, toute limite, tout échec même mineur déclenche une réaction intense" },
       { label: "Perfectionnisme rigide avec évitement", desc: "Refuse de commencer si risque d'erreur, efface compulsivement, abandonne rapidement face à la difficulté" },
+      // --- Estime de soi / Confiance ---
+      { label: "Manque de confiance en soi", desc: "Dit souvent \"je suis nul(le)\", \"je sais pas\", \"j'y arriverai pas\" avant même d'essayer, se sous-estime de façon systématique" },
+      { label: "Sentiment d'incompétence scolaire", desc: "Convaincu(e) de ne pas être capable d'apprendre, perçoit ses difficultés comme permanentes et inhérentes à sa personne" },
+      { label: "Autodépréciation verbale", desc: "Tient des propos négatifs sur lui/elle-même : \"je suis bête\", \"tout le monde est meilleur que moi\", \"j'ai jamais rien\"" },
+      { label: "Hypersensibilité au regard des autres", desc: "Rougit, se fige ou refuse de participer à l'oral par peur d'être jugé(e), très affecté(e) par les moqueries même légères" },
+      { label: "Évitement des situations de mise en valeur", desc: "Refuse de montrer son travail, se cache quand félicité(e), ne lève jamais la main même quand il/elle connaît la réponse" },
+      { label: "Découragement rapide face à la difficulté", desc: "Abandonne dès le premier obstacle, ne persévère pas, expression de résignation apprise (\"ça sert à rien\")" },
+      { label: "Dépendance excessive au regard de l'adulte", desc: "A besoin d'être rassuré(e) en permanence pour agir, n'ose pas décider seul(e), attend une validation pour chaque étape" },
+      { label: "Repli identitaire scolaire", desc: "Se définit uniquement par ses échecs, a intégré une identité de \"mauvais élève\", désinvestissement global de la scolarité" },
     ],
   },
   {
