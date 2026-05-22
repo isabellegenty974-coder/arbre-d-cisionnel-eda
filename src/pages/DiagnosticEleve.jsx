@@ -210,10 +210,41 @@ Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois ana
     }
   };
 
+  const generatePdf = async () => {
+    const norm = (str) => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const doc = new jsPDF();
+    const name = norm(`${eleve?.prenom || ''} ${eleve?.nom || ''}`.trim());
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Rapport - Hypothese(s) diagnostique(s)', 15, 20);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    if (name) doc.text(`Eleve : ${name}`, 15, 30);
+    if (eleve?.classe) doc.text(`Classe : ${norm(eleve.classe)}`, 15, 37);
+    doc.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`, 15, eleve?.classe ? 44 : 37);
+    const lines = doc.splitTextToSize(norm(rapport), 180);
+    doc.setFontSize(10);
+    doc.text(lines, 15, eleve?.classe ? 54 : 47);
+    return doc.output('arraybuffer');
+  };
+
   const handleSave = async () => {
     setSaving(true);
     const selections = {};
     CATEGORIES.forEach(cat => { selections[cat.key] = checked[cat.key] || []; });
+
+    let rapportPdfUrl = '';
+    if (rapport) {
+      try {
+        const pdfBuffer = await generatePdf();
+        const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+        const file = new File([blob], `rapport_${eleve?.nom || 'eleve'}.pdf`, { type: 'application/pdf' });
+        const result = await base44.integrations.Core.UploadFile({ file });
+        rapportPdfUrl = result.file_url;
+      } catch (err) {
+        console.error('Erreur upload PDF:', err);
+      }
+    }
 
     await base44.entities.Diagnostic.create({
       eleve_nom: eleve?.nom || "",
@@ -222,6 +253,7 @@ Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois ana
       eleve_classe: eleve?.classe || "",
       selections,
       rapport: generatedRapport || "",
+      rapport_pdf_url: rapportPdfUrl,
       statut: "complète",
     });
 
@@ -345,26 +377,24 @@ Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois ana
               <div className="px-6 py-4 border-t border-border shrink-0">
                 <Button
                   className="w-full gap-2"
-                  onClick={() => {
-                    const norm = (str) => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                    const doc = new jsPDF();
-                    const name = norm(`${eleve?.prenom || ''} ${eleve?.nom || ''}`.trim());
-                    doc.setFontSize(14);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text('Rapport - Hypothese(s) diagnostique(s)', 15, 20);
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'normal');
-                    if (name) doc.text(`Eleve : ${name}`, 15, 30);
-                    if (eleve?.classe) doc.text(`Classe : ${norm(eleve.classe)}`, 15, 37);
-                    doc.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`, 15, eleve?.classe ? 44 : 37);
-                    const lines = doc.splitTextToSize(norm(rapport), 180);
-                    doc.setFontSize(10);
-                    doc.text(lines, 15, eleve?.classe ? 54 : 47);
-                    doc.save(`rapport_${(name || 'eleve').replace(/\s+/g, '_')}.pdf`);
+                  onClick={async () => {
+                    try {
+                      const pdfBuffer = await generatePdf();
+                      const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+                      const name = (eleve?.nom || 'eleve').replace(/\s+/g, '_');
+                      const a = document.createElement('a');
+                      a.href = URL.createObjectURL(blob);
+                      a.download = `rapport_${name}.pdf`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    } catch (err) {
+                      console.error('Erreur téléchargement PDF:', err);
+                    }
                   }}
                 >
                   <Download className="w-4 h-4" />
-                  Enregistrer en PDF
+                  Télécharger le PDF
                 </Button>
               </div>
             </motion.div>

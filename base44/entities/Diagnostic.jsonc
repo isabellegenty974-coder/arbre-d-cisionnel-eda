@@ -26,6 +26,10 @@
       "type": "string",
       "description": "Rapport IA g\u00e9n\u00e9r\u00e9"
     },
+    "rapport_pdf_url": {
+      "type": "string",
+      "description": "URL du rapport PDF stock\u00e9"
+    },
     "statut": {
       "type": "string",
       "enum": [
