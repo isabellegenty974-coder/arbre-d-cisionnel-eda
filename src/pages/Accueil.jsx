@@ -40,7 +40,7 @@ export default function Accueil() {
             <span className="text-[#0C3B8C] text-2xl font-bold" style={{ fontFamily: 'serif' }}>Ψ</span>
           </div>
           <div className="flex-1">
-            <h1 className="text-white font-bold text-lg leading-tight">Arbre décisionnel EDA</h1>
+            <h1 className="text-white font-bold text-lg leading-tight">Arbre décisionnel RASED</h1>
             <p className="text-blue-100 text-xs leading-snug mt-0.5">Outil d'aide à la formulation d'hypothèses diagnostiques</p>
           </div>
         </div>
