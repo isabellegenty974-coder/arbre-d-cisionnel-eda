@@ -53,17 +53,17 @@ export default function FicheEleve() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#FAFAF8]">
       <HamburgerMenu />
       <ScreenLayout title="👤 Créer une fiche élève">
         <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-xl bg-primary/5 border-2 border-primary/20 space-y-4"
+            className="p-6 rounded-xl bg-[#F5F0E8] border-2 border-[#D4A574]/30 space-y-4"
           >
             <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Prénom *</label>
+              <label className="text-sm font-medium text-[#0F172A] block mb-2">Prénom *</label>
               <Input
                 {...register('prenom', eleveValidationRules.prenom)}
                 placeholder="Prénom"
@@ -77,7 +77,7 @@ export default function FicheEleve() {
               )}
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Nom *</label>
+              <label className="text-sm font-medium text-[#0F172A] block mb-2">Nom *</label>
               <Input
                 {...register('nom', eleveValidationRules.nom)}
                 placeholder="Nom"
@@ -91,7 +91,7 @@ export default function FicheEleve() {
               )}
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Âge</label>
+              <label className="text-sm font-medium text-[#0F172A] block mb-2">Âge</label>
               <Input
                 {...register('age', { ...eleveValidationRules.age, valueAsNumber: true })}
                 type="number"
@@ -106,7 +106,7 @@ export default function FicheEleve() {
               )}
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-2">Classe</label>
+              <label className="text-sm font-medium text-[#0F172A] block mb-2">Classe</label>
               <Input
                 {...register('classe', eleveValidationRules.classe)}
                 placeholder="Ex: CM2"
@@ -125,7 +125,7 @@ export default function FicheEleve() {
             <Button
               type="submit"
               disabled={!isValid}
-              className="w-full gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full gap-2 bg-[#D4A574] hover:bg-[#C49464] disabled:opacity-50 disabled:cursor-not-allowed text-white"
             >
               <Plus className="w-4 h-4" />
               Enregistrer
@@ -142,7 +142,7 @@ export default function FicheEleve() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="p-4 rounded-lg bg-accent/5 border border-accent/20"
+                className="p-4 rounded-lg bg-[#E8DCC8]/20 border border-[#D4A574]"
               >
                 <PhotoEEUpload 
                   ficheId={savedId} 
@@ -153,7 +153,7 @@ export default function FicheEleve() {
               
               <Button
                 onClick={() => navigate(`/diagnostic-eleve?id=${savedId}`)}
-                className="w-full gap-2 bg-primary hover:bg-primary/90"
+                className="w-full gap-2 bg-[#D4A574] hover:bg-[#C49464] text-white"
               >
                 <ClipboardList className="w-4 h-4" />
                 Démarrer l'observation

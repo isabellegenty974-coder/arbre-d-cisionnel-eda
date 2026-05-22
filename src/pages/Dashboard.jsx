@@ -61,25 +61,25 @@ export default function Dashboard() {
   const paginatedEleves = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#FAFAF8]">
       <HamburgerMenu />
       <ScreenLayout title="📊 Tableau de bord" subtitle="Liste de vos élèves">
         <div className="space-y-5">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#0F172A]/60" />
               <Input
                 placeholder="Chercher par nom..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                className="pl-10"
+                className="pl-10 bg-white border-[#D4A574] text-[#0F172A]"
               />
             </div>
             {uniqueClasses.length > 0 && (
               <select
                 value={classFilter}
                 onChange={(e) => { setClassFilter(e.target.value); setPage(1); }}
-                className="px-3 py-2 rounded-md border border-input bg-card text-foreground text-sm"
+                className="px-3 py-2 rounded-md border border-[#D4A574] bg-white text-[#0F172A] text-sm"
               >
                 <option value="">Toutes les classes</option>
                 {uniqueClasses.map(cls => (
@@ -88,7 +88,7 @@ export default function Dashboard() {
               </select>
             )}
             <Link to="/fiche-eleve">
-              <Button className="gap-2 shrink-0">
+              <Button className="gap-2 shrink-0 bg-[#D4A574] hover:bg-[#C49464] text-white">
                 <Plus className="w-4 h-4" />
                 Nouvel élève
               </Button>
@@ -98,9 +98,9 @@ export default function Dashboard() {
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Chargement...</div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 p-6 rounded-lg bg-secondary/30 border border-secondary">
-              <p className="text-muted-foreground">Aucun élève trouvé</p>
-              <p className="text-xs text-muted-foreground mt-2">Créez une fiche élève pour commencer</p>
+            <div className="text-center py-8 p-6 rounded-lg bg-[#E8DCC8]/30 border border-[#D4A574]">
+              <p className="text-[#0F172A]/70">Aucun élève trouvé</p>
+              <p className="text-xs text-[#0F172A]/70 mt-2">Créez une fiche élève pour commencer</p>
             </div>
           ) : (
             <>
@@ -111,14 +111,14 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(0.02 * idx, 0.1), duration: 0.2 }}
-                    className="p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all"
+                    className="p-4 rounded-xl bg-white border border-[#D4A574] hover:border-[#D4A574] hover:shadow-lg transition-all"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <button
                         onClick={() => navigate(`/detail-fiche?id=${eleve.id}`)}
-                        className="text-left flex-1 p-2 rounded hover:bg-secondary/50 transition-colors"
+                        className="text-left flex-1 p-2 rounded hover:bg-[#F5F0E8] transition-colors"
                       >
-                        <p className="font-semibold text-foreground">{eleve.prenom} {eleve.nom}</p>
+                        <p className="font-semibold text-[#0F172A]">{eleve.prenom} {eleve.nom}</p>
                       </button>
                       <Button
                         variant="destructive"
@@ -132,21 +132,21 @@ export default function Dashboard() {
                 ))}
               </div>
               {totalPages > 1 && (
-                <div className="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-border">
+                <div className="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-[#D4A574]">
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="px-3 py-2 text-sm rounded-md border border-input disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary transition-colors"
+                    className="px-3 py-2 text-sm rounded-md border border-[#D4A574] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#F5F0E8] transition-colors text-[#0F172A]"
                   >
                     Précédent
                   </button>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-[#0F172A]/70">
                     Page {page} / {totalPages} ({filtered.length} résultats)
                   </span>
                   <button
                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
-                    className="px-3 py-2 text-sm rounded-md border border-input disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary transition-colors"
+                    className="px-3 py-2 text-sm rounded-md border border-[#D4A574] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#F5F0E8] transition-colors text-[#0F172A]"
                   >
                     Suivant
                   </button>

@@ -19,7 +19,7 @@ export default function ScreenLayout({ title, subtitle, children }) {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-screen bg-[#FAFAF8] pb-16">
       <HamburgerMenu />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Nav */}
@@ -31,14 +31,14 @@ export default function ScreenLayout({ title, subtitle, children }) {
         >
           <button
             onClick={handleBack}
-            className="p-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            className="p-2.5 rounded-lg bg-[#D4A574]/10 text-[#D4A574] hover:bg-[#D4A574]/20 transition-colors"
             title="Retour"
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
           <button
             onClick={() => navigate("/")}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            className="p-2 rounded-lg text-[#0F172A]/60 hover:text-[#0F172A] hover:bg-[#E8DCC8]/50 transition-colors"
             title="Accueil"
           >
             <Home className="w-4 h-4" />
@@ -52,11 +52,11 @@ export default function ScreenLayout({ title, subtitle, children }) {
           transition={{ delay: 0.05, duration: 0.2 }}
           className="mb-8"
         >
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-foreground leading-tight">
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-[#0F172A] leading-tight">
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-2 text-muted-foreground text-base">{subtitle}</p>
+            <p className="mt-2 text-[#0F172A]/70 text-base">{subtitle}</p>
           )}
         </motion.div>
 
