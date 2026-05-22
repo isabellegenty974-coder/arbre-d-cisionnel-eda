@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportFullPDF } from "@/lib/pdfExport";
+import { exportStatsPDF } from "@/lib/statsExport";
 import { useDiagnostic } from "@/lib/DiagnosticContext";
 import { Button } from "@/components/ui/button";
 import { Download, Users, ClipboardList } from "lucide-react";
@@ -80,7 +81,13 @@ export default function StatsAnnuelles() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleExport = () => exportFullPDF(eleve, selections, crossRecommendations, diagnostics);
+  const handleExport = () => {
+    if (filteredDiagnostics.length === 0) {
+      alert('Aucune donnée à exporter');
+      return;
+    }
+    exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession);
+  };
 
   // Filtrer par profession si sélectionnée
   const filteredDiagnostics = selectedProfession 
@@ -301,9 +308,13 @@ export default function StatsAnnuelles() {
             transition={{ delay: 0.25 }}
             className="flex flex-col sm:flex-row gap-3 pt-4"
           >
-            <Button onClick={handleExport} className="flex-1 gap-2 h-10 shadow-md hover:shadow-lg transition-shadow">
+            <Button
+              onClick={handleExport}
+              disabled={filteredDiagnostics.length === 0}
+              className="flex-1 gap-2 h-10 shadow-md hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <Download className="w-4 h-4" />
-              Exporter PDF
+              Exporter statistiques PDF
             </Button>
             <Button onClick={() => navigate("/dashboard")} variant="outline" className="flex-1 gap-2 h-10 hover:bg-secondary/80 transition-colors">
               <Users className="w-4 h-4" />
