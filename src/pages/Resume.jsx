@@ -20,7 +20,7 @@ const DOMAIN_LABELS = {
 
 function DiagnosticView({ diag }) {
   const [regenerating, setRegenerating] = useState(false);
-  const [rapport, setRapport] = useState(diag.rapport);
+  const [rapport, setRapport] = useState(diag.rapport || '');
 
   const selections = diag.selections || {};
   const isNewFormat = Object.values(selections).some(arr => Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'string');
@@ -43,13 +43,22 @@ function DiagnosticView({ diag }) {
           lignes.push(`**${CATEGORIES_MAP[key]}** : ${items.join(" ; ")}`);
         }
       });
-      const user = await base44.auth.me();
+
+      // Récupérer l'user pour le rapport
+      let userName = 'N/A';
+      try {
+        const user = await base44.auth.me();
+        userName = user?.full_name || 'N/A';
+      } catch (e) {
+        // Silencieusement échouer si pas d'user
+      }
+
       const now = new Date();
       const dateStr = now.toLocaleDateString('fr-FR');
       const prompt = `Élève : ${diag.eleve_prenom} ${diag.eleve_nom}
 Âge : ${diag.eleve_age || 'N/A'} ans
 Classe : ${diag.eleve_classe || 'N/A'}
-Examinateur : ${user?.full_name || 'N/A'}
+Examinateur : ${userName}
 Date : ${dateStr}
 
 Tu es un professionnel spécialisé en psychopédagogie et en diagnostic des troubles de l'apprentissage. Analyse les observations suivantes :\n\n${lignes.join("\n")}\n\nRédige un rapport clinique structuré et élégant en français. Inclus les informations de l'élève et de la date en début de rapport. Remplace chaque occurrence de "Patient" par "L'élève" ou "l'élève".
