@@ -15,8 +15,15 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    base44.entities.FicheEleve.list('-created_date', 100).then(data => {
-      setEleves(data);
+    Promise.all([
+      base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
+      base44.entities.Eleve.list('-created_date', 100).catch(() => []),
+    ]).then(([fiches, elevesData]) => {
+      // Merge both sources, prefer FicheEleve records
+      const ficheMap = new Map();
+      fiches.forEach(f => ficheMap.set(`${f.prenom}|${f.nom}`.toLowerCase(), { ...f, _source: 'fiche' }));
+      const extra = elevesData.filter(e => !ficheMap.has(`${e.prenom}|${e.nom}`.toLowerCase()));
+      setEleves([...fiches, ...extra.map(e => ({ ...e, _source: 'eleve' }))]);
       setLoading(false);
     });
   }, []);
