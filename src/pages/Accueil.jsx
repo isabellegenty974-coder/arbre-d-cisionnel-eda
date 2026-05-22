@@ -66,11 +66,11 @@ export default function Accueil() {
             transition={{ delay: 0.05, type: "spring", stiffness: 200 }}
             className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-soft-lg mb-5"
           >
-            <TreePine className="w-8 h-8 text-white" />
+            <span className="text-white text-3xl font-bold select-none" style={{fontFamily: 'serif'}}>Ψ</span>
           </motion.div>
 
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-            Arbre EDA
+            Arbre décisionnel EDA
           </h1>
           <p className="mt-2 text-muted-foreground text-sm sm:text-base max-w-xs mx-auto leading-relaxed">
             Outil d'évaluation et d'aide au diagnostic pour les enseignants
