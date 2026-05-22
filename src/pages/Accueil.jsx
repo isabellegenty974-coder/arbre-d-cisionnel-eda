@@ -15,12 +15,22 @@ export default function Accueil() {
       base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
       base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
     ]);
+    
+    // Nettoyer les diagnostics orphelins
+    const ficheKeys = new Set(fiches.map(f => `${f.prenom}|${f.nom}`.toLowerCase()));
+    const orphanedDiags = diagnostics.filter(
+      d => !ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())
+    );
+    for (const d of orphanedDiags) {
+      await base44.entities.Diagnostic.delete(d.id).catch(() => {});
+    }
+    
     const map = new Map();
     fiches.forEach(f => {
       const key = `${f.prenom}|${f.nom}`.toLowerCase();
       map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date, profession: f.createdByProfession });
     });
-    diagnostics.forEach(d => {
+    diagnostics.filter(d => ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())).forEach(d => {
       const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
       if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, lastDate: d.created_date });
       else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
