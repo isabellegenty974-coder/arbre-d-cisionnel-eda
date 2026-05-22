@@ -21,12 +21,18 @@ export default function FicheEleve() {
   });
 
   const onSubmit = async (data) => {
+    const user = await base44.auth.me();
+    const fullName = user.full_name || 'Utilisateur';
+    const profession = user.profession || 'Profession non renseignée';
+    
     const created = await base44.entities.FicheEleve.create({
       nom: data.nom,
       prenom: data.prenom,
       age: data.age ? Number(data.age) : undefined,
       classe: data.classe,
       date: new Date().toISOString().split('T')[0],
+      createdByName: fullName,
+      createdByProfession: profession,
     });
     setSavedId(created.id);
     setSaved(true);

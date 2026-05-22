@@ -56,6 +56,14 @@
       "type": "string",
       "format": "date",
       "description": "Date d'enregistrement de la fiche"
+    },
+    "createdByName": {
+      "type": "string",
+      "description": "Nom et pr\u00e9nom de la personne qui a cr\u00e9\u00e9 la fiche"
+    },
+    "createdByProfession": {
+      "type": "string",
+      "description": "Profession de la personne qui a cr\u00e9\u00e9 la fiche"
     }
   },
   "required": [
