@@ -29,13 +29,14 @@ export default function Dashboard() {
 
   const handleDelete = async (fiche) => {
     if (window.confirm('Supprimer cette fiche élève ? Tous les diagnostics liés seront aussi supprimés.')) {
-      // Supprimer tous les diagnostics liés à cet élève
-      const diagnostics = await base44.entities.Diagnostic.filter({
-        eleve_nom: fiche.nom,
-        eleve_prenom: fiche.prenom
-      }).catch(() => []);
+      // Supprimer tous les diagnostics liés à cet élève (cas-insensitif)
+      const allDiagnostics = await base44.entities.Diagnostic.list('-created_date', 500).catch(() => []);
+      const diagnosticsToDelete = allDiagnostics.filter(
+        d => d.eleve_nom?.toLowerCase() === fiche.nom?.toLowerCase() &&
+             d.eleve_prenom?.toLowerCase() === fiche.prenom?.toLowerCase()
+      );
       
-      for (const diag of diagnostics) {
+      for (const diag of diagnosticsToDelete) {
         await base44.entities.Diagnostic.delete(diag.id).catch(() => {});
       }
       
