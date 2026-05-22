@@ -36,14 +36,13 @@ export default function FicheEleve() {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        if (isValid) document.querySelector('form')?.requestSubmit();
-      } else if (e.key === 'Escape' && saved) {
-        navigate('/dashboard');
+        const form = document.querySelector('form');
+        if (form) form.requestSubmit();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isValid, saved, navigate]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
