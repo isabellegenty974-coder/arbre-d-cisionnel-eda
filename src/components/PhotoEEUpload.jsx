@@ -27,7 +27,7 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
       reader.readAsDataURL(file);
 
       // Upload le fichier
-      const response = await base44.integrations.Core.UploadFile({ file });
+      const response = await base44.integrations.Core.UploadFile(file);
       
       if (!response?.file_url) {
         throw new Error('URL du fichier manquante');
@@ -115,7 +115,10 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(e) => handleFileSelect(e.target.files?.[0])}
+        onChange={(e) => {
+          handleFileSelect(e.target.files?.[0]);
+          e.target.value = '';
+        }}
       />
       <input
         ref={cameraInputRef}
@@ -123,7 +126,10 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
         accept="image/*"
         capture="environment"
         className="hidden"
-        onChange={(e) => handleFileSelect(e.target.files?.[0])}
+        onChange={(e) => {
+          handleFileSelect(e.target.files?.[0]);
+          e.target.value = '';
+        }}
       />
     </div>
   );
