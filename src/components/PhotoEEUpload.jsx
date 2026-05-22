@@ -14,15 +14,16 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
     if (!file) return;
 
     setIsLoading(true);
+    
+    // Afficher l'aperçu
     const reader = new FileReader();
     reader.onload = (e) => setPreview(e.target.result);
     reader.readAsDataURL(file);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
+    // Upload le fichier
     const response = await base44.integrations.Core.UploadFile({ file });
     
+    // Sauvegarde l'URL
     await base44.entities.FicheEleve.update(ficheId, {
       photo_ee_url: response.file_url
     });
