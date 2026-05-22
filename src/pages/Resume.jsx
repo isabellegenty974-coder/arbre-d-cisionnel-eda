@@ -47,10 +47,10 @@ function DiagnosticView({ diag }) {
                 <p className="text-xs font-semibold text-muted-foreground mb-2">{label}</p>
                 <ul className="space-y-1">
                   {items.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                   <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                       <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                      {item.label}
-                    </li>
+                      {typeof item === 'string' ? item : item.label}
+                   </li>
                   ))}
                 </ul>
               </div>
