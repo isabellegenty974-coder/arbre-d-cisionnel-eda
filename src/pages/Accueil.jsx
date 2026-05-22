@@ -55,11 +55,11 @@ export default function Accueil() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-[#0A1E35] via-[#0D2D4F] to-[#0F3A5F] pb-24">
       <HamburgerMenu />
 
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-[#0C3B8C] to-[#1054B3] px-5 pt-12 pb-6">
+      <div className="bg-gradient-to-r from-[#1B5E7E] to-[#0E9B9B] px-5 pt-12 pb-6 shadow-lg">
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shrink-0 shadow">
             <span className="text-[#0C3B8C] text-2xl font-bold" style={{ fontFamily: 'serif' }}>Ψ</span>
@@ -78,14 +78,14 @@ export default function Accueil() {
           {/* Arbre décisionnel */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
             <Link to="/evaluation-domains" className="group block h-full">
-              <div className="bg-white rounded-2xl border-2 border-[#F97316] p-4 h-full flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F97316] to-[#EA580C] flex items-center justify-center mb-3 shadow">
-                  <TreePine className="w-7 h-7 text-white" />
+              <div className="bg-gradient-to-br from-[#D4A04A] to-[#8B6634] rounded-3xl border-2 border-[#F4A460] p-5 h-full flex flex-col items-start text-left shadow-lg hover:shadow-xl transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FF6B35] to-[#F97316] flex items-center justify-center mb-3 shadow">
+                  <TreePine className="w-6 h-6 text-white" />
                 </div>
-                <p className="font-bold text-foreground text-sm leading-tight mb-1">Arbre décisionnel</p>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 mb-2">Analyse</span>
-                <p className="text-xs text-muted-foreground leading-snug flex-1">Analyse approfondie par domaine</p>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/50 mt-2 group-hover:text-orange-500 transition-colors" />
+                <p className="font-bold text-white text-lg leading-tight mb-2">Arbre décisionnel</p>
+                <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-[#FF8C42] text-white mb-3">Analyse</span>
+                <p className="text-sm text-white/90 leading-snug flex-1 mb-3">Analyse approfondie par domaine</p>
+                <ChevronRight className="w-5 h-5 text-white/70 mt-auto self-end" />
               </div>
             </Link>
           </motion.div>
@@ -93,14 +93,14 @@ export default function Accueil() {
           {/* Nouvelle observation */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Link to="/fiche-eleve" className="group block h-full">
-              <div className="bg-white rounded-2xl border-2 border-[#00897B] p-4 h-full flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#00897B] to-[#00695C] flex items-center justify-center mb-3 shadow">
-                  <ClipboardList className="w-7 h-7 text-white" />
+              <div className="bg-gradient-to-br from-[#20B2AA] to-[#0F7F7F] rounded-3xl border-2 border-[#40E0D0] p-5 h-full flex flex-col items-start text-left shadow-lg hover:shadow-xl transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#00D9D9] to-[#00B8B8] flex items-center justify-center mb-3 shadow">
+                  <ClipboardList className="w-6 h-6 text-white" />
                 </div>
-                <p className="font-bold text-foreground text-sm leading-tight mb-1">Nouvelle observation</p>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 mb-2">Créer</span>
-                <p className="text-xs text-muted-foreground leading-snug flex-1">Créer une fiche élève et observer</p>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/50 mt-2 group-hover:text-teal-600 transition-colors" />
+                <p className="font-bold text-white text-lg leading-tight mb-2">Nouvelle observation</p>
+                <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-[#00E6E6] text-[#0F7F7F] mb-3">Créer</span>
+                <p className="text-sm text-white/90 leading-snug flex-1 mb-3">Créer une fiche élève et observer</p>
+                <ChevronRight className="w-5 h-5 text-white/70 mt-auto self-end" />
               </div>
             </Link>
           </motion.div>
@@ -108,24 +108,24 @@ export default function Accueil() {
 
         {/* Mes élèves — full width */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <div className="bg-white rounded-2xl border-2 border-[#0C3B8C] shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-br from-[#4A90E2] to-[#357ABD] rounded-3xl border-2 border-[#6BB6FF] shadow-lg overflow-hidden">
             {/* Top row */}
             <div
-              className="flex items-center gap-3 px-4 pt-4 pb-3 cursor-pointer hover:bg-blue-950/5 transition-colors"
+              className="flex items-center gap-3 px-4 pt-4 pb-3 cursor-pointer hover:bg-white/10 transition-colors"
               onClick={() => navigate('/dashboard')}
               title="Tableau de bord"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0C3B8C] to-[#1054B3] flex items-center justify-center shadow shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#6B5FFF] to-[#4F3FF0] flex items-center justify-center shadow shrink-0">
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                   <span className="font-bold text-foreground">Élèves</span>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-950/10 text-blue-950">Gestion</span>
+                   <span className="font-bold text-white">Élèves</span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/20 text-white">Gestion</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">Fiches et historique des diagnostics</p>
+                <p className="text-xs text-white/80 mt-0.5">Fiches et historique des diagnostics</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+              <ChevronRight className="w-4 h-4 text-white/60 shrink-0" />
             </div>
             {/* Filters */}
             <div className="mx-4 mb-3 flex gap-2 flex-wrap">
@@ -134,30 +134,30 @@ export default function Accueil() {
                 placeholder="Chercher..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                className="flex-1 min-w-fit px-2 py-1.5 text-[10px] rounded border border-blue-950/10 bg-white"
+                className="flex-1 min-w-fit px-3 py-2 text-[11px] rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/40"
               />
               {[...new Set(eleves.map(e => e.classe).filter(Boolean))].sort().length > 0 && (
                 <select
                   value={classFilter}
                   onChange={(e) => { setClassFilter(e.target.value); setPage(1); }}
-                  className="px-2 py-1.5 text-[10px] rounded border border-blue-950/10 bg-white"
+                  className="px-3 py-2 text-[11px] rounded-lg border border-white/20 bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-white/40"
                 >
-                  <option value="">Classes</option>
+                  <option value="" className="text-foreground">Classes</option>
                   {[...new Set(eleves.map(e => e.classe).filter(Boolean))].sort().map(cls => (
-                    <option key={cls} value={cls}>{cls}</option>
+                    <option key={cls} value={cls} className="text-foreground">{cls}</option>
                   ))}
                 </select>
               )}
             </div>
             
             {/* Preview strip */}
-            <div className="mx-4 mb-4 rounded-xl bg-[#F0F4F8] border border-blue-950/10 p-3">
-              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-blue-950/10">
-                <div className="w-5 h-5 rounded bg-[#0C3B8C] flex items-center justify-center">
+            <div className="mx-4 mb-4 rounded-xl bg-white/10 border border-white/20 p-3">
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/20">
+                <div className="w-5 h-5 rounded bg-white/30 flex items-center justify-center">
                   <span className="text-white text-[9px] font-bold">Ψ</span>
                 </div>
-                <span className="text-xs font-semibold text-foreground">Élèves</span>
-                <span className="ml-auto text-[10px] text-blue-950 font-semibold">{eleves.length} élève{eleves.length !== 1 ? 's' : ''}</span>
+                <span className="text-xs font-semibold text-white">Élèves</span>
+                <span className="ml-auto text-[10px] text-white/80 font-semibold">{eleves.length} élève{eleves.length !== 1 ? 's' : ''}</span>
               </div>
               {(() => {
                 const filtered = eleves.filter(e => {
@@ -168,25 +168,25 @@ export default function Accueil() {
                 const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
                 const pageEleves = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
                 return filtered.length === 0 ? (
-                  <p className="text-[10px] text-muted-foreground text-center py-2">Aucun élève trouvé</p>
+                  <p className="text-[10px] text-white/60 text-center py-2">Aucun élève trouvé</p>
                 ) : (
                   <>
                     <div className="space-y-1.5">
                       {pageEleves.map((e, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2 cursor-pointer hover:bg-blue-950/10 rounded-lg px-1 py-0.5 transition-colors"
+                      className="flex items-center gap-2 cursor-pointer hover:bg-white/15 rounded-lg px-1 py-0.5 transition-colors"
                       onClick={() => navigate(`/historique?eleve=${encodeURIComponent(`${e.prenom} ${e.nom}`)}`)}
                     >
-                      <div className="w-5 h-5 rounded-full bg-blue-950/20 flex items-center justify-center shrink-0">
-                        <span className="text-[8px] font-bold text-blue-950">{e.prenom?.[0]}{e.nom?.[0]}</span>
+                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                        <span className="text-[8px] font-bold text-white">{e.prenom?.[0]}{e.nom?.[0]}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="text-[10px] text-foreground font-medium block">{e.prenom} {e.nom}</span>
-                        {e.profession && <span className="text-[8px] text-muted-foreground">{e.profession}</span>}
+                        <span className="text-[10px] text-white font-medium block">{e.prenom} {e.nom}</span>
+                        {e.profession && <span className="text-[8px] text-white/70">{e.profession}</span>}
                       </div>
                       {e.lastDate && (
-                        <span className="text-[9px] text-muted-foreground ml-auto shrink-0">
+                        <span className="text-[9px] text-white/70 ml-auto shrink-0">
                           {new Date(e.lastDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                         </span>
                       )}
@@ -194,19 +194,19 @@ export default function Accueil() {
                     ))}
                     </div>
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-between gap-1 mt-2 pt-2 border-t border-blue-950/10">
+                      <div className="flex items-center justify-between gap-1 mt-2 pt-2 border-t border-white/20">
                         <button
                           onClick={() => setPage(Math.max(1, page - 1))}
                           disabled={page === 1}
-                          className="px-1.5 py-0.5 text-[8px] rounded border border-blue-950/10 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-950/5"
+                          className="px-1.5 py-0.5 text-[8px] rounded border border-white/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 text-white/80"
                         >
                           ←
                         </button>
-                        <span className="text-[8px] text-blue-950">{page}/{totalPages}</span>
+                        <span className="text-[8px] text-white/80">{page}/{totalPages}</span>
                         <button
                           onClick={() => setPage(Math.min(totalPages, page + 1))}
                           disabled={page === totalPages}
-                          className="px-1.5 py-0.5 text-[8px] rounded border border-blue-950/10 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-950/5"
+                          className="px-1.5 py-0.5 text-[8px] rounded border border-white/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 text-white/80"
                         >
                           →
                         </button>
@@ -221,47 +221,51 @@ export default function Accueil() {
 
         {/* Divider */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-sm text-muted-foreground font-medium">Autres sections</span>
-          <div className="flex-1 h-px bg-border" />
+          <div className="flex-1 h-px bg-white/20" />
+          <span className="text-sm text-white/70 font-medium">Autres sections</span>
+          <div className="flex-1 h-px bg-white/20" />
         </motion.div>
 
-        {/* Secondary 3-col grid */}
+        {/* Secondary cards grid */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="grid grid-cols-3 gap-3">
-          <Link to="/register" className="group bg-white rounded-2xl border border-border p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
-            <div className="w-10 h-10 rounded-full bg-[#F0F4F8] border border-border flex items-center justify-center mb-2 group-hover:border-purple-300 transition-colors">
-              <Users className="w-5 h-5 text-muted-foreground group-hover:text-purple-600 transition-colors" />
+          <Link to="/register" className="group bg-gradient-to-br from-[#B8A3FF] to-[#8B7FD9] rounded-2xl border border-white/30 p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7B68EE] to-[#6A5ACD] flex items-center justify-center mb-2">
+              <Users className="w-5 h-5 text-white" />
             </div>
-            <p className="font-bold text-foreground text-xs mb-1">Profil</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Compléter infos</p>
+            <p className="font-bold text-white text-xs mb-1">Profil</p>
+            <p className="text-[10px] text-white/90 leading-tight">Gérer son compte</p>
           </Link>
-          <Link to="/invite-users" className="group bg-white rounded-2xl border border-border p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
-            <div className="w-10 h-10 rounded-full bg-[#F0F4F8] border border-border flex items-center justify-center mb-2 group-hover:border-green-300 transition-colors">
-              <Users className="w-5 h-5 text-muted-foreground group-hover:text-green-600 transition-colors" />
+          <Link to="/invite-users" className="group bg-gradient-to-br from-[#5DFFCC] to-[#2DD4BF] rounded-2xl border border-white/30 p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00D9A3] to-[#00B894] flex items-center justify-center mb-2">
+              <Users className="w-5 h-5 text-white" />
             </div>
-            <p className="font-bold text-foreground text-xs mb-1">Inviter</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Ajouter utilisateurs</p>
+            <p className="font-bold text-white text-xs mb-1">Inviter</p>
+            <p className="text-[10px] text-white/90 leading-tight">Inviter un collègue</p>
           </Link>
-          <Link to="/stats-annuelles" className="group bg-white rounded-2xl border border-border p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
-            <div className="w-10 h-10 rounded-full bg-[#F0F4F8] border border-border flex items-center justify-center mb-2 group-hover:border-blue-300 transition-colors">
-              <BarChart2 className="w-5 h-5 text-muted-foreground group-hover:text-blue-600 transition-colors" />
+          <Link to="/stats-annuelles" className="group bg-gradient-to-br from-[#FFD89B] to-[#D4A574] rounded-2xl border border-white/30 p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FFB347] to-[#E89B3C] flex items-center justify-center mb-2">
+              <BarChart2 className="w-5 h-5 text-white" />
             </div>
-            <p className="font-bold text-foreground text-xs mb-1">Statistiques</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Suivi annuel</p>
+            <p className="font-bold text-[#3D2817] text-xs mb-1">Statistiques</p>
+            <p className="text-[10px] text-[#5C4033] leading-tight">Accéder aux données</p>
           </Link>
-          <Link to="/items-professionnels" className="group bg-white rounded-2xl border border-border p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
-            <div className="w-10 h-10 rounded-full bg-[#F0F4F8] border border-border flex items-center justify-center mb-2 group-hover:border-teal-300 transition-colors">
-              <BookOpen className="w-5 h-5 text-muted-foreground group-hover:text-teal-600 transition-colors" />
+        </motion.div>
+
+        {/* Ressources & Confidentialité - 2 col */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.27 }} className="grid grid-cols-2 gap-3">
+          <Link to="/items-professionnels" className="group bg-gradient-to-br from-[#E89CFF] to-[#D878FF] rounded-2xl border border-white/30 p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#D946EF] to-[#C026D3] flex items-center justify-center mb-2">
+              <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <p className="font-bold text-foreground text-xs mb-1">Ressources</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Guides & professionnels</p>
+            <p className="font-bold text-white text-xs mb-1">Ressources</p>
+            <p className="text-[10px] text-white/90 leading-tight">Guides & professionnels</p>
           </Link>
-          <Link to="/politique-confidentialite" className="group bg-white rounded-2xl border border-border p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
-            <div className="w-10 h-10 rounded-full bg-[#F0F4F8] border border-border flex items-center justify-center mb-2 group-hover:border-gray-400 transition-colors">
-              <Shield className="w-5 h-5 text-muted-foreground group-hover:text-gray-600 transition-colors" />
+          <Link to="/politique-confidentialite" className="group bg-gradient-to-br from-[#D0DEEF] to-[#B8D4E8] rounded-2xl border border-white/30 p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#94B8D4] to-[#7AA5C4] flex items-center justify-center mb-2">
+              <Shield className="w-5 h-5 text-white" />
             </div>
-            <p className="font-bold text-foreground text-xs mb-1">Confidentialité</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">RGPD compliant</p>
+            <p className="font-bold text-[#1E3A5F] text-xs mb-1">Confidentialité</p>
+            <p className="text-[10px] text-[#2D4A6F] leading-tight">RGPD compliant</p>
           </Link>
         </motion.div>
 
