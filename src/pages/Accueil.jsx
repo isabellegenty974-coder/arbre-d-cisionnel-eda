@@ -6,9 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
+const ITEMS_PER_PAGE = 5;
+
 export default function Accueil() {
   const navigate = useNavigate();
   const [eleves, setEleves] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [classFilter, setClassFilter] = useState('');
+  const [page, setPage] = useState(1);
 
   const loadEleves = async () => {
     const [fiches, diagnostics] = await Promise.all([
@@ -36,6 +41,7 @@ export default function Accueil() {
       else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
     });
     setEleves([...map.values()]);
+    setPage(1);
   };
 
   useEffect(() => {
@@ -121,6 +127,29 @@ export default function Accueil() {
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
             </div>
+            {/* Filters */}
+            <div className="mx-4 mb-3 flex gap-2 flex-wrap">
+              <input
+                type="text"
+                placeholder="Chercher..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                className="flex-1 min-w-fit px-2 py-1.5 text-[10px] rounded border border-blue-950/10 bg-white"
+              />
+              {[...new Set(eleves.map(e => e.classe).filter(Boolean))].sort().length > 0 && (
+                <select
+                  value={classFilter}
+                  onChange={(e) => { setClassFilter(e.target.value); setPage(1); }}
+                  className="px-2 py-1.5 text-[10px] rounded border border-blue-950/10 bg-white"
+                >
+                  <option value="">Classes</option>
+                  {[...new Set(eleves.map(e => e.classe).filter(Boolean))].sort().map(cls => (
+                    <option key={cls} value={cls}>{cls}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            
             {/* Preview strip */}
             <div className="mx-4 mb-4 rounded-xl bg-[#F0F4F8] border border-blue-950/10 p-3">
               <div className="flex items-center gap-2 mb-2 pb-2 border-b border-blue-950/10">
@@ -130,11 +159,20 @@ export default function Accueil() {
                 <span className="text-xs font-semibold text-foreground">Élèves</span>
                 <span className="ml-auto text-[10px] text-blue-950 font-semibold">{eleves.length} élève{eleves.length !== 1 ? 's' : ''}</span>
               </div>
-              {eleves.length === 0 ? (
-                <p className="text-[10px] text-muted-foreground text-center py-2">Aucun élève enregistré</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {eleves.slice(0, 3).map((e, i) => (
+              {(() => {
+                const filtered = eleves.filter(e => {
+                  const nameMatch = `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm.toLowerCase());
+                  const classMatch = !classFilter || e.classe === classFilter;
+                  return nameMatch && classMatch;
+                });
+                const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+                const pageEleves = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+                return filtered.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground text-center py-2">Aucun élève trouvé</p>
+                ) : (
+                  <>
+                    <div className="space-y-1.5">
+                      {pageEleves.map((e, i) => (
                     <div
                       key={i}
                       className="flex items-center gap-2 cursor-pointer hover:bg-blue-950/10 rounded-lg px-1 py-0.5 transition-colors"
@@ -152,10 +190,31 @@ export default function Accueil() {
                           {new Date(e.lastDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                         </span>
                       )}
+                      </div>
+                    ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between gap-1 mt-2 pt-2 border-t border-blue-950/10">
+                        <button
+                          onClick={() => setPage(Math.max(1, page - 1))}
+                          disabled={page === 1}
+                          className="px-1.5 py-0.5 text-[8px] rounded border border-blue-950/10 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-950/5"
+                        >
+                          ←
+                        </button>
+                        <span className="text-[8px] text-blue-950">{page}/{totalPages}</span>
+                        <button
+                          onClick={() => setPage(Math.min(totalPages, page + 1))}
+                          disabled={page === totalPages}
+                          className="px-1.5 py-0.5 text-[8px] rounded border border-blue-950/10 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-950/5"
+                        >
+                          →
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </motion.div>
