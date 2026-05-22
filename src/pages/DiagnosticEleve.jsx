@@ -172,6 +172,17 @@ export default function DiagnosticEleve() {
   const handleGenerateRapport = async () => {
     setGenerating(true);
     try {
+      // Récupérer le nom de l'examinateur
+      let examinerName = 'N/A';
+      try {
+        const user = await base44.auth.me();
+        examinerName = user?.full_name || 'N/A';
+      } catch (e) {
+        // Silencieusement échouer
+      }
+
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('fr-FR');
       const lignes = [];
       CATEGORIES.forEach(cat => {
         const items = checked[cat.key] || [];
@@ -179,7 +190,13 @@ export default function DiagnosticEleve() {
           lignes.push(`**${cat.label}** : ${items.join(" ; ")}`);
         }
       });
-      const prompt = `Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois analyser les observations suivantes chez un élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé synthétique des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations d'évaluation complémentaire recommandées\n4. Les recommandations d'accompagnement et d'aménagements\n\nSois professionnel, rigoureux et clair. Évite de poser un diagnostic définitif.`;
+      const prompt = `Élève : ${eleve?.prenom || 'N/A'} ${eleve?.nom || 'N/A'}
+Âge : ${eleve?.age || 'N/A'} ans
+Classe : ${eleve?.classe || 'N/A'}
+Examinateur : ${examinerName}
+Date : ${dateStr}
+
+Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois analyser les observations suivantes chez cet élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé synthétique des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations d'évaluation complémentaire recommandées\n4. Les recommandations d'accompagnement et d'aménagements\n\nRemplace chaque occurrence de "Patient" par "L'élève" ou "l'élève". Sois professionnel, rigoureux et clair. Évite de poser un diagnostic définitif.`;
 
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
       const texte = result || "Le rapport n'a pas pu être généré.";
