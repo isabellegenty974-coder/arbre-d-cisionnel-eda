@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, ClipboardList, Users, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { useForm } from 'react-hook-form';
 import { eleveValidationRules } from '@/lib/formValidation';
@@ -31,6 +31,19 @@ export default function FicheEleve() {
     setSavedId(created.id);
     setSaved(true);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (isValid) document.querySelector('form')?.requestSubmit();
+      } else if (e.key === 'Escape' && saved) {
+        navigate('/dashboard');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isValid, saved, navigate]);
 
   return (
     <div className="min-h-screen bg-background">

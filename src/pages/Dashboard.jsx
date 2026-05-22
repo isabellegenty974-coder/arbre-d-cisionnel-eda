@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Trash2, ClipboardList, Plus, FileText, History } from 'lucide-react';
+import { Trash2, ClipboardList, Plus, FileText, History, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 
@@ -22,14 +22,16 @@ export default function Dashboard() {
     const map = new Map();
     fiches.forEach(f => {
       const key = `${f.prenom}|${f.nom}`.toLowerCase();
-      map.set(key, { prenom: f.prenom, nom: f.nom, age: f.age, classe: f.classe, ficheId: f.id });
+      map.set(key, { prenom: f.prenom, nom: f.nom, age: f.age, classe: f.classe, ficheId: f.id, statut: 'fiche' });
     });
     diagnostics.forEach(d => {
       const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
       if (!map.has(key)) {
-        map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, age: d.eleve_age, classe: d.eleve_classe, ficheId: null, lastDiagId: d.id });
-      } else if (!map.get(key).lastDiagId) {
-        map.get(key).lastDiagId = d.id;
+        map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, age: d.eleve_age, classe: d.eleve_classe, ficheId: null, lastDiagId: d.id, statut: d.statut });
+      } else {
+        const existing = map.get(key);
+        if (!existing.lastDiagId) existing.lastDiagId = d.id;
+        existing.statut = d.statut;
       }
     });
     setEleves([...map.values()]);
@@ -69,12 +71,15 @@ export default function Dashboard() {
       <ScreenLayout title="📊 Tableau de bord" subtitle="Liste de vos élèves">
         <div className="space-y-5">
           <div className="flex gap-3">
-            <Input
-              placeholder="Chercher par nom ou classe..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1"
-            />
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Chercher par nom ou classe..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+             />
+            </div>
             <Link to="/fiche-eleve">
               <Button className="gap-2 shrink-0">
                 <Plus className="w-4 h-4" />
@@ -102,12 +107,26 @@ export default function Dashboard() {
                  >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-foreground">{eleve.prenom} {eleve.nom}</h3>
-                      <div className="text-xs text-muted-foreground mt-1 flex gap-3">
-                        {eleve.classe && <span>Classe : {eleve.classe}</span>}
-                        {eleve.age && <span>{eleve.age} ans</span>}
-                      </div>
-                    </div>
+                         <div className="flex items-center gap-3 mb-1">
+                           <h3 className="font-semibold text-foreground">{eleve.prenom} {eleve.nom}</h3>
+                           {eleve.statut && (
+                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                               eleve.statut === 'complète' ? 'bg-green-100 text-green-800' :
+                               eleve.statut === 'en_cours' ? 'bg-blue-100 text-blue-800' :
+                               eleve.statut === 'archivée' ? 'bg-gray-100 text-gray-800' :
+                               'bg-secondary text-secondary-foreground'
+                             }`}>
+                               {eleve.statut === 'complète' ? '✓ Complété' :
+                                eleve.statut === 'en_cours' ? '◯ En cours' :
+                                eleve.statut === 'archivée' ? '⊘ Archivé' : 'Fiche'}
+                             </span>
+                           )}
+                         </div>
+                         <div className="text-xs text-muted-foreground mt-1 flex gap-3">
+                           {eleve.classe && <span>Classe : {eleve.classe}</span>}
+                           {eleve.age && <span>{eleve.age} ans</span>}
+                         </div>
+                       </div>
                     <div className="flex gap-2 flex-wrap justify-end">
                       <Button
                         size="sm"

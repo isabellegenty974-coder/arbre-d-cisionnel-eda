@@ -135,6 +135,22 @@ export default function DiagnosticEleve() {
   const [generatedRapport, setGeneratedRapport] = useState(''); // rapport persistant pour la sauvegarde
 
   useEffect(() => {
+    const handleKeyDown = async (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (totalChecked > 0 && !saving && !saved) await handleSave();
+      } else if (e.key === 'Enter' && totalChecked > 0 && !generating && !rapport) {
+        e.preventDefault();
+        await handleGenerateRapport();
+      } else if (e.key === 'Escape' && rapport) {
+        setRapport(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [totalChecked, saving, saved, generating, rapport]);
+
+  useEffect(() => {
     if (eleveId) {
       base44.entities.FicheEleve.get(eleveId).then(setEleve);
     } else {
