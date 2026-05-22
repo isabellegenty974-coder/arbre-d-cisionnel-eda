@@ -97,30 +97,30 @@ export default function DetailFiche() {
             </motion.div>
           )}
 
-          {/* Rapport du diagnostic le plus récent */}
-          {diagnostics.length > 0 && diagnostics[0].rapport && (
-           <motion.div
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             transition={{ delay: 0.15 }}
-             className="flex items-center justify-between gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg"
-           >
-             <div>
-               <h2 className="font-semibold text-foreground">Rapport (dernière observation)</h2>
-               <p className="text-xs text-muted-foreground mt-1">{new Date(diagnostics[0].created_date).toLocaleDateString('fr-FR')}</p>
-             </div>
-             <Button
-               size="sm"
-               variant="secondary"
-               onClick={() => {
-                 setSelectedRapport(diagnostics[0]);
-                 setSelectedDiagnosticId(diagnostics[0].id);
-                 setShowRapport(true);
-               }}
-             >
-               Voir
-             </Button>
-           </motion.div>
+          {/* Rapport de la fiche */}
+          {fiche.rapport && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="flex items-center justify-between gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg"
+          >
+            <div>
+              <h2 className="font-semibold text-foreground">Rapport généré</h2>
+              <p className="text-xs text-muted-foreground mt-1">{new Date(fiche.updated_date).toLocaleDateString('fr-FR')}</p>
+            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setSelectedRapport(fiche);
+                setSelectedDiagnosticId(null);
+                setShowRapport(true);
+              }}
+            >
+              Voir
+            </Button>
+          </motion.div>
           )}
 
           {/* Synthèse EE avec Photo Upload */}
