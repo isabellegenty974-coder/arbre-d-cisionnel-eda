@@ -160,28 +160,24 @@ export default function DiagnosticEleve() {
 
   const handleGenerateRapport = async () => {
     setGenerating(true);
-    const lignes = [];
-    CATEGORIES.forEach(cat => {
-      const items = checked[cat.key] || [];
-      if (items.length > 0) {
-        lignes.push(`**${cat.label}** : ${items.join(" ; ")}`);
-      }
-    });
-    const prompt = `Tu es un professionnel de l'éducation spécialisée. Un enseignant a observé les signes suivants chez un élève :
+    try {
+      const lignes = [];
+      CATEGORIES.forEach(cat => {
+        const items = checked[cat.key] || [];
+        if (items.length > 0) {
+          lignes.push(`**${cat.label}** : ${items.join(" ; ")}`);
+        }
+      });
+      const prompt = `Tu es un professionnel de l'éducation spécialisée. Un enseignant a observé les signes suivants chez un élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations recommandées (professionnels à consulter, aménagements pédagogiques)\n4. Un message de vigilance à destination de l'enseignant\n\nSois professionnel, bienveillant et clair. Évite de poser un diagnostic définitif.`;
 
-${lignes.join("\n")}
-
-Génère un rapport clinique structuré en français avec :
-1. Un résumé des observations
-2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)
-3. Les orientations recommandées (professionnels à consulter, aménagements pédagogiques)
-4. Un message de vigilance à destination de l'enseignant
-
-Sois professionnel, bienveillant et clair. Évite de poser un diagnostic définitif.`;
-
-    const result = await base44.integrations.Core.InvokeLLM({ prompt });
-    setRapport(result);
-    setGenerating(false);
+      const result = await base44.integrations.Core.InvokeLLM({ prompt });
+      setRapport(result || "Le rapport n'a pas pu être généré.");
+    } catch (err) {
+      console.error(err);
+      setRapport("Une erreur est survenue lors de la génération du rapport.");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleSave = async () => {
