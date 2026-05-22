@@ -108,7 +108,7 @@ export default function Dashboard() {
                         }}
                       >
                         <ClipboardList className="w-4 h-4" />
-                        Diagnostic
+                        Observation
                       </Button>
                       <Button
                         variant="destructive"
