@@ -10,23 +10,32 @@ export default function Accueil() {
   const navigate = useNavigate();
   const [eleves, setEleves] = useState([]);
 
-  useEffect(() => {
-    Promise.all([
+  const loadEleves = async () => {
+    const [fiches, diagnostics] = await Promise.all([
       base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
       base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
-    ]).then(([fiches, diagnostics]) => {
-      const map = new Map();
-      fiches.forEach(f => {
-        const key = `${f.prenom}|${f.nom}`.toLowerCase();
-        map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date, profession: f.createdByProfession });
-      });
-      diagnostics.forEach(d => {
-        const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
-        if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, lastDate: d.created_date });
-        else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
-      });
-      setEleves([...map.values()]);
+    ]);
+    const map = new Map();
+    fiches.forEach(f => {
+      const key = `${f.prenom}|${f.nom}`.toLowerCase();
+      map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date, profession: f.createdByProfession });
     });
+    diagnostics.forEach(d => {
+      const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
+      if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, lastDate: d.created_date });
+      else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
+    });
+    setEleves([...map.values()]);
+  };
+
+  useEffect(() => {
+    loadEleves();
+    const unsubFiche = base44.entities.FicheEleve.subscribe(() => loadEleves());
+    const unsubDiag = base44.entities.Diagnostic.subscribe(() => loadEleves());
+    return () => {
+      unsubFiche();
+      unsubDiag();
+    };
   }, []);
 
   return (
