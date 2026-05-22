@@ -195,6 +195,7 @@ Sois professionnel, bienveillant et clair. Évite de poser un diagnostic défini
       eleve_age: eleve?.age,
       eleve_classe: eleve?.classe || "",
       selections,
+      rapport: rapport || "",
       statut: "complète",
     });
 

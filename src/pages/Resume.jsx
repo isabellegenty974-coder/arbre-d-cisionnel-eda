@@ -1,4 +1,5 @@
 import { useDiagnostic } from "@/lib/DiagnosticContext";
+import RapportContent from "@/components/RapportContent";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import { Button } from "@/components/ui/button";
 import { Trash2, FileText, AlertCircle, CheckCircle2, Users, Lightbulb } from "lucide-react";
@@ -117,7 +118,15 @@ function DiagnosticView({ diag }) {
         </motion.div>
       )}
 
-      {totalItems === 0 && (
+      {diag.rapport && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+          className="p-5 rounded-xl bg-card border border-border">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">📋 Rapport généré</h3>
+          <RapportContent text={diag.rapport} />
+        </motion.div>
+      )}
+
+      {totalItems === 0 && !diag.rapport && (
         <div className="text-center p-8 rounded-lg bg-secondary/30 border border-secondary">
           <p className="text-muted-foreground">Aucun item coché dans ce diagnostic</p>
         </div>
