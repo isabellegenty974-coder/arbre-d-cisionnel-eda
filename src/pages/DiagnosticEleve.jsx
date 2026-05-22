@@ -316,17 +316,18 @@ export default function DiagnosticEleve() {
                 <Button
                   className="w-full gap-2"
                   onClick={() => {
+                    const norm = (str) => (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                     const doc = new jsPDF();
-                    const name = `${eleve?.prenom || ''} ${eleve?.nom || ''}`.trim();
+                    const name = norm(`${eleve?.prenom || ''} ${eleve?.nom || ''}`.trim());
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(`Rapport - Hypothese(s) diagnostique(s)`, 15, 20);
+                    doc.text('Rapport - Hypothese(s) diagnostique(s)', 15, 20);
                     doc.setFontSize(11);
                     doc.setFont('helvetica', 'normal');
                     if (name) doc.text(`Eleve : ${name}`, 15, 30);
-                    if (eleve?.classe) doc.text(`Classe : ${eleve.classe}`, 15, 37);
+                    if (eleve?.classe) doc.text(`Classe : ${norm(eleve.classe)}`, 15, 37);
                     doc.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`, 15, eleve?.classe ? 44 : 37);
-                    const lines = doc.splitTextToSize(rapport, 180);
+                    const lines = doc.splitTextToSize(norm(rapport), 180);
                     doc.setFontSize(10);
                     doc.text(lines, 15, eleve?.classe ? 54 : 47);
                     doc.save(`rapport_${(name || 'eleve').replace(/\s+/g, '_')}.pdf`);
