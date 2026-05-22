@@ -104,7 +104,7 @@ export default function Accueil() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-foreground">Mes élèves</span>
+                   <span className="font-bold text-foreground">Élèves</span>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-950/10 text-blue-950">Gestion</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">Fiches et historique des diagnostics</p>
@@ -117,7 +117,7 @@ export default function Accueil() {
                 <div className="w-5 h-5 rounded bg-[#0C3B8C] flex items-center justify-center">
                   <span className="text-white text-[9px] font-bold">Ψ</span>
                 </div>
-                <span className="text-xs font-semibold text-foreground">Mes élèves</span>
+                <span className="text-xs font-semibold text-foreground">Élèves</span>
                 <span className="ml-auto text-[10px] text-blue-950 font-semibold">{eleves.length} élève{eleves.length !== 1 ? 's' : ''}</span>
               </div>
               {eleves.length === 0 ? (
