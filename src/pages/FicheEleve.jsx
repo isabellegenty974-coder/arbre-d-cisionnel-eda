@@ -121,20 +121,6 @@ export default function FicheEleve() {
             </div>
           </motion.div>
 
-          {saved && savedId && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-6 rounded-xl bg-accent/5 border-2 border-accent/20"
-            >
-              <PhotoEEUpload 
-                ficheId={savedId} 
-                initialPhotoUrl={photoUrl}
-                onPhotoUploaded={setPhotoUrl}
-              />
-            </motion.div>
-          )}
-
           {!saved ? (
             <Button
               type="submit"
@@ -151,6 +137,20 @@ export default function FicheEleve() {
               className="space-y-3"
             >
               <p className="text-center text-sm font-medium text-chart-2">✓ Fiche créée !</p>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="p-4 rounded-lg bg-accent/5 border border-accent/20"
+              >
+                <PhotoEEUpload 
+                  ficheId={savedId} 
+                  initialPhotoUrl={photoUrl}
+                  onPhotoUploaded={setPhotoUrl}
+                />
+              </motion.div>
+              
               <Button
                 onClick={() => navigate(`/diagnostic-eleve?id=${savedId}`)}
                 className="w-full gap-2 bg-primary hover:bg-primary/90"
