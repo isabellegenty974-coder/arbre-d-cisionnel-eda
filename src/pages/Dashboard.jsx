@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Trash2, ClipboardList, Plus, FileText } from 'lucide-react';
+import { Trash2, ClipboardList, Plus, FileText, History } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 
@@ -97,18 +97,16 @@ export default function Dashboard() {
                         {eleve.age && <span>{eleve.age} ans</span>}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      {eleve.lastDiagId && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5"
-                          onClick={() => navigate(`/resume?id=${eleve.lastDiagId}`)}
-                        >
-                          <FileText className="w-4 h-4" />
-                          Rapport
-                        </Button>
-                      )}
+                    <div className="flex gap-2 flex-wrap justify-end">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() => navigate(`/historique?eleve=${encodeURIComponent(`${eleve.prenom} ${eleve.nom}`)}`)}
+                      >
+                        <History className="w-4 h-4" />
+                        Historique
+                      </Button>
                       <Button
                         size="sm"
                         className="gap-1.5"

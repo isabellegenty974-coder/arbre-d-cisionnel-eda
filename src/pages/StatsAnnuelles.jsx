@@ -192,9 +192,9 @@ export default function StatsAnnuelles() {
               <Download className="w-4 h-4" />
               Exporter le rapport annuel PDF
             </Button>
-            <Button onClick={() => navigate("/analyse-eda")} variant="outline" className="w-full gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Retour à l'analyse
+            <Button onClick={() => navigate("/dashboard")} variant="outline" className="w-full gap-2">
+              <Users className="w-4 h-4" />
+              Mes élèves
             </Button>
           </div>
 
