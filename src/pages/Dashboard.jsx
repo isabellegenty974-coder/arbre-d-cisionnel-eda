@@ -17,21 +17,31 @@ export default function Dashboard() {
   useEffect(() => {
     Promise.all([
       base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
-      base44.entities.Eleve.list('-created_date', 100).catch(() => []),
-    ]).then(([fiches, elevesData]) => {
-      // Merge both sources, prefer FicheEleve records
-      const ficheMap = new Map();
-      fiches.forEach(f => ficheMap.set(`${f.prenom}|${f.nom}`.toLowerCase(), { ...f, _source: 'fiche' }));
-      const extra = elevesData.filter(e => !ficheMap.has(`${e.prenom}|${e.nom}`.toLowerCase()));
-      setEleves([...fiches, ...extra.map(e => ({ ...e, _source: 'eleve' }))]);
+      base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
+    ]).then(([fiches, diagnostics]) => {
+      // Build a unique student list from both sources
+      const map = new Map();
+      // FicheEleve records have priority (they have ficheId)
+      fiches.forEach(f => {
+        const key = `${f.prenom}|${f.nom}`.toLowerCase();
+        map.set(key, { prenom: f.prenom, nom: f.nom, age: f.age, classe: f.classe, ficheId: f.id });
+      });
+      // Add students from Diagnostic if not already present
+      diagnostics.forEach(d => {
+        const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, age: d.eleve_age, classe: d.eleve_classe, ficheId: null });
+        }
+      });
+      setEleves([...map.values()]);
       setLoading(false);
     });
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (eleve) => {
     if (window.confirm('Supprimer cet élève ?')) {
-      await base44.entities.FicheEleve.delete(id);
-      setEleves(eleves.filter(e => e.id !== id));
+      if (eleve.ficheId) await base44.entities.FicheEleve.delete(eleve.ficheId);
+      setEleves(eleves.filter(e => `${e.prenom}|${e.nom}` !== `${eleve.prenom}|${eleve.nom}`));
     }
   };
 
@@ -89,7 +99,13 @@ export default function Dashboard() {
                       <Button
                         size="sm"
                         className="gap-1.5"
-                        onClick={() => navigate(`/diagnostic-eleve?id=${eleve.id}`)}
+                        onClick={() => {
+                          if (eleve.ficheId) {
+                            navigate(`/diagnostic-eleve?id=${eleve.ficheId}`);
+                          } else {
+                            navigate(`/diagnostic-eleve?prenom=${encodeURIComponent(eleve.prenom)}&nom=${encodeURIComponent(eleve.nom)}&age=${eleve.age||''}&classe=${encodeURIComponent(eleve.classe||'')}`);
+                          }
+                        }}
                       >
                         <ClipboardList className="w-4 h-4" />
                         Diagnostic
@@ -97,7 +113,7 @@ export default function Dashboard() {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDelete(eleve.id)}
+                        onClick={() => handleDelete(eleve)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

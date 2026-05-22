@@ -86,8 +86,16 @@ export default function DiagnosticEleve() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!eleveId) return;
-    base44.entities.FicheEleve.get(eleveId).then(setEleve);
+    if (eleveId) {
+      base44.entities.FicheEleve.get(eleveId).then(setEleve);
+    } else {
+      // Student info passed as query params (from Diagnostic entity)
+      const prenom = urlParams.get('prenom') || '';
+      const nom = urlParams.get('nom') || '';
+      const age = urlParams.get('age');
+      const classe = urlParams.get('classe') || '';
+      if (prenom || nom) setEleve({ prenom, nom, age: age ? Number(age) : undefined, classe });
+    }
   }, [eleveId]);
 
   const toggle = (catKey, item) => {
