@@ -161,7 +161,7 @@ export default function StatsAnnuelles() {
           >
             {[
               { icon: Users, label: "Élèves", value: nbEleves, color: "text-primary", bg: "bg-primary/10" },
-              { icon: ClipboardList, label: "Diagnostics", value: nbDiagnostics, color: "text-violet-500", bg: "bg-violet-500/10" },
+              { icon: ClipboardList, label: "Hypothèse(s) diagnostique(s)", value: nbDiagnostics, color: "text-violet-500", bg: "bg-violet-500/10" },
             ].map(({ icon: Icon, label, value, color, bg }) => (
               <div key={label} className={`flex flex-col items-center gap-1 p-4 rounded-2xl border border-border ${bg}`}>
                 <Icon className={`w-5 h-5 ${color}`} />
