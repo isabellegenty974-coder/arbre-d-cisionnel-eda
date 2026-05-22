@@ -144,7 +144,7 @@ export default function DiagnosticEleve() {
     <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
       <ScreenLayout
-        title={`🔍 Diagnostic`}
+        title={`🔍 Hypothèse(s) diagnostique(s)`}
         subtitle={eleve ? `${eleve.prenom} ${eleve.nom}${eleve.classe ? ` — ${eleve.classe}` : ""}` : ""}
       >
         <div className="space-y-4">
