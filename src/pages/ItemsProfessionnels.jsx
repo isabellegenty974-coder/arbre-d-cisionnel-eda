@@ -82,6 +82,7 @@ const PROFESSIONNELS = [
     color: "bg-rose-50 border-rose-200",
     badgeColor: "bg-rose-100 text-rose-700",
     title: "Psychologue",
+    badge: "Professionnel de l'accompagnement",
     description: "Accompagne l'enfant dans sa vie émotionnelle, ses relations et son épanouissement psychique.",
     difficultes: [
       "Anxiété, phobies scolaires ou refus d'école",
@@ -130,7 +131,7 @@ export default function ItemsProfessionnels() {
       <HamburgerMenu />
       <ScreenLayout title="👩‍⚕️ Professionnels" subtitle="Fiches par professionnel et difficultés concernées">
         <div className="space-y-5">
-          {PROFESSIONNELS.map(({ emoji, color, badgeColor, title, description, difficultes }, i) => (
+          {PROFESSIONNELS.map(({ emoji, color, badgeColor, badge, title, description, difficultes }, i) => (
             <motion.div
               key={title}
               initial={{ opacity: 0, y: 14 }}
@@ -142,7 +143,7 @@ export default function ItemsProfessionnels() {
                 <span className="text-2xl">{emoji}</span>
                 <div>
                   <h3 className="font-semibold text-foreground text-lg leading-tight">{title}</h3>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeColor}`}>Professionnel de santé</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeColor}`}>{badge || "Professionnel de santé"}</span>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-4">{description}</p>
