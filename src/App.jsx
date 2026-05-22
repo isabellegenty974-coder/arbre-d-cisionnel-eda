@@ -33,6 +33,7 @@ import ItemsProfessionnels from './pages/ItemsProfessionnels';
 import DiagnosticEleve from './pages/DiagnosticEleve';
 import TableauSynthese from './pages/TableauSynthese';
 import InviteUsers from './pages/InviteUsers';
+import Register from './pages/Register';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -191,6 +192,7 @@ const AuthenticatedApp = () => {
       <BottomBar />
       <Routes>
         <Route path="/" element={<Accueil />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/resume" element={<Resume />} />
         <Route path="/fiche-eleve" element={<FicheEleve />} />
         <Route path="/dashboard" element={<Dashboard />} />

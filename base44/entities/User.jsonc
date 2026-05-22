@@ -1,0 +1,15 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "profession": {
+      "type": "string",
+      "enum": [
+        "MaDP",
+        "MaDR",
+        "Psy EN EDA"
+      ],
+      "description": "Profession de l'utilisateur"
+    }
+  }
+}
