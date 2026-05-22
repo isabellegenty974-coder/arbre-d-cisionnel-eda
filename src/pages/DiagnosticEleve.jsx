@@ -36,16 +36,40 @@ const CATEGORIES = [
     color: "bg-rose-50 border-rose-200",
     headerColor: "bg-rose-100 text-rose-800",
     items: [
-      { label: "Agitation motrice persistante", desc: "Se lève fréquemment, ne reste pas en place, besoin constant de bouger, agite mains ou pieds en permanence" },
-      { label: "Impulsivité verbale et gestuelle", desc: "Parle sans lever le doigt, interrompt, agit avant de réfléchir, réponses précipitées, difficulté à attendre son tour" },
-      { label: "Difficultés d'inhibition / contrôle", desc: "Peine à stopper une réaction automatique, persévère dans l'erreur, impulsions motrices ou verbales non filtrées" },
-      { label: "Inattention et distractibilité", desc: "Décroche rapidement, oublie la consigne en cours de tâche, sensible aux stimuli extérieurs, rares moments de concentration soutenue" },
-      { label: "Opposition systématique", desc: "Refuse de se soumettre aux règles ou aux demandes des adultes, contestation régulière, recherche de conflits" },
-      { label: "Provocation et comportements défiants", desc: "Cherche à contrarier, énerve intentionnellement les autres, ne reconnaît pas ses torts, rend les autres responsables" },
-      { label: "Anxiété généralisée ou scolaire", desc: "Inquiétudes excessives et récurrentes, peurs scolaires, somatisations (maux de ventre, tête), refus d'école" },
-      { label: "Repli sur soi / affect plat", desc: "Isolé, peu communicatif, air triste ou absent de manière durable, perte d'intérêt pour les activités" },
-      { label: "Réactions émotionnelles disproportionnées", desc: "Pleurs ou colères intenses pour des raisons mineures, durée de retour au calme très longue" },
-      { label: "Difficulté à accepter les erreurs / perfectionnisme rigide", desc: "Réaction excessive face aux échecs, efface compulsivement, stratégies d'évitement, peur du jugement" },
+      // --- Agitation / Hyperactivité ---
+      { label: "Agitation motrice permanente", desc: "Se lève sans permission, se tortille sur sa chaise, besoin constant de bouger, incapable de rester assis même brièvement" },
+      { label: "Mouvements parasites incessants", desc: "Agite les jambes, tapote, manipule des objets, fait du bruit avec la bouche ou le matériel en permanence" },
+      { label: "Agitation non liée au contexte", desc: "Hyperactivité présente dans tous les contextes (classe, récré, maison) et pas seulement lors de transitions ou d'ennui" },
+      // --- Impulsivité ---
+      { label: "Impulsivité verbale", desc: "Répond avant la fin de la question, coupe la parole, crie la réponse, parle sans lever le doigt de façon systématique" },
+      { label: "Impulsivité motrice", desc: "Agit avant de réfléchir, touche les affaires des autres, se lève sans autorisation, réponses gestuelles précipitées" },
+      { label: "Incapacité à attendre son tour", desc: "Tensions en jeux collectifs, files d'attente insupportables, frustration immédiate si délai même court" },
+      { label: "Passage à l'acte impulsif avec regrets", desc: "L'enfant regrette souvent après coup, reconnaît avoir agi trop vite, mais répète le comportement" },
+      // --- Inhibition / Contrôle ---
+      { label: "Déficit d'inhibition comportementale", desc: "Peine à stopper une réponse automatique, difficultés à respecter une règle lorsque le contexte change" },
+      { label: "Persévération dans l'erreur", desc: "Répète la même réponse ou stratégie malgré le feedback négatif, difficulté à changer de procédure" },
+      { label: "Rires ou réactions inadaptés", desc: "Rit au mauvais moment, réponses émotionnelles décalées par rapport au contexte social" },
+      // --- Attention ---
+      { label: "Décrochage attentionnel rapide", desc: "Perd le fil après quelques minutes, déconnecte en cours de consigne, regard dans le vide fréquent" },
+      { label: "Hypersensibilité aux distracteurs", desc: "Toute stimulation extérieure (bruit, mouvement, lumière) capte son attention et interrompt la tâche" },
+      { label: "Oubli des consignes en cours de tâche", desc: "Commence un exercice mais ne sait plus ce qu'il devait faire après 2 ou 3 étapes" },
+      { label: "Attention en éclairs uniquement", desc: "Ne concentre son attention que sur les activités qui le passionnent, jamais sur les tâches imposées" },
+      // --- Anxiété ---
+      { label: "Anxiété scolaire spécifique", desc: "Peurs liées aux évaluations, aux exposés oraux, à la lecture à voix haute, panique en situation de performance" },
+      { label: "Anxiété généralisée", desc: "Inquiétudes excessives dans de nombreux domaines (famille, santé, avenir), difficultés à déconnecter" },
+      { label: "Somatisations régulières", desc: "Maux de ventre, de tête ou nausées récurrents le matin ou avant un contrôle, sans cause médicale identifiée" },
+      { label: "Refus ou évitement scolaire", desc: "Résistance à aller à l'école, pleurs le matin, demandes répétées de rester à la maison, fugues de classe" },
+      { label: "Comportements de réassurance", desc: "Demande sans cesse si c'est bien, cherche la validation de l'adulte, vérifie ses réponses compulsivement" },
+      // --- Opposition ---
+      { label: "Opposition aux règles scolaires", desc: "Refuse régulièrement de suivre les consignes, conteste les règles de classe, résistance passive ou active" },
+      { label: "Provocations ciblées", desc: "Cherche à agacer intentionnellement des pairs ou l'adulte, sourit quand il transgresse, semble y trouver du plaisir" },
+      { label: "Non-reconnaissance de ses torts", desc: "Reporte systématiquement la faute sur les autres, nie les faits même évidents, discours victimaire ancré" },
+      { label: "Crises de colère disproportionnées", desc: "Explosions de rage pour un refus ou une frustration minime, durée longue, récupération difficile" },
+      // --- Régulation émotionnelle ---
+      { label: "Labilité émotionnelle marquée", desc: "Passe d'une émotion à l'autre très rapidement, humeur imprévisible, pleurs ou rires sans raison apparente" },
+      { label: "Repli affectif / affect plat", desc: "Visage inexpressif, peu de réactions émotionnelles, isolement, regard vide, indifférence aux activités" },
+      { label: "Difficulté à tolérer la frustration", desc: "Réagit fortement à tout obstacle, toute limite, tout échec même mineur déclenche une réaction intense" },
+      { label: "Perfectionnisme rigide avec évitement", desc: "Refuse de commencer si risque d'erreur, efface compulsivement, abandonne rapidement face à la difficulté" },
     ],
   },
   {
