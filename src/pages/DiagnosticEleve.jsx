@@ -278,6 +278,17 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
       statut: "complète",
     });
 
+    // Sauvegarde le rapport dans la fiche élève
+    if (eleveId && generatedRapport) {
+      try {
+        await base44.entities.FicheEleve.update(eleveId, {
+          rapport: generatedRapport
+        });
+      } catch (err) {
+        console.error('Erreur mise à jour fiche élève:', err);
+      }
+    }
+
     setSaving(false);
     setSaved(true);
     setTimeout(() => navigate(`/dashboard?ficheId=${eleveId}`), 1200);
