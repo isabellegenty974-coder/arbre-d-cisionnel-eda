@@ -20,7 +20,7 @@ const DOMAIN_LABELS = {
 
 function DiagnosticView({ diag }) {
   const selections = diag.selections || {};
-  const [rapportOpen, setRapportOpen] = useState(false);
+  const [rapportOpen, setRapportOpen] = useState(true);
 
   // Détecter si le format est "nouveau" (strings simples) ou "ancien" (objets)
   const isNewFormat = Object.values(selections).some(arr => Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'string');
