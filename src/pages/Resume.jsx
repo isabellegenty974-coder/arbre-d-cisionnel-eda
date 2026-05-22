@@ -122,64 +122,21 @@ function DiagnosticView({ diag }) {
         </motion.div>
       )}
 
-      {/* Hypothèses diagnostiques (nouveau format) */}
-      {isNewFormat && selections._analyse?.hypotheses?.length > 0 && (
+      {/* Rapport / Hypothèses diagnostiques */}
+      {isNewFormat && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="p-5 rounded-xl bg-card border-2 border-primary/30">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-primary mt-1 shrink-0" />
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">🎯 Hypothèses diagnostiques</h3>
-              <ul className="space-y-2">
-                {selections._analyse.hypotheses.map((h, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                    <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Préconisations (nouveau format) */}
-      {isNewFormat && selections._analyse?.recommandations?.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="p-5 rounded-xl bg-accent/10 border border-accent/20">
-          <div className="flex items-start gap-3">
-            <Lightbulb className="w-5 h-5 text-accent mt-1 shrink-0" />
-            <div className="flex-1">
-              <h4 className="font-semibold text-foreground mb-3">💡 Préconisations</h4>
-              <ul className="space-y-2">
-                {selections._analyse.recommandations.map((r, i) => (
-                  <li key={i} className="text-sm text-foreground leading-relaxed">• {r}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Rapport IA complet */}
-      {isNewFormat && diag.rapport && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
           className="rounded-xl border-2 border-primary/30 overflow-hidden">
-          <button
-            onClick={() => setRapportOpen(o => !o)}
-            className="w-full flex items-center justify-between px-5 py-4 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-primary" />
-              <span className="font-semibold text-foreground">📄 Rapport complet IA</span>
-            </div>
-            {rapportOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-          </button>
-          {rapportOpen && (
-            <div className="px-5 py-4 bg-card">
+          <div className="flex items-center gap-2 px-5 py-4 bg-primary/5">
+            <AlertCircle className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-foreground">🎯 Hypothèses diagnostiques</span>
+          </div>
+          <div className="px-5 py-4 bg-card">
+            {diag.rapport ? (
               <RapportContent text={diag.rapport} />
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Aucun rapport généré. Retournez sur la fiche d’observation et cliquez sur "Générer le rapport" avant d’enregistrer.</p>
+            )}
+          </div>
         </motion.div>
       )}
 
