@@ -69,7 +69,7 @@ export default function TableauSynthese() {
   return (
     <div className="min-h-screen bg-background">
       <HamburgerMenu />
-      <ScreenLayout title="📊 Tableau de synthèse des diagnostics">
+      <ScreenLayout title="📊 Tableau de synthèse des hypothèses diagnostiques">
         {loading ? (
           <div className="text-center py-12 text-muted-foreground">Chargement...</div>
         ) : diagnostics.length === 0 ? (
