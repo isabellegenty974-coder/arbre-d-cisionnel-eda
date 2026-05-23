@@ -30,6 +30,7 @@ export default function EquipeRased() {
   const [savingInscription, setSavingInscription] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -40,18 +41,15 @@ export default function EquipeRased() {
         setNom(me?.full_name?.split(' ').slice(1).join(' ') || '');
         setProfession(me?.profession || '');
         
-        // Afficher le formulaire si invité (param ?invited=true) ou profil incomplet
         const isInvited = searchParams.get('invited') === 'true';
         if (isInvited || !me?.profession || !me?.full_name) {
           setShowInscriptionForm(true);
         }
         
-        // Charger la liste des membres (peut échouer si l'utilisateur n'a pas les permissions)
         try {
           const users = await base44.entities.User.list();
           setMembers(users);
         } catch (err) {
-          // Fallback: afficher seulement l'utilisateur actuel
           setMembers([me]);
         }
       } catch (err) {
@@ -96,12 +94,14 @@ export default function EquipeRased() {
 
   const handleDeleteMember = async (memberId) => {
     setDeletingId(memberId);
+    setDeleteError(null);
     try {
       await base44.entities.User.delete(memberId);
       setMembers(members.filter(m => m.id !== memberId));
       setShowDeleteConfirm(null);
     } catch (err) {
       console.error('Erreur lors de la suppression:', err);
+      setDeleteError(err.message || 'Erreur lors de la suppression.');
     } finally {
       setDeletingId(null);
     }
@@ -169,7 +169,6 @@ export default function EquipeRased() {
                 </div>
               )}
 
-              {/* Invite section */}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="pt-2">
                 {!showInviteForm ? (
                   <Button
@@ -198,7 +197,7 @@ export default function EquipeRased() {
                           className="border-[#D4A574]/50 focus:ring-[#D4A574]/40"
                         />
                         {inviteStatus === 'error' && (
-                          <p className="text-red-500 text-sm">Erreur lors de l&apos;invitation. Vérifiez l&apos;adresse email.</p>
+                          <p className="text-red-500 text-sm">Erreur lors de l'invitation. Vérifiez l'adresse email.</p>
                         )}
                         <div className="flex gap-2">
                           <Button
@@ -222,7 +221,6 @@ export default function EquipeRased() {
         </div>
       </ScreenLayout>
 
-      {/* Inscription form modal */}
       {showInscriptionForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <motion.div
@@ -291,7 +289,6 @@ export default function EquipeRased() {
         </div>
       )}
 
-      {/* Delete confirmation modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <motion.div
@@ -301,6 +298,11 @@ export default function EquipeRased() {
           >
             <h2 className="text-xl font-semibold text-[#0F172A] mb-2">Supprimer ce profil ?</h2>
             <p className="text-[#0F172A]/70 mb-6">Cette action ne peut pas être annulée. Êtes-vous sûr ?</p>
+            {deleteError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg">
+                <p className="text-red-700 text-sm">{deleteError}</p>
+              </div>
+            )}
             <div className="flex gap-2">
               <Button
                 onClick={() => handleDeleteMember(showDeleteConfirm)}
@@ -311,7 +313,10 @@ export default function EquipeRased() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setShowDeleteConfirm(null)}
+                onClick={() => {
+                  setShowDeleteConfirm(null);
+                  setDeleteError(null);
+                }}
                 disabled={deletingId === showDeleteConfirm}
                 className="flex-1"
               >
