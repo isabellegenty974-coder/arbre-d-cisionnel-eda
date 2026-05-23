@@ -16,11 +16,13 @@ export default function Accueil() {
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  // Redirect to register if no profession set
+  // Redirect to login if not authenticated, or to register if no profession
   useEffect(() => {
     base44.auth.me().then(user => {
-      if (user && !user.profession) navigate('/register', { replace: true });
-    }).catch(() => {});
+      if (!user || !user.profession) navigate('/register', { replace: true });
+    }).catch(() => {
+      base44.auth.redirectToLogin();
+    });
   }, []);
 
   const loadEleves = async () => {
