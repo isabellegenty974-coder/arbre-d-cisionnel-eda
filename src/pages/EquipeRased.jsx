@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Pencil } from 'lucide-react';
+import { UserCircle, Pencil, UserPlus, CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 
 const PROFESSION_LABELS = {
@@ -18,6 +19,9 @@ export default function EquipeRased() {
   const [members, setMembers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteStatus, setInviteStatus] = useState(null); // null | 'loading' | 'success' | 'error'
+  const [showInviteForm, setShowInviteForm] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -38,6 +42,19 @@ export default function EquipeRased() {
     };
     load();
   }, []);
+
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    setInviteStatus('loading');
+    try {
+      await base44.users.inviteUser(inviteEmail.trim(), 'user');
+      setInviteStatus('success');
+      setInviteEmail('');
+      setTimeout(() => { setInviteStatus(null); setShowInviteForm(false); }, 3000);
+    } catch (err) {
+      setInviteStatus('error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-16">
@@ -88,6 +105,55 @@ export default function EquipeRased() {
                   <p>Aucun membre trouvé</p>
                 </div>
               )}
+
+              {/* Invite section */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="pt-2">
+                {!showInviteForm ? (
+                  <Button
+                    onClick={() => setShowInviteForm(true)}
+                    className="w-full gap-2 bg-[#0F172A] hover:bg-[#1E293B] text-white border-0"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Inviter un membre
+                  </Button>
+                ) : (
+                  <div className="bg-white rounded-2xl border-2 border-[#D4A574] p-5 space-y-4 shadow-sm">
+                    <p className="font-semibold text-[#0F172A]">Inviter un nouveau membre</p>
+                    {inviteStatus === 'success' ? (
+                      <div className="flex items-center gap-2 text-emerald-600 font-medium">
+                        <CheckCircle className="w-5 h-5" />
+                        Invitation envoyée avec succès !
+                      </div>
+                    ) : (
+                      <>
+                        <Input
+                          type="email"
+                          placeholder="adresse@email.fr"
+                          value={inviteEmail}
+                          onChange={e => setInviteEmail(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleInvite()}
+                          className="border-[#D4A574]/50 focus:ring-[#D4A574]/40"
+                        />
+                        {inviteStatus === 'error' && (
+                          <p className="text-red-500 text-sm">Erreur lors de l&apos;invitation. Vérifiez l&apos;adresse email.</p>
+                        )}
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleInvite}
+                            disabled={inviteStatus === 'loading' || !inviteEmail.trim()}
+                            className="flex-1 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] border-0 font-semibold"
+                          >
+                            {inviteStatus === 'loading' ? 'Envoi...' : 'Envoyer l\'invitation'}
+                          </Button>
+                          <Button variant="outline" onClick={() => { setShowInviteForm(false); setInviteStatus(null); setInviteEmail(''); }}>
+                            Annuler
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </motion.div>
             </>
           )}
         </div>
