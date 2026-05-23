@@ -45,6 +45,7 @@ export default function Register() {
     try {
       await base44.auth.updateMe({
         profession,
+        full_name: `${prenom.trim()} ${nom.trim()}`,
       });
       navigate('/');
     } catch (err) {
