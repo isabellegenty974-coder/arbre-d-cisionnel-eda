@@ -107,8 +107,9 @@ export default function Accueil() {
           </div>
 
           {/* Right Column - Cards */}
-          <div className="col-span-1 lg:col-span-2 grid grid-cols-1 gap-4">
-            <p className="text-gray-300 text-xs font-medium">sections</p>
+          <div className="col-span-1 lg:col-span-2">
+            <p className="text-gray-300 text-xs font-medium mb-4">sections</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             
             {/* Resources Section */}
             <Link to="/items-professionnels" className="block">
@@ -136,6 +137,7 @@ export default function Accueil() {
                 <p className="text-sm text-blue-200">Voir l'équipe</p>
               </div>
             </Link>
+            </div>
           </div>
         </div>
       </div>
