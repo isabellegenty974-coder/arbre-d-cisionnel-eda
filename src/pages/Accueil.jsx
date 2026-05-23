@@ -47,13 +47,13 @@ export default function Accueil() {
       <HamburgerMenu />
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-blue-900 to-blue-800 text-white px-6 py-12 rounded-b-3xl">
-        <h1 className="text-4xl font-bold text-center mb-2">Arbre décisionnel</h1>
-        <h2 className="text-4xl font-bold text-center mb-4 text-blue-200">RASED</h2>
-        <p className="text-center text-blue-100 text-sm mb-8">Outil d'aide à la formulation d'hypothèses diagnostiques</p>
+      <div className="bg-gradient-to-b from-blue-900 to-blue-800 text-white px-6 py-8 pb-0">
+        <h1 className="text-4xl font-bold text-center mb-2 text-blue-200">Arbre décisionnel</h1>
+        <h2 className="text-4xl font-bold text-center mb-2 text-blue-200">RASED</h2>
+        <p className="text-center text-blue-100 text-xs mb-8">Outil d'aide à la formulation d'hypothèses diagnostiques</p>
 
         {/* Action Buttons */}
-        <div className="space-y-3 max-w-sm mx-auto">
+        <div className="space-y-3 max-w-sm mx-auto pb-8">
           <Link to="/fiche-eleve" className="w-full">
             <button className="w-full bg-white text-gray-900 font-semibold py-3 rounded-full flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors">
               <span>📋</span>
@@ -72,9 +72,10 @@ export default function Accueil() {
 
       {/* Main Content */}
       <div className="px-4 py-6 max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Élèves Section */}
-          <div className="bg-blue-950 text-white rounded-2xl p-6">
+        <p className="text-gray-400 text-xs mb-3 ml-1">sections</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Élèves Section - Left */}
+          <div className="bg-blue-950 text-white rounded-2xl p-6 md:row-span-3">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Élèves</h3>
               <span className="bg-blue-500 text-xs px-3 py-1 rounded-full font-semibold">Gestion</span>
@@ -107,32 +108,39 @@ export default function Accueil() {
 
             {/* View All Button */}
             <Link to="/dashboard" className="w-full">
-              <button className="w-full bg-blue-500/30 hover:bg-blue-500/50 text-white font-medium py-2 rounded-lg transition-colors text-sm">
+              <button className="w-full bg-blue-500/30 hover:bg-blue-500/50 text-white font-medium py-2 rounded-lg transition-colors text-sm mt-4">
                 Voir tous les élèves
               </button>
             </Link>
           </div>
 
           {/* Right Column */}
-          <div className="space-y-4">
-            {/* Resources Section */}
-            <Link to="/items-professionnels" className="block">
-              <div className="bg-blue-950 text-white rounded-2xl p-6 h-full hover:bg-blue-900 transition-colors cursor-pointer">
-                <div className="text-4xl mb-3">📖</div>
-                <h3 className="text-lg font-bold mb-2">Ressources</h3>
-                <p className="text-sm text-blue-200">Guides professionnels</p>
-              </div>
-            </Link>
+          {/* Resources Section */}
+          <Link to="/items-professionnels" className="block">
+            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer h-full">
+              <div className="text-3xl mb-3">📖</div>
+              <h3 className="text-lg font-bold mb-2">Ressources</h3>
+              <p className="text-sm text-blue-200">Guides professionnels</p>
+            </div>
+          </Link>
 
-            {/* Confidentiality Section */}
-            <Link to="/politique-confidentialite" className="block">
-              <div className="bg-blue-950 text-white rounded-2xl p-6 h-full hover:bg-blue-900 transition-colors cursor-pointer">
-                <Shield className="w-8 h-8 mb-3 text-blue-300" />
-                <h3 className="text-lg font-bold mb-2">Confidentialité</h3>
-                <p className="text-sm text-blue-200">Conforme au RGPD</p>
-              </div>
-            </Link>
-          </div>
+          {/* Confidentiality Section */}
+          <Link to="/politique-confidentialite" className="block">
+            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer h-full">
+              <Shield className="w-8 h-8 mb-3 text-blue-300" />
+              <h3 className="text-lg font-bold mb-2">Confidentialité</h3>
+              <p className="text-sm text-blue-200">Conforme au RGPD</p>
+            </div>
+          </Link>
+
+          {/* Team Section */}
+          <Link to="/equipe-rased" className="block">
+            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer h-full">
+              <Users className="w-8 h-8 mb-3 text-blue-300" />
+              <h3 className="text-lg font-bold mb-2">Équipe RAED</h3>
+              <p className="text-sm text-blue-200">Voir l'équipe</p>
+            </div>
+          </Link>
         </div>
       </div>
 
