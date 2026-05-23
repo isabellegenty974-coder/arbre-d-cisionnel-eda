@@ -1,14 +1,11 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, Search, Home } from "lucide-react";
+import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, Search, Home, UserPlus, Pencil, FileText, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import FirstVisitModal from "@/components/FirstVisitModal";
-
-const BG_IMAGE = "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80";
-const ITEMS_PER_PAGE = 5;
 
 export default function Accueil() {
   const navigate = useNavigate();
@@ -51,13 +48,16 @@ export default function Accueil() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    base44.auth.me().catch(() => navigate('/register'));
+  }, [navigate]);
+
   const loadEleves = async () => {
     const [fiches, diagnostics] = await Promise.all([
       base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
       base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
     ]);
     
-    // Nettoyer les diagnostics orphelins
     const ficheKeys = new Set(fiches.map(f => `${f.prenom}|${f.nom}`.toLowerCase()));
     const orphanedDiags = diagnostics.filter(
       d => !ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())
@@ -90,31 +90,30 @@ export default function Accueil() {
     };
   }, []);
 
-  const filtered = eleves.filter(e => {
-    const nameMatch = `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm.toLowerCase());
-    const classMatch = !classFilter || e.classe === classFilter;
-    return nameMatch && classMatch;
-  });
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const pageEleves = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-
   if (notAuthenticated) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: 'linear-gradient(180deg, rgba(10,30,80,1) 0%, rgba(8,20,70,1) 100%)' }}>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#7EB8F7', fontFamily: 'serif' }}>Arbre décisionnel RASED</h1>
-        <p className="text-white/60 text-sm mb-8">Connectez-vous pour accéder à l&apos;application</p>
-        <button
-          onClick={() => base44.auth.redirectToLogin()}
-          className="bg-white text-[#0F172A] font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-white/90 transition-all"
-        >
-          Se connecter
-        </button>
+      <div className="min-h-screen bg-white flex flex-col">
+        <div className="px-6 py-8 flex items-start justify-between border-b border-gray-200">
+          <div>
+            <h1 className="text-3xl font-bold text-[#0F172A]">Arbre décisionnel RASED</h1>
+            <p className="text-gray-600 text-sm mt-1">Connectez-vous pour accéder à l&apos;application</p>
+          </div>
+          <button
+            onClick={() => base44.auth.redirectToLogin()}
+            className="px-6 py-2 rounded-full border-2 border-[#3B82F6] text-[#3B82F6] font-semibold hover:bg-blue-50 transition-all"
+          >
+            Se connecter
+          </button>
+        </div>
+        <div className="flex-1 flex items-center justify-center text-gray-400 pb-20">
+          <p>Application inaccessible. Veuillez vous connecter.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <FirstVisitModal
         isOpen={showFirstVisitModal}
         onClose={() => setShowFirstVisitModal(false)}
@@ -124,186 +123,150 @@ export default function Accueil() {
         }}
       />
 
-      {/* Full-screen background */}
-      <div
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${BG_IMAGE})` }}
-      />
-      {/* Dark overlay */}
-      <div className="fixed inset-0 z-0" style={{ background: 'linear-gradient(180deg, rgba(10,30,80,0.88) 0%, rgba(15,50,120,0.75) 45%, rgba(8,20,70,0.92) 100%)' }} />
-
       <HamburgerMenu />
 
-      <div className="relative z-10 flex flex-col items-center px-5 pt-14 pb-6 max-w-lg mx-auto w-full">
-
-        {/* Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.35 }}
-          className="text-center font-bold text-3xl mb-2 leading-tight"
-          style={{ color: '#7EB8F7', fontFamily: 'serif' }}
-        >
-          Arbre décisionnel RASED
-        </motion.h1>
-
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="text-white/80 text-sm text-center mb-8 leading-snug">
-          Outil d&apos;aide à la formulation d&apos;hypothèses diagnostiques
-        </motion.p>
-
-        {/* CTA Buttons */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col gap-3 w-full max-w-xs">
-          <Link to="/fiche-eleve">
-            <button className="w-full flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-[#0F172A] font-semibold text-base rounded-full px-6 py-3.5 shadow-lg transition-all">
-              <ClipboardList className="w-5 h-5" />
-              Nouvelle observation
-              <span className="ml-1 w-6 h-6 rounded-full border-2 border-[#0F172A]/30 flex items-center justify-center text-xs font-bold">+</span>
-            </button>
-          </Link>
-          <Link to="/evaluation-domains">
-            <button className="w-full flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/50 text-white font-semibold text-base rounded-full px-6 py-3.5 backdrop-blur-sm shadow transition-all">
-              <TreePine className="w-5 h-5" />
-              Arbre décisionnel
-            </button>
-          </Link>
-        </motion.div>
-
-        {/* Cards section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}
-          className="w-full mt-10 grid grid-cols-2 gap-3 items-start"
-        >
-          {/* Elèves card - left */}
-          <div
-            className="rounded-2xl border border-[#3B82F6]/40 p-4 flex flex-col gap-2 cursor-pointer"
-            style={{ background: 'rgba(10,18,40,0.65)', backdropFilter: 'blur(12px)' }}
-            onClick={() => navigate('/dashboard')}
-          >
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-bold text-white text-base">Elèves</span>
-              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#3B82F6', color: '#fff' }}>Gestion</span>
-            </div>
-            <p className="text-white/60 text-[10px] leading-snug">Fiches et historique des diagnostics</p>
-
-            {/* Search */}
-            <div
-              className="flex items-center gap-2 rounded-lg px-3 py-2 mt-1"
-              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(59,130,246,0.3)' }}
-              onClick={e => e.stopPropagation()}
-            >
-              <Search className="w-3.5 h-3.5 text-white/50 shrink-0" />
-              <input
-                type="text"
-                placeholder="Chercher..."
-                value={searchTerm}
-                onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
-                className="bg-transparent text-white text-[11px] placeholder-white/40 outline-none flex-1 min-w-0"
-              />
-            </div>
-
-            {/* List */}
-            <div
-              className="rounded-lg mt-1 overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(59,130,246,0.2)' }}
-            >
-              <div className="flex items-center gap-1.5 px-2 py-2 border-b border-white/10">
-                <span className="text-[#7EB8F7] font-bold" style={{ fontFamily: 'serif', fontSize: 12 }}>&#936;</span>
-                <span className="text-white text-[10px] font-semibold flex-1">Elèves /</span>
-                <span className="text-white/50 text-[9px]">{filtered.length} élève{filtered.length !== 1 ? 's' : ''}</span>
-              </div>
-              {pageEleves.length === 0 ? (
-                <p className="text-white/40 text-[10px] text-center py-3">Aucun élève trouvé</p>
-              ) : (
-                <div className="divide-y divide-white/5">
-                  {pageEleves.map((e, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-2 px-2 py-2 cursor-pointer hover:bg-white/5 transition-colors"
-                      onClick={ev => { ev.stopPropagation(); navigate(`/historique?eleve=${encodeURIComponent(`${e.prenom} ${e.nom}`)}`); }}
-                    >
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(59,130,246,0.25)' }}>
-                        <span className="text-[8px] font-bold text-[#7EB8F7]">{e.prenom?.[0]}{e.nom?.[0]}</span>
-                      </div>
-                      <span className="text-white text-[10px] font-medium flex-1 truncate">{e.prenom} {e.nom}</span>
-                      {e.lastDate && (
-                        <span className="text-white/40 text-[8px] shrink-0">
-                          {new Date(e.lastDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between px-2 py-1.5 border-t border-white/10">
-                  <button onClick={ev => { ev.stopPropagation(); setPage(Math.max(1, page - 1)); }} disabled={page === 1} className="text-white/50 disabled:opacity-30 text-[9px] px-1.5 py-0.5 rounded">←</button>
-                  <span className="text-white/50 text-[8px]">{page}/{totalPages}</span>
-                  <button onClick={ev => { ev.stopPropagation(); setPage(Math.min(totalPages, page + 1)); }} disabled={page === totalPages} className="text-white/50 disabled:opacity-30 text-[9px] px-1.5 py-0.5 rounded">→</button>
-                </div>
-              )}
-            </div>
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-8">
+        <div className="flex items-start justify-between max-w-7xl mx-auto">
+          <div>
+            <h1 className="text-3xl font-bold text-[#0F172A]">Arbre décisionnel RASED</h1>
+            <p className="text-gray-600 text-sm mt-1">Connectez-vous pour accéder à l&apos;application</p>
           </div>
-
-          {/* Right column */}
-          <div className="flex flex-col gap-3">
-            <p className="text-[#7EB8F7] font-bold text-sm" style={{ fontFamily: 'serif' }}>Autres sections</p>
-
-            <Link to="/items-professionnels">
-              <div
-                className="rounded-2xl border border-[#3B82F6]/30 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/60 transition-all"
-                style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
-              >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)' }}>
-                  <BookOpen className="w-5 h-5 text-[#7EB8F7]" />
-                </div>
-                <p className="font-bold text-white text-sm leading-tight">Ressources</p>
-                <p className="text-white/55 text-[10px]">Guides professionnels</p>
-              </div>
-            </Link>
-
-            <Link to="/politique-confidentialite">
-              <div
-                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/40 transition-all"
-                style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
-              >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  <Shield className="w-5 h-5 text-white/60" />
-                </div>
-                <p className="font-bold text-white text-sm leading-tight">Confidentialité</p>
-                <p className="text-white/55 text-[10px]">RGPD compliant</p>
-              </div>
-            </Link>
-
-            <Link to="/equipe-rased">
-              <div
-                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/40 transition-all"
-                style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
-              >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  <Users className="w-5 h-5 text-white/60" />
-                </div>
-                <p className="font-bold text-white text-sm leading-tight">Equipe RASED</p>
-                <p className="text-white/55 text-[10px]">Voir l&apos;équipe</p>
-              </div>
-            </Link>
-          </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Bottom nav bar */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around px-4 py-3 border-t border-white/10"
-        style={{ background: 'rgba(8,15,35,0.92)', backdropFilter: 'blur(16px)' }}
-      >
-        {[
-          { label: 'Accueil', icon: Home, to: '/', active: true },
-          { label: 'Elèves', icon: Users, to: '/dashboard', active: false },
-          { label: 'Arbre', icon: TreePine, to: '/evaluation-domains', active: false },
-          { label: 'Stats', icon: BarChart2, to: '/stats-annuelles', active: false },
-        ].map(({ label, icon: Icon, to, active }) => (
-          <Link key={label} to={to} className="flex flex-col items-center gap-1">
-            <Icon className="w-5 h-5" style={{ color: active ? '#7EB8F7' : 'rgba(255,255,255,0.45)' }} />
-            <span className="text-[10px] font-medium" style={{ color: active ? '#7EB8F7' : 'rgba(255,255,255,0.45)' }}>{label}</span>
-          </Link>
-        ))}
+      {/* Main Content - 3 Column Grid */}
+      <div className="px-6 py-10 max-w-7xl mx-auto">
+        <div className="grid grid-cols-3 gap-6">
+          {/* Card 1: Élèves */}
+          <div className="bg-blue-100 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-200">
+              <Users className="w-10 h-10 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#0F172A]">Élèves</h2>
+            
+            {/* Search Section */}
+            <div className="bg-white rounded-lg p-4 space-y-3">
+              <h3 className="font-bold text-[#0F172A]">Recherche d'élèves</h3>
+              <p className="text-sm text-gray-600">Recherche-le d'élèves, pourquoi avoir ces applications.</p>
+              <Link to="/dashboard">
+                <button className="w-full bg-blue-100 hover:bg-blue-200 text-blue-600 font-semibold py-2 rounded-lg transition-colors">
+                  Recherche d'élèves
+                </button>
+              </Link>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="space-y-2">
+              <h3 className="font-bold text-[#0F172A]">Actions rapides</h3>
+              <Link to="/register" className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/50 transition-colors">
+                <UserPlus className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium text-[#0F172A]">Créer un profil</span>
+              </Link>
+              <Link to="/edit-eleve" className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/50 transition-colors">
+                <Pencil className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium text-[#0F172A]">Modifier des infos</span>
+              </Link>
+              <Link to="/historique" className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/50 transition-colors">
+                <BarChart2 className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium text-[#0F172A]">Suivi pédagogique</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 2: Arbre */}
+          <div className="bg-green-100 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-200">
+              <TreePine className="w-10 h-10 text-green-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#0F172A]">Arbre</h2>
+            
+            {/* Parcours Section */}
+            <div className="bg-white rounded-lg p-4 space-y-3">
+              <h3 className="font-bold text-[#0F172A]">Parcours d'aide</h3>
+              <p className="text-sm text-gray-600">Parcourez-nous lients dépravaillement de les parcours d'aide.</p>
+              <Link to="/evaluation-domains">
+                <button className="w-full bg-green-100 hover:bg-green-200 text-green-600 font-semibold py-2 rounded-lg transition-colors">
+                  Parcours d'aide
+                </button>
+              </Link>
+            </div>
+
+            {/* Features */}
+            <div className="space-y-3">
+              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/50 transition-colors bg-white/30">
+                <span className="font-bold text-[#0F172A]">Critères de décision</span>
+                <ChevronDown className="w-4 h-4 text-green-600" />
+              </button>
+              <p className="text-sm text-gray-700 px-3">Critères des catégories au reversions des décision.</p>
+              
+              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/50 transition-colors bg-white/30">
+                <span className="font-bold text-[#0F172A]">Outils d'intervention</span>
+                <ChevronDown className="w-4 h-4 text-green-600" />
+              </button>
+              <p className="text-sm text-gray-700 px-3">Envoyer les outils de compétision toules et d'interventions.</p>
+            </div>
+          </div>
+
+          {/* Card 3: Stats */}
+          <div className="bg-gray-100 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-300">
+              <BarChart2 className="w-10 h-10 text-gray-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#0F172A]">Stats</h2>
+            
+            {/* KPI Grid */}
+            <div className="space-y-3">
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-2">Taux de réussite</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-blue-600">70%</span>
+                  <BarChart2 className="w-8 h-8 text-blue-400" />
+                </div>
+                <p className="text-[10px] text-gray-500 mt-1">Taux de réussite</p>
+              </div>
+              
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-2">Nombre de fiches</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold text-blue-600">69</span>
+                  <FileText className="w-8 h-8 text-blue-400" />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-2">Interventions par type</p>
+                <BarChart2 className="w-12 h-8 text-gray-400" />
+              </div>
+            </div>
+
+            <Link to="/stats-annuelles">
+              <button className="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 rounded-lg transition-colors">
+                Voir toutes les stats
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-3 px-4">
+        <Link to="/" className="flex flex-col items-center gap-1">
+          <Home className="w-6 h-6 text-blue-600" />
+          <span className="text-[10px] font-medium text-blue-600">Accueil</span>
+        </Link>
+        <Link to="/dashboard" className="flex flex-col items-center gap-1">
+          <Users className="w-6 h-6 text-gray-400" />
+          <span className="text-[10px] font-medium text-gray-400">Élèves</span>
+        </Link>
+        <Link to="/evaluation-domains" className="flex flex-col items-center gap-1">
+          <TreePine className="w-6 h-6 text-gray-400" />
+          <span className="text-[10px] font-medium text-gray-400">Arbre</span>
+        </Link>
+        <Link to="/stats-annuelles" className="flex flex-col items-center gap-1">
+          <BarChart2 className="w-6 h-6 text-gray-400" />
+          <span className="text-[10px] font-medium text-gray-400">Stats</span>
+        </Link>
       </div>
     </div>
   );
