@@ -106,8 +106,8 @@ export default function Accueil() {
             </div>
           </div>
 
-          {/* Right Column - Cards (2 cols) */}
-          <div className="md:col-span-2 grid grid-cols-1 gap-4">
+          {/* Right Column - Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <p className="text-gray-300 text-xs font-medium">sections</p>
             
             {/* Resources Section */}
