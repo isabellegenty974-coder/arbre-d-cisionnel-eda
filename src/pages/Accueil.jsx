@@ -73,9 +73,9 @@ export default function Accueil() {
       {/* Main Content */}
       <div className="px-4 py-6 max-w-4xl mx-auto">
         <p className="text-gray-400 text-xs mb-3 ml-1">sections</p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Élèves Section - Left (wider) */}
-          <div className="bg-blue-950 text-white rounded-2xl p-6 md:col-span-2 md:row-span-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Élèves Section - Left */}
+          <div className="bg-blue-950 text-white rounded-2xl p-6 md:row-span-3">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Élèves</h3>
               <span className="bg-blue-500 text-xs px-3 py-1 rounded-full font-semibold">Gestion</span>
@@ -107,10 +107,9 @@ export default function Accueil() {
             </div>
           </div>
 
-          {/* Right Column - 3 cards stacked */}
           {/* Resources Section */}
-          <Link to="/items-professionnels" className="block md:col-span-2">
-            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer h-full">
+          <Link to="/items-professionnels" className="block">
+            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer">
               <div className="text-3xl mb-3">📖</div>
               <h3 className="text-lg font-bold mb-2">Ressources</h3>
               <p className="text-sm text-blue-200">Guides professionnels</p>
@@ -118,8 +117,8 @@ export default function Accueil() {
           </Link>
 
           {/* Confidentiality Section */}
-          <Link to="/politique-confidentialite" className="block md:col-span-2">
-            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer h-full">
+          <Link to="/politique-confidentialite" className="block">
+            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer">
               <Shield className="w-8 h-8 mb-3 text-blue-300" />
               <h3 className="text-lg font-bold mb-2">Confidentialité</h3>
               <p className="text-sm text-blue-200">Conforme au RGPD</p>
@@ -127,8 +126,8 @@ export default function Accueil() {
           </Link>
 
           {/* Team Section */}
-          <Link to="/equipe-rased" className="block md:col-span-2">
-            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer h-full">
+          <Link to="/equipe-rased" className="block">
+            <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer">
               <Users className="w-8 h-8 mb-3 text-blue-300" />
               <h3 className="text-lg font-bold mb-2">Équipe RAED</h3>
               <p className="text-sm text-blue-200">Voir l'équipe</p>
