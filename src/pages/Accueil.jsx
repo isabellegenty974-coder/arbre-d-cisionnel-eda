@@ -72,7 +72,7 @@ export default function Accueil() {
 
       {/* Main Content */}
       <div className="px-4 py-8 max-w-4xl mx-auto bg-blue-900 min-h-screen">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {/* Left Column - Élèves */}
           <div className="col-span-1 lg:col-span-1 bg-blue-950 text-white rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
