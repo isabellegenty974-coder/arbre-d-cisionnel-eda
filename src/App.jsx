@@ -179,14 +179,17 @@ const AuthenticatedApp = () => {
   useEffect(() => {
     if (!isLoadingAuth && !authError && !['register', '/register'].includes(location.pathname)) {
       setCheckingProfile(true);
-      base44.auth.me()
-        .then(user => {
-          if (user && !user.profession) {
-            setNeedsRegister(true);
-          }
-        })
-        .catch(() => {})
-        .finally(() => setCheckingProfile(false));
+      const checkProfile = async (retries = 3) => {
+        try {
+          const user = await base44.auth.me();
+          if (user && !user.profession) setNeedsRegister(true);
+        } catch {
+          if (retries > 0) setTimeout(() => checkProfile(retries - 1), 800);
+        } finally {
+          setCheckingProfile(false);
+        }
+      };
+      checkProfile();
     }
   }, [isLoadingAuth, authError]);
 

@@ -18,11 +18,17 @@ export default function Accueil() {
 
   // Redirect to register if profession not set
   useEffect(() => {
-    base44.auth.me().then(user => {
-      if (user && !user.profession) {
-        navigate('/register', { replace: true });
+    const checkProfession = async (retries = 3) => {
+      try {
+        const user = await base44.auth.me();
+        if (user && !user.profession) {
+          navigate('/register', { replace: true });
+        }
+      } catch {
+        if (retries > 0) setTimeout(() => checkProfession(retries - 1), 800);
       }
-    }).catch(() => {});
+    };
+    checkProfession();
   }, []);
 
   const loadEleves = async () => {
