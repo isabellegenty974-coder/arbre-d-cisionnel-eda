@@ -183,18 +183,16 @@ export default function EquipeRased() {
                 </div>
               )}
 
-              {currentUser && !currentUser?.profession && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="pt-2">
-                  <Button
-                    onClick={openInscriptionForm}
-                    variant="outline"
-                    className="w-full gap-2 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Créer mon profil
-                  </Button>
-                </motion.div>
-              )}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="pt-2">
+                <Button
+                  onClick={openInscriptionForm}
+                  variant="outline"
+                  className="w-full gap-2 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Créer mon profil
+                </Button>
+              </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="pt-2">
                 {!showInviteForm ? (
