@@ -41,11 +41,6 @@ export default function EquipeRased() {
         setNom(me?.full_name?.split(' ').slice(1).join(' ') || '');
         setProfession(me?.profession || '');
         
-        const isInvited = searchParams.get('invited') === 'true';
-        if (isInvited || !me?.profession) {
-          setShowInscriptionForm(true);
-        }
-        
         try {
           const users = await base44.entities.User.list();
           setMembers(users.length > 0 ? users : [me]);
@@ -188,7 +183,7 @@ export default function EquipeRased() {
                 </div>
               )}
 
-              {currentUser && (!currentUser.profession || !currentUser.profession.trim()) && (
+              {!currentUser?.profession && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <Button
                     onClick={openInscriptionForm}
