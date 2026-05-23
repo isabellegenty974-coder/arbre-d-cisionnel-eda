@@ -1,21 +1,32 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, Search, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const BG_IMAGE = "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80";
 const ITEMS_PER_PAGE = 5;
 
 export default function Accueil() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [notAuthenticated, setNotAuthenticated] = useState(false);
   const [eleves, setEleves] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
+  const [showInvitePopup, setShowInvitePopup] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('invited') === 'true' && !localStorage.getItem('invite_popup_shown')) {
+      setShowInvitePopup(true);
+      localStorage.setItem('invite_popup_shown', 'true');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -26,6 +37,11 @@ export default function Accueil() {
     };
     checkAuth();
   }, []);
+
+  const handleJoinTeam = () => {
+    setShowInvitePopup(false);
+    navigate('/equipe-rased');
+  };
 
   useEffect(() => {
     base44.auth.me().catch(() => navigate('/register'));
@@ -95,6 +111,31 @@ export default function Accueil() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden pb-20">
+      <Dialog open={showInvitePopup} onOpenChange={setShowInvitePopup}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Bienvenue ! 👋</DialogTitle>
+            <DialogDescription className="text-base mt-3">
+              Vous avez été invité à rejoindre l'équipe RASED. Complétez votre profil pour accéder à tous les outils.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowInvitePopup(false)}
+              className="flex-1"
+            >
+              Plus tard
+            </Button>
+            <Button
+              onClick={handleJoinTeam}
+              className="flex-1"
+            >
+              Rejoindre l'équipe
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Full-screen background */}
       <div
