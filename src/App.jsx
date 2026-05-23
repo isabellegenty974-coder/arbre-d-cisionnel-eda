@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import PageNotFound from './lib/PageNotFound';
@@ -177,7 +177,7 @@ const AuthenticatedApp = () => {
   const [needsRegister, setNeedsRegister] = useState(false);
 
   useEffect(() => {
-    if (!isLoadingAuth && !authError && location.pathname !== '/register') {
+    if (!isLoadingAuth && !authError && !['register', '/register'].includes(location.pathname)) {
       setCheckingProfile(true);
       base44.auth.me()
         .then(user => {
@@ -208,8 +208,7 @@ const AuthenticatedApp = () => {
   }
 
   if (needsRegister) {
-    window.location.href = '/register';
-    return null;
+    return <Navigate to="/register" replace />;
   }
 
   return (
