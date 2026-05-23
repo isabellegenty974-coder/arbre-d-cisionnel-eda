@@ -183,8 +183,8 @@ export default function EquipeRased() {
                 </div>
               )}
 
-              {currentUser && (!currentUser?.profession || currentUser.profession === '') && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              {!loading && currentUser && !currentUser.profession && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="pt-2">
                   <Button
                     onClick={openInscriptionForm}
                     variant="outline"
