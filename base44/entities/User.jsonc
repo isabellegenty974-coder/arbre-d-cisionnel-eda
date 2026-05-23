@@ -2,6 +2,14 @@
   "name": "User",
   "type": "object",
   "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user"
+    },
     "profession": {
       "type": "string",
       "enum": [
@@ -9,7 +17,7 @@
         "MaDR",
         "Psy EN EDA"
       ],
-      "description": "Profession de l'utilisateur"
+      "description": "Profession du membre RASED"
     }
   }
 }
