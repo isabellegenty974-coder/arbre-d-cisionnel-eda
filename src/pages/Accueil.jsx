@@ -47,22 +47,22 @@ export default function Accueil() {
       <HamburgerMenu />
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-blue-900 to-blue-800 text-white px-6 py-8">
-        <h1 className="text-3xl font-bold text-center mb-0 text-blue-300">Arbre décisionnel</h1>
-        <h2 className="text-3xl font-bold text-center mb-3 text-blue-300">RASED</h2>
-        <p className="text-center text-blue-200 text-sm mb-8">Outil d'aide à la formulation d'hypothèses diagnostiques</p>
+      <div className="bg-gradient-to-b from-blue-900 to-blue-800 text-white px-6 py-12">
+        <h1 className="text-4xl font-bold text-center mb-1 text-blue-200">Arbre décisionnel</h1>
+        <h2 className="text-4xl font-bold text-center mb-4 text-blue-200">RASED</h2>
+        <p className="text-center text-blue-100 text-sm mb-8">Outil d'aide à la formulation d'hypothèses diagnostiques</p>
 
         {/* Action Buttons */}
-        <div className="space-y-3 max-w-sm mx-auto pb-8">
+        <div className="space-y-3 max-w-sm mx-auto">
           <Link to="/fiche-eleve" className="w-full">
-            <button className="w-full bg-white text-gray-900 font-semibold py-3 rounded-full flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors">
+            <button className="w-full bg-white text-gray-900 font-semibold py-3 px-6 rounded-full flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors">
               <span>📋</span>
               <span>Nouvelle observation</span>
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
             </button>
           </Link>
           <Link to="/evaluation-domains" className="w-full">
-            <button className="w-full bg-transparent border-2 border-white text-white font-semibold py-3 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
+            <button className="w-full bg-transparent border-2 border-white text-white font-semibold py-3 px-6 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
               <Bell className="w-5 h-5" />
               <span>Arbre décisionnel</span>
             </button>
@@ -71,8 +71,8 @@ export default function Accueil() {
       </div>
 
       {/* Main Content */}
-      <div className="px-4 py-6 max-w-4xl mx-auto">
-        <p className="text-gray-400 text-xs mb-3 ml-1">sections</p>
+      <div className="px-4 py-8 max-w-4xl mx-auto bg-blue-900 min-h-screen">
+        <p className="text-gray-300 text-xs mb-4 ml-1 font-medium">sections</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Élèves Section - Left */}
           <div className="bg-blue-950 text-white rounded-2xl p-6 md:row-span-3">
