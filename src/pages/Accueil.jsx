@@ -1,165 +1,281 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Home, Users, TreePine, BarChart2, Menu, Search, Plus, Bell, Shield } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
-import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
-import FirstVisitModal from '@/components/FirstVisitModal';
-import { useDiagnostic } from '@/lib/DiagnosticContext';
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, Search, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
+
+const BG_IMAGE = "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80";
+const ITEMS_PER_PAGE = 5;
 
 export default function Accueil() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [showFirstVisitModal, setShowFirstVisitModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const { eleve, setEleve } = useDiagnostic();
+  const [notAuthenticated, setNotAuthenticated] = useState(false);
+  const [eleves, setEleves] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [classFilter, setClassFilter] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-
-        if (!currentUser.profession) {
-          const hasSeenModal = localStorage.getItem('firstVisitModalSeen');
-          if (!hasSeenModal) {
-            setShowFirstVisitModal(true);
-            localStorage.setItem('firstVisitModalSeen', 'true');
-          }
-        }
-      } catch {
-        // Utilisateur non connecté - on laisse la page accessible
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) {
+        setNotAuthenticated(true);
       }
     };
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    base44.auth.me().catch(() => navigate('/register'));
+  }, [navigate]);
+
+  const loadEleves = async () => {
+    const [fiches, diagnostics] = await Promise.all([
+      base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
+      base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
+    ]);
+    
+    // Nettoyer les diagnostics orphelins
+    const ficheKeys = new Set(fiches.map(f => `${f.prenom}|${f.nom}`.toLowerCase()));
+    const orphanedDiags = diagnostics.filter(
+      d => !ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())
+    );
+    for (const d of orphanedDiags) {
+      await base44.entities.Diagnostic.delete(d.id).catch(() => {});
+    }
+    
+    const map = new Map();
+    fiches.forEach(f => {
+      const key = `${f.prenom}|${f.nom}`.toLowerCase();
+      map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date, profession: f.createdByProfession });
+    });
+    diagnostics.filter(d => ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())).forEach(d => {
+      const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
+      if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, lastDate: d.created_date });
+      else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
+    });
+    setEleves([...map.values()]);
+    setPage(1);
+  };
+
+  useEffect(() => {
+    loadEleves();
+    const unsubFiche = base44.entities.FicheEleve.subscribe(() => loadEleves());
+    const unsubDiag = base44.entities.Diagnostic.subscribe(() => loadEleves());
+    return () => {
+      unsubFiche();
+      unsubDiag();
+    };
+  }, []);
+
+  const filtered = eleves.filter(e => {
+    const nameMatch = `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm.toLowerCase());
+    const classMatch = !classFilter || e.classe === classFilter;
+    return nameMatch && classMatch;
+  });
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const pageEleves = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  if (notAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: 'linear-gradient(180deg, rgba(10,30,80,1) 0%, rgba(8,20,70,1) 100%)' }}>
+        <h1 className="text-3xl font-bold mb-2" style={{ color: '#7EB8F7', fontFamily: 'serif' }}>Arbre décisionnel RASED</h1>
+        <p className="text-white/60 text-sm mb-8">Connectez-vous pour accéder à l&apos;application</p>
+        <button
+          onClick={() => base44.auth.redirectToLogin()}
+          className="bg-white text-[#0F172A] font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-white/90 transition-all"
+        >
+          Se connecter
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-blue-900 pb-24">
-      <FirstVisitModal
-        isOpen={showFirstVisitModal}
-        onClose={() => setShowFirstVisitModal(false)}
-        onGoToTeam={() => {
-          setShowFirstVisitModal(false);
-          navigate('/equipe-rased');
-        }}
+    <div className="min-h-screen relative overflow-x-hidden pb-20">
+
+      {/* Full-screen background */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${BG_IMAGE})` }}
       />
+      {/* Dark overlay */}
+      <div className="fixed inset-0 z-0" style={{ background: 'linear-gradient(180deg, rgba(10,30,80,0.88) 0%, rgba(15,50,120,0.75) 45%, rgba(8,20,70,0.92) 100%)' }} />
 
       <HamburgerMenu />
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-blue-900 to-blue-800 text-white px-6 py-12">
-        <h1 className="text-4xl font-bold text-center mb-1 text-blue-200">Arbre décisionnel</h1>
-        <h2 className="text-4xl font-bold text-center mb-4 text-blue-200">RASED</h2>
-        <p className="text-center text-blue-100 text-sm mb-8">Outil d'aide à la formulation d'hypothèses diagnostiques</p>
+      <div className="relative z-10 flex flex-col items-center px-5 pt-14 pb-6 max-w-lg mx-auto w-full">
 
-        {/* Action Buttons */}
-        <div className="space-y-3 max-w-sm mx-auto">
-          <Link to="/fiche-eleve" className="w-full">
-            <button className="w-full bg-white text-gray-900 font-semibold py-3 px-6 rounded-full flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors">
-              <span>📋</span>
-              <span>Nouvelle observation</span>
-              <Plus className="w-5 h-5" />
+        {/* Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.35 }}
+          className="text-center font-bold text-3xl mb-2 leading-tight"
+          style={{ color: '#7EB8F7', fontFamily: 'serif' }}
+        >
+          Arbre décisionnel RASED
+        </motion.h1>
+
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="text-white/80 text-sm text-center mb-8 leading-snug">
+          Outil d&apos;aide à la formulation d&apos;hypothèses diagnostiques
+        </motion.p>
+
+        {/* CTA Buttons */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col gap-3 w-full max-w-xs">
+          <Link to="/fiche-eleve">
+            <button className="w-full flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-[#0F172A] font-semibold text-base rounded-full px-6 py-3.5 shadow-lg transition-all">
+              <ClipboardList className="w-5 h-5" />
+              Nouvelle observation
+              <span className="ml-1 w-6 h-6 rounded-full border-2 border-[#0F172A]/30 flex items-center justify-center text-xs font-bold">+</span>
             </button>
           </Link>
-          <Link to="/evaluation-domains" className="w-full">
-            <button className="w-full bg-transparent border-2 border-white text-white font-semibold py-3 px-6 rounded-full flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
-              <Bell className="w-5 h-5" />
-              <span>Arbre décisionnel</span>
+          <Link to="/evaluation-domains">
+            <button className="w-full flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/50 text-white font-semibold text-base rounded-full px-6 py-3.5 backdrop-blur-sm shadow transition-all">
+              <TreePine className="w-5 h-5" />
+              Arbre décisionnel
             </button>
           </Link>
-        </div>
-      </div>
+        </motion.div>
 
-      {/* Main Content */}
-      <div className="px-4 py-8 max-w-4xl mx-auto bg-blue-900 min-h-screen">
-        <div className="grid grid-cols-5 gap-4">
-          {/* Left Column - Élèves */}
-          <div className="col-span-3 bg-blue-950 text-white rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Élèves</h3>
-              <span className="bg-blue-500 text-xs px-3 py-1 rounded-full font-semibold">Gestion</span>
+        {/* Cards section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}
+          className="w-full mt-10 grid grid-cols-2 gap-3 items-start"
+        >
+          {/* Elèves card - left */}
+          <div
+            className="rounded-2xl border border-[#3B82F6]/40 p-4 flex flex-col gap-2 cursor-pointer"
+            style={{ background: 'rgba(10,18,40,0.65)', backdropFilter: 'blur(12px)' }}
+            onClick={() => navigate('/dashboard')}
+          >
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-white text-base">Elèves</span>
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#3B82F6', color: '#fff' }}>Gestion</span>
             </div>
-            <p className="text-sm text-blue-200 mb-4">Fiches et historique des diagnostics</p>
+            <p className="text-white/60 text-[10px] leading-snug">Fiches et historique des diagnostics</p>
 
             {/* Search */}
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-blue-400" />
-                <input
-                  type="text"
-                  placeholder="Chercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-blue-900 text-white placeholder-blue-400 pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
+            <div
+              className="flex items-center gap-2 rounded-lg px-3 py-2 mt-1"
+              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(59,130,246,0.3)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <Search className="w-3.5 h-3.5 text-white/50 shrink-0" />
+              <input
+                type="text"
+                placeholder="Chercher..."
+                value={searchTerm}
+                onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
+                className="bg-transparent text-white text-[11px] placeholder-white/40 outline-none flex-1 min-w-0"
+              />
+            </div>
+
+            {/* List */}
+            <div
+              className="rounded-lg mt-1 overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(59,130,246,0.2)' }}
+            >
+              <div className="flex items-center gap-1.5 px-2 py-2 border-b border-white/10">
+                <span className="text-[#7EB8F7] font-bold" style={{ fontFamily: 'serif', fontSize: 12 }}>&#936;</span>
+                <span className="text-white text-[10px] font-semibold flex-1">Elèves /</span>
+                <span className="text-white/50 text-[9px]">{filtered.length} élève{filtered.length !== 1 ? 's' : ''}</span>
               </div>
-            </div>
-
-            {/* Élèves Count */}
-            <div className="bg-blue-900/50 rounded-lg p-3 mb-4">
-              <p className="text-sm font-semibold text-blue-200">Ψ Élèves / <span className="text-blue-400">0 élève s</span></p>
-            </div>
-
-            {/* Empty State */}
-            <div className="text-center text-blue-300 text-sm py-4">
-              Aucun élève trouvé
+              {pageEleves.length === 0 ? (
+                <p className="text-white/40 text-[10px] text-center py-3">Aucun élève trouvé</p>
+              ) : (
+                <div className="divide-y divide-white/5">
+                  {pageEleves.map((e, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 px-2 py-2 cursor-pointer hover:bg-white/5 transition-colors"
+                      onClick={ev => { ev.stopPropagation(); navigate(`/historique?eleve=${encodeURIComponent(`${e.prenom} ${e.nom}`)}`); }}
+                    >
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(59,130,246,0.25)' }}>
+                        <span className="text-[8px] font-bold text-[#7EB8F7]">{e.prenom?.[0]}{e.nom?.[0]}</span>
+                      </div>
+                      <span className="text-white text-[10px] font-medium flex-1 truncate">{e.prenom} {e.nom}</span>
+                      {e.lastDate && (
+                        <span className="text-white/40 text-[8px] shrink-0">
+                          {new Date(e.lastDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2 py-1.5 border-t border-white/10">
+                  <button onClick={ev => { ev.stopPropagation(); setPage(Math.max(1, page - 1)); }} disabled={page === 1} className="text-white/50 disabled:opacity-30 text-[9px] px-1.5 py-0.5 rounded">←</button>
+                  <span className="text-white/50 text-[8px]">{page}/{totalPages}</span>
+                  <button onClick={ev => { ev.stopPropagation(); setPage(Math.min(totalPages, page + 1)); }} disabled={page === totalPages} className="text-white/50 disabled:opacity-30 text-[9px] px-1.5 py-0.5 rounded">→</button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Column - Cards */}
-          <div className="col-span-2">
-            <p className="text-gray-300 text-xs font-medium mb-4">sections</p>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            
-            {/* Resources Section */}
-            <Link to="/items-professionnels" className="block">
-              <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer">
-                <div className="text-3xl mb-3">📖</div>
-                <h3 className="text-lg font-bold mb-2">Ressources</h3>
-                <p className="text-sm text-blue-200">Guides professionnels</p>
+          {/* Right column */}
+          <div className="flex flex-col gap-3">
+            <p className="text-[#7EB8F7] font-bold text-sm" style={{ fontFamily: 'serif' }}>Autres sections</p>
+
+            <Link to="/items-professionnels">
+              <div
+                className="rounded-2xl border border-[#3B82F6]/30 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/60 transition-all"
+                style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)' }}>
+                  <BookOpen className="w-5 h-5 text-[#7EB8F7]" />
+                </div>
+                <p className="font-bold text-white text-sm leading-tight">Ressources</p>
+                <p className="text-white/55 text-[10px]">Guides professionnels</p>
               </div>
             </Link>
 
-            {/* Confidentiality Section */}
-            <Link to="/politique-confidentialite" className="block">
-              <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer">
-                <Shield className="w-8 h-8 mb-3 text-blue-300" />
-                <h3 className="text-lg font-bold mb-2">Confidentialité</h3>
-                <p className="text-sm text-blue-200">Conforme au RGPD</p>
+            <Link to="/politique-confidentialite">
+              <div
+                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/40 transition-all"
+                style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <Shield className="w-5 h-5 text-white/60" />
+                </div>
+                <p className="font-bold text-white text-sm leading-tight">Confidentialité</p>
+                <p className="text-white/55 text-[10px]">RGPD compliant</p>
               </div>
             </Link>
 
-            {/* Team Section */}
-            <Link to="/equipe-rased" className="block">
-              <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer">
-                <Users className="w-8 h-8 mb-3 text-blue-300" />
-                <h3 className="text-lg font-bold mb-2">Équipe RASED</h3>
-                <p className="text-sm text-blue-200">Voir l'équipe</p>
+            <Link to="/equipe-rased">
+              <div
+                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/40 transition-all"
+                style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <Users className="w-5 h-5 text-white/60" />
+                </div>
+                <p className="font-bold text-white text-sm leading-tight">Equipe RASED</p>
+                <p className="text-white/55 text-[10px]">Voir l&apos;équipe</p>
               </div>
             </Link>
-            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-4">
-        <Link to="/" className="flex flex-col items-center gap-1 text-blue-500">
-          <Home className="w-6 h-6" />
-          <span className="text-[11px] font-semibold">Accueil</span>
-        </Link>
-        <Link to="/dashboard" className="flex flex-col items-center gap-1 text-gray-400">
-          <Users className="w-6 h-6" />
-          <span className="text-[11px] font-semibold">Élèves</span>
-        </Link>
-        <Link to="/evaluation-domains" className="flex flex-col items-center gap-1 text-gray-400">
-          <TreePine className="w-6 h-6" />
-          <span className="text-[11px] font-semibold">Arbre</span>
-        </Link>
-        <Link to="/stats-annuelles" className="flex flex-col items-center gap-1 text-gray-400">
-          <BarChart2 className="w-6 h-6" />
-          <span className="text-[11px] font-semibold">Statistiques</span>
-        </Link>
+      {/* Bottom nav bar */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around px-4 py-3 border-t border-white/10"
+        style={{ background: 'rgba(8,15,35,0.92)', backdropFilter: 'blur(16px)' }}
+      >
+        {[
+          { label: 'Accueil', icon: Home, to: '/', active: true },
+          { label: 'Elèves', icon: Users, to: '/dashboard', active: false },
+          { label: 'Arbre', icon: TreePine, to: '/evaluation-domains', active: false },
+          { label: 'Stats', icon: BarChart2, to: '/stats-annuelles', active: false },
+        ].map(({ label, icon: Icon, to, active }) => (
+          <Link key={label} to={to} className="flex flex-col items-center gap-1">
+            <Icon className="w-5 h-5" style={{ color: active ? '#7EB8F7' : 'rgba(255,255,255,0.45)' }} />
+            <span className="text-[10px] font-medium" style={{ color: active ? '#7EB8F7' : 'rgba(255,255,255,0.45)' }}>{label}</span>
+          </Link>
+        ))}
       </div>
     </div>
   );
