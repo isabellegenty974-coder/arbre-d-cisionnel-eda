@@ -21,10 +21,13 @@ export default function Accueil() {
     const checkProfession = async (retries = 3) => {
       try {
         const user = await base44.auth.me();
+        console.log('[Accueil] user from me():', JSON.stringify(user));
         if (user && !user.profession) {
+          console.log('[Accueil] No profession → redirect to /register');
           navigate('/register', { replace: true });
         }
-      } catch {
+      } catch (e) {
+        console.log('[Accueil] auth.me() error:', e?.message);
         if (retries > 0) setTimeout(() => checkProfession(retries - 1), 800);
       }
     };
