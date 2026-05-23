@@ -85,7 +85,7 @@ export default function Accueil() {
           className="text-center font-bold text-3xl mb-2 leading-tight"
           style={{ color: '#D4A574', fontFamily: 'serif' }}
         >
-          &#936; Arbre décisionnel RASED
+          Arbre décisionnel RASED
         </motion.h1>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="text-white/80 text-sm text-center mb-8 leading-snug">
@@ -105,7 +105,6 @@ export default function Accueil() {
             <button className="w-full flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/50 text-white font-semibold text-base rounded-full px-6 py-3.5 backdrop-blur-sm shadow transition-all">
               <TreePine className="w-5 h-5" />
               Arbre décisionnel
-              <span className="ml-1 text-[#D4A574]" style={{ fontFamily: 'serif', fontSize: 18 }}>&#936;</span>
             </button>
           </Link>
         </motion.div>
