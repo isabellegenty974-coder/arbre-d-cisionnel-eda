@@ -27,7 +27,7 @@ export default function Accueil() {
           }
         }
       } catch {
-        base44.auth.redirectToLogin('/');
+        // Utilisateur non connecté - on laisse la page accessible
       }
     };
     checkAuth();
