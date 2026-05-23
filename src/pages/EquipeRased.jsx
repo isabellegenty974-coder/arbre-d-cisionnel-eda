@@ -22,6 +22,9 @@ export default function EquipeRased() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteStatus, setInviteStatus] = useState(null); // null | 'loading' | 'success' | 'error'
   const [showInviteForm, setShowInviteForm] = useState(false);
+  const [showProfessionForm, setShowProfessionForm] = useState(false);
+  const [profession, setProfession] = useState(currentUser?.profession || '');
+  const [savingProfession, setSavingProfession] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -56,6 +59,20 @@ export default function EquipeRased() {
     }
   };
 
+  const handleSaveProfession = async () => {
+    if (!profession) return;
+    setSavingProfession(true);
+    try {
+      await base44.auth.updateMe({ profession });
+      setCurrentUser({ ...currentUser, profession });
+      setShowProfessionForm(false);
+    } catch (err) {
+      console.error('Erreur lors de la sauvegarde');
+    } finally {
+      setSavingProfession(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-16">
       <HamburgerMenu />
@@ -86,16 +103,16 @@ export default function EquipeRased() {
                       {isMe && <span className="text-[10px] font-bold text-[#D4A574] uppercase tracking-wide">Moi</span>}
                     </div>
                     {isMe && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => navigate('/register')}
-                        className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
-                      >
-                        <Pencil className="w-3 h-3" />
-                        Modifier
-                      </Button>
-                    )}
+                       <Button
+                         size="sm"
+                         variant="outline"
+                         onClick={() => setShowProfessionForm(true)}
+                         className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
+                       >
+                         <Pencil className="w-3 h-3" />
+                         Modifier
+                       </Button>
+                     )}
                   </motion.div>
                 );
               })}
@@ -103,6 +120,48 @@ export default function EquipeRased() {
               {members.length === 0 && (
                 <div className="text-center py-8 text-[#0F172A]/60">
                   <p>Aucun membre trouvé</p>
+                </div>
+              )}
+
+              {/* Profession form modal */}
+              {showProfessionForm && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg"
+                  >
+                    <h2 className="text-xl font-semibold text-[#0F172A] mb-4">Modifier votre profession</h2>
+                    <select
+                      value={profession}
+                      onChange={(e) => setProfession(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-[#D4A574]/50 bg-white text-[#0F172A] text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A574] mb-4"
+                    >
+                      <option value="">Sélectionner une profession</option>
+                      <option value="MaDP">Maître à dominante pédagogique (MaDP)</option>
+                      <option value="MaDR">Maître à dominante relationnelle (MaDR)</option>
+                      <option value="Psy EN EDA">Psychologue EN EDA</option>
+                    </select>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleSaveProfession}
+                        disabled={savingProfession || !profession}
+                        className="flex-1 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] border-0 font-semibold"
+                      >
+                        {savingProfession ? 'Sauvegarde...' : 'Valider'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowProfessionForm(false);
+                          setProfession(currentUser?.profession || '');
+                        }}
+                        className="flex-1"
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  </motion.div>
                 </div>
               )}
 
