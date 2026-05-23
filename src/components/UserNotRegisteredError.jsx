@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 const UserNotRegisteredError = () => {
   useEffect(() => {
     // Redirect new invited users to the registration page
-    window.location.href = '/register';
+    window.location.href = '/equipe-rased';
   }, []);
 
   return (
