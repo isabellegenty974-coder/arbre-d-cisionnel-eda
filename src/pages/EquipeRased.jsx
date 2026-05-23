@@ -188,7 +188,7 @@ export default function EquipeRased() {
                 </div>
               )}
 
-              {(!currentUser?.profession || !members.some(m => m.email === currentUser?.email)) && (
+              {currentUser && (!currentUser.profession || !currentUser.profession.trim()) && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                   <Button
                     onClick={openInscriptionForm}
