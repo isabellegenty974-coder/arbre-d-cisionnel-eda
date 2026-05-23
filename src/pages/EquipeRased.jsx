@@ -31,32 +31,27 @@ export default function EquipeRased() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [me, users] = await Promise.all([
-          base44.auth.me(),
-          base44.entities.User.list(),
-        ]);
+        const me = await base44.auth.me();
         setCurrentUser(me);
-        setMembers(users);
         setPrenom(me?.full_name?.split(' ')[0] || '');
         setNom(me?.full_name?.split(' ').slice(1).join(' ') || '');
         setProfession(me?.profession || '');
+        
         // Afficher le formulaire si le profil est incomplet
         if (!me?.profession || !me?.full_name) {
           setShowInscriptionForm(true);
         }
-      } catch (err) {
-        const me = await base44.auth.me().catch(() => null);
-        setCurrentUser(me);
-        if (me) {
+        
+        // Charger la liste des membres (peut échouer si l'utilisateur n'a pas les permissions)
+        try {
+          const users = await base44.entities.User.list();
+          setMembers(users);
+        } catch (err) {
+          // Fallback: afficher seulement l'utilisateur actuel
           setMembers([me]);
-          setPrenom(me.full_name?.split(' ')[0] || '');
-          setNom(me.full_name?.split(' ').slice(1).join(' ') || '');
-          setProfession(me.profession || '');
-          // Afficher le formulaire si le profil est incomplet
-          if (!me.profession || !me.full_name) {
-            setShowInscriptionForm(true);
-          }
         }
+      } catch (err) {
+        console.error('Erreur lors du chargement:', err);
       } finally {
         setLoading(false);
       }
