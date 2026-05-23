@@ -72,9 +72,9 @@ export default function Accueil() {
 
       {/* Main Content */}
       <div className="px-4 py-8 max-w-4xl mx-auto bg-blue-900 min-h-screen">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Élèves Section - Left */}
-          <div className="bg-blue-950 text-white rounded-2xl p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Left Column - Élèves (1 col) */}
+          <div className="bg-blue-950 text-white rounded-2xl p-6 md:col-span-1">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Élèves</h3>
               <span className="bg-blue-500 text-xs px-3 py-1 rounded-full font-semibold">Gestion</span>
@@ -106,9 +106,10 @@ export default function Accueil() {
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="flex flex-col gap-4">
-            <p className="text-gray-300 text-xs font-medium mb-1">sections</p>
+          {/* Right Column - Cards (2 cols) */}
+          <div className="md:col-span-2 grid grid-cols-1 gap-4">
+            <p className="text-gray-300 text-xs font-medium">sections</p>
+            
             {/* Resources Section */}
             <Link to="/items-professionnels" className="block">
               <div className="bg-blue-950 text-white rounded-2xl p-6 hover:bg-blue-900 transition-colors cursor-pointer">
