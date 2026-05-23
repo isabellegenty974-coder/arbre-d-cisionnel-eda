@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
-const BG_IMAGE = "https://media.base44.com/images/public/69e918c1956306f5db6eaf3d/830f7754c_generated_image.png";
+const BG_IMAGE = "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80";
 const ITEMS_PER_PAGE = 5;
 
 export default function Accueil() {
@@ -71,7 +71,7 @@ export default function Accueil() {
         style={{ backgroundImage: `url(${BG_IMAGE})` }}
       />
       {/* Dark overlay */}
-      <div className="fixed inset-0 z-0" style={{ background: 'linear-gradient(180deg, rgba(10,18,40,0.85) 0%, rgba(10,18,40,0.72) 45%, rgba(8,15,35,0.90) 100%)' }} />
+      <div className="fixed inset-0 z-0" style={{ background: 'linear-gradient(180deg, rgba(10,30,80,0.88) 0%, rgba(15,50,120,0.75) 45%, rgba(8,20,70,0.92) 100%)' }} />
 
       <HamburgerMenu />
 
@@ -83,7 +83,7 @@ export default function Accueil() {
         <motion.h1
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.35 }}
           className="text-center font-bold text-3xl mb-2 leading-tight"
-          style={{ color: '#D4A574', fontFamily: 'serif' }}
+          style={{ color: '#7EB8F7', fontFamily: 'serif' }}
         >
           Arbre décisionnel RASED
         </motion.h1>
@@ -116,20 +116,20 @@ export default function Accueil() {
         >
           {/* Elèves card - left */}
           <div
-            className="rounded-2xl border border-[#D4A574]/40 p-4 flex flex-col gap-2 cursor-pointer"
+            className="rounded-2xl border border-[#3B82F6]/40 p-4 flex flex-col gap-2 cursor-pointer"
             style={{ background: 'rgba(10,18,40,0.65)', backdropFilter: 'blur(12px)' }}
             onClick={() => navigate('/dashboard')}
           >
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-white text-base">Elèves</span>
-              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#D4A574', color: '#0F172A' }}>Gestion</span>
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#3B82F6', color: '#fff' }}>Gestion</span>
             </div>
             <p className="text-white/60 text-[10px] leading-snug">Fiches et historique des diagnostics</p>
 
             {/* Search */}
             <div
               className="flex items-center gap-2 rounded-lg px-3 py-2 mt-1"
-              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(212,165,116,0.3)' }}
+              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(59,130,246,0.3)' }}
               onClick={e => e.stopPropagation()}
             >
               <Search className="w-3.5 h-3.5 text-white/50 shrink-0" />
@@ -145,10 +145,10 @@ export default function Accueil() {
             {/* List */}
             <div
               className="rounded-lg mt-1 overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(212,165,116,0.2)' }}
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(59,130,246,0.2)' }}
             >
               <div className="flex items-center gap-1.5 px-2 py-2 border-b border-white/10">
-                <span className="text-[#D4A574] font-bold" style={{ fontFamily: 'serif', fontSize: 12 }}>&#936;</span>
+                <span className="text-[#7EB8F7] font-bold" style={{ fontFamily: 'serif', fontSize: 12 }}>&#936;</span>
                 <span className="text-white text-[10px] font-semibold flex-1">Elèves /</span>
                 <span className="text-white/50 text-[9px]">{filtered.length} élève{filtered.length !== 1 ? 's' : ''}</span>
               </div>
@@ -162,8 +162,8 @@ export default function Accueil() {
                       className="flex items-center gap-2 px-2 py-2 cursor-pointer hover:bg-white/5 transition-colors"
                       onClick={ev => { ev.stopPropagation(); navigate(`/historique?eleve=${encodeURIComponent(`${e.prenom} ${e.nom}`)}`); }}
                     >
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(212,165,116,0.25)' }}>
-                        <span className="text-[8px] font-bold text-[#D4A574]">{e.prenom?.[0]}{e.nom?.[0]}</span>
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(59,130,246,0.25)' }}>
+                        <span className="text-[8px] font-bold text-[#7EB8F7]">{e.prenom?.[0]}{e.nom?.[0]}</span>
                       </div>
                       <span className="text-white text-[10px] font-medium flex-1 truncate">{e.prenom} {e.nom}</span>
                       {e.lastDate && (
@@ -187,15 +187,15 @@ export default function Accueil() {
 
           {/* Right column */}
           <div className="flex flex-col gap-3">
-            <p className="text-[#D4A574] font-bold text-sm" style={{ fontFamily: 'serif' }}>Autres sections</p>
+            <p className="text-[#7EB8F7] font-bold text-sm" style={{ fontFamily: 'serif' }}>Autres sections</p>
 
             <Link to="/items-professionnels">
               <div
-                className="rounded-2xl border border-[#D4A574]/30 p-3 flex flex-col gap-2 hover:border-[#D4A574]/60 transition-all"
+                className="rounded-2xl border border-[#3B82F6]/30 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/60 transition-all"
                 style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
               >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(212,165,116,0.15)' }}>
-                  <BookOpen className="w-5 h-5 text-[#D4A574]" />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)' }}>
+                  <BookOpen className="w-5 h-5 text-[#7EB8F7]" />
                 </div>
                 <p className="font-bold text-white text-sm leading-tight">Ressources</p>
                 <p className="text-white/55 text-[10px]">Guides professionnels</p>
@@ -204,7 +204,7 @@ export default function Accueil() {
 
             <Link to="/politique-confidentialite">
               <div
-                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#D4A574]/40 transition-all"
+                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/40 transition-all"
                 style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
               >
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
@@ -217,7 +217,7 @@ export default function Accueil() {
 
             <Link to="/equipe-rased">
               <div
-                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#D4A574]/40 transition-all"
+                className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/40 transition-all"
                 style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
               >
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
@@ -243,8 +243,8 @@ export default function Accueil() {
           { label: 'Stats', icon: BarChart2, to: '/stats-annuelles', active: false },
         ].map(({ label, icon: Icon, to, active }) => (
           <Link key={label} to={to} className="flex flex-col items-center gap-1">
-            <Icon className="w-5 h-5" style={{ color: active ? '#D4A574' : 'rgba(255,255,255,0.45)' }} />
-            <span className="text-[10px] font-medium" style={{ color: active ? '#D4A574' : 'rgba(255,255,255,0.45)' }}>{label}</span>
+            <Icon className="w-5 h-5" style={{ color: active ? '#7EB8F7' : 'rgba(255,255,255,0.45)' }} />
+            <span className="text-[10px] font-medium" style={{ color: active ? '#7EB8F7' : 'rgba(255,255,255,0.45)' }}>{label}</span>
           </Link>
         ))}
       </div>
