@@ -172,28 +172,8 @@ import ActionsAbsenteisme from './pages/contexte/ActionsAbsenteisme';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  const location = useLocation();
-  const [checkingProfile, setCheckingProfile] = useState(false);
-  const [needsRegister, setNeedsRegister] = useState(false);
 
-  useEffect(() => {
-    if (!isLoadingAuth && !authError && !['register', '/register'].includes(location.pathname)) {
-      setCheckingProfile(true);
-      const checkProfile = async () => {
-        try {
-          const user = await base44.auth.me();
-          if (user && !user.profession) setNeedsRegister(true);
-        } catch {
-          // Not authenticated — let auth system handle it
-        } finally {
-          setCheckingProfile(false);
-        }
-      };
-      checkProfile();
-    }
-  }, [isLoadingAuth, authError]);
-
-  if (isLoadingPublicSettings || isLoadingAuth || checkingProfile) {
+  if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -208,10 +188,6 @@ const AuthenticatedApp = () => {
       navigateToLogin();
       return null;
     }
-  }
-
-  if (needsRegister) {
-    return <Navigate to="/register" replace />;
   }
 
   return (
