@@ -119,25 +119,27 @@ export default function EquipeRased() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border-2 bg-white shadow-sm ${isMe ? 'border-[#D4A574]' : 'border-[#E8DCC8]'}`}
+                    className={`flex flex-col gap-3 p-4 rounded-2xl border-2 bg-white shadow-sm ${isMe ? 'border-[#D4A574]' : 'border-[#E8DCC8]'}`}
                   >
-                    <div className="w-12 h-12 rounded-full bg-[#E8DCC8] flex items-center justify-center shrink-0">
-                      <UserCircle className="w-7 h-7 text-[#0F172A]" />
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#E8DCC8] flex items-center justify-center shrink-0">
+                        <UserCircle className="w-7 h-7 text-[#0F172A]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-[#0F172A]">{member.full_name || 'Nom non renseigné'}</p>
+                        <p className="text-sm text-[#0F172A]/70 mt-0.5">
+                          {PROFESSION_LABELS[member.profession] || member.profession || 'Profession non renseignée'}
+                        </p>
+                        {isMe && <span className="text-[10px] font-bold text-[#D4A574] uppercase tracking-wide">Moi</span>}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[#0F172A]">{member.full_name || 'Nom non renseigné'}</p>
-                      <p className="text-sm text-[#0F172A]/70 mt-0.5">
-                        {PROFESSION_LABELS[member.profession] || member.profession || 'Profession non renseignée'}
-                      </p>
-                      {isMe && <span className="text-[10px] font-bold text-[#D4A574] uppercase tracking-wide">Moi</span>}
-                    </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-2">
                        {isMe && (
                          <Button
                            size="sm"
                            variant="outline"
                            onClick={() => navigate('/register')}
-                           className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
+                           className="flex-1 gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
                          >
                            <Pencil className="w-3 h-3" />
                            Modifier
@@ -147,7 +149,7 @@ export default function EquipeRased() {
                          size="sm"
                          variant="outline"
                          onClick={() => setDeleteConfirm(member.id)}
-                         className="gap-1 border-red-300 text-red-600 hover:bg-red-50 shrink-0"
+                         className={`flex-1 gap-1 border-red-300 text-red-600 hover:bg-red-50 ${!isMe && 'w-full'}`}
                        >
                          <Trash2 className="w-3 h-3" />
                          Supprimer
@@ -157,7 +159,7 @@ export default function EquipeRased() {
                        <motion.div
                          initial={{ opacity: 0, y: -10 }}
                          animate={{ opacity: 1, y: 0 }}
-                         className="mt-3 pt-3 border-t-2 border-red-200 space-y-2"
+                         className="pt-3 border-t-2 border-red-200 space-y-2"
                        >
                          <p className="text-sm text-red-600 font-semibold">Êtes-vous sûr de vouloir supprimer ce profil ?</p>
                          <div className="flex gap-2">
