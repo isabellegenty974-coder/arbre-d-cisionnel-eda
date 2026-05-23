@@ -5,6 +5,7 @@ import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, Search, Ho
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
+import FirstVisitModal from "@/components/FirstVisitModal";
 
 const BG_IMAGE = "https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&q=80";
 const ITEMS_PER_PAGE = 5;
@@ -16,6 +17,7 @@ export default function Accueil() {
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
+  const [showFirstVisitModal, setShowFirstVisitModal] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -25,6 +27,14 @@ export default function Accueil() {
       }
     };
     checkAuth();
+  }, []);
+
+  useEffect(() => {
+    const hasSeenModal = localStorage.getItem('firstVisitModalSeen');
+    if (!hasSeenModal) {
+      setShowFirstVisitModal(true);
+      localStorage.setItem('firstVisitModalSeen', 'true');
+    }
   }, []);
 
   useEffect(() => {
@@ -95,6 +105,14 @@ export default function Accueil() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden pb-20">
+      <FirstVisitModal
+        isOpen={showFirstVisitModal}
+        onClose={() => setShowFirstVisitModal(false)}
+        onGoToTeam={() => {
+          setShowFirstVisitModal(false);
+          navigate('/equipe-rased');
+        }}
+      />
 
       {/* Full-screen background */}
       <div
