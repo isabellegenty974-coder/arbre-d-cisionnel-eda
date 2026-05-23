@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -173,19 +173,24 @@ import ActionsAbsenteisme from './pages/contexte/ActionsAbsenteisme';
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const location = useLocation();
+  const [checkingProfile, setCheckingProfile] = useState(false);
+  const [needsRegister, setNeedsRegister] = useState(false);
 
   useEffect(() => {
-    // Redirect users without profession to register (skip if already on /register)
     if (!isLoadingAuth && !authError && location.pathname !== '/register') {
-      base44.auth.me().then(user => {
-        if (user && !user.profession) {
-          window.location.href = '/register';
-        }
-      }).catch(() => {});
+      setCheckingProfile(true);
+      base44.auth.me()
+        .then(user => {
+          if (user && !user.profession) {
+            setNeedsRegister(true);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setCheckingProfile(false));
     }
-  }, [isLoadingAuth, authError, location.pathname]);
+  }, [isLoadingAuth, authError]);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingPublicSettings || isLoadingAuth || checkingProfile) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -200,6 +205,10 @@ const AuthenticatedApp = () => {
       navigateToLogin();
       return null;
     }
+  }
+
+  if (needsRegister) {
+    return <Register />;
   }
 
   return (
