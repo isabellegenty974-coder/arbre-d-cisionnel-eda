@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Pencil, UserPlus, CheckCircle, Loader } from 'lucide-react';
+import { UserCircle, Pencil, UserPlus, CheckCircle, Loader, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 
@@ -27,6 +27,8 @@ export default function EquipeRased() {
   const [registerSaving, setRegisterSaving] = useState(false);
   const [registerError, setRegisterError] = useState(null);
   const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -87,6 +89,19 @@ export default function EquipeRased() {
     }
   };
 
+  const handleDeleteMember = async (memberId) => {
+    setDeleting(true);
+    try {
+      await base44.entities.User.delete(memberId);
+      setMembers(members.filter(m => m.id !== memberId));
+      setDeleteConfirm(null);
+    } catch (err) {
+      console.error('Erreur lors de la suppression:', err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-16">
       <HamburgerMenu />
@@ -116,17 +131,55 @@ export default function EquipeRased() {
                       </p>
                       {isMe && <span className="text-[10px] font-bold text-[#D4A574] uppercase tracking-wide">Moi</span>}
                     </div>
-                    {isMe && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => navigate('/register')}
-                        className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
-                      >
-                        <Pencil className="w-3 h-3" />
-                        Modifier
-                      </Button>
-                    )}
+                    <div className="flex gap-2">
+                       {isMe && (
+                         <Button
+                           size="sm"
+                           variant="outline"
+                           onClick={() => navigate('/register')}
+                           className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
+                         >
+                           <Pencil className="w-3 h-3" />
+                           Modifier
+                         </Button>
+                       )}
+                       <Button
+                         size="sm"
+                         variant="outline"
+                         onClick={() => setDeleteConfirm(member.id)}
+                         className="gap-1 border-red-300 text-red-600 hover:bg-red-50 shrink-0"
+                       >
+                         <Trash2 className="w-3 h-3" />
+                         Supprimer
+                       </Button>
+                     </div>
+                     {deleteConfirm === member.id && (
+                       <motion.div
+                         initial={{ opacity: 0, y: -10 }}
+                         animate={{ opacity: 1, y: 0 }}
+                         className="mt-3 pt-3 border-t-2 border-red-200 space-y-2"
+                       >
+                         <p className="text-sm text-red-600 font-semibold">Êtes-vous sûr de vouloir supprimer ce profil ?</p>
+                         <div className="flex gap-2">
+                           <Button
+                             size="sm"
+                             onClick={() => handleDeleteMember(member.id)}
+                             disabled={deleting}
+                             className="flex-1 bg-red-600 hover:bg-red-700 text-white border-0 text-xs"
+                           >
+                             {deleting ? 'Suppression...' : 'Confirmer la suppression'}
+                           </Button>
+                           <Button
+                             size="sm"
+                             variant="outline"
+                             onClick={() => setDeleteConfirm(null)}
+                             className="flex-1 text-xs"
+                           >
+                             Annuler
+                           </Button>
+                         </div>
+                       </motion.div>
+                     )}
                   </motion.div>
                 );
               })}
