@@ -1,22 +1,22 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
+import { base44 } from '@/api/base44Client';
 
 const UserNotRegisteredError = () => {
-  useEffect(() => {
-    // Redirect new invited users to the registration page
-    window.location.href = '/equipe-rased';
-  }, []);
-
   return (
     <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center gap-4 text-center px-6"
-      >
-        <div className="w-10 h-10 border-4 border-[#D4A574]/30 border-t-[#D4A574] rounded-full animate-spin" />
-        <p className="text-white/80 text-sm">Redirection vers l&apos;inscription...</p>
-      </motion.div>
+      <div className="flex flex-col items-center gap-4 text-center px-6 max-w-sm">
+        <div className="text-4xl mb-2">🔒</div>
+        <h2 className="text-white text-xl font-bold">Accès non autorisé</h2>
+        <p className="text-white/60 text-sm leading-relaxed">
+          Votre compte n&apos;est pas encore enregistré dans cette application. Contactez votre administrateur pour obtenir une invitation.
+        </p>
+        <button
+          onClick={() => base44.auth.logout()}
+          className="mt-4 bg-white text-[#0F172A] font-semibold px-6 py-2.5 rounded-full hover:bg-white/90 transition-all"
+        >
+          Se déconnecter
+        </button>
+      </div>
     </div>
   );
 };

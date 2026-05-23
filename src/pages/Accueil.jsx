@@ -12,19 +12,13 @@ const ITEMS_PER_PAGE = 5;
 export default function Accueil() {
   const navigate = useNavigate();
   const [notAuthenticated, setNotAuthenticated] = useState(false);
-  const [showRegisterPopup, setShowRegisterPopup] = useState(false);
   const [eleves, setEleves] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  // Redirect to register if no profession, or show login screen if not authenticated
   useEffect(() => {
-    base44.auth.me().then(user => {
-      if (user && !user.profession) setShowRegisterPopup(true);
-    }).catch(() => {
-      setNotAuthenticated(true);
-    });
+    base44.auth.me().catch(() => setNotAuthenticated(true));
   }, []);
 
   const loadEleves = async () => {
@@ -91,24 +85,7 @@ export default function Accueil() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden pb-20">
-      {/* Popup nouveaux utilisateurs */}
-      {showRegisterPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm mx-4 text-center">
-            <div className="text-4xl mb-4">👋</div>
-            <h2 className="text-xl font-bold text-[#0F172A] mb-2">Bienvenue !</h2>
-            <p className="text-sm text-[#0F172A]/70 mb-6 leading-relaxed">
-              Pour finaliser votre inscription et accéder à l&apos;application, rendez-vous dans la section <strong>Équipe RASED</strong> et complétez votre profil.
-            </p>
-            <button
-              onClick={() => navigate('/equipe-rased')}
-              className="w-full bg-[#0F172A] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#1E293B] transition-all"
-            >
-              Aller dans Équipe RASED
-            </button>
-          </div>
-        </div>
-      )}
+
       {/* Full-screen background */}
       <div
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
