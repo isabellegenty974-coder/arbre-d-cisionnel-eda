@@ -18,8 +18,18 @@ export default function Accueil() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    base44.auth.me().catch(() => setNotAuthenticated(true));
+    const checkAuth = async () => {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) {
+        setNotAuthenticated(true);
+      }
+    };
+    checkAuth();
   }, []);
+
+  useEffect(() => {
+    base44.auth.me().catch(() => navigate('/register'));
+  }, [navigate]);
 
   const loadEleves = async () => {
     const [fiches, diagnostics] = await Promise.all([
