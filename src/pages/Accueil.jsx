@@ -77,10 +77,7 @@ export default function Accueil() {
 
       <div className="relative z-10 flex flex-col items-center px-5 pt-14 pb-6 max-w-lg mx-auto w-full">
 
-        {/* Logo */}
-        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-4">
-          <span className="text-[#D4A574] font-bold" style={{ fontSize: 52, fontFamily: 'serif', lineHeight: 1 }}>&#936;</span>
-        </motion.div>
+
 
         {/* Title */}
         <motion.h1
