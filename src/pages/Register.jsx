@@ -43,11 +43,8 @@ export default function Register() {
     setSaving(true);
     setError(null);
     try {
-      await base44.auth.updateMe({
-        profession,
-        full_name: `${prenom.trim()} ${nom.trim()}`,
-      });
-      navigate('/');
+      await base44.auth.updateMe({ profession });
+      window.location.href = '/';
     } catch (err) {
       setError(err.message || 'Erreur lors de la sauvegarde');
     } finally {
