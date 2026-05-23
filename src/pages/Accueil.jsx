@@ -1,213 +1,197 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Users, TreePine, BarChart2, Home, UserPlus, Pencil } from "lucide-react";
-import { base44 } from "@/api/base44Client";
-import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
-import FirstVisitModal from "@/components/FirstVisitModal";
-
-const BG_URL = 'https://media.base44.com/images/public/69e918c1956306f5db6eaf3d/fb9410bf1_generated_image.png';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { BarChart2, Users, BookOpen, Settings } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
+import FirstVisitModal from '@/components/FirstVisitModal';
+import { useDiagnostic } from '@/lib/DiagnosticContext';
 
 export default function Accueil() {
   const navigate = useNavigate();
-  const [notAuthenticated, setNotAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [showFirstVisitModal, setShowFirstVisitModal] = useState(false);
+  const { eleve } = useDiagnostic();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    base44.auth.me().catch(() => {
+      base44.auth.redirectToLogin('/');
+    });
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
       try {
-        await base44.auth.me();
-        setNotAuthenticated(false);
-      } catch {
-        setNotAuthenticated(true);
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+
+        if (!currentUser.profession) {
+          const hasSeenModal = localStorage.getItem('firstVisitModalSeen');
+          if (!hasSeenModal) {
+            setShowFirstVisitModal(true);
+            localStorage.setItem('firstVisitModalSeen', 'true');
+          }
+        }
+      } catch (err) {
+        // User not authenticated
       }
     };
-    checkAuth();
+    load();
   }, []);
 
-  useEffect(() => {
-    const hasSeenModal = localStorage.getItem('firstVisitModalSeen');
-    if (!hasSeenModal) {
-      setShowFirstVisitModal(true);
-      localStorage.setItem('firstVisitModalSeen', 'true');
-    }
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        await base44.auth.me();
-        setNotAuthenticated(false);
-      } catch {
-        setNotAuthenticated(true);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (notAuthenticated) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <div className="px-6 py-8 flex items-start justify-between border-b" style={{ borderColor: '#D4C4B0' }}>
-          <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>Arbre décisionnel RASED</h1>
-            <p className="text-sm mt-1" style={{ color: '#9CAF88' }}>Connectez-vous pour accéder à l'application</p>
-          </div>
-          <button
-            onClick={() => base44.auth.redirectToLogin()}
-            className="px-6 py-2 rounded-full border-2 font-semibold transition-all hover:opacity-80"
-            style={{ borderColor: '#6B8BA5', color: '#6B8BA5' }}
-          >
-            Se connecter
-          </button>
-        </div>
-        <div className="flex-1 flex items-center justify-center pb-20" style={{ color: '#B0A090' }}>
-          <p>Application inaccessible. Veuillez vous connecter.</p>
-        </div>
-      </div>
-    );
-  }
+  const handleGoToTeam = () => {
+    setShowFirstVisitModal(false);
+    navigate('/equipe-rased');
+  };
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundImage: `url(${BG_URL})`, backgroundSize: 'cover', backgroundColor: '#F5F0E8' }}>
-      <FirstVisitModal
-        isOpen={showFirstVisitModal}
-        onClose={() => setShowFirstVisitModal(false)}
-        onGoToTeam={() => {
-          setShowFirstVisitModal(false);
-          navigate('/equipe-rased');
-        }}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <FirstVisitModal isOpen={showFirstVisitModal} onClose={() => setShowFirstVisitModal(false)} onGoToTeam={handleGoToTeam} />
 
       <HamburgerMenu />
 
-      {/* Main Content */}
-      <div className="px-4 py-8 max-w-2xl mx-auto space-y-6">
-        
-        {/* Welcome Card */}
-        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#FFFBF8', borderLeft: '6px solid #6B8BA5' }}>
-          <div className="flex items-start gap-6">
-            <div className="shrink-0">
-              <TreePine className="w-16 h-16" style={{ color: '#6B8BA5' }} />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>
-                Welcome to Arbre Décisionnel EDA
-              </h1>
-              <p className="text-sm mb-6" style={{ color: '#9CAF88', lineHeight: '1.6' }}>
-                Sign in to continue
-              </p>
-              <button
-                onClick={() => base44.auth.redirectToLogin()}
-                className="px-8 py-3 rounded-full font-semibold text-white shadow-md transition-all hover:opacity-90"
-                style={{ backgroundColor: '#6B8BA5' }}
-              >
-                Sign In to Continue
-              </button>
-            </div>
+      {/* Header Navigation */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Arbre Décisionnel RASED</h1>
+            {user && <p className="text-sm text-gray-600">Bienvenue {user.full_name || user.email}</p>}
           </div>
-        </div>
-
-        {/* Aide à la Décision Card */}
-        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#9CAF88' }}>
-          <h2 className="text-2xl font-bold mb-4" style={{ color: '#FFFBF8', fontFamily: 'Georgia, serif' }}>
-            Aide à la Décision
-          </h2>
-          <p className="text-sm leading-relaxed" style={{ color: '#FFFBF8' }}>
-            Une wise désestrantqu rune aide à la décisionnel EDA peu papper soras marches ari'n except norun-uisent le processing et outpuet umle sec arbre to décisionnel EDA.
-          </p>
-          <div className="mt-6 flex gap-4">
-            <Link to="/evaluation-domains">
-              <button className="px-6 py-2 rounded-lg font-semibold transition-all" style={{ backgroundColor: '#FFFBF8', color: '#9CAF88' }}>
-                Parcours d'aide
-              </button>
-            </Link>
-            <Link to="/dashboard">
-              <button className="px-6 py-2 rounded-lg font-semibold transition-all" style={{ backgroundColor: '#FFFBF8', color: '#9CAF88' }}>
-                Recherche d'élèves
-              </button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Comment ça marche Card */}
-        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#E8D4B8' }}>
-          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>
-            Comment ça marche
-          </h2>
-          <div className="flex justify-between items-center text-center">
-            <div>
-              <div className="text-3xl mb-2">📥</div>
-              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Input</p>
-            </div>
-            <div className="text-2xl" style={{ color: '#A89A8A' }}>→</div>
-            <div>
-              <div className="text-3xl mb-2">⚙️</div>
-              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Processing</p>
-            </div>
-            <div className="text-2xl" style={{ color: '#A89A8A' }}>→</div>
-            <div>
-              <div className="text-3xl mb-2">📤</div>
-              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Output</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Pour qui Card */}
-        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#FFFBF8' }}>
-          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>
-            Pour qui?
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
-              <p className="text-3xl mb-2">👨‍⚕️</p>
-              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Professionnels</p>
-            </div>
-            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
-              <p className="text-3xl mb-2">👩‍🏫</p>
-              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Éducateurs</p>
-            </div>
-            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
-              <p className="text-3xl mb-2">👨‍⚖️</p>
-              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Éducateurs</p>
-            </div>
-            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
-              <p className="text-3xl mb-2">🔬</p>
-              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Danteta analysts</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-4">
-          <Link to="/register" className="rounded-2xl p-6 shadow-lg text-center" style={{ backgroundColor: '#FFFBF8', borderLeft: '4px solid #6B8BA5' }}>
-            <UserPlus className="w-8 h-8 mx-auto mb-3" style={{ color: '#6B8BA5' }} />
-            <p className="font-semibold text-sm" style={{ color: '#8B7355' }}>Créer un profil</p>
-          </Link>
-          <Link to="/edit-eleve" className="rounded-2xl p-6 shadow-lg text-center" style={{ backgroundColor: '#FFFBF8', borderLeft: '4px solid #6B8BA5' }}>
-            <Pencil className="w-8 h-8 mx-auto mb-3" style={{ color: '#6B8BA5' }} />
-            <p className="font-semibold text-sm" style={{ color: '#8B7355' }}>Modifier des infos</p>
-          </Link>
+          {user && <span className="text-xs px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full font-medium">{user.profession || 'Non défini'}</span>}
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 flex items-center justify-around py-4 shadow-lg" style={{ backgroundColor: '#E8D4B8', borderTop: '1px solid #D4C4B0' }}>
-        <Link to="/" className="flex flex-col items-center gap-1">
-          <Home className="w-6 h-6" style={{ color: '#8B7355' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#8B7355' }}>Accueil</span>
-        </Link>
-        <Link to="/dashboard" className="flex flex-col items-center gap-1">
-          <Users className="w-6 h-6" style={{ color: '#A89A8A' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#A89A8A' }}>Élèves</span>
-        </Link>
-        <Link to="/evaluation-domains" className="flex flex-col items-center gap-1">
-          <TreePine className="w-6 h-6" style={{ color: '#A89A8A' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#A89A8A' }}>Arbre</span>
-        </Link>
-        <Link to="/stats-annuelles" className="flex flex-col items-center gap-1">
-          <BarChart2 className="w-6 h-6" style={{ color: '#A89A8A' }} />
-          <span className="text-[10px] font-semibold" style={{ color: '#A89A8A' }}>Stats</span>
-        </Link>
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-6 py-12 pb-24">
+        {/* Dashboard Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {/* Élèves Card */}
+          <Link to="/dashboard" className="group">
+            <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-200 p-8">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                  <Users className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900">Gestion des Élèves</h2>
+                  <p className="text-sm text-gray-600 mt-1">Accédez à la liste de vos élèves</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p>• Consulter les fiches élèves</p>
+                <p>• Ajouter de nouveaux élèves</p>
+                <p>• Gérer les observations</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Arbre Décisionnel Card */}
+          <Link to="/evaluation-domains" className="group">
+            <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-200 p-8">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                  <BookOpen className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900">Arbre Décisionnel</h2>
+                  <p className="text-sm text-gray-600 mt-1">Parcours diagnostique structuré</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p>• Apprentissages</p>
+                <p>• Comportement</p>
+                <p>• Développement et Contexte</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Statistiques Card */}
+          <Link to="/stats-annuelles" className="group">
+            <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-200 p-8">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                  <BarChart2 className="w-6 h-6 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900">Statistiques Annuelles</h2>
+                  <p className="text-sm text-gray-600 mt-1">Analyse des données</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p>• Rapports diagnostiques</p>
+                <p>• Graphiques d'activité</p>
+                <p>• Exportation de données</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Équipe RASED Card */}
+          <Link to="/equipe-rased" className="group">
+            <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-200 p-8">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                  <Settings className="w-6 h-6 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900">Équipe RASED</h2>
+                  <p className="text-sm text-gray-600 mt-1">Gestion de l'équipe</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p>• Profils utilisateurs</p>
+                <p>• Inviter des membres</p>
+                <p>• Rôles et permissions</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Quick Actions */}
+        {eleve && (
+          <div className="bg-indigo-50 rounded-xl border border-indigo-200 p-6 mb-8">
+            <h3 className="font-semibold text-indigo-900 mb-4">Élève en cours : {eleve.prenom} {eleve.nom}</h3>
+            <div className="flex gap-3 flex-wrap">
+              <Link to="/resume" className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">
+                Voir le diagnostic
+              </Link>
+              <Link to="/fiche-eleve" className="px-4 py-2 bg-white text-indigo-600 border border-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-50">
+                Ajouter observation
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Info Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 className="font-bold text-gray-900 mb-3">À propos</h3>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Arbre Décisionnel RASED est un outil de diagnostic pour les professionnels de l'éducation, permettant d'identifier les besoins des élèves et de proposer des interventions adaptées.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 className="font-bold text-gray-900 mb-3">Ressources</h3>
+            <ul className="text-sm text-gray-700 space-y-2">
+              <li>
+                <Link to="/items-professionnels" className="text-indigo-600 hover:underline">
+                  → Fiches ressources
+                </Link>
+              </li>
+              <li>
+                <Link to="/politique-confidentialite" className="text-indigo-600 hover:underline">
+                  → Politique de confidentialité
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="bg-gray-900 text-gray-400 py-8 mt-12">
+        <div className="max-w-6xl mx-auto px-6 text-center text-sm">
+          <p>© 2024 Arbre Décisionnel RASED. Tous droits réservés.</p>
+        </div>
       </div>
     </div>
   );
