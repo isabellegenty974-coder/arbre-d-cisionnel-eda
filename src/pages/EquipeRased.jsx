@@ -42,13 +42,14 @@ export default function EquipeRased() {
         setProfession(me?.profession || '');
         
         const isInvited = searchParams.get('invited') === 'true';
-        if (isInvited || !me?.profession || !me?.full_name) {
+        // Afficher le formulaire si l'utilisateur est invité OU n'a pas complété son profil
+        if (isInvited || !me?.profession) {
           setShowInscriptionForm(true);
         }
         
         try {
           const users = await base44.entities.User.list();
-          setMembers(users);
+          setMembers(users.length > 0 ? users : [me]);
         } catch (err) {
           setMembers([me]);
         }
