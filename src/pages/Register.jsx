@@ -25,7 +25,8 @@ export default function Register() {
         setPrenom(currentUser.full_name?.split(' ')[0] || '');
         setProfession(currentUser.profession || '');
       } catch (err) {
-        setError('Erreur lors du chargement du profil');
+        // L'utilisateur est authentifié mais pas encore enregistré — c'est normal
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -43,7 +44,10 @@ export default function Register() {
     setSaving(true);
     setError(null);
     try {
-      await base44.auth.updateMe({ profession });
+      await base44.auth.updateMe({
+        profession,
+        full_name: `${prenom.trim()} ${nom.trim()}`,
+      });
       window.location.href = '/';
     } catch (err) {
       setError(err.message || 'Erreur lors de la sauvegarde');
