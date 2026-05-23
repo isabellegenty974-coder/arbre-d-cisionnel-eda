@@ -191,7 +191,7 @@ export default function EquipeRased() {
                   className="w-full gap-2 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
                 >
                   <Pencil className="w-4 h-4" />
-                  Compléter mon profil
+                  Créer mon profil
                 </Button>
               </motion.div>
 
