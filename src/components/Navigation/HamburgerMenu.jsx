@@ -88,6 +88,10 @@ export default function HamburgerMenu() {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
                   <BarChart2 className="w-4 h-4" /> Tableau de synthèse
                 </Link>
+                <Link to="/equipe-rased" onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors text-foreground font-medium">
+                  <User className="w-4 h-4" /> Équipe RASED
+                </Link>
               </div>
 
 

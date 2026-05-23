@@ -35,6 +35,7 @@ import DiagnosticEleve from './pages/DiagnosticEleve';
 import TableauSynthese from './pages/TableauSynthese';
 import InviteUsers from './pages/InviteUsers';
 import Register from './pages/Register';
+import EquipeRased from './pages/EquipeRased';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -217,6 +218,7 @@ const AuthenticatedApp = () => {
         <Route path="/diagnostic-eleve" element={<DiagnosticEleve />} />
         <Route path="/tableau-synthese" element={<TableauSynthese />} />
         <Route path="/invite-users" element={<InviteUsers />} />
+        <Route path="/equipe-rased" element={<EquipeRased />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />

@@ -228,12 +228,12 @@ export default function Accueil() {
 
         {/* Secondary cards grid */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="grid grid-cols-3 gap-3">
-          <Link to="/register" className="group bg-white rounded-2xl border-2 border-[#D4A574] p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
+          <Link to="/equipe-rased" className="group bg-white rounded-2xl border-2 border-[#D4A574] p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
             <div className="w-10 h-10 rounded-full bg-[#E8DCC8] flex items-center justify-center mb-2">
               <Users className="w-5 h-5 text-[#0F172A]" />
             </div>
-            <p className="font-bold text-[#0F172A] text-xs mb-1">Profil</p>
-            <p className="text-[10px] text-[#0F172A]/80 leading-tight">Gérer son compte</p>
+            <p className="font-bold text-[#0F172A] text-xs mb-1">Équipe RASED</p>
+            <p className="text-[10px] text-[#0F172A]/80 leading-tight">Voir l'équipe</p>
           </Link>
           <Link to="/invite-users" className="group bg-white rounded-2xl border-2 border-[#D4A574] p-4 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-all">
             <div className="w-10 h-10 rounded-full bg-[#E8DCC8] flex items-center justify-center mb-2">
