@@ -85,13 +85,21 @@ export default function EquipeRased() {
     if (!prenom.trim() || !nom.trim() || !profession) return;
     setSavingInscription(true);
     try {
-      await base44.auth.updateMe({
+      const updatedUser = {
         profession,
         full_name: `${prenom.trim()} ${nom.trim()}`,
-      });
-      setCurrentUser({ ...currentUser, profession, full_name: `${prenom.trim()} ${nom.trim()}` });
+      };
+      await base44.auth.updateMe(updatedUser);
+      const me = await base44.auth.me();
+      setCurrentUser(me);
       setShowInscriptionForm(false);
-      navigate('/equipe-rased', { replace: true });
+      
+      try {
+        const users = await base44.entities.User.list();
+        setMembers(users.length > 0 ? users : [me]);
+      } catch (err) {
+        setMembers([me]);
+      }
     } catch (err) {
       console.error('Erreur lors de la sauvegarde:', err);
     } finally {
