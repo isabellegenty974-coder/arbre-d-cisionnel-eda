@@ -208,7 +208,7 @@ const AuthenticatedApp = () => {
   }
 
   if (needsRegister) {
-    window.location.href = '/equipe-rased';
+    window.location.href = '/register';
     return null;
   }
 
