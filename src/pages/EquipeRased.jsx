@@ -20,12 +20,12 @@ export default function EquipeRased() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteStatus, setInviteStatus] = useState(null); // null | 'loading' | 'success' | 'error'
+  const [inviteStatus, setInviteStatus] = useState(null);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [showInscriptionForm, setShowInscriptionForm] = useState(false);
-  const [prenom, setPrenom] = useState(currentUser?.full_name?.split(' ')[0] || '');
-  const [nom, setNom] = useState(currentUser?.full_name?.split(' ').slice(1).join(' ') || '');
-  const [profession, setProfession] = useState(currentUser?.profession || '');
+  const [prenom, setPrenom] = useState('');
+  const [nom, setNom] = useState('');
+  const [profession, setProfession] = useState('');
   const [savingInscription, setSavingInscription] = useState(false);
 
   useEffect(() => {
@@ -37,10 +37,18 @@ export default function EquipeRased() {
         ]);
         setCurrentUser(me);
         setMembers(users);
+        setPrenom(me?.full_name?.split(' ')[0] || '');
+        setNom(me?.full_name?.split(' ').slice(1).join(' ') || '');
+        setProfession(me?.profession || '');
       } catch (err) {
         const me = await base44.auth.me().catch(() => null);
         setCurrentUser(me);
-        if (me) setMembers([me]);
+        if (me) {
+          setMembers([me]);
+          setPrenom(me.full_name?.split(' ')[0] || '');
+          setNom(me.full_name?.split(' ').slice(1).join(' ') || '');
+          setProfession(me.profession || '');
+        }
       } finally {
         setLoading(false);
       }
@@ -108,16 +116,16 @@ export default function EquipeRased() {
                       {isMe && <span className="text-[10px] font-bold text-[#D4A574] uppercase tracking-wide">Moi</span>}
                     </div>
                     {isMe && (
-                       <Button
-                         size="sm"
-                         variant="outline"
-                         onClick={() => setShowInscriptionForm(true)}
-                         className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
-                       >
-                         <Pencil className="w-3 h-3" />
-                         Modifier
-                       </Button>
-                     )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowInscriptionForm(true)}
+                        className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        Modifier
+                      </Button>
+                    )}
                   </motion.div>
                 );
               })}
@@ -125,75 +133,6 @@ export default function EquipeRased() {
               {members.length === 0 && (
                 <div className="text-center py-8 text-[#0F172A]/60">
                   <p>Aucun membre trouvé</p>
-                </div>
-              )}
-
-              {/* Inscription form modal */}
-              {showInscriptionForm && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg"
-                  >
-                    <h2 className="text-xl font-semibold text-[#0F172A] mb-4">Complétez votre profil</h2>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-[#0F172A] mb-2">Prénom</label>
-                        <Input
-                          type="text"
-                          placeholder="Ex: Jean"
-                          value={prenom}
-                          onChange={(e) => setPrenom(e.target.value)}
-                          className="border-[#D4A574]/50"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-[#0F172A] mb-2">Nom</label>
-                        <Input
-                          type="text"
-                          placeholder="Ex: Dupont"
-                          value={nom}
-                          onChange={(e) => setNom(e.target.value)}
-                          className="border-[#D4A574]/50"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-[#0F172A] mb-2">Profession</label>
-                        <select
-                          value={profession}
-                          onChange={(e) => setProfession(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-[#D4A574]/50 bg-white text-[#0F172A] text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A574]"
-                        >
-                          <option value="">Sélectionner une profession</option>
-                          <option value="MaDP">Maître à dominante pédagogique (MaDP)</option>
-                          <option value="MaDR">Maître à dominante relationnelle (MaDR)</option>
-                          <option value="Psy EN EDA">Psychologue EN EDA</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 mt-6">
-                      <Button
-                        onClick={handleSaveInscription}
-                        disabled={savingInscription || !prenom.trim() || !nom.trim() || !profession}
-                        className="flex-1 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] border-0 font-semibold"
-                      >
-                        {savingInscription ? 'Sauvegarde...' : 'Valider'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setShowInscriptionForm(false);
-                          setPrenom(currentUser?.full_name?.split(' ')[0] || '');
-                          setNom(currentUser?.full_name?.split(' ').slice(1).join(' ') || '');
-                          setProfession(currentUser?.profession || '');
-                        }}
-                        className="flex-1"
-                      >
-                        Annuler
-                      </Button>
-                    </div>
-                  </motion.div>
                 </div>
               )}
 
@@ -249,6 +188,75 @@ export default function EquipeRased() {
           )}
         </div>
       </ScreenLayout>
+
+      {/* Inscription form modal */}
+      {showInscriptionForm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg"
+          >
+            <h2 className="text-xl font-semibold text-[#0F172A] mb-4">Complétez votre profil</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#0F172A] mb-2">Prénom</label>
+                <Input
+                  type="text"
+                  placeholder="Ex: Jean"
+                  value={prenom}
+                  onChange={(e) => setPrenom(e.target.value)}
+                  className="border-[#D4A574]/50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#0F172A] mb-2">Nom</label>
+                <Input
+                  type="text"
+                  placeholder="Ex: Dupont"
+                  value={nom}
+                  onChange={(e) => setNom(e.target.value)}
+                  className="border-[#D4A574]/50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#0F172A] mb-2">Profession</label>
+                <select
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-[#D4A574]/50 bg-white text-[#0F172A] text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A574]"
+                >
+                  <option value="">Sélectionner une profession</option>
+                  <option value="MaDP">Maître à dominante pédagogique (MaDP)</option>
+                  <option value="MaDR">Maître à dominante relationnelle (MaDR)</option>
+                  <option value="Psy EN EDA">Psychologue EN EDA</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
+              <Button
+                onClick={handleSaveInscription}
+                disabled={savingInscription || !prenom.trim() || !nom.trim() || !profession}
+                className="flex-1 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] border-0 font-semibold"
+              >
+                {savingInscription ? 'Sauvegarde...' : 'Valider'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowInscriptionForm(false);
+                  setPrenom(currentUser?.full_name?.split(' ')[0] || '');
+                  setNom(currentUser?.full_name?.split(' ').slice(1).join(' ') || '');
+                  setProfession(currentUser?.profession || '');
+                }}
+                className="flex-1"
+              >
+                Annuler
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
