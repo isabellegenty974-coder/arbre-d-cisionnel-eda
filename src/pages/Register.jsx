@@ -20,13 +20,16 @@ export default function Register() {
     const fetchUser = async () => {
       try {
         const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
-        setPrenom(currentUser.full_name?.split(' ')[0] || '');
-        setProfession(currentUser.profession || '');
+        if (currentUser) {
+          setUser(currentUser);
+          setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
+          setPrenom(currentUser.full_name?.split(' ')[0] || '');
+          setProfession(currentUser.profession || '');
+        }
       } catch (err) {
-        // L'utilisateur est authentifié mais pas encore enregistré — c'est normal
-        setUser(null);
+        // Utilisateur non authentifié — rediriger vers login
+        base44.auth.redirectToLogin('/register');
+        return;
       } finally {
         setLoading(false);
       }
@@ -84,10 +87,16 @@ export default function Register() {
           </div>
 
           {/* Email display */}
-          <div className="mb-6 p-3 bg-secondary/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Email</p>
-            <p className="text-sm font-medium text-foreground">{user?.email}</p>
-          </div>
+          {user ? (
+            <div className="mb-6 p-3 bg-secondary/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Email</p>
+              <p className="text-sm font-medium text-foreground">{user.email}</p>
+            </div>
+          ) : (
+            <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">Authentification en cours...</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Prénom */}
