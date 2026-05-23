@@ -10,8 +10,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    // Invite the 3 users
-    const emails = [
+    // Get emails from request body
+    const body = await req.json().catch(() => ({}));
+    const emails = body.emails || [
       'isabellegenty974@gmail.com',
       'veroniquecaro1985@gmail.com',
       'laurencepetit.reunion@gmail.com'
