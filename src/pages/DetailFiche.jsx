@@ -30,7 +30,7 @@ export default function DetailFiche() {
 
     Promise.all([
       base44.entities.FicheEleve.get(ficheId),
-      base44.entities.Diagnostic.filter({ createdByName: { $exists: true } }, '-created_date')
+      base44.entities.Diagnostic.list('-created_date', 200)
     ])
       .then(([ficheData, allDiagnostics]) => {
         setFiche(ficheData);
