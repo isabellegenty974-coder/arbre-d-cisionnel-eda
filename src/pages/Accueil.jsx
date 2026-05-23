@@ -21,8 +21,10 @@ export default function Accueil() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const isAuth = await base44.auth.isAuthenticated();
-      if (!isAuth) {
+      try {
+        await base44.auth.me();
+        setNotAuthenticated(false);
+      } catch {
         setNotAuthenticated(true);
       }
     };
@@ -38,8 +40,16 @@ export default function Accueil() {
   }, []);
 
   useEffect(() => {
-    base44.auth.me().catch(() => navigate('/register'));
-  }, [navigate]);
+    const interval = setInterval(async () => {
+      try {
+        await base44.auth.me();
+        setNotAuthenticated(false);
+      } catch {
+        setNotAuthenticated(true);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadEleves = async () => {
     const [fiches, diagnostics] = await Promise.all([
