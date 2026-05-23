@@ -16,7 +16,7 @@ import Dashboard from './pages/Dashboard';
 import Historique from './pages/Historique';
 import FicheEleve from './pages/FicheEleve';
 import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite';
-import StatsAnnuelles from './pages/StatsAnnuelles';
+import StatsAnnuelles from './pages/StatsAnnuelles.jsx';
 import Resultats from './pages/Resultats';
 import EvaluationDomains from './pages/EvaluationDomains';
 import ItemsApprentissages from './pages/ItemsApprentissages';
