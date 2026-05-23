@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
@@ -16,6 +16,7 @@ const PROFESSION_LABELS = {
 
 export default function EquipeRased() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [members, setMembers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +38,9 @@ export default function EquipeRased() {
         setNom(me?.full_name?.split(' ').slice(1).join(' ') || '');
         setProfession(me?.profession || '');
         
-        // Afficher le formulaire si le profil est incomplet
-        if (!me?.profession || !me?.full_name) {
+        // Afficher le formulaire si invité (param ?invited=true) ou profil incomplet
+        const isInvited = searchParams.get('invited') === 'true';
+        if (isInvited || !me?.profession || !me?.full_name) {
           setShowInscriptionForm(true);
         }
         
@@ -57,7 +59,7 @@ export default function EquipeRased() {
       }
     };
     load();
-  }, []);
+  }, [searchParams]);
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return;
@@ -82,8 +84,10 @@ export default function EquipeRased() {
       });
       setCurrentUser({ ...currentUser, profession, full_name: `${prenom.trim()} ${nom.trim()}` });
       setShowInscriptionForm(false);
+      // Nettoyer le paramètre ?invited=true
+      navigate('/equipe-rased', { replace: true });
     } catch (err) {
-      console.error('Erreur lors de la sauvegarde');
+      console.error('Erreur lors de la sauvegarde:', err);
     } finally {
       setSavingInscription(false);
     }
