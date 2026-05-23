@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Pencil, UserPlus, CheckCircle } from 'lucide-react';
+import { UserCircle, Pencil, UserPlus, CheckCircle, Loader } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 
@@ -20,8 +20,13 @@ export default function EquipeRased() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteStatus, setInviteStatus] = useState(null); // null | 'loading' | 'success' | 'error'
+  const [inviteStatus, setInviteStatus] = useState(null);
   const [showInviteForm, setShowInviteForm] = useState(false);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [registerData, setRegisterData] = useState({ nom: '', prenom: '', profession: '' });
+  const [registerSaving, setRegisterSaving] = useState(false);
+  const [registerError, setRegisterError] = useState(null);
+  const [registerSuccess, setRegisterSuccess] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -53,6 +58,32 @@ export default function EquipeRased() {
       setTimeout(() => { setInviteStatus(null); setShowInviteForm(false); }, 3000);
     } catch (err) {
       setInviteStatus('error');
+    }
+  };
+
+  const handleRegisterSubmit = async () => {
+    if (!registerData.nom.trim() || !registerData.prenom.trim() || !registerData.profession) {
+      setRegisterError('Tous les champs sont requis');
+      return;
+    }
+    setRegisterSaving(true);
+    setRegisterError(null);
+    try {
+      await base44.auth.updateMe({
+        profession: registerData.profession,
+        full_name: `${registerData.prenom.trim()} ${registerData.nom.trim()}`,
+      });
+      setRegisterSuccess(true);
+      setShowRegisterForm(false);
+      setTimeout(() => {
+        setRegisterSuccess(false);
+        setRegisterData({ nom: '', prenom: '', profession: '' });
+        window.location.reload();
+      }, 2000);
+    } catch (err) {
+      setRegisterError(err.message || 'Erreur lors de l\'enregistrement');
+    } finally {
+      setRegisterSaving(false);
     }
   };
 
@@ -106,8 +137,78 @@ export default function EquipeRased() {
                 </div>
               )}
 
-              {/* Invite section */}
+              {/* Register section */}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="pt-2">
+                {!showRegisterForm ? (
+                  <Button
+                    onClick={() => setShowRegisterForm(true)}
+                    className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    M'enregistrer
+                  </Button>
+                ) : (
+                  <div className="bg-white rounded-2xl border-2 border-emerald-500 p-5 space-y-4 shadow-sm">
+                    <p className="font-semibold text-[#0F172A]">Complétez votre profil</p>
+                    {registerSuccess ? (
+                      <div className="flex items-center gap-2 text-emerald-600 font-medium">
+                        <CheckCircle className="w-5 h-5" />
+                        Enregistrement réussi !
+                      </div>
+                    ) : (
+                      <>
+                        <Input
+                          type="text"
+                          placeholder="Prénom"
+                          value={registerData.prenom}
+                          onChange={e => setRegisterData({ ...registerData, prenom: e.target.value })}
+                          className="border-emerald-500/50 focus:ring-emerald-500/40"
+                        />
+                        <Input
+                          type="text"
+                          placeholder="Nom"
+                          value={registerData.nom}
+                          onChange={e => setRegisterData({ ...registerData, nom: e.target.value })}
+                          className="border-emerald-500/50 focus:ring-emerald-500/40"
+                        />
+                        <select
+                          value={registerData.profession}
+                          onChange={e => setRegisterData({ ...registerData, profession: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg border border-emerald-500/50 bg-white text-[#0F172A] text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500/40"
+                        >
+                          <option value="">Sélectionner une profession</option>
+                          <option value="MaDP">Maître à dominante pédagogique (MaDP)</option>
+                          <option value="MaDR">Maître à dominante relationnelle (MaDR)</option>
+                          <option value="Psy EN EDA">Psychologue EN EDA (Psy EN EDA)</option>
+                        </select>
+                        {registerError && <p className="text-red-500 text-sm">{registerError}</p>}
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleRegisterSubmit}
+                            disabled={registerSaving}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-0 font-semibold"
+                          >
+                            {registerSaving ? (
+                              <>
+                                <Loader className="w-4 h-4 animate-spin" />
+                                Enregistrement...
+                              </>
+                            ) : (
+                              'S\'enregistrer'
+                            )}
+                          </Button>
+                          <Button variant="outline" onClick={() => { setShowRegisterForm(false); setRegisterError(null); }}>
+                            Annuler
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Invite section */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="pt-2">
                 {!showInviteForm ? (
                   <Button
                     onClick={() => setShowInviteForm(true)}
