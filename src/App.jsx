@@ -179,12 +179,12 @@ const AuthenticatedApp = () => {
   useEffect(() => {
     if (!isLoadingAuth && !authError && !['register', '/register'].includes(location.pathname)) {
       setCheckingProfile(true);
-      const checkProfile = async (retries = 3) => {
+      const checkProfile = async () => {
         try {
           const user = await base44.auth.me();
           if (user && !user.profession) setNeedsRegister(true);
         } catch {
-          if (retries > 0) setTimeout(() => checkProfile(retries - 1), 800);
+          // Not authenticated — let auth system handle it
         } finally {
           setCheckingProfile(false);
         }

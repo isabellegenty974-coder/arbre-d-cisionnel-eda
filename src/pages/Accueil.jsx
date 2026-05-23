@@ -16,22 +16,20 @@ export default function Accueil() {
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  // Redirect to register if profession not set
+  // Redirect to login if not authenticated, or to register if no profession
   useEffect(() => {
-    const checkProfession = async (retries = 3) => {
+    const checkAuth = async () => {
       try {
         const user = await base44.auth.me();
-        console.log('[Accueil] user from me():', JSON.stringify(user));
-        if (user && !user.profession) {
-          console.log('[Accueil] No profession → redirect to /register');
+        if (!user || !user.profession) {
           navigate('/register', { replace: true });
         }
-      } catch (e) {
-        console.log('[Accueil] auth.me() error:', e?.message);
-        if (retries > 0) setTimeout(() => checkProfession(retries - 1), 800);
+      } catch {
+        // Not authenticated → redirect to login
+        base44.auth.redirectToLogin();
       }
     };
-    checkProfession();
+    checkAuth();
   }, []);
 
   const loadEleves = async () => {
