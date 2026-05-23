@@ -96,7 +96,11 @@ export default function EquipeRased() {
       
       try {
         const users = await base44.entities.User.list();
-        setMembers(users.length > 0 ? users : [me]);
+        const updatedMembers = users.map(u => u.email === me.email ? me : u);
+        if (!updatedMembers.find(u => u.email === me.email)) {
+          updatedMembers.push(me);
+        }
+        setMembers(updatedMembers.length > 0 ? updatedMembers : [me]);
       } catch (err) {
         setMembers([me]);
       }
