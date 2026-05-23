@@ -1,19 +1,15 @@
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, Search, Home, UserPlus, Pencil, FileText, ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Users, TreePine, BarChart2, Home, UserPlus, Pencil } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import FirstVisitModal from "@/components/FirstVisitModal";
 
+const BG_URL = 'https://media.base44.com/images/public/69e918c1956306f5db6eaf3d/fb9410bf1_generated_image.png';
+
 export default function Accueil() {
   const navigate = useNavigate();
   const [notAuthenticated, setNotAuthenticated] = useState(false);
-  const [eleves, setEleves] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [classFilter, setClassFilter] = useState('');
-  const [page, setPage] = useState(1);
   const [showFirstVisitModal, setShowFirstVisitModal] = useState(false);
 
   useEffect(() => {
@@ -48,64 +44,23 @@ export default function Accueil() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    base44.auth.me().catch(() => navigate('/register'));
-  }, [navigate]);
-
-  const loadEleves = async () => {
-    const [fiches, diagnostics] = await Promise.all([
-      base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
-      base44.entities.Diagnostic.list('-created_date', 200).catch(() => []),
-    ]);
-    
-    const ficheKeys = new Set(fiches.map(f => `${f.prenom}|${f.nom}`.toLowerCase()));
-    const orphanedDiags = diagnostics.filter(
-      d => !ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())
-    );
-    for (const d of orphanedDiags) {
-      await base44.entities.Diagnostic.delete(d.id).catch(() => {});
-    }
-    
-    const map = new Map();
-    fiches.forEach(f => {
-      const key = `${f.prenom}|${f.nom}`.toLowerCase();
-      map.set(key, { prenom: f.prenom, nom: f.nom, classe: f.classe, lastDate: f.date || f.created_date, profession: f.createdByProfession });
-    });
-    diagnostics.filter(d => ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())).forEach(d => {
-      const key = `${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase();
-      if (!map.has(key)) map.set(key, { prenom: d.eleve_prenom, nom: d.eleve_nom, lastDate: d.created_date });
-      else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
-    });
-    setEleves([...map.values()]);
-    setPage(1);
-  };
-
-  useEffect(() => {
-    loadEleves();
-    const unsubFiche = base44.entities.FicheEleve.subscribe(() => loadEleves());
-    const unsubDiag = base44.entities.Diagnostic.subscribe(() => loadEleves());
-    return () => {
-      unsubFiche();
-      unsubDiag();
-    };
-  }, []);
-
   if (notAuthenticated) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <div className="px-6 py-8 flex items-start justify-between border-b border-gray-200">
+        <div className="px-6 py-8 flex items-start justify-between border-b" style={{ borderColor: '#D4C4B0' }}>
           <div>
-            <h1 className="text-3xl font-bold text-[#0F172A]">Arbre décisionnel RASED</h1>
-            <p className="text-gray-600 text-sm mt-1">Connectez-vous pour accéder à l&apos;application</p>
+            <h1 className="text-3xl font-bold" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>Arbre décisionnel RASED</h1>
+            <p className="text-sm mt-1" style={{ color: '#9CAF88' }}>Connectez-vous pour accéder à l'application</p>
           </div>
           <button
             onClick={() => base44.auth.redirectToLogin()}
-            className="px-6 py-2 rounded-full border-2 border-[#3B82F6] text-[#3B82F6] font-semibold hover:bg-blue-50 transition-all"
+            className="px-6 py-2 rounded-full border-2 font-semibold transition-all hover:opacity-80"
+            style={{ borderColor: '#6B8BA5', color: '#6B8BA5' }}
           >
             Se connecter
           </button>
         </div>
-        <div className="flex-1 flex items-center justify-center text-gray-400 pb-20">
+        <div className="flex-1 flex items-center justify-center pb-20" style={{ color: '#B0A090' }}>
           <p>Application inaccessible. Veuillez vous connecter.</p>
         </div>
       </div>
@@ -113,7 +68,7 @@ export default function Accueil() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen pb-20" style={{ backgroundImage: `url(${BG_URL})`, backgroundSize: 'cover', backgroundColor: '#F5F0E8' }}>
       <FirstVisitModal
         isOpen={showFirstVisitModal}
         onClose={() => setShowFirstVisitModal(false)}
@@ -125,147 +80,133 @@ export default function Accueil() {
 
       <HamburgerMenu />
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-8">
-        <div className="flex items-start justify-between max-w-7xl mx-auto">
-          <div>
-            <h1 className="text-3xl font-bold text-[#0F172A]">Arbre décisionnel RASED</h1>
-            <p className="text-gray-600 text-sm mt-1">Connectez-vous pour accéder à l&apos;application</p>
+      {/* Main Content */}
+      <div className="px-4 py-8 max-w-2xl mx-auto space-y-6">
+        
+        {/* Welcome Card */}
+        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#FFFBF8', borderLeft: '6px solid #6B8BA5' }}>
+          <div className="flex items-start gap-6">
+            <div className="shrink-0">
+              <TreePine className="w-16 h-16" style={{ color: '#6B8BA5' }} />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-2" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>
+                Welcome to Arbre Décisionnel EDA
+              </h1>
+              <p className="text-sm mb-6" style={{ color: '#9CAF88', lineHeight: '1.6' }}>
+                Sign in to continue
+              </p>
+              <button
+                onClick={() => base44.auth.redirectToLogin()}
+                className="px-8 py-3 rounded-full font-semibold text-white shadow-md transition-all hover:opacity-90"
+                style={{ backgroundColor: '#6B8BA5' }}
+              >
+                Sign In to Continue
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content - 3 Column Grid */}
-      <div className="px-6 py-10 max-w-7xl mx-auto">
-        <div className="grid grid-cols-3 gap-6">
-          {/* Card 1: Élèves */}
-          <div className="bg-blue-100 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-200">
-              <Users className="w-10 h-10 text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-[#0F172A]">Élèves</h2>
-            
-            {/* Search Section */}
-            <div className="bg-white rounded-lg p-4 space-y-3">
-              <h3 className="font-bold text-[#0F172A]">Recherche d'élèves</h3>
-              <p className="text-sm text-gray-600">Recherche-le d'élèves, pourquoi avoir ces applications.</p>
-              <Link to="/dashboard">
-                <button className="w-full bg-blue-100 hover:bg-blue-200 text-blue-600 font-semibold py-2 rounded-lg transition-colors">
-                  Recherche d'élèves
-                </button>
-              </Link>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="space-y-2">
-              <h3 className="font-bold text-[#0F172A]">Actions rapides</h3>
-              <Link to="/register" className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                <UserPlus className="w-5 h-5 text-blue-600" />
-                <span className="text-sm font-medium text-[#0F172A]">Créer un profil</span>
-              </Link>
-              <Link to="/edit-eleve" className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                <Pencil className="w-5 h-5 text-blue-600" />
-                <span className="text-sm font-medium text-[#0F172A]">Modifier des infos</span>
-              </Link>
-              <Link to="/historique" className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                <BarChart2 className="w-5 h-5 text-blue-600" />
-                <span className="text-sm font-medium text-[#0F172A]">Suivi pédagogique</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Card 2: Arbre */}
-          <div className="bg-green-100 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-200">
-              <TreePine className="w-10 h-10 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-[#0F172A]">Arbre</h2>
-            
-            {/* Parcours Section */}
-            <div className="bg-white rounded-lg p-4 space-y-3">
-              <h3 className="font-bold text-[#0F172A]">Parcours d'aide</h3>
-              <p className="text-sm text-gray-600">Parcourez-nous lients dépravaillement de les parcours d'aide.</p>
-              <Link to="/evaluation-domains">
-                <button className="w-full bg-green-100 hover:bg-green-200 text-green-600 font-semibold py-2 rounded-lg transition-colors">
-                  Parcours d'aide
-                </button>
-              </Link>
-            </div>
-
-            {/* Features */}
-            <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/50 transition-colors bg-white/30">
-                <span className="font-bold text-[#0F172A]">Critères de décision</span>
-                <ChevronDown className="w-4 h-4 text-green-600" />
+        {/* Aide à la Décision Card */}
+        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#9CAF88' }}>
+          <h2 className="text-2xl font-bold mb-4" style={{ color: '#FFFBF8', fontFamily: 'Georgia, serif' }}>
+            Aide à la Décision
+          </h2>
+          <p className="text-sm leading-relaxed" style={{ color: '#FFFBF8' }}>
+            Une wise désestrantqu rune aide à la décisionnel EDA peu papper soras marches ari'n except norun-uisent le processing et outpuet umle sec arbre to décisionnel EDA.
+          </p>
+          <div className="mt-6 flex gap-4">
+            <Link to="/evaluation-domains">
+              <button className="px-6 py-2 rounded-lg font-semibold transition-all" style={{ backgroundColor: '#FFFBF8', color: '#9CAF88' }}>
+                Parcours d'aide
               </button>
-              <p className="text-sm text-gray-700 px-3">Critères des catégories au reversions des décision.</p>
-              
-              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/50 transition-colors bg-white/30">
-                <span className="font-bold text-[#0F172A]">Outils d'intervention</span>
-                <ChevronDown className="w-4 h-4 text-green-600" />
-              </button>
-              <p className="text-sm text-gray-700 px-3">Envoyer les outils de compétision toules et d'interventions.</p>
-            </div>
-          </div>
-
-          {/* Card 3: Stats */}
-          <div className="bg-gray-100 rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-300">
-              <BarChart2 className="w-10 h-10 text-gray-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-[#0F172A]">Stats</h2>
-            
-            {/* KPI Grid */}
-            <div className="space-y-3">
-              <div className="bg-white rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-2">Taux de réussite</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-blue-600">70%</span>
-                  <BarChart2 className="w-8 h-8 text-blue-400" />
-                </div>
-                <p className="text-[10px] text-gray-500 mt-1">Taux de réussite</p>
-              </div>
-              
-              <div className="bg-white rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-2">Nombre de fiches</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-blue-600">69</span>
-                  <FileText className="w-8 h-8 text-blue-400" />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-2">Interventions par type</p>
-                <BarChart2 className="w-12 h-8 text-gray-400" />
-              </div>
-            </div>
-
-            <Link to="/stats-annuelles">
-              <button className="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 rounded-lg transition-colors">
-                Voir toutes les stats
+            </Link>
+            <Link to="/dashboard">
+              <button className="px-6 py-2 rounded-lg font-semibold transition-all" style={{ backgroundColor: '#FFFBF8', color: '#9CAF88' }}>
+                Recherche d'élèves
               </button>
             </Link>
           </div>
         </div>
+
+        {/* Comment ça marche Card */}
+        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#E8D4B8' }}>
+          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>
+            Comment ça marche
+          </h2>
+          <div className="flex justify-between items-center text-center">
+            <div>
+              <div className="text-3xl mb-2">📥</div>
+              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Input</p>
+            </div>
+            <div className="text-2xl" style={{ color: '#A89A8A' }}>→</div>
+            <div>
+              <div className="text-3xl mb-2">⚙️</div>
+              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Processing</p>
+            </div>
+            <div className="text-2xl" style={{ color: '#A89A8A' }}>→</div>
+            <div>
+              <div className="text-3xl mb-2">📤</div>
+              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Output</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Pour qui Card */}
+        <div className="rounded-3xl p-8 shadow-lg" style={{ backgroundColor: '#FFFBF8' }}>
+          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#8B7355', fontFamily: 'Georgia, serif' }}>
+            Pour qui?
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
+              <p className="text-3xl mb-2">👨‍⚕️</p>
+              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Professionnels</p>
+            </div>
+            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
+              <p className="text-3xl mb-2">👩‍🏫</p>
+              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Éducateurs</p>
+            </div>
+            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
+              <p className="text-3xl mb-2">👨‍⚖️</p>
+              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Éducateurs</p>
+            </div>
+            <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: '#F5F0E8' }}>
+              <p className="text-3xl mb-2">🔬</p>
+              <p className="text-sm font-semibold" style={{ color: '#8B7355' }}>Danteta analysts</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-4">
+          <Link to="/register" className="rounded-2xl p-6 shadow-lg text-center" style={{ backgroundColor: '#FFFBF8', borderLeft: '4px solid #6B8BA5' }}>
+            <UserPlus className="w-8 h-8 mx-auto mb-3" style={{ color: '#6B8BA5' }} />
+            <p className="font-semibold text-sm" style={{ color: '#8B7355' }}>Créer un profil</p>
+          </Link>
+          <Link to="/edit-eleve" className="rounded-2xl p-6 shadow-lg text-center" style={{ backgroundColor: '#FFFBF8', borderLeft: '4px solid #6B8BA5' }}>
+            <Pencil className="w-8 h-8 mx-auto mb-3" style={{ color: '#6B8BA5' }} />
+            <p className="font-semibold text-sm" style={{ color: '#8B7355' }}>Modifier des infos</p>
+          </Link>
+        </div>
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex items-center justify-around py-3 px-4">
+      <div className="fixed bottom-0 left-0 right-0 flex items-center justify-around py-4 shadow-lg" style={{ backgroundColor: '#E8D4B8', borderTop: '1px solid #D4C4B0' }}>
         <Link to="/" className="flex flex-col items-center gap-1">
-          <Home className="w-6 h-6 text-blue-600" />
-          <span className="text-[10px] font-medium text-blue-600">Accueil</span>
+          <Home className="w-6 h-6" style={{ color: '#8B7355' }} />
+          <span className="text-[10px] font-semibold" style={{ color: '#8B7355' }}>Accueil</span>
         </Link>
         <Link to="/dashboard" className="flex flex-col items-center gap-1">
-          <Users className="w-6 h-6 text-gray-400" />
-          <span className="text-[10px] font-medium text-gray-400">Élèves</span>
+          <Users className="w-6 h-6" style={{ color: '#A89A8A' }} />
+          <span className="text-[10px] font-semibold" style={{ color: '#A89A8A' }}>Élèves</span>
         </Link>
         <Link to="/evaluation-domains" className="flex flex-col items-center gap-1">
-          <TreePine className="w-6 h-6 text-gray-400" />
-          <span className="text-[10px] font-medium text-gray-400">Arbre</span>
+          <TreePine className="w-6 h-6" style={{ color: '#A89A8A' }} />
+          <span className="text-[10px] font-semibold" style={{ color: '#A89A8A' }}>Arbre</span>
         </Link>
         <Link to="/stats-annuelles" className="flex flex-col items-center gap-1">
-          <BarChart2 className="w-6 h-6 text-gray-400" />
-          <span className="text-[10px] font-medium text-gray-400">Stats</span>
+          <BarChart2 className="w-6 h-6" style={{ color: '#A89A8A' }} />
+          <span className="text-[10px] font-semibold" style={{ color: '#A89A8A' }}>Stats</span>
         </Link>
       </div>
     </div>
