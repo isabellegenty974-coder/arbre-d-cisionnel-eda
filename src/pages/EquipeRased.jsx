@@ -40,6 +40,10 @@ export default function EquipeRased() {
         setPrenom(me?.full_name?.split(' ')[0] || '');
         setNom(me?.full_name?.split(' ').slice(1).join(' ') || '');
         setProfession(me?.profession || '');
+        // Afficher le formulaire si le profil est incomplet
+        if (!me?.profession || !me?.full_name) {
+          setShowInscriptionForm(true);
+        }
       } catch (err) {
         const me = await base44.auth.me().catch(() => null);
         setCurrentUser(me);
@@ -48,6 +52,10 @@ export default function EquipeRased() {
           setPrenom(me.full_name?.split(' ')[0] || '');
           setNom(me.full_name?.split(' ').slice(1).join(' ') || '');
           setProfession(me.profession || '');
+          // Afficher le formulaire si le profil est incomplet
+          if (!me.profession || !me.full_name) {
+            setShowInscriptionForm(true);
+          }
         }
       } finally {
         setLoading(false);
