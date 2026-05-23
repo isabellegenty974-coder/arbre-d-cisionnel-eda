@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Pencil, UserPlus, CheckCircle } from 'lucide-react';
+import { UserCircle, Pencil, UserPlus, CheckCircle, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 
@@ -28,6 +28,8 @@ export default function EquipeRased() {
   const [nom, setNom] = useState('');
   const [profession, setProfession] = useState('');
   const [savingInscription, setSavingInscription] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -84,12 +86,24 @@ export default function EquipeRased() {
       });
       setCurrentUser({ ...currentUser, profession, full_name: `${prenom.trim()} ${nom.trim()}` });
       setShowInscriptionForm(false);
-      // Nettoyer le paramètre ?invited=true
       navigate('/equipe-rased', { replace: true });
     } catch (err) {
       console.error('Erreur lors de la sauvegarde:', err);
     } finally {
       setSavingInscription(false);
+    }
+  };
+
+  const handleDeleteMember = async (memberId) => {
+    setDeletingId(memberId);
+    try {
+      await base44.entities.User.delete(memberId);
+      setMembers(members.filter(m => m.id !== memberId));
+      setShowDeleteConfirm(null);
+    } catch (err) {
+      console.error('Erreur lors de la suppression:', err);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -122,17 +136,29 @@ export default function EquipeRased() {
                       </p>
                       {isMe && <span className="text-[10px] font-bold text-[#D4A574] uppercase tracking-wide">Moi</span>}
                     </div>
-                    {isMe && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowInscriptionForm(true)}
-                        className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8] shrink-0"
-                      >
-                        <Pencil className="w-3 h-3" />
-                        Modifier
-                      </Button>
-                    )}
+                    <div className="flex gap-2 shrink-0">
+                      {isMe && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowInscriptionForm(true)}
+                          className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          Modifier
+                        </Button>
+                      )}
+                      {(isMe || currentUser?.role === 'admin') && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowDeleteConfirm(member.id)}
+                          className="gap-1 border-red-300 text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
                   </motion.div>
                 );
               })}
@@ -256,6 +282,37 @@ export default function EquipeRased() {
                   setNom(currentUser?.full_name?.split(' ').slice(1).join(' ') || '');
                   setProfession(currentUser?.profession || '');
                 }}
+                className="flex-1"
+              >
+                Annuler
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-lg"
+          >
+            <h2 className="text-xl font-semibold text-[#0F172A] mb-2">Supprimer ce profil ?</h2>
+            <p className="text-[#0F172A]/70 mb-6">Cette action ne peut pas être annulée. Êtes-vous sûr ?</p>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => handleDeleteMember(showDeleteConfirm)}
+                disabled={deletingId === showDeleteConfirm}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white border-0 font-semibold"
+              >
+                {deletingId === showDeleteConfirm ? 'Suppression...' : 'Supprimer'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(null)}
+                disabled={deletingId === showDeleteConfirm}
                 className="flex-1"
               >
                 Annuler
