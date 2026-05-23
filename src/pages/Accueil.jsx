@@ -72,9 +72,9 @@ export default function Accueil() {
 
       {/* Main Content */}
       <div className="px-4 py-8 max-w-4xl mx-auto bg-blue-900 min-h-screen">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-5 gap-4">
           {/* Left Column - Élèves */}
-          <div className="col-span-1 bg-blue-950 text-white rounded-2xl p-6">
+          <div className="col-span-2 bg-blue-950 text-white rounded-2xl p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Élèves</h3>
               <span className="bg-blue-500 text-xs px-3 py-1 rounded-full font-semibold">Gestion</span>
@@ -107,7 +107,7 @@ export default function Accueil() {
           </div>
 
           {/* Right Column - Cards */}
-          <div className="col-span-2">
+          <div className="col-span-3">
             <p className="text-gray-300 text-xs font-medium mb-4">sections</p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             
