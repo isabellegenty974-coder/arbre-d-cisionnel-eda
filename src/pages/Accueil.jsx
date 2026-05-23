@@ -44,7 +44,18 @@ export default function Accueil() {
   };
 
   useEffect(() => {
-    base44.auth.me().catch(() => navigate('/register'));
+    const checkProfile = async () => {
+      try {
+        const user = await base44.auth.me();
+        // Si l'utilisateur n'a pas complété son profil (pas de profession), le rediriger
+        if (!user?.profession) {
+          navigate('/equipe-rased?invited=true', { replace: true });
+        }
+      } catch (err) {
+        navigate('/register');
+      }
+    };
+    checkProfile();
   }, [navigate]);
 
   const loadEleves = async () => {
