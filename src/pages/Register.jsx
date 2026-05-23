@@ -51,7 +51,7 @@ export default function Register() {
         profession,
         full_name: `${prenom.trim()} ${nom.trim()}`,
       });
-      window.location.href = '/equipe-rased';
+      window.location.href = '/';
     } catch (err) {
       setError(err.message || 'Erreur lors de la sauvegarde');
     } finally {
