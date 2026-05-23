@@ -42,7 +42,6 @@ export default function EquipeRased() {
         setProfession(me?.profession || '');
         
         const isInvited = searchParams.get('invited') === 'true';
-        // Afficher le formulaire si l'utilisateur est invité OU n'a pas complété son profil
         if (isInvited || !me?.profession) {
           setShowInscriptionForm(true);
         }
@@ -73,6 +72,13 @@ export default function EquipeRased() {
     } catch (err) {
       setInviteStatus('error');
     }
+  };
+
+  const openInscriptionForm = () => {
+    setPrenom('');
+    setNom('');
+    setProfession('');
+    setShowInscriptionForm(true);
   };
 
   const handleSaveInscription = async () => {
@@ -142,7 +148,7 @@ export default function EquipeRased() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setShowInscriptionForm(true)}
+                          onClick={openInscriptionForm}
                           className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
                         >
                           <Pencil className="w-3 h-3" />
@@ -172,7 +178,7 @@ export default function EquipeRased() {
 
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                 <Button
-                  onClick={() => setShowInscriptionForm(true)}
+                  onClick={openInscriptionForm}
                   variant="outline"
                   className="w-full gap-2 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
                 >
