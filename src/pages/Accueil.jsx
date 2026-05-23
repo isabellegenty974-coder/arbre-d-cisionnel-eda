@@ -16,6 +16,15 @@ export default function Accueil() {
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
 
+  // Redirect to register if profession not set
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (user && !user.profession) {
+        navigate('/register', { replace: true });
+      }
+    }).catch(() => {});
+  }, []);
+
   const loadEleves = async () => {
     const [fiches, diagnostics] = await Promise.all([
       base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
