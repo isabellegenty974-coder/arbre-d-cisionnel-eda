@@ -12,7 +12,7 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
   const cameraInputRef = useRef(null);
 
   const handleFileSelect = async (file) => {
-    if (!file) return;
+    if (!file || isLoading) return;
     if (!ficheId) {
       setError('ID de fiche manquant');
       return;
