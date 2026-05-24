@@ -139,13 +139,66 @@ const STRUCTURES = [
     badgeColor: "bg-sky-100 text-sky-700",
     badge: "Structure scolaire",
     title: "RASED",
-    description: "Réseau d'Aides Spécialisées aux Élèves en Difficulté. Intervient directement à l'école.",
+    description: "Réseau d'Aides Spécialisées aux Élèves en Difficulté. Intervient directement à l'école auprès des élèves présentant des difficultés persistantes.",
     difficultes: [
       "Difficultés d'apprentissage persistantes à l'école ordinaire",
       "Élève nécessitant une aide pédagogique renforcée",
       "Difficultés de comportement perturbant les apprentissages",
       "Blocages émotionnels face aux apprentissages",
       "Besoin d'un bilan adaptatif en milieu scolaire",
+    ],
+    professions: [
+      {
+        role: "Psy EN EDA",
+        emoji: "🧠",
+        color: "bg-violet-50 border-violet-200",
+        labelColor: "bg-violet-100 text-violet-700",
+        champ: "Psychologue de l'Éducation Nationale spécialité Éducation, Développement et Apprentissages",
+        interventions: [
+          "Bilan psychologique et psychométrique (évaluation cognitive, QI, profil d'apprentissage)",
+          "Observation et analyse des difficultés scolaires en lien avec le développement de l'enfant",
+          "Évaluation des fonctions cognitives : mémoire, attention, fonctions exécutives",
+          "Entretiens avec l'enfant et sa famille pour comprendre le contexte",
+          "Guidance parentale et conseils aux enseignants",
+          "Participation aux équipes éducatives et ESS",
+          "Orientation vers des professionnels de santé ou structures spécialisées",
+          "Accompagnement lors de la mise en place d'un PAP, PPRE ou PPS",
+        ],
+      },
+      {
+        role: "MaDP",
+        emoji: "📚",
+        color: "bg-blue-50 border-blue-200",
+        labelColor: "bg-blue-100 text-blue-700",
+        champ: "Maître à dominante Pédagogique",
+        interventions: [
+          "Aide spécialisée à dominante pédagogique (ancienne aide de type E)",
+          "Remédiation pédagogique individualisée ou en petit groupe",
+          "Travail sur les apprentissages fondamentaux : lecture, écriture, calcul",
+          "Aide à la compréhension et à la mémorisation des notions",
+          "Développement de stratégies d'apprentissage adaptées",
+          "Travail sur la métacognition et l'estime de soi scolaire",
+          "Coordination avec l'enseignant de la classe",
+          "Participation aux équipes éducatives et PPRE",
+        ],
+      },
+      {
+        role: "MaDR",
+        emoji: "💛",
+        color: "bg-amber-50 border-amber-200",
+        labelColor: "bg-amber-100 text-amber-700",
+        champ: "Maître à dominante Relationnelle",
+        interventions: [
+          "Aide spécialisée à dominante relationnelle (ancienne aide de type G)",
+          "Accompagnement des élèves présentant des difficultés comportementales ou émotionnelles",
+          "Travail sur la relation à l'autre, la confiance en soi et l'estime de soi",
+          "Prise en charge des troubles du comportement en milieu scolaire",
+          "Aide aux élèves anxieux, inhibés ou en refus scolaire",
+          "Séances individuelles ou en petit groupe axées sur le bien-être",
+          "Liaison avec les familles et l'équipe enseignante",
+          "Participation aux équipes éducatives et dispositifs d'aide",
+        ],
+      },
     ],
   },
   {
@@ -255,7 +308,28 @@ const STRUCTURES = [
   },
 ];
 
-function FicheCard({ emoji, color, badgeColor, badge, title, description, difficultes, index }) {
+function ProfessionBlock({ role, emoji, color, labelColor, champ, interventions }) {
+  return (
+    <div className={`rounded-xl border p-4 ${color}`}>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-lg">{emoji}</span>
+        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${labelColor}`}>{role}</span>
+      </div>
+      <p className="text-xs text-muted-foreground italic mb-3">{champ}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Champ d'intervention</p>
+      <ul className="space-y-1.5">
+        {interventions.map((item, i) => (
+          <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function FicheCard({ emoji, color, badgeColor, badge, title, description, difficultes, professions, index }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
@@ -271,7 +345,7 @@ function FicheCard({ emoji, color, badgeColor, badge, title, description, diffic
         </div>
       </div>
       <p className="text-sm text-muted-foreground mb-4">{description}</p>
-      <div className="p-3 rounded-xl bg-white/60">
+      <div className="p-3 rounded-xl bg-white/60 mb-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Difficultés relevant de son champ</p>
         <ul className="space-y-1.5">
           {difficultes.map((d, j) => (
@@ -282,6 +356,14 @@ function FicheCard({ emoji, color, badgeColor, badge, title, description, diffic
           ))}
         </ul>
       </div>
+      {professions && (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Membres du RASED</p>
+          {professions.map((p) => (
+            <ProfessionBlock key={p.role} {...p} />
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }
