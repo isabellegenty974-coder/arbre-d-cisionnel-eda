@@ -159,7 +159,7 @@ export default function Accueil() {
           className="text-center font-bold text-3xl mb-2 leading-tight"
           style={{ color: '#7EB8F7', fontFamily: 'serif' }}
         >
-          Arbre décisionnel RASED
+          Tableau de bord RASED
         </motion.h1>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="text-white/80 text-sm text-center mb-8 leading-snug">
