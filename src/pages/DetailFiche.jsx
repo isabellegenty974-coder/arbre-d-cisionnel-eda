@@ -19,6 +19,7 @@ export default function DetailFiche() {
   const [selectedDiagnosticId, setSelectedDiagnosticId] = useState(null);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState('');
+  const [selectedProfession, setSelectedProfession] = useState(null);
 
   const ficheId = searchParams.get('id');
 
@@ -162,6 +163,43 @@ export default function DetailFiche() {
             )}
           </motion.div>
 
+          {/* Onglets professionnels */}
+          {diagnostics.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.24 }}
+              className="flex gap-2 flex-wrap border-b border-border pb-3"
+            >
+              <button
+                onClick={() => setSelectedProfession(null)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  selectedProfession === null
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-foreground hover:bg-secondary/80'
+                }`}
+              >
+                Tous ({diagnostics.length})
+              </button>
+              {['Psy EN EDA', 'MaDR', 'MaDP'].map(prof => {
+                const count = diagnostics.filter(d => d.createdByProfession === prof).length;
+                return (
+                  <button
+                    key={prof}
+                    onClick={() => setSelectedProfession(prof)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      selectedProfession === prof
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80'
+                    }`}
+                  >
+                    {prof} ({count})
+                  </button>
+                );
+              })}
+            </motion.div>
+          )}
+
           {/* Rapports générés */}
           {diagnostics.length > 0 && (
             <motion.div
@@ -172,7 +210,10 @@ export default function DetailFiche() {
             >
               <h2 className="font-semibold text-foreground">Rapports générés</h2>
               <div className="space-y-2">
-                {diagnostics.map((diag, idx) => (
+                {(selectedProfession
+                  ? diagnostics.filter(d => d.createdByProfession === selectedProfession)
+                  : diagnostics
+                ).map((diag, idx) => (
                   <motion.div
                     key={diag.id}
                     initial={{ opacity: 0, y: 5 }}
