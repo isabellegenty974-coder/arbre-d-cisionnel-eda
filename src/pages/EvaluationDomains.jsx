@@ -89,27 +89,6 @@ export default function EvaluationDomains() {
               </Link>
             </motion.div>
           ))}
-
-          {/* Analyse */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: DOMAINS.length * 0.08 + 0.05 }}
-            className="pt-2"
-          >
-            <Link to="/analyse-eda" className="group block">
-              <div className="flex items-center gap-4 p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:shadow-soft transition-all duration-200 hover:scale-[1.01]">
-                <div className="shrink-0 w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
-                  <ArrowRight className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-primary">Passer à l'analyse</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Synthèse et recommandations</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-primary/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-              </div>
-            </Link>
-          </motion.div>
         </div>
       </ScreenLayout>
     </div>
