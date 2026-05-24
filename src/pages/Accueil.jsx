@@ -43,20 +43,7 @@ export default function Accueil() {
     navigate('/equipe-rased');
   };
 
-  useEffect(() => {
-    const checkProfile = async () => {
-      try {
-        const user = await base44.auth.me();
-        // Si l'utilisateur n'a pas complété son profil (pas de profession), le rediriger
-        if (!user?.profession) {
-          navigate('/equipe-rased?invited=true', { replace: true });
-        }
-      } catch (err) {
-        navigate('/register');
-      }
-    };
-    checkProfile();
-  }, [navigate]);
+
 
   const loadEleves = async () => {
     const [fiches, diagnostics] = await Promise.all([
