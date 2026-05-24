@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 
 export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession) => {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
