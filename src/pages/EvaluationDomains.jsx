@@ -56,35 +56,39 @@ export default function EvaluationDomains() {
     <div className="min-h-screen bg-background pb-20">
       <HamburgerMenu />
       <ScreenLayout
-        title="Domaines d'évaluation"
-        subtitle="Explorez chaque domaine pour identifier les signes d'alerte"
+        title="🎯 Domaines d'évaluation"
+        subtitle="Cliquez sur un domaine pour explorer les signes et ressources"
       >
-        <div className="space-y-3 max-w-lg mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
           {DOMAINS.map(({ label, desc, icon: Icon, to, color, border, iconBg, iconColor, dot }, i) => (
             <motion.div
               key={to}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, duration: 0.35 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.1, duration: 0.35 }}
             >
-              <Link to={to} className="group block">
-                <div className={`relative flex items-center gap-4 p-4 rounded-2xl border ${border} bg-gradient-to-r ${color} hover:shadow-soft-md transition-all duration-200 hover:scale-[1.01]`}>
-                  {/* Dot accent */}
-                  <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full ${dot}`} />
+              <Link to={to} className="group block h-full">
+                <div className={`relative flex flex-col items-start gap-4 p-6 rounded-2xl border ${border} bg-gradient-to-br ${color} hover:shadow-soft-lg transition-all duration-250 hover:scale-[1.03] h-full overflow-hidden`}>
+                  {/* Background accent */}
+                  <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${iconBg} opacity-40 blur-2xl`} />
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${dot}`} />
 
                   {/* Icon */}
-                  <div className={`shrink-0 w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center`}>
-                    <Icon className={`w-6 h-6 ${iconColor}`} />
+                  <div className={`relative z-10 w-14 h-14 rounded-xl ${iconBg} flex items-center justify-center shadow-soft`}>
+                    <Icon className={`w-7 h-7 ${iconColor}`} />
                   </div>
 
                   {/* Text */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground">{label}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                  <div className="relative z-10 flex-1">
+                    <h3 className="font-bold text-lg text-foreground">{label}</h3>
+                    <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{desc}</p>
                   </div>
 
-                  {/* Arrow */}
-                  <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+                  {/* Footer */}
+                  <div className="relative z-10 flex items-center gap-2 text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors">
+                    <span>Explorer</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </Link>
             </motion.div>
