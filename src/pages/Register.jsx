@@ -56,6 +56,7 @@ export default function Register() {
         prenom: prenom.trim(),
         nom: nom.trim(),
         profession,
+        email: user?.email,
       });
       window.location.href = '/';
     } catch (err) {

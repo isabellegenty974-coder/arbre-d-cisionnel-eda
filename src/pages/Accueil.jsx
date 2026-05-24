@@ -26,8 +26,9 @@ export default function Accueil() {
       try {
         const user = await base44.auth.me();
         if (!user) return;
-        const membres = await base44.entities.MembreEquipe.filter({ created_by: user.email });
-        if (membres.length === 0) {
+        const membres = await base44.entities.MembreEquipe.list('-created_date', 200);
+        const hasProfile = membres.some(m => m.email === user.email || m.created_by === user.email);
+        if (!hasProfile) {
           setShowInvitePopup(true);
         }
       } catch (err) {
