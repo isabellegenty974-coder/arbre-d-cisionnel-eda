@@ -127,7 +127,7 @@ export default function DiagnosticEleve() {
 
   const [eleve, setEleve] = useState(null);
   const [checked, setChecked] = useState({});
-  const [openSections, setOpenSections] = useState({ apprentissages: true, comportement: true, developpement: true, contexte: true });
+  const [activeTab, setActiveTab] = useState('apprentissages');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -165,7 +165,7 @@ export default function DiagnosticEleve() {
     });
   };
 
-  const toggleSection = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  
 
   const totalChecked = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
 
@@ -311,61 +311,73 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
         subtitle={eleve ? `${eleve.prenom} ${eleve.nom}${eleve.classe ? ` — ${eleve.classe}` : ""}` : ""}
       >
         <div className="space-y-4">
-          {CATEGORIES.map((cat) => {
-            const catChecked = checked[cat.key] || [];
-            const isOpen = openSections[cat.key];
-            return (
-              <motion.div
-                key={cat.key}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`rounded-2xl border overflow-hidden ${cat.color}`}
-              >
+          {/* Onglets */}
+          <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border">
+            {CATEGORIES.map(cat => {
+              const catChecked = checked[cat.key] || [];
+              const isActive = activeTab === cat.key;
+              return (
                 <button
-                  onClick={() => toggleSection(cat.key)}
-                  className={`w-full flex items-center justify-between px-5 py-3 font-semibold text-left ${cat.headerColor}`}
+                  key={cat.key}
+                  onClick={() => setActiveTab(cat.key)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                    isActive
+                      ? `${cat.headerColor} border-b-2 border-current`
+                      : "bg-secondary/30 hover:bg-secondary/50 text-foreground"
+                  }`}
                 >
-                  <span>
-                    {cat.label}
-                    {catChecked.length > 0 && (
-                      <span className="ml-2 text-xs font-bold bg-white/60 px-2 py-0.5 rounded-full">
-                        {catChecked.length}
-                      </span>
-                    )}
-                  </span>
-                  {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {cat.label}
+                  {catChecked.length > 0 && (
+                    <span className="ml-1.5 text-xs font-bold bg-white/60 px-1.5 py-0.5 rounded-full">
+                      {catChecked.length}
+                    </span>
+                  )}
                 </button>
-                {isOpen && (
-                  <div className="p-4 space-y-2">
-                    {cat.items.map((item) => {
-                      const isChecked = (checked[cat.key] || []).includes(item.label);
-                      return (
-                        <label
-                          key={item.label}
-                          className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                            isChecked ? "bg-white/80 shadow-sm" : "bg-white/30 hover:bg-white/50"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => toggle(cat.key, item)}
-                            className="mt-1 accent-current w-4 h-4 shrink-0"
-                          />
-                          <div>
-                            <p className={`text-sm font-medium ${isChecked ? "text-foreground" : "text-foreground/90"}`}>
-                              {item.label}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          {/* Contenu de l'onglet actif */}
+          <AnimatePresence mode="wait">
+            {CATEGORIES.map((cat) => {
+              if (activeTab !== cat.key) return null;
+              const catChecked = checked[cat.key] || [];
+              return (
+                <motion.div
+                  key={cat.key}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`rounded-2xl border overflow-hidden ${cat.color} space-y-2 p-4`}
+                >
+                  {cat.items.map((item) => {
+                    const isChecked = (checked[cat.key] || []).includes(item.label);
+                    return (
+                      <label
+                        key={item.label}
+                        className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                          isChecked ? "bg-white/80 shadow-sm" : "bg-white/30 hover:bg-white/50"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggle(cat.key, item)}
+                          className="mt-1 accent-current w-4 h-4 shrink-0"
+                        />
+                        <div>
+                          <p className={`text-sm font-medium ${isChecked ? "text-foreground" : "text-foreground/90"}`}>
+                            {item.label}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
           <div className="pt-2 flex flex-col gap-3">
             <Button
