@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
 import { BookOpen, PenLine, Calculator } from "lucide-react";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
+import ItemCard from "@/components/ItemCard";
 
 const FICHES = [
   {
@@ -46,41 +46,10 @@ export default function ItemsApprentissages() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
-      <ScreenLayout title="📚 Apprentissages" subtitle="Fiches informatives sur les domaines d'apprentissage">
-        <div className="space-y-5">
-          {FICHES.map(({ icon: Icon, color, iconColor, title, description, signes, pistes }, i) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.07 }}
-              className={`rounded-2xl border p-5 ${color}`}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`p-2 rounded-xl bg-white/70 ${iconColor}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <h3 className="font-semibold text-foreground text-lg">{title}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">{description}</p>
-
-              <div className="mb-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Signes à observer</p>
-                <ul className="space-y-1.5">
-                  {signes.map((s, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="mt-1 w-1.5 h-1.5 rounded-full bg-current shrink-0 opacity-50" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white/60">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Pistes d'exploration</p>
-                <p className="text-sm text-foreground">{pistes}</p>
-              </div>
-            </motion.div>
+      <ScreenLayout title="📚 Apprentissages" subtitle="Domaines clés pour l'apprentissage">
+        <div className="space-y-4">
+          {FICHES.map((fiche, i) => (
+            <ItemCard key={fiche.title} {...fiche} index={i} />
           ))}
         </div>
       </ScreenLayout>
