@@ -88,131 +88,173 @@ export default function FicheEleve() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
+    <div className="min-h-screen bg-gradient-to-b from-[#FAFAF8] to-[#F5F0E8]">
       <HamburgerMenu />
-      <ScreenLayout title="👤 Créer une fiche élève">
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto space-y-6">
+      <ScreenLayout title="📋 Nouvelle observation" subtitle="Complétez les informations de l'élève">
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto">
+          {/* Section Identité */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-xl bg-[#F5F0E8] border-2 border-[#D4A574]/30 space-y-4"
+            transition={{ delay: 0.05 }}
+            className="mb-6 p-6 rounded-2xl bg-white border border-[#D4A574]/20 shadow-soft"
           >
-            <div>
-              <label className="text-sm font-medium text-[#0F172A] block mb-2">Prénom *</label>
-              <Input
-                {...register('prenom', eleveValidationRules.prenom)}
-                placeholder="Prénom"
-                className={errors.prenom ? 'border-destructive' : ''}
-              />
-              {errors.prenom && (
-                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {errors.prenom.message}
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="text-sm font-medium text-[#0F172A] block mb-2">Nom *</label>
-              <Input
-                {...register('nom', eleveValidationRules.nom)}
-                placeholder="Nom"
-                className={errors.nom ? 'border-destructive' : ''}
-              />
-              {errors.nom && (
-                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {errors.nom.message}
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="text-sm font-medium text-[#0F172A] block mb-2">Date de naissance</label>
-              <div className="flex items-center gap-2">
-              <div className="grid grid-cols-3 gap-2 flex-1">
-                <select
-                  value={jourNaissance}
-                  onChange={e => { setJourNaissance(e.target.value); handleDateNaissance(e.target.value, moisNaissance, anneeNaissance); }}
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="">Jour</option>
-                  {Array.from({ length: daysInMonth(moisNaissance, anneeNaissance) }, (_, i) => i + 1).map(d => (
-                    <option key={d} value={String(d)}>{d}</option>
-                  ))}
-                </select>
-                <select
-                  value={moisNaissance}
-                  onChange={e => { setMoisNaissance(e.target.value); handleDateNaissance(jourNaissance, e.target.value, anneeNaissance); }}
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="">Mois</option>
-                  {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
-                </select>
-                <select
-                  value={anneeNaissance}
-                  onChange={e => { setAnneeNaissance(e.target.value); handleDateNaissance(jourNaissance, moisNaissance, e.target.value); }}
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="">Année</option>
-                  {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
-                </select>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-lg bg-[#D4A574]/10 flex items-center justify-center">
+                <span className="text-lg">👤</span>
               </div>
-              {ageCalcule !== null ? (
-                <span className="text-sm font-bold text-[#D4A574] whitespace-nowrap">{ageCalcule} ans</span>
-              ) : (
-                <span className="text-sm text-[#0F172A]/30 whitespace-nowrap">— ans</span>
-              )}
+              <h2 className="font-bold text-lg text-[#0F172A]">Identité de l'élève</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Prénom *</label>
+                <Input
+                  {...register('prenom', eleveValidationRules.prenom)}
+                  placeholder="Prénom"
+                  className={`${errors.prenom ? 'border-destructive' : ''} rounded-lg`}
+                />
+                {errors.prenom && (
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    {errors.prenom.message}
+                  </div>
+                )}
               </div>
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Nom *</label>
+                <Input
+                  {...register('nom', eleveValidationRules.nom)}
+                  placeholder="Nom"
+                  className={`${errors.nom ? 'border-destructive' : ''} rounded-lg`}
+                />
+                {errors.nom && (
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    {errors.nom.message}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#D4A574]/10 mt-4">
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Date de naissance</label>
+                <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-3 gap-2 flex-1">
+                    <select
+                      value={jourNaissance}
+                      onChange={e => { setJourNaissance(e.target.value); handleDateNaissance(e.target.value, moisNaissance, anneeNaissance); }}
+                      className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="">Jour</option>
+                      {Array.from({ length: daysInMonth(moisNaissance, anneeNaissance) }, (_, i) => i + 1).map(d => (
+                        <option key={d} value={String(d)}>{d}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={moisNaissance}
+                      onChange={e => { setMoisNaissance(e.target.value); handleDateNaissance(jourNaissance, e.target.value, anneeNaissance); }}
+                      className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="">Mois</option>
+                      {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+                    </select>
+                    <select
+                      value={anneeNaissance}
+                      onChange={e => { setAnneeNaissance(e.target.value); handleDateNaissance(jourNaissance, moisNaissance, e.target.value); }}
+                      className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="">Année</option>
+                      {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                    </select>
+                  </div>
+                  {ageCalcule !== null ? (
+                    <span className="text-sm font-bold text-[#D4A574] whitespace-nowrap bg-[#D4A574]/10 px-3 py-2 rounded-lg">{ageCalcule} ans</span>
+                  ) : (
+                    <span className="text-sm text-[#0F172A]/30 whitespace-nowrap">— ans</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Classe</label>
+                <Input
+                  {...register('classe', eleveValidationRules.classe)}
+                  placeholder="Ex: CM2"
+                  className={`${errors.classe ? 'border-destructive' : ''} rounded-lg`}
+                />
+                {errors.classe && (
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    {errors.classe.message}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
 
+          {/* Section Contexte Scolaire */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6 p-6 rounded-2xl bg-white border border-[#D4A574]/20 shadow-soft"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-lg bg-[#D4A574]/10 flex items-center justify-center">
+                <span className="text-lg">🏫</span>
+              </div>
+              <h2 className="font-bold text-lg text-[#0F172A]">Contexte scolaire</h2>
             </div>
             <div>
-              <label className="text-sm font-medium text-[#0F172A] block mb-2">École</label>
+              <label className="text-sm font-semibold text-[#0F172A] block mb-2">École</label>
               <select
                 value={ecole}
                 onChange={e => setEcole(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 <option value="">-- Sélectionner une école --</option>
                 {ECOLES.map(e => <option key={e} value={e}>{e}</option>)}
               </select>
             </div>
-            <div>
-              <label className="text-sm font-medium text-[#0F172A] block mb-2">Classe</label>
-              <Input
-                {...register('classe', eleveValidationRules.classe)}
-                placeholder="Ex: CM2"
-                className={errors.classe ? 'border-destructive' : ''}
-              />
-              {errors.classe && (
-                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {errors.classe.message}
-                </div>
-              )}
-            </div>
           </motion.div>
 
+          {/* Actions */}
           {!saved ? (
-            <Button
-              type="submit"
-              className="w-full gap-2 bg-[#D4A574] hover:bg-[#C49464] disabled:opacity-50 disabled:cursor-not-allowed text-white"
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
             >
-              <Plus className="w-4 h-4" />
-              Enregistrer
-            </Button>
+              <Button
+                type="submit"
+                className="w-full gap-2 h-11 bg-[#D4A574] hover:bg-[#C49464] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-soft"
+              >
+                <Plus className="w-5 h-5" />
+                Créer la fiche
+              </Button>
+              <p className="text-xs text-center text-muted-foreground mt-3">Ctrl+S pour enregistrer rapidement</p>
+            </motion.div>
           ) : (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-3"
+              className="space-y-4"
             >
-              <p className="text-center text-sm font-medium text-chart-2">✓ Fiche créée !</p>
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-chart-2/10 to-chart-2/5 border border-chart-2/30">
+                <p className="text-center text-sm font-semibold text-chart-2 flex items-center justify-center gap-2">
+                  <span className="text-lg">✓</span>
+                  Fiche créée avec succès !
+                </p>
+              </div>
               
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="p-4 rounded-lg bg-[#E8DCC8]/20 border border-[#D4A574]"
+                transition={{ delay: 0.15 }}
+                className="p-5 rounded-2xl bg-[#F5F0E8] border-2 border-[#D4A574]/20"
               >
+                <div className="flex items-center gap-2 mb-4">
+                  <Camera className="w-5 h-5 text-[#D4A574]" />
+                  <h3 className="font-semibold text-[#0F172A]">Photo synthèse (optionnel)</h3>
+                </div>
                 <PhotoEEUpload 
                   ficheId={savedId} 
                   initialPhotoUrl={photoUrl}
@@ -222,18 +264,18 @@ export default function FicheEleve() {
               
               <Button
                 onClick={() => navigate(`/diagnostic-eleve?id=${savedId}`)}
-                className="w-full gap-2 bg-[#D4A574] hover:bg-[#C49464] text-white"
+                className="w-full gap-2 h-11 bg-[#D4A574] hover:bg-[#C49464] text-white font-semibold rounded-lg shadow-soft"
               >
-                <ClipboardList className="w-4 h-4" />
-                Démarrer l'observation
+                <ClipboardList className="w-5 h-5" />
+                Démarrer l'observation diagnostic
               </Button>
               <Button
                 onClick={() => navigate('/dashboard')}
                 variant="outline"
-                className="w-full gap-2"
+                className="w-full gap-2 h-11 rounded-lg"
               >
-                <Users className="w-4 h-4" />
-                Voir mes élèves
+                <Users className="w-5 h-5" />
+                Retour au tableau de bord
               </Button>
             </motion.div>
           )}
