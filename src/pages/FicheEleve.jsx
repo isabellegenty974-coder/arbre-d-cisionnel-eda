@@ -127,7 +127,8 @@ export default function FicheEleve() {
             </div>
             <div>
               <label className="text-sm font-medium text-[#0F172A] block mb-2">Date de naissance</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-3 gap-2 flex-1">
                 <select
                   value={jourNaissance}
                   onChange={e => { setJourNaissance(e.target.value); handleDateNaissance(e.target.value, moisNaissance, anneeNaissance); }}
@@ -155,9 +156,13 @@ export default function FicheEleve() {
                   {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
                 </select>
               </div>
-              {ageCalcule !== null && (
-                <p className="text-xs text-[#0F172A]/60 mt-1.5">→ Âge calculé : <strong>{ageCalcule} ans</strong></p>
+              {ageCalcule !== null ? (
+                <span className="text-sm font-bold text-[#D4A574] whitespace-nowrap">{ageCalcule} ans</span>
+              ) : (
+                <span className="text-sm text-[#0F172A]/30 whitespace-nowrap">— ans</span>
               )}
+              </div>
+
             </div>
             <div>
               <label className="text-sm font-medium text-[#0F172A] block mb-2">École</label>
