@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Users, ClipboardList, TreePine, BarChart2, BookOpen, Shield, Search, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,7 @@ const ITEMS_PER_PAGE = 5;
 
 export default function Accueil() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+
   const [notAuthenticated, setNotAuthenticated] = useState(false);
   const [eleves, setEleves] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,11 +22,20 @@ export default function Accueil() {
   const [showInvitePopup, setShowInvitePopup] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get('invited') === 'true' && !localStorage.getItem('invite_popup_shown')) {
-      setShowInvitePopup(true);
-      localStorage.setItem('invite_popup_shown', 'true');
-    }
-  }, [searchParams]);
+    const checkProfile = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (!user) return;
+        const membres = await base44.entities.MembreEquipe.filter({ created_by: user.email });
+        if (membres.length === 0 && !localStorage.getItem('profile_popup_shown_' + user.email)) {
+          setShowInvitePopup(true);
+        }
+      } catch (err) {
+        // silently ignore
+      }
+    };
+    checkProfile();
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,9 +47,21 @@ export default function Accueil() {
     checkAuth();
   }, []);
 
-  const handleJoinTeam = () => {
+  const handleJoinTeam = async () => {
     setShowInvitePopup(false);
+    try {
+      const user = await base44.auth.me();
+      if (user) localStorage.setItem('profile_popup_shown_' + user.email, 'true');
+    } catch {}
     navigate('/equipe-rased');
+  };
+
+  const handleDismissPopup = async () => {
+    setShowInvitePopup(false);
+    try {
+      const user = await base44.auth.me();
+      if (user) localStorage.setItem('profile_popup_shown_' + user.email, 'true');
+    } catch {}
   };
 
 
@@ -114,13 +135,13 @@ export default function Accueil() {
           <DialogHeader>
             <DialogTitle>Bienvenue ! 👋</DialogTitle>
             <DialogDescription className="text-base mt-3">
-              Vous avez été invité à rejoindre l'équipe RASED. Complétez votre profil pour accéder à tous les outils.
+              Vous n'avez pas encore créé votre profil. Rejoignez l'équipe RASED en créant votre profil dès maintenant.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-3 mt-6">
             <Button
               variant="outline"
-              onClick={() => setShowInvitePopup(false)}
+              onClick={handleDismissPopup}
               className="flex-1"
             >
               Plus tard
