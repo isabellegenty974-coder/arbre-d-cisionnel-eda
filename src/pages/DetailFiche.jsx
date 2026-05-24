@@ -20,7 +20,7 @@ export default function DetailFiche() {
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState('');
   const [selectedTab, setSelectedTab] = useState('psy');
-  const [interventions, setInterventions] = useState({ psy: '', madr: '', madp: '' });
+  const [interventions, setInterventions] = useState({ psy: { date: '', description: '' }, madr: { date: '', description: '' }, madp: { date: '', description: '' } });
   const [editingInterventions, setEditingInterventions] = useState(false);
 
   const ficheId = searchParams.get('id');
@@ -39,6 +39,8 @@ export default function DetailFiche() {
         setFiche(ficheData);
         if (ficheData?.interventions) {
           setInterventions(ficheData.interventions);
+        } else {
+          setInterventions({ psy: { date: '', description: '' }, madr: { date: '', description: '' }, madp: { date: '', description: '' } });
         }
         if (ficheData && allDiagnostics) {
           const related = allDiagnostics.filter(
@@ -205,16 +207,28 @@ export default function DetailFiche() {
 
             {editingInterventions ? (
               <div className="space-y-3">
-                <textarea
-                  value={interventions[selectedTab] || ''}
-                  onChange={(e) => setInterventions({ ...interventions, [selectedTab]: e.target.value })}
-                  placeholder="Décrivez les interventions réalisées..."
-                  className="w-full min-h-40 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={interventions[selectedTab]?.date || ''}
+                    onChange={(e) => setInterventions({ ...interventions, [selectedTab]: { ...interventions[selectedTab], date: e.target.value } })}
+                    className="w-full h-9 px-3 rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-2">Description</label>
+                  <textarea
+                    value={interventions[selectedTab]?.description || ''}
+                    onChange={(e) => setInterventions({ ...interventions, [selectedTab]: { ...interventions[selectedTab], description: e.target.value } })}
+                    placeholder="Décrivez les interventions réalisées..."
+                    className="w-full min-h-40 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => {
-                      setInterventions(fiche?.interventions || { psy: '', madr: '', madp: '' });
+                      setInterventions(fiche?.interventions || { psy: { date: '', description: '' }, madr: { date: '', description: '' }, madp: { date: '', description: '' } });
                       setEditingInterventions(false);
                     }}
                     className="px-4 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition-colors text-sm font-medium"
@@ -231,12 +245,17 @@ export default function DetailFiche() {
               </div>
             ) : (
               <div className="flex items-start justify-between gap-3">
-                <div className="min-h-40 p-4 flex-1 rounded-lg bg-secondary/30 border border-border">
-                  {interventions[selectedTab] ? (
-                    <p className="text-foreground whitespace-pre-wrap text-sm leading-relaxed">{interventions[selectedTab]}</p>
-                  ) : (
-                    <p className="text-muted-foreground text-sm italic">Aucune intervention renseignée</p>
+                <div className="flex-1 space-y-2">
+                  {interventions[selectedTab]?.date && (
+                    <p className="text-sm font-medium text-muted-foreground">📅 {new Date(interventions[selectedTab].date).toLocaleDateString('fr-FR')}</p>
                   )}
+                  <div className="min-h-40 p-4 rounded-lg bg-secondary/30 border border-border">
+                    {interventions[selectedTab]?.description ? (
+                      <p className="text-foreground whitespace-pre-wrap text-sm leading-relaxed">{interventions[selectedTab].description}</p>
+                    ) : (
+                      <p className="text-muted-foreground text-sm italic">Aucune intervention renseignée</p>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => setEditingInterventions(true)}

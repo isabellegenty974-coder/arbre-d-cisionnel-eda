@@ -40,16 +40,40 @@
       "description": "Interventions r\u00e9alis\u00e9es par profession",
       "properties": {
         "psy": {
-          "type": "string",
-          "description": "Interventions Psy EN EDA"
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
         },
         "madr": {
-          "type": "string",
-          "description": "Interventions MaDR"
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
         },
         "madp": {
-          "type": "string",
-          "description": "Interventions MaDP"
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
         }
       }
     },
