@@ -29,19 +29,10 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     th { background: #f0f4ff; color: #0C3B8C; padding: 6px 10px; text-align: left; font-size: 12px; }
     td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
     tr:last-child td { border-bottom: none; }
-    @media print {
-      body { margin: 16px; }
-      .no-print { display: none; }
-    }
+    @media print { body { margin: 16px; } }
   </style>
 </head>
 <body>
-  <div class="no-print" style="margin-bottom:16px;">
-    <button onclick="window.print()" style="background:#0C3B8C;color:white;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;">
-      Imprimer / Enregistrer en PDF
-    </button>
-  </div>
-
   <h1>Statistiques des Diagnostics RASED</h1>
   <div class="meta">
     Genere le ${new Date().toLocaleDateString('fr-FR')}
@@ -58,24 +49,14 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   <h2>Repartition par domaine</h2>
   <table>
     <tr><th>Domaine</th><th>Observations</th><th>Pourcentage</th></tr>
-    ${domainesOk.map(d => `
-    <tr>
-      <td>${d.name}</td>
-      <td>${d.value}</td>
-      <td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td>
-    </tr>`).join('')}
+    ${domainesOk.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
   </table>` : ''}
 
   ${(topItems || []).length > 0 ? `
   <h2>Top 10 observations frequentes</h2>
   <table>
     <tr><th>#</th><th>Observation</th><th>Occurrences</th></tr>
-    ${topItems.map((item, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${item.name}</td>
-      <td><b>${item.total}x</b></td>
-    </tr>`).join('')}
+    ${topItems.map((item, i) => `<tr><td>${i + 1}</td><td>${item.name}</td><td><b>${item.total}x</b></td></tr>`).join('')}
   </table>` : ''}
 
   ${(evolution || []).length > 0 ? `
@@ -87,14 +68,22 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
 </body>
 </html>`;
 
-  // Téléchargement via blob (évite les popups bloquées)
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'statistiques-rased-' + new Date().toISOString().split('T')[0] + '.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  // Crée une iframe cachée pour imprimer sans popup blocker
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.top = '-9999px';
+  iframe.style.left = '-9999px';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  document.body.appendChild(iframe);
+
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(html);
+  iframe.contentDocument.close();
+
+  iframe.onload = () => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    setTimeout(() => document.body.removeChild(iframe), 2000);
+  };
 };
