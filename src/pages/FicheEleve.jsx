@@ -21,15 +21,33 @@ export default function FicheEleve() {
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
 
-  const handleDateNaissance = (value) => {
-    setDateNaissance(value);
-    if (!value) { setAgeCalcule(null); return; }
+  const [jourNaissance, setJourNaissance] = useState('');
+  const [moisNaissance, setMoisNaissance] = useState('');
+  const [anneeNaissance, setAnneeNaissance] = useState('');
+
+  const handleDateNaissance = (jour, mois, annee) => {
+    if (!jour || !mois || !annee) { setDateNaissance(''); setAgeCalcule(null); return; }
+    const isoDate = `${annee}-${mois.padStart(2,'0')}-${jour.padStart(2,'0')}`;
+    setDateNaissance(isoDate);
     const today = new Date();
-    const birth = new Date(value);
+    const birth = new Date(isoDate);
     let age = today.getFullYear() - birth.getFullYear();
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
     setAgeCalcule(age >= 0 ? age : null);
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 20 }, (_, i) => currentYear - 3 - i);
+  const months = [
+    { v: '1', l: 'Janvier' }, { v: '2', l: 'Février' }, { v: '3', l: 'Mars' },
+    { v: '4', l: 'Avril' }, { v: '5', l: 'Mai' }, { v: '6', l: 'Juin' },
+    { v: '7', l: 'Juillet' }, { v: '8', l: 'Août' }, { v: '9', l: 'Septembre' },
+    { v: '10', l: 'Octobre' }, { v: '11', l: 'Novembre' }, { v: '12', l: 'Décembre' },
+  ];
+  const daysInMonth = (mois, annee) => {
+    if (!mois || !annee) return 31;
+    return new Date(Number(annee), Number(mois), 0).getDate();
   };
   const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({
     mode: 'onChange',
@@ -109,12 +127,34 @@ export default function FicheEleve() {
             </div>
             <div>
               <label className="text-sm font-medium text-[#0F172A] block mb-2">Date de naissance</label>
-              <Input
-                type="date"
-                value={dateNaissance}
-                onChange={e => handleDateNaissance(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-              />
+              <div className="grid grid-cols-3 gap-2">
+                <select
+                  value={jourNaissance}
+                  onChange={e => { setJourNaissance(e.target.value); handleDateNaissance(e.target.value, moisNaissance, anneeNaissance); }}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">Jour</option>
+                  {Array.from({ length: daysInMonth(moisNaissance, anneeNaissance) }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={String(d)}>{d}</option>
+                  ))}
+                </select>
+                <select
+                  value={moisNaissance}
+                  onChange={e => { setMoisNaissance(e.target.value); handleDateNaissance(jourNaissance, e.target.value, anneeNaissance); }}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">Mois</option>
+                  {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+                </select>
+                <select
+                  value={anneeNaissance}
+                  onChange={e => { setAnneeNaissance(e.target.value); handleDateNaissance(jourNaissance, moisNaissance, e.target.value); }}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">Année</option>
+                  {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                </select>
+              </div>
               {ageCalcule !== null && (
                 <p className="text-xs text-[#0F172A]/60 mt-1.5">→ Âge calculé : <strong>{ageCalcule} ans</strong></p>
               )}
