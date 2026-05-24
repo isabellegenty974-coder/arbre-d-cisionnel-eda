@@ -51,7 +51,13 @@ export default function Register() {
         profession,
         full_name: `${prenom.trim()} ${nom.trim()}`,
       });
-      window.location.href = '/equipe-rased';
+      // Créer automatiquement le profil MembreEquipe
+      await base44.entities.MembreEquipe.create({
+        prenom: prenom.trim(),
+        nom: nom.trim(),
+        profession,
+      });
+      window.location.href = '/';
     } catch (err) {
       setError(err.message || 'Erreur lors de la sauvegarde');
     } finally {
