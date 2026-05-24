@@ -1,124 +1,92 @@
-import { jsPDF } from 'jspdf';
-
 export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession) => {
-  try {
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 12;
-    let y = 20;
-
-    const checkPage = () => {
-      if (y > pageHeight - 20) {
-        doc.addPage();
-        y = 20;
-      }
-    };
-
-    // Titre
-    doc.setFontSize(18);
-    doc.setTextColor(12, 59, 140);
-    doc.text('Statistiques des Diagnostics', margin, y);
-    y += 8;
-
-    // Date + filtre
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Genere le ' + new Date().toLocaleDateString('fr-FR'), margin, y);
-    y += 5;
-    if (selectedProfession) {
-      doc.text('Filtre : ' + selectedProfession, margin, y);
-      y += 5;
-    }
-    y += 5;
-
-    // KPIs
-    const nbEleves = new Set(filteredDiagnostics.map(d => d.eleve_prenom + ' ' + d.eleve_nom)).size;
-    const nbDiagnostics = filteredDiagnostics.length;
-    let nbItems = 0;
-    filteredDiagnostics.forEach(d => {
-      ['apprentissages', 'comportement', 'developpement', 'contexte'].forEach(cat => {
-        nbItems += (d.selections?.[cat] || []).length;
-      });
+  const nbEleves = new Set(filteredDiagnostics.map(d => d.eleve_prenom + ' ' + d.eleve_nom)).size;
+  const nbDiagnostics = filteredDiagnostics.length;
+  let nbItems = 0;
+  filteredDiagnostics.forEach(d => {
+    ['apprentissages', 'comportement', 'developpement', 'contexte'].forEach(cat => {
+      nbItems += (d.selections?.[cat] || []).length;
     });
+  });
 
-    doc.setFontSize(13);
-    doc.setTextColor(12, 59, 140);
-    doc.text('Resume', margin, y);
-    y += 7;
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text('Eleves suivis : ' + nbEleves, margin + 4, y); y += 6;
-    doc.text('Diagnostics realises : ' + nbDiagnostics, margin + 4, y); y += 6;
-    doc.text('Items observes : ' + nbItems, margin + 4, y); y += 10;
+  const totalDomaines = (domaines || []).reduce((s, d) => s + d.value, 0);
+  const domainesOk = (domaines || []).filter(d => d.value > 0);
 
-    // Domaines
-    const domainesOk = (domaines || []).filter(d => d.value > 0);
-    if (domainesOk.length > 0) {
-      checkPage();
-      doc.setFontSize(13);
-      doc.setTextColor(12, 59, 140);
-      doc.text('Repartition par domaine', margin, y);
-      y += 7;
-      const total = domainesOk.reduce((s, d) => s + d.value, 0);
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-      domainesOk.forEach(domain => {
-        const pct = total > 0 ? ((domain.value / total) * 100).toFixed(1) : 0;
-        doc.text(domain.name + ' : ' + domain.value + ' (' + pct + '%)', margin + 4, y);
-        y += 6;
-        checkPage();
-      });
-      y += 4;
-    }
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Statistiques RASED</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #111; margin: 32px; font-size: 13px; }
+    h1 { color: #0C3B8C; font-size: 22px; margin-bottom: 4px; }
+    h2 { color: #0C3B8C; font-size: 15px; margin: 24px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    .meta { color: #666; font-size: 11px; margin-bottom: 24px; }
+    .kpis { display: flex; gap: 24px; margin-bottom: 8px; }
+    .kpi { background: #f0f4ff; border-radius: 8px; padding: 12px 20px; text-align: center; }
+    .kpi-val { font-size: 28px; font-weight: bold; color: #0C3B8C; }
+    .kpi-label { font-size: 11px; color: #555; margin-top: 2px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    th { background: #f0f4ff; color: #0C3B8C; padding: 6px 10px; text-align: left; font-size: 12px; }
+    td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
+    tr:last-child td { border-bottom: none; }
+    .bar-wrap { background: #eee; border-radius: 4px; height: 8px; }
+    .bar { background: #4A90E2; border-radius: 4px; height: 8px; }
+    @media print { body { margin: 16px; } }
+  </style>
+</head>
+<body>
+  <h1>Statistiques des Diagnostics RASED</h1>
+  <div class="meta">
+    Genere le ${new Date().toLocaleDateString('fr-FR')}
+    ${selectedProfession ? ' &mdash; Filtre : ' + selectedProfession : ''}
+  </div>
 
-    // Top 10
-    if ((topItems || []).length > 0) {
-      checkPage();
-      doc.setFontSize(13);
-      doc.setTextColor(12, 59, 140);
-      doc.text('Top 10 observations frequentes', margin, y);
-      y += 7;
-      doc.setFontSize(9);
-      doc.setTextColor(0, 0, 0);
-      topItems.forEach((item, idx) => {
-        checkPage();
-        const label = item.name.length > 70 ? item.name.slice(0, 70) + '...' : item.name;
-        doc.text((idx + 1) + '. ' + label, margin + 4, y);
-        doc.text(item.total + 'x', pageWidth - margin, y, { align: 'right' });
-        y += 5;
-      });
-      y += 4;
-    }
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-val">${nbEleves}</div><div class="kpi-label">Eleves suivis</div></div>
+    <div class="kpi"><div class="kpi-val">${nbDiagnostics}</div><div class="kpi-label">Diagnostics</div></div>
+    <div class="kpi"><div class="kpi-val">${nbItems}</div><div class="kpi-label">Items observes</div></div>
+  </div>
 
-    // Evolution mensuelle
-    if ((evolution || []).length > 0) {
-      checkPage();
-      doc.setFontSize(13);
-      doc.setTextColor(12, 59, 140);
-      doc.text('Evolution mensuelle', margin, y);
-      y += 7;
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-      evolution.forEach(month => {
-        checkPage();
-        doc.text(month.mois + ' : ' + month.total + ' diagnostic(s)', margin + 4, y);
-        y += 5;
-      });
-    }
+  ${domainesOk.length > 0 ? `
+  <h2>Repartition par domaine</h2>
+  <table>
+    <tr><th>Domaine</th><th>Observations</th><th>Pourcentage</th></tr>
+    ${domainesOk.map(d => `
+    <tr>
+      <td>${d.name}</td>
+      <td>${d.value}</td>
+      <td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td>
+    </tr>`).join('')}
+  </table>` : ''}
 
-    // Pieds de page
-    const totalPages = doc.internal.pages.length - 1;
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text('Page ' + i + '/' + totalPages, pageWidth - margin, pageHeight - 8, { align: 'right' });
-    }
+  ${(topItems || []).length > 0 ? `
+  <h2>Top 10 observations frequentes</h2>
+  <table>
+    <tr><th>#</th><th>Observation</th><th>Occurrences</th></tr>
+    ${topItems.map((item, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${item.name}</td>
+      <td><b>${item.total}x</b></td>
+    </tr>`).join('')}
+  </table>` : ''}
 
-    doc.save('statistiques-' + new Date().toISOString().split('T')[0] + '.pdf');
-  } catch (err) {
-    console.error('Erreur export PDF:', err);
-    alert('Erreur lors de la generation du PDF : ' + err.message);
+  ${(evolution || []).length > 0 ? `
+  <h2>Evolution mensuelle</h2>
+  <table>
+    <tr><th>Mois</th><th>Diagnostics</th></tr>
+    ${evolution.map(m => `<tr><td>${m.mois}</td><td>${m.total}</td></tr>`).join('')}
+  </table>` : ''}
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('Veuillez autoriser les popups pour exporter en PDF.');
+    return;
   }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 500);
 };
