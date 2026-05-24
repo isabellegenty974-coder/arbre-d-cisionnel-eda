@@ -9,97 +9,86 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   });
 
   const totalDomaines = (domaines || []).reduce((s, d) => s + d.value, 0);
-  const allDomaines = [
-    { name: 'Apprentissages' },
-    { name: 'Comportement' },
-    { name: 'Developpement' },
-    { name: 'Contexte' },
-  ].map(d => {
-    const found = (domaines || []).find(x => x.name === d.name || (x.name === 'Développement' && d.name === 'Developpement'));
-    return { name: d.name, value: found ? found.value : 0 };
+  const allDomaines = ['Apprentissages', 'Comportement', 'Développement', 'Contexte'].map(name => {
+    const found = (domaines || []).find(x => x.name === name);
+    return { name, value: found ? found.value : 0 };
   });
 
   const topItemsAll = topItems || [];
   const evolutionAll = evolution || [];
 
-  const content = `
-    <h1 style="color:#0C3B8C;font-size:22px;margin-bottom:4px;">Statistiques des Diagnostics RASED</h1>
-    <p style="color:#666;font-size:11px;margin-bottom:20px;">
-      Genere le ${new Date().toLocaleDateString('fr-FR')}
-      ${selectedProfession ? ' — Filtre : ' + selectedProfession : ' — Ensemble de l\'equipe'}
-    </p>
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Statistiques RASED</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #111; margin: 32px; font-size: 13px; }
+    h1 { color: #0C3B8C; font-size: 22px; margin-bottom: 4px; }
+    h2 { color: #0C3B8C; font-size: 15px; margin: 24px 0 4px; border-bottom: 2px solid #dde3f5; padding-bottom: 4px; }
+    .meta { color: #666; font-size: 11px; margin-bottom: 20px; }
+    .comment { color: #444; font-size: 11px; font-style: italic; margin-bottom: 10px; padding: 6px 10px; background: #f4f7ff; border-left: 3px solid #7fa8e8; border-radius: 2px; }
+    .kpis { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .kpi { background: #f0f4ff; border-radius: 8px; padding: 12px 20px; text-align: center; border: 1px solid #dde3f5; }
+    .kpi-val { font-size: 28px; font-weight: bold; color: #0C3B8C; }
+    .kpi-label { font-size: 11px; color: #555; margin-top: 2px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+    th { background: #eef2ff; color: #0C3B8C; padding: 7px 10px; text-align: left; font-size: 12px; border-bottom: 2px solid #c7d4f0; }
+    td { padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #fafbff; }
+    .empty { color: #aaa; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Statistiques des Diagnostics RASED</h1>
+  <p class="meta">
+    Généré le ${new Date().toLocaleDateString('fr-FR')}
+    ${selectedProfession ? ' — Filtre : ' + selectedProfession : ' — Ensemble de l\'équipe'}
+  </p>
 
-    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;">
-      <div style="background:#f0f4ff;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:bold;color:#0C3B8C;">${nbEleves}</div>
-        <div style="font-size:11px;color:#555;">Eleves suivis</div>
-      </div>
-      <div style="background:#f0f4ff;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:bold;color:#0C3B8C;">${nbDiagnostics}</div>
-        <div style="font-size:11px;color:#555;">Diagnostics realises</div>
-      </div>
-      <div style="background:#f0f4ff;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:bold;color:#0C3B8C;">${nbItems}</div>
-        <div style="font-size:11px;color:#555;">Items observes</div>
-      </div>
-    </div>
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-val">${nbEleves}</div><div class="kpi-label">Élèves suivis</div></div>
+    <div class="kpi"><div class="kpi-val">${nbDiagnostics}</div><div class="kpi-label">Diagnostics réalisés</div></div>
+    <div class="kpi"><div class="kpi-val">${nbItems}</div><div class="kpi-label">Items observés</div></div>
+  </div>
 
-    <h2 style="color:#0C3B8C;font-size:15px;border-bottom:1px solid #ddd;padding-bottom:4px;margin:20px 0 4px;">Repartition par domaine</h2>
-    <p style="color:#555;font-size:11px;font-style:italic;margin-bottom:8px;padding:4px 8px;background:#f8f9ff;border-left:3px solid #b0c4e8;">
-      Ce tableau indique, pour chaque grand domaine d'intervention, le nombre total d'items observes et leur part relative. Il permet d'identifier les domaines les plus sollicites par l'equipe RASED.
-    </p>
-    <table style="width:100%;border-collapse:collapse;">
-      <tr style="background:#f0f4ff;"><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">Domaine</th><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">Observations</th><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">Pourcentage</th></tr>
-      ${allDomaines.map(d => `<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;">${d.name}</td><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;">${d.value}</td><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;">${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
-    </table>
+  <h2>Répartition par domaine</h2>
+  <p class="comment">Ce tableau indique, pour chaque grand domaine d'intervention (Apprentissages, Comportement, Développement, Contexte), le nombre total d'items observés et leur part relative. Il permet d'identifier les domaines les plus sollicités par l'équipe RASED sur la période analysée.</p>
+  <table>
+    <tr><th>Domaine</th><th>Observations</th><th>Pourcentage</th></tr>
+    ${allDomaines.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
+  </table>
 
-    <h2 style="color:#0C3B8C;font-size:15px;border-bottom:1px solid #ddd;padding-bottom:4px;margin:20px 0 4px;">Top 10 observations frequentes</h2>
-    <p style="color:#555;font-size:11px;font-style:italic;margin-bottom:8px;padding:4px 8px;background:#f8f9ff;border-left:3px solid #b0c4e8;">
-      Ce tableau liste les 10 items les plus souvent selectionnes lors des diagnostics. Il met en evidence les difficultes recurrentes et peut orienter les priorites d'action pedagogique ou d'accompagnement specialise.
-    </p>
-    <table style="width:100%;border-collapse:collapse;">
-      <tr style="background:#f0f4ff;"><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">#</th><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">Observation</th><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">Occurrences</th></tr>
-      ${topItemsAll.length > 0
-        ? topItemsAll.map((item, i) => `<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;">${i + 1}</td><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;">${item.name}</td><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;font-weight:bold;">${item.total}x</td></tr>`).join('')
-        : '<tr><td colspan="3" style="padding:8px 10px;font-size:12px;color:#aaa;font-style:italic;">Aucune observation enregistree</td></tr>'
-      }
-    </table>
-
-    <h2 style="color:#0C3B8C;font-size:15px;border-bottom:1px solid #ddd;padding-bottom:4px;margin:20px 0 4px;">Evolution mensuelle</h2>
-    <p style="color:#555;font-size:11px;font-style:italic;margin-bottom:8px;padding:4px 8px;background:#f8f9ff;border-left:3px solid #b0c4e8;">
-      Ce tableau retrace le nombre de diagnostics realises chaque mois sur les 12 derniers mois. Il permet de suivre l'activite de l'equipe dans le temps et de mesurer la progression du suivi des eleves au fil de l'annee scolaire.
-    </p>
-    <table style="width:100%;border-collapse:collapse;">
-      <tr style="background:#f0f4ff;"><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">Mois</th><th style="padding:6px 10px;text-align:left;font-size:12px;color:#0C3B8C;">Diagnostics</th></tr>
-      ${evolutionAll.length > 0
-        ? evolutionAll.map(m => `<tr><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;">${m.mois}</td><td style="padding:5px 10px;border-bottom:1px solid #eee;font-size:12px;">${m.total}</td></tr>`).join('')
-        : '<tr><td colspan="2" style="padding:8px 10px;font-size:12px;color:#aaa;font-style:italic;">Aucune donnee mensuelle disponible</td></tr>'
-      }
-    </table>
-  `;
-
-  // Injecte le contenu dans la page courante et imprime
-  const printDiv = document.createElement('div');
-  printDiv.id = '__print_stats__';
-  printDiv.style.display = 'none';
-  printDiv.innerHTML = content;
-  document.body.appendChild(printDiv);
-
-  const style = document.createElement('style');
-  style.id = '__print_style__';
-  style.innerHTML = `
-    @media print {
-      body > *:not(#__print_stats__) { display: none !important; }
-      #__print_stats__ { display: block !important; font-family: Arial, sans-serif; color: #111; margin: 16px; }
+  <h2>Top 10 des observations fréquentes</h2>
+  <p class="comment">Ce tableau liste les 10 items les plus souvent sélectionnés lors des diagnostics. Il met en évidence les difficultés récurrentes rencontrées par les élèves suivis et peut orienter les priorités d'action pédagogique ou d'accompagnement spécialisé.</p>
+  <table>
+    <tr><th>#</th><th>Observation</th><th>Occurrences</th></tr>
+    ${topItemsAll.length > 0
+      ? topItemsAll.map((item, i) => `<tr><td>${i + 1}</td><td>${item.name}</td><td><b>${item.total}×</b></td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">Aucune observation enregistrée</td></tr>'
     }
-  `;
-  document.head.appendChild(style);
+  </table>
 
-  window.print();
+  <h2>Évolution mensuelle</h2>
+  <p class="comment">Ce tableau retrace le nombre de diagnostics réalisés chaque mois sur les 12 derniers mois. Il permet de suivre l'activité de l'équipe dans le temps, d'identifier les périodes de forte mobilisation et de mesurer la progression du suivi des élèves au fil de l'année scolaire.</p>
+  <table>
+    <tr><th>Mois</th><th>Diagnostics réalisés</th></tr>
+    ${evolutionAll.length > 0
+      ? evolutionAll.map(m => `<tr><td>${m.mois}</td><td>${m.total}</td></tr>`).join('')
+      : '<tr><td colspan="2" class="empty">Aucune donnée mensuelle disponible</td></tr>'
+    }
+  </table>
 
-  // Nettoyage après impression
-  setTimeout(() => {
-    document.body.removeChild(printDiv);
-    document.head.removeChild(style);
-  }, 1000);
+  <script>window.onload = function() { window.print(); }<\/script>
+</body>
+</html>`;
+
+  const newWin = window.open('', '_blank');
+  if (newWin) {
+    newWin.document.write(html);
+    newWin.document.close();
+  } else {
+    alert("Veuillez autoriser les popups pour exporter le PDF.");
+  }
 };
