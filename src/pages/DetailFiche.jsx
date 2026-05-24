@@ -19,7 +19,9 @@ export default function DetailFiche() {
   const [selectedDiagnosticId, setSelectedDiagnosticId] = useState(null);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState('');
-  const [selectedProfession, setSelectedProfession] = useState(null);
+  const [selectedTab, setSelectedTab] = useState('psy');
+  const [interventions, setInterventions] = useState({ psy: '', madr: '', madp: '' });
+  const [editingInterventions, setEditingInterventions] = useState(false);
 
   const ficheId = searchParams.get('id');
 
@@ -35,6 +37,9 @@ export default function DetailFiche() {
     ])
       .then(([ficheData, allDiagnostics]) => {
         setFiche(ficheData);
+        if (ficheData?.interventions) {
+          setInterventions(ficheData.interventions);
+        }
         if (ficheData && allDiagnostics) {
           const related = allDiagnostics.filter(
             d => d.eleve_nom?.toLowerCase() === ficheData.nom?.toLowerCase() &&
@@ -61,6 +66,13 @@ export default function DetailFiche() {
     await base44.entities.FicheEleve.update(fiche.id, { notes });
     setFiche({ ...fiche, notes });
     setEditingNotes(false);
+  };
+
+  const handleInterventionsChange = async () => {
+    if (!fiche) return;
+    await base44.entities.FicheEleve.update(fiche.id, { interventions });
+    setFiche({ ...fiche, interventions });
+    setEditingInterventions(false);
   };
 
   if (loading) {
@@ -163,57 +175,90 @@ export default function DetailFiche() {
             )}
           </motion.div>
 
-          {/* Onglets professionnels */}
-          {diagnostics.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.24 }}
-              className="flex gap-2 flex-wrap border-b border-border pb-3"
-            >
-              <button
-                onClick={() => setSelectedProfession(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedProfession === null
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
-                }`}
-              >
-                Tous ({diagnostics.length})
-              </button>
-              {['Psy EN EDA', 'MaDR', 'MaDP'].map(prof => {
-                const count = diagnostics.filter(d => d.createdByProfession === prof).length;
-                return (
+          {/* Onglets Interventions */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.24 }}
+            className="space-y-3"
+          >
+            <h2 className="font-semibold text-foreground">Interventions par profession</h2>
+            <div className="flex gap-2 border-b border-border pb-3">
+              {[
+                { key: 'psy', label: 'Psy EN EDA' },
+                { key: 'madr', label: 'MaDR' },
+                { key: 'madp', label: 'MaDP' }
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedTab(tab.key)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedTab === tab.key
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-foreground hover:bg-secondary/80'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {editingInterventions ? (
+              <div className="space-y-3">
+                <textarea
+                  value={interventions[selectedTab] || ''}
+                  onChange={(e) => setInterventions({ ...interventions, [selectedTab]: e.target.value })}
+                  placeholder="Décrivez les interventions réalisées..."
+                  className="w-full min-h-40 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <div className="flex gap-2 justify-end">
                   <button
-                    key={prof}
-                    onClick={() => setSelectedProfession(prof)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      selectedProfession === prof
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-foreground hover:bg-secondary/80'
-                    }`}
+                    onClick={() => {
+                      setInterventions(fiche?.interventions || { psy: '', madr: '', madp: '' });
+                      setEditingInterventions(false);
+                    }}
+                    className="px-4 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition-colors text-sm font-medium"
                   >
-                    {prof} ({count})
+                    Annuler
                   </button>
-                );
-              })}
-            </motion.div>
-          )}
+                  <button
+                    onClick={handleInterventionsChange}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
+                  >
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-h-40 p-4 flex-1 rounded-lg bg-secondary/30 border border-border">
+                  {interventions[selectedTab] ? (
+                    <p className="text-foreground whitespace-pre-wrap text-sm leading-relaxed">{interventions[selectedTab]}</p>
+                  ) : (
+                    <p className="text-muted-foreground text-sm italic">Aucune intervention renseignée</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setEditingInterventions(true)}
+                  className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors whitespace-nowrap"
+                >
+                  Éditer
+                </button>
+              </div>
+            )}
+          </motion.div>
 
           {/* Rapports générés */}
           {diagnostics.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.25 }}
+              transition={{ delay: 0.26 }}
               className="space-y-3"
             >
               <h2 className="font-semibold text-foreground">Rapports générés</h2>
               <div className="space-y-2">
-                {(selectedProfession
-                  ? diagnostics.filter(d => d.createdByProfession === selectedProfession)
-                  : diagnostics
-                ).map((diag, idx) => (
+                {diagnostics.map((diag, idx) => (
                   <motion.div
                     key={diag.id}
                     initial={{ opacity: 0, y: 5 }}

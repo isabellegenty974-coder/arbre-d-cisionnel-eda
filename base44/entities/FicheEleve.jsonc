@@ -35,6 +35,24 @@
       "type": "string",
       "description": "Notes libres et observations rapides lors des entretiens"
     },
+    "interventions": {
+      "type": "object",
+      "description": "Interventions r\u00e9alis\u00e9es par profession",
+      "properties": {
+        "psy": {
+          "type": "string",
+          "description": "Interventions Psy EN EDA"
+        },
+        "madr": {
+          "type": "string",
+          "description": "Interventions MaDR"
+        },
+        "madp": {
+          "type": "string",
+          "description": "Interventions MaDP"
+        }
+      }
+    },
     "score_apprentissages": {
       "type": "number",
       "description": "Score du domaine Apprentissages"
