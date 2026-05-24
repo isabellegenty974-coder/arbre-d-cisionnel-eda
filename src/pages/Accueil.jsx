@@ -123,27 +123,42 @@ export default function Accueil() {
   return (
     <div className="min-h-screen relative overflow-x-hidden pb-20">
       <Dialog open={showInvitePopup} onOpenChange={setShowInvitePopup}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Bienvenue ! 👋</DialogTitle>
-            <DialogDescription className="text-base mt-3">
-              Vous n'avez pas encore créé votre profil. Rejoignez l'équipe RASED en créant votre profil dès maintenant.
+        <DialogContent className="sm:max-w-sm border-0 p-0 overflow-hidden rounded-3xl">
+          {/* Header gradient */}
+          <div className="relative px-6 pt-8 pb-6 text-center" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%)' }}>
+            <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl shadow-lg" style={{ background: 'rgba(126,184,247,0.15)', border: '1px solid rgba(126,184,247,0.3)' }}>
+              👋
+            </div>
+            <DialogTitle className="text-xl font-bold text-white mb-2">Bienvenue dans l'équipe !</DialogTitle>
+            <DialogDescription className="text-[#7EB8F7]/90 text-sm leading-relaxed">
+              Vous n'avez pas encore créé votre profil RASED.<br />Prenez une minute pour le compléter.
             </DialogDescription>
-          </DialogHeader>
-          <div className="flex gap-3 mt-6">
-            <Button
-              variant="outline"
-              onClick={handleDismissPopup}
-              className="flex-1"
-            >
-              Plus tard
-            </Button>
-            <Button
-              onClick={handleJoinTeam}
-              className="flex-1"
-            >
-              Rejoindre l'équipe
-            </Button>
+          </div>
+          {/* Body */}
+          <div className="px-6 py-5 bg-white space-y-3">
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
+              <span className="text-lg">✅</span>
+              <p className="text-sm text-slate-600 leading-snug">Identifiez-vous auprès de vos collègues RASED</p>
+            </div>
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
+              <span className="text-lg">📋</span>
+              <p className="text-sm text-slate-600 leading-snug">Votre profession apparaîtra sur chaque fiche élève</p>
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button
+                onClick={handleJoinTeam}
+                className="w-full h-11 rounded-xl font-semibold text-sm shadow-md"
+                style={{ background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', color: 'white', border: 'none' }}
+              >
+                Créer mon profil maintenant →
+              </Button>
+              <button
+                onClick={handleDismissPopup}
+                className="w-full text-center text-slate-400 text-xs py-1 hover:text-slate-600 transition-colors"
+              >
+                Plus tard
+              </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
