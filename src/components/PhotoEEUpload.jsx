@@ -27,7 +27,7 @@ export default function PhotoEEUpload({ ficheId, onPhotoUploaded, initialPhotoUr
       reader.readAsDataURL(file);
 
       // Upload le fichier
-      const response = await base44.integrations.Core.UploadFile(file);
+      const response = await base44.integrations.Core.UploadFile({ file });
       
       if (!response?.file_url) {
         throw new Error('URL du fichier manquante');
