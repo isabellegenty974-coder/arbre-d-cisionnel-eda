@@ -72,8 +72,13 @@ export default function DetailFiche() {
 
   const handleInterventionsChange = async () => {
     if (!fiche) return;
-    await base44.entities.FicheEleve.update(fiche.id, { interventions });
-    setFiche({ ...fiche, interventions });
+    const cleanedInterventions = {
+      psy: interventions.psy || { date: '', description: '' },
+      madr: interventions.madr || { date: '', description: '' },
+      madp: interventions.madp || { date: '', description: '' }
+    };
+    await base44.entities.FicheEleve.update(fiche.id, { interventions: cleanedInterventions });
+    setFiche({ ...fiche, interventions: cleanedInterventions });
     setEditingInterventions(false);
   };
 
