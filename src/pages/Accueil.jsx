@@ -27,7 +27,7 @@ export default function Accueil() {
         const user = await base44.auth.me();
         if (!user) return;
         const membres = await base44.entities.MembreEquipe.filter({ created_by: user.email });
-        if (membres.length === 0 && !localStorage.getItem('profile_popup_shown_' + user.email)) {
+        if (membres.length === 0) {
           setShowInvitePopup(true);
         }
       } catch (err) {
@@ -47,21 +47,13 @@ export default function Accueil() {
     checkAuth();
   }, []);
 
-  const handleJoinTeam = async () => {
+  const handleJoinTeam = () => {
     setShowInvitePopup(false);
-    try {
-      const user = await base44.auth.me();
-      if (user) localStorage.setItem('profile_popup_shown_' + user.email, 'true');
-    } catch {}
     navigate('/equipe-rased');
   };
 
-  const handleDismissPopup = async () => {
+  const handleDismissPopup = () => {
     setShowInvitePopup(false);
-    try {
-      const user = await base44.auth.me();
-      if (user) localStorage.setItem('profile_popup_shown_' + user.email, 'true');
-    } catch {}
   };
 
 
