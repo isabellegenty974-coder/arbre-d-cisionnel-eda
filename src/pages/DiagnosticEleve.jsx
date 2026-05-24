@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
-import { Save, ChevronDown, ChevronUp, FileText, X, Download } from "lucide-react";
+import { Save, FileText, X, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 import RapportContent from "@/components/RapportContent";
@@ -37,41 +37,33 @@ const CATEGORIES = [
     color: "bg-rose-50 border-rose-200",
     headerColor: "bg-rose-100 text-rose-800",
     items: [
-      // --- Agitation / Hyperactivité ---
       { label: "Agitation motrice permanente", desc: "Se lève sans permission, se tortille sur sa chaise, besoin constant de bouger, incapable de rester assis même brièvement" },
       { label: "Mouvements parasites incessants", desc: "Agite les jambes, tapote, manipule des objets, fait du bruit avec la bouche ou le matériel en permanence" },
       { label: "Agitation non liée au contexte", desc: "Hyperactivité présente dans tous les contextes (classe, récré, maison) et pas seulement lors de transitions ou d'ennui" },
-      // --- Impulsivité ---
       { label: "Impulsivité verbale", desc: "Répond avant la fin de la question, coupe la parole, crie la réponse, parle sans lever le doigt de façon systématique" },
       { label: "Impulsivité motrice", desc: "Agit avant de réfléchir, touche les affaires des autres, se lève sans autorisation, réponses gestuelles précipitées" },
       { label: "Incapacité à attendre son tour", desc: "Tensions en jeux collectifs, files d'attente insupportables, frustration immédiate si délai même court" },
       { label: "Passage à l'acte impulsif avec regrets", desc: "L'enfant regrette souvent après coup, reconnaît avoir agi trop vite, mais répète le comportement" },
-      // --- Inhibition / Contrôle ---
       { label: "Déficit d'inhibition comportementale", desc: "Peine à stopper une réponse automatique, difficultés à respecter une règle lorsque le contexte change" },
       { label: "Persévération dans l'erreur", desc: "Répète la même réponse ou stratégie malgré le feedback négatif, difficulté à changer de procédure" },
       { label: "Rires ou réactions inadaptés", desc: "Rit au mauvais moment, réponses émotionnelles décalées par rapport au contexte social" },
-      // --- Attention ---
       { label: "Décrochage attentionnel rapide", desc: "Perd le fil après quelques minutes, déconnecte en cours de consigne, regard dans le vide fréquent" },
       { label: "Hypersensibilité aux distracteurs", desc: "Toute stimulation extérieure (bruit, mouvement, lumière) capte son attention et interrompt la tâche" },
       { label: "Oubli des consignes en cours de tâche", desc: "Commence un exercice mais ne sait plus ce qu'il devait faire après 2 ou 3 étapes" },
       { label: "Attention en éclairs uniquement", desc: "Ne concentre son attention que sur les activités qui le passionnent, jamais sur les tâches imposées" },
-      // --- Anxiété ---
       { label: "Anxiété scolaire spécifique", desc: "Peurs liées aux évaluations, aux exposés oraux, à la lecture à voix haute, panique en situation de performance" },
       { label: "Anxiété généralisée", desc: "Inquiétudes excessives dans de nombreux domaines (famille, santé, avenir), difficultés à déconnecter" },
       { label: "Somatisations régulières", desc: "Maux de ventre, de tête ou nausées récurrents le matin ou avant un contrôle, sans cause médicale identifiée" },
       { label: "Refus ou évitement scolaire", desc: "Résistance à aller à l'école, pleurs le matin, demandes répétées de rester à la maison, fugues de classe" },
       { label: "Comportements de réassurance", desc: "Demande sans cesse si c'est bien, cherche la validation de l'adulte, vérifie ses réponses compulsivement" },
-      // --- Opposition ---
       { label: "Opposition aux règles scolaires", desc: "Refuse régulièrement de suivre les consignes, conteste les règles de classe, résistance passive ou active" },
       { label: "Provocations ciblées", desc: "Cherche à agacer intentionnellement des pairs ou l'adulte, sourit quand il transgresse, semble y trouver du plaisir" },
       { label: "Non-reconnaissance de ses torts", desc: "Reporte systématiquement la faute sur les autres, nie les faits même évidents, discours victimaire ancré" },
       { label: "Crises de colère disproportionnées", desc: "Explosions de rage pour un refus ou une frustration minime, durée longue, récupération difficile" },
-      // --- Régulation émotionnelle ---
       { label: "Labilité émotionnelle marquée", desc: "Passe d'une émotion à l'autre très rapidement, humeur imprévisible, pleurs ou rires sans raison apparente" },
       { label: "Repli affectif / affect plat", desc: "Visage inexpressif, peu de réactions émotionnelles, isolement, regard vide, indifférence aux activités" },
       { label: "Difficulté à tolérer la frustration", desc: "Réagit fortement à tout obstacle, toute limite, tout échec même mineur déclenche une réaction intense" },
       { label: "Perfectionnisme rigide avec évitement", desc: "Refuse de commencer si risque d'erreur, efface compulsivement, abandonne rapidement face à la difficulté" },
-      // --- Estime de soi / Confiance ---
       { label: "Manque de confiance en soi", desc: "Dit souvent \"je suis nul(le)\", \"je sais pas\", \"j'y arriverai pas\" avant même d'essayer, se sous-estime de façon systématique" },
       { label: "Sentiment d'incompétence scolaire", desc: "Convaincu(e) de ne pas être capable d'apprendre, perçoit ses difficultés comme permanentes et inhérentes à sa personne" },
       { label: "Autodépréciation verbale", desc: "Tient des propos négatifs sur lui/elle-même : \"je suis bête\", \"tout le monde est meilleur que moi\", \"j'ai jamais rien\"" },
@@ -131,8 +123,8 @@ export default function DiagnosticEleve() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [rapport, setRapport] = useState(null); // rapport affiché dans la modale
-  const [generatedRapport, setGeneratedRapport] = useState(''); // rapport persistant pour la sauvegarde
+  const [rapport, setRapport] = useState(null);
+  const [generatedRapport, setGeneratedRapport] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -148,7 +140,6 @@ export default function DiagnosticEleve() {
     if (eleveId) {
       base44.entities.FicheEleve.get(eleveId).then(setEleve);
     } else {
-      // Student info passed as query params (from Diagnostic entity)
       const prenom = urlParams.get('prenom') || '';
       const nom = urlParams.get('nom') || '';
       const age = urlParams.get('age');
@@ -165,21 +156,16 @@ export default function DiagnosticEleve() {
     });
   };
 
-  
-
   const totalChecked = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
 
   const handleGenerateRapport = async () => {
     setGenerating(true);
     try {
-      // Récupérer le nom de l'examinateur
       let examinerName = 'N/A';
       try {
         const user = await base44.auth.me();
         examinerName = user?.full_name || 'N/A';
-      } catch (e) {
-        // Silencieusement échouer
-      }
+      } catch (e) {}
 
       const now = new Date();
       const dateStr = now.toLocaleDateString('fr-FR');
@@ -200,7 +186,6 @@ Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois ana
 
       const result = await base44.integrations.Core.InvokeLLM({ prompt });
 
-      // Analyse croisée
       const lignesAnalyse = [];
       Object.entries(checked).forEach(([key, items]) => {
         if (items && items.length > 0) {
@@ -224,7 +209,6 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
       setRapport(rapportEnrichi);
       setGeneratedRapport(rapportEnrichi);
 
-      // Sauvegarde immédiatement le rapport dans FicheEleve
       if (eleveId) {
         try {
           await base44.entities.FicheEleve.update(eleveId, { rapport: rapportEnrichi });
@@ -287,7 +271,6 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
       statut: "complète",
     });
 
-    // Sauvegarde le rapport dans la fiche élève
     if (eleveId && generatedRapport) {
       try {
         await base44.entities.FicheEleve.update(eleveId, {
@@ -304,35 +287,54 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-screen bg-gradient-to-b from-[#FAFAF8] to-[#F5F0E8] pb-20">
       <HamburgerMenu />
       <ScreenLayout
-        title={`🔍 Construire une hypothèse diagnostique`}
+        title={`🔍 Diagnostic — Construire une hypothèse`}
         subtitle={eleve ? `${eleve.prenom} ${eleve.nom}${eleve.classe ? ` — ${eleve.classe}` : ""}` : ""}
       >
-        <div className="space-y-4">
+        {/* Barre de progression */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 rounded-xl bg-white border border-[#D4A574]/20 shadow-soft"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-semibold text-[#0F172A]">Sélections</p>
+            <p className="text-sm font-bold text-[#D4A574]">{totalChecked} observation{totalChecked > 1 ? "s" : ""}</p>
+          </div>
+          <div className="w-full bg-[#D4A574]/10 rounded-full h-2">
+            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: `${Math.min(totalChecked * 5, 100)}%`}}></div>
+          </div>
+        </motion.div>
+
+        <div className="space-y-6">
           {/* Onglets */}
-          <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border">
+          <div className="flex gap-2 overflow-x-auto pb-3 border-b-2 border-[#D4A574]/10">
             {CATEGORIES.map(cat => {
               const catChecked = checked[cat.key] || [];
               const isActive = activeTab === cat.key;
               return (
-                <button
+                <motion.button
                   key={cat.key}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab(cat.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                  className={`px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all ${
                     isActive
-                      ? `${cat.headerColor} border-b-2 border-current`
-                      : "bg-secondary/30 hover:bg-secondary/50 text-foreground"
+                      ? `${cat.headerColor} shadow-soft scale-105`
+                      : "bg-white/40 hover:bg-white/60 text-foreground border border-transparent"
                   }`}
                 >
                   {cat.label}
                   {catChecked.length > 0 && (
-                    <span className="ml-1.5 text-xs font-bold bg-white/60 px-1.5 py-0.5 rounded-full">
+                    <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded-full ${
+                      isActive ? "bg-white/30" : "bg-[#D4A574]/20 text-[#D4A574]"
+                    }`}>
                       {catChecked.length}
                     </span>
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -345,60 +347,95 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
               return (
                 <motion.div
                   key={cat.key}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={`rounded-2xl border overflow-hidden ${cat.color} space-y-2 p-4`}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-3"
                 >
-                  {cat.items.map((item) => {
-                    const isChecked = (checked[cat.key] || []).includes(item.label);
-                    return (
-                      <label
-                        key={item.label}
-                        className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                          isChecked ? "bg-white/80 shadow-sm" : "bg-white/30 hover:bg-white/50"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggle(cat.key, item)}
-                          className="mt-1 accent-current w-4 h-4 shrink-0"
-                        />
-                        <div>
-                          <p className={`text-sm font-medium ${isChecked ? "text-foreground" : "text-foreground/90"}`}>
-                            {item.label}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
-                        </div>
-                      </label>
-                    );
-                  })}
+                  {cat.items.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>Aucun élément dans cette catégorie</p>
+                    </div>
+                  ) : (
+                    cat.items.map((item, idx) => {
+                      const isChecked = (checked[cat.key] || []).includes(item.label);
+                      return (
+                        <motion.label
+                          key={item.label}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.03 }}
+                          className={`flex items-start gap-3 p-4 rounded-xl cursor-pointer border transition-all ${
+                            isChecked 
+                              ? "bg-white border-[#D4A574]/40 shadow-soft" 
+                              : "bg-white/50 border-transparent hover:bg-white hover:border-[#D4A574]/20"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggle(cat.key, item)}
+                            className="mt-1 w-5 h-5 rounded shrink-0 cursor-pointer accent-[#D4A574]"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-semibold leading-snug ${
+                              isChecked ? "text-[#0F172A]" : "text-foreground/80"
+                            }`}>
+                              {item.label}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                              {item.desc}
+                            </p>
+                          </div>
+                          {isChecked && (
+                            <div className="shrink-0 w-5 h-5 rounded-full bg-[#D4A574]/20 flex items-center justify-center mt-0.5">
+                              <span className="text-xs font-bold text-[#D4A574]">✓</span>
+                            </div>
+                          )}
+                        </motion.label>
+                      );
+                    })
+                  )}
                 </motion.div>
               );
             })}
           </AnimatePresence>
-
-          <div className="pt-2 flex flex-col gap-3">
-            <Button
-              onClick={handleGenerateRapport}
-              disabled={totalChecked === 0 || generating}
-              variant="outline"
-              className="w-full gap-2 border-primary/40 text-primary hover:bg-primary/5"
-            >
-              <FileText className="w-4 h-4" />
-              {generating ? "Génération du rapport..." : `Générer le rapport (${totalChecked} item${totalChecked > 1 ? "s" : ""})`}
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={totalChecked === 0 || saving || saved}
-              className={`w-full gap-2 transition-all ${saved ? "bg-green-600 hover:bg-green-700" : ""}`}
-            >
-              <Save className="w-4 h-4" />
-              {saved ? "✓ Enregistré !" : saving ? "Enregistrement..." : `Enregistrer`}
-            </Button>
-          </div>
         </div>
+
+        {/* Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-8 space-y-3 sticky bottom-0 pt-6 bg-gradient-to-t from-[#F5F0E8] from-80% to-transparent -mx-6 px-6 pb-4"
+        >
+          <Button
+            onClick={handleGenerateRapport}
+            disabled={totalChecked === 0 || generating}
+            variant="outline"
+            className="w-full h-11 gap-2 border-2 border-[#D4A574] text-[#D4A574] hover:bg-[#D4A574]/5 font-semibold rounded-lg"
+          >
+            <FileText className="w-5 h-5" />
+            {generating ? (
+              <><span className="animate-spin">⟳</span> Génération en cours...</>
+            ) : (
+              `Générer le rapport (${totalChecked})`
+            )}
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={totalChecked === 0 || saving || saved}
+            className={`w-full h-11 gap-2 font-semibold rounded-lg shadow-soft transition-all ${
+              saved 
+                ? "bg-chart-2 hover:bg-chart-2/90" 
+                : "bg-[#D4A574] hover:bg-[#C49464]"
+            }`}
+          >
+            <Save className="w-5 h-5" />
+            {saved ? "✓ Diagnostic enregistré !" : saving ? "Enregistrement..." : `Enregistrer le diagnostic`}
+          </Button>
+        </motion.div>
       </ScreenLayout>
 
       {/* Rapport Modal */}
