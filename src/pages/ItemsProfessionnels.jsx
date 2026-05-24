@@ -1,13 +1,66 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
+import { ChevronDown } from "lucide-react";
+
+const RASED_PROFESSIONS = [
+  {
+    role: "Psy EN EDA",
+    emoji: "🧠",
+    color: "bg-violet-50 border-violet-200",
+    labelColor: "bg-violet-100 text-violet-700",
+    champ: "Psychologue de l'Éducation Nationale — Éducation, Développement et Apprentissages",
+    interventions: [
+      "Bilan psychologique et psychométrique (évaluation cognitive, QI, profil d'apprentissage)",
+      "Observation et analyse des difficultés scolaires en lien avec le développement de l'enfant",
+      "Évaluation des fonctions cognitives : mémoire, attention, fonctions exécutives",
+      "Entretiens avec l'enfant et sa famille pour comprendre le contexte",
+      "Guidance parentale et conseils aux enseignants",
+      "Participation aux équipes éducatives et ESS",
+      "Orientation vers des professionnels de santé ou structures spécialisées",
+      "Accompagnement lors de la mise en place d'un PAP, PPRE ou PPS",
+    ],
+  },
+  {
+    role: "MaDP",
+    emoji: "📚",
+    color: "bg-blue-50 border-blue-200",
+    labelColor: "bg-blue-100 text-blue-700",
+    champ: "Maître à dominante Pédagogique — ancienne aide de type E",
+    interventions: [
+      "Remédiations pédagogiques individualisées ou en petit groupe",
+      "Travail sur les apprentissages fondamentaux : lecture, écriture, calcul",
+      "Aide à la compréhension et à la mémorisation des notions",
+      "Développement de stratégies d'apprentissage adaptées",
+      "Travail sur la métacognition et l'estime de soi scolaire",
+      "Coordination avec l'enseignant de la classe",
+      "Participation aux équipes éducatives et PPRE",
+    ],
+  },
+  {
+    role: "MaDR",
+    emoji: "💛",
+    color: "bg-amber-50 border-amber-200",
+    labelColor: "bg-amber-100 text-amber-700",
+    champ: "Maître à dominante Relationnelle — ancienne aide de type G",
+    interventions: [
+      "Accompagnement des élèves présentant des difficultés comportementales ou émotionnelles",
+      "Travail sur la relation à l'autre, la confiance en soi et l'estime de soi",
+      "Prise en charge des troubles du comportement en milieu scolaire",
+      "Aide aux élèves anxieux, inhibés ou en refus scolaire",
+      "Séances individuelles ou en petit groupe axées sur le bien-être",
+      "Liaison avec les familles et l'équipe enseignante",
+      "Participation aux équipes éducatives et dispositifs d'aide",
+    ],
+  },
+];
 
 const PROFESSIONNELS = [
   {
     emoji: "🗣️",
-    color: "bg-blue-50 border-blue-200",
-    badgeColor: "bg-blue-100 text-blue-700",
-    badge: "Professionnel de santé",
+    color: "border-blue-200",
+    dot: "bg-blue-400",
     title: "Orthophoniste",
     description: "Spécialiste du langage oral et écrit, de la parole, de la voix et de la déglutition.",
     difficultes: [
@@ -21,9 +74,8 @@ const PROFESSIONNELS = [
   },
   {
     emoji: "🧠",
-    color: "bg-violet-50 border-violet-200",
-    badgeColor: "bg-violet-100 text-violet-700",
-    badge: "Professionnel de santé",
+    color: "border-violet-200",
+    dot: "bg-violet-400",
     title: "Neuropsychologue",
     description: "Évalue les fonctions cognitives : mémoire, attention, fonctions exécutives, QI.",
     difficultes: [
@@ -37,9 +89,8 @@ const PROFESSIONNELS = [
   },
   {
     emoji: "🏃",
-    color: "bg-green-50 border-green-200",
-    badgeColor: "bg-green-100 text-green-700",
-    badge: "Professionnel de santé",
+    color: "border-green-200",
+    dot: "bg-green-400",
     title: "Psychomotricien(ne)",
     description: "Travaille sur les liens entre corps, mouvement et psychisme pour favoriser le développement global.",
     difficultes: [
@@ -53,9 +104,8 @@ const PROFESSIONNELS = [
   },
   {
     emoji: "👁️",
-    color: "bg-amber-50 border-amber-200",
-    badgeColor: "bg-amber-100 text-amber-700",
-    badge: "Professionnel de santé",
+    color: "border-amber-200",
+    dot: "bg-amber-400",
     title: "Ophtalmologiste / Orthoptiste",
     description: "Dépiste et traite les troubles visuels et oculomoteurs pouvant gêner la lecture et l'écriture.",
     difficultes: [
@@ -69,9 +119,8 @@ const PROFESSIONNELS = [
   },
   {
     emoji: "🧏",
-    color: "bg-pink-50 border-pink-200",
-    badgeColor: "bg-pink-100 text-pink-700",
-    badge: "Professionnel de santé",
+    color: "border-pink-200",
+    dot: "bg-pink-400",
     title: "Audiologiste / ORL",
     description: "Évalue l'acuité auditive et les traitements auditifs centraux pouvant impacter le langage.",
     difficultes: [
@@ -84,9 +133,8 @@ const PROFESSIONNELS = [
   },
   {
     emoji: "💆",
-    color: "bg-rose-50 border-rose-200",
-    badgeColor: "bg-rose-100 text-rose-700",
-    badge: "Professionnel de l'accompagnement",
+    color: "border-rose-200",
+    dot: "bg-rose-400",
     title: "Psychologue",
     description: "Accompagne l'enfant dans sa vie émotionnelle, ses relations et son épanouissement psychique.",
     difficultes: [
@@ -100,9 +148,8 @@ const PROFESSIONNELS = [
   },
   {
     emoji: "🩺",
-    color: "bg-cyan-50 border-cyan-200",
-    badgeColor: "bg-cyan-100 text-cyan-700",
-    badge: "Professionnel de santé",
+    color: "border-cyan-200",
+    dot: "bg-cyan-400",
     title: "Pédopsychiatre",
     description: "Médecin spécialiste des troubles mentaux et neurodéveloppementaux chez l'enfant.",
     difficultes: [
@@ -116,11 +163,10 @@ const PROFESSIONNELS = [
   },
   {
     emoji: "🤝",
-    color: "bg-orange-50 border-orange-200",
-    badgeColor: "bg-orange-100 text-orange-700",
-    badge: "Professionnel de santé",
+    color: "border-orange-200",
+    dot: "bg-orange-400",
     title: "Ergothérapeute",
-    description: "Aide l'enfant à s'adapter à son environnement pour favoriser son autonomie dans les activités quotidiennes et scolaires.",
+    description: "Aide l'enfant à s'adapter à son environnement pour favoriser son autonomie scolaire.",
     difficultes: [
       "Difficultés de préhension et de manipulation d'outils",
       "Dyspraxie affectant les gestes du quotidien",
@@ -133,283 +179,248 @@ const PROFESSIONNELS = [
 ];
 
 const STRUCTURES = [
-  {
-    emoji: "🏫",
-    color: "bg-sky-50 border-sky-200",
-    badgeColor: "bg-sky-100 text-sky-700",
-    badge: "Structure scolaire",
-    title: "RASED",
-    description: "Réseau d'Aides Spécialisées aux Élèves en Difficulté. Intervient directement à l'école auprès des élèves présentant des difficultés persistantes.",
-    difficultes: [
-      "Difficultés d'apprentissage persistantes à l'école ordinaire",
-      "Élève nécessitant une aide pédagogique renforcée",
-      "Difficultés de comportement perturbant les apprentissages",
-      "Blocages émotionnels face aux apprentissages",
-      "Besoin d'un bilan adaptatif en milieu scolaire",
-    ],
-    professions: [
-      {
-        role: "Psy EN EDA",
-        emoji: "🧠",
-        color: "bg-violet-50 border-violet-200",
-        labelColor: "bg-violet-100 text-violet-700",
-        champ: "Psychologue de l'Éducation Nationale spécialité Éducation, Développement et Apprentissages",
-        interventions: [
-          "Bilan psychologique et psychométrique (évaluation cognitive, QI, profil d'apprentissage)",
-          "Observation et analyse des difficultés scolaires en lien avec le développement de l'enfant",
-          "Évaluation des fonctions cognitives : mémoire, attention, fonctions exécutives",
-          "Entretiens avec l'enfant et sa famille pour comprendre le contexte",
-          "Guidance parentale et conseils aux enseignants",
-          "Participation aux équipes éducatives et ESS",
-          "Orientation vers des professionnels de santé ou structures spécialisées",
-          "Accompagnement lors de la mise en place d'un PAP, PPRE ou PPS",
-        ],
-      },
-      {
-        role: "MaDP",
-        emoji: "📚",
-        color: "bg-blue-50 border-blue-200",
-        labelColor: "bg-blue-100 text-blue-700",
-        champ: "Maître à dominante Pédagogique",
-        interventions: [
-          "Aide spécialisée à dominante pédagogique (ancienne aide de type E)",
-          "Remédiation pédagogique individualisée ou en petit groupe",
-          "Travail sur les apprentissages fondamentaux : lecture, écriture, calcul",
-          "Aide à la compréhension et à la mémorisation des notions",
-          "Développement de stratégies d'apprentissage adaptées",
-          "Travail sur la métacognition et l'estime de soi scolaire",
-          "Coordination avec l'enseignant de la classe",
-          "Participation aux équipes éducatives et PPRE",
-        ],
-      },
-      {
-        role: "MaDR",
-        emoji: "💛",
-        color: "bg-amber-50 border-amber-200",
-        labelColor: "bg-amber-100 text-amber-700",
-        champ: "Maître à dominante Relationnelle",
-        interventions: [
-          "Aide spécialisée à dominante relationnelle (ancienne aide de type G)",
-          "Accompagnement des élèves présentant des difficultés comportementales ou émotionnelles",
-          "Travail sur la relation à l'autre, la confiance en soi et l'estime de soi",
-          "Prise en charge des troubles du comportement en milieu scolaire",
-          "Aide aux élèves anxieux, inhibés ou en refus scolaire",
-          "Séances individuelles ou en petit groupe axées sur le bien-être",
-          "Liaison avec les familles et l'équipe enseignante",
-          "Participation aux équipes éducatives et dispositifs d'aide",
-        ],
-      },
-    ],
-  },
-  {
-    emoji: "🏥",
-    color: "bg-teal-50 border-teal-200",
-    badgeColor: "bg-teal-100 text-teal-700",
-    badge: "Structure médico-sociale",
-    title: "CMP / CMPP",
-    description: "Centre Médico-Psychologique / Médico-Psycho-Pédagogique. Offre des consultations pluridisciplinaires gratuites.",
-    difficultes: [
-      "Troubles émotionnels ou comportementaux marqués",
-      "Suspicion de troubles neurodéveloppementaux",
-      "Besoin d'un bilan pluridisciplinaire (psy, ortho, psychomot…)",
-      "Suivi pédopsychiatrique ambulatoire",
-      "Difficultés scolaires avec composante psychologique",
-    ],
-  },
-  {
-    emoji: "🌿",
-    color: "bg-green-50 border-green-200",
-    badgeColor: "bg-green-100 text-green-700",
-    badge: "Structure médico-sociale",
-    title: "SESSAD",
-    description: "Service d'Éducation Spéciale et de Soins à Domicile. Intervient dans le milieu de vie de l'enfant.",
-    difficultes: [
-      "Enfant en situation de handicap scolarisé en milieu ordinaire",
-      "Besoins de rééducation et d'accompagnement régulier",
-      "Troubles moteurs, cognitifs, sensoriels ou du langage",
-      "Accompagnement à l'inclusion scolaire",
-      "Coordination des soins autour de l'enfant",
-    ],
-  },
-  {
-    emoji: "🍀",
-    color: "bg-lime-50 border-lime-200",
-    badgeColor: "bg-lime-100 text-lime-700",
-    badge: "Structure médico-sociale",
-    title: "CAMSP",
-    description: "Centre d'Action Médico-Sociale Précoce. Destiné aux enfants de 0 à 6 ans présentant des troubles du développement.",
-    difficultes: [
-      "Retard de développement identifié avant 6 ans",
-      "Troubles moteurs néonataux ou congénitaux",
-      "Risques de handicap chez le jeune enfant",
-      "Accompagnement parental précoce",
-      "Dépistage et prise en charge pluridisciplinaire précoce",
-    ],
-  },
-  {
-    emoji: "📋",
-    color: "bg-indigo-50 border-indigo-200",
-    badgeColor: "bg-indigo-100 text-indigo-700",
-    badge: "Instance administrative",
-    title: "MDPH",
-    description: "Maison Départementale des Personnes Handicapées. Évalue les besoins et attribue les droits et aides.",
-    difficultes: [
-      "Demande de reconnaissance de handicap (RQTH, AEEH…)",
-      "Mise en place d'un PPS (Projet Personnalisé de Scolarisation)",
-      "Attribution d'une AESH (accompagnant)",
-      "Orientation vers des structures spécialisées (ULIS, IME…)",
-      "Accès à des aides financières ou matérielles",
-    ],
-  },
-  {
-    emoji: "🏛️",
-    color: "bg-purple-50 border-purple-200",
-    badgeColor: "bg-purple-100 text-purple-700",
-    badge: "Structure scolaire spécialisée",
-    title: "ULIS",
-    description: "Unité Localisée pour l'Inclusion Scolaire. Dispositif en école, collège ou lycée pour élèves avec besoins éducatifs particuliers.",
-    difficultes: [
-      "Troubles cognitifs ou intellectuels",
-      "Troubles du spectre autistique (TSA)",
-      "Troubles des fonctions motrices",
-      "Troubles du langage et de la communication",
-      "Besoins d'un enseignement adapté avec inclusion partielle",
-    ],
-  },
-  {
-    emoji: "🏠",
-    color: "bg-fuchsia-50 border-fuchsia-200",
-    badgeColor: "bg-fuchsia-100 text-fuchsia-700",
-    badge: "Structure médico-éducative",
-    title: "IME / ITEP",
-    description: "Institut Médico-Éducatif / Institut Thérapeutique, Éducatif et Pédagogique. Pour les enfants ne pouvant être scolarisés en milieu ordinaire.",
-    difficultes: [
-      "Déficience intellectuelle avec retentissement majeur",
-      "Troubles du comportement sévères empêchant la scolarisation ordinaire",
-      "Besoin d'un accompagnement éducatif, thérapeutique et pédagogique global",
-      "TSA avec besoins de soins intensifs",
-      "Orientation après décision MDPH/CDAPH",
-    ],
-  },
-  {
-    emoji: "🧑‍🤝‍🧑",
-    color: "bg-yellow-50 border-yellow-200",
-    badgeColor: "bg-yellow-100 text-yellow-700",
-    badge: "Accompagnement scolaire",
-    title: "AESH",
-    description: "Accompagnant des Élèves en Situation de Handicap. Soutient l'élève dans sa scolarité au quotidien.",
-    difficultes: [
-      "Élève nécessitant une aide humaine individuelle ou mutualisée",
-      "Difficultés d'autonomie en classe (installation, prise de notes…)",
-      "Troubles moteurs, sensoriels ou cognitifs impactant la vie scolaire",
-      "Accompagnement lors des temps périscolaires si nécessaire",
-      "Attribution via décision MDPH/CDAPH",
-    ],
-  },
+  { emoji: "🏥", title: "CMP / CMPP", badge: "Médico-social", color: "bg-teal-500", description: "Centre Médico-Psychologique / Médico-Psycho-Pédagogique. Consultations pluridisciplinaires gratuites.", items: ["Troubles émotionnels ou comportementaux marqués", "Suspicion de troubles neurodéveloppementaux", "Besoin d'un bilan pluridisciplinaire (psy, ortho, psychomot…)", "Suivi pédopsychiatrique ambulatoire", "Difficultés scolaires avec composante psychologique"] },
+  { emoji: "🌿", title: "SESSAD", badge: "Médico-social", color: "bg-green-500", description: "Service d'Éducation Spéciale et de Soins à Domicile. Intervient dans le milieu de vie de l'enfant.", items: ["Enfant en situation de handicap scolarisé en milieu ordinaire", "Besoins de rééducation et d'accompagnement régulier", "Troubles moteurs, cognitifs, sensoriels ou du langage", "Accompagnement à l'inclusion scolaire", "Coordination des soins autour de l'enfant"] },
+  { emoji: "🍀", title: "CAMSP", badge: "Médico-social", color: "bg-lime-500", description: "Centre d'Action Médico-Sociale Précoce. Pour les enfants de 0 à 6 ans.", items: ["Retard de développement identifié avant 6 ans", "Troubles moteurs néonataux ou congénitaux", "Risques de handicap chez le jeune enfant", "Accompagnement parental précoce", "Dépistage et prise en charge pluridisciplinaire précoce"] },
+  { emoji: "📋", title: "MDPH", badge: "Administratif", color: "bg-indigo-500", description: "Maison Départementale des Personnes Handicapées. Évalue les besoins et attribue les droits.", items: ["Demande de reconnaissance de handicap (RQTH, AEEH…)", "Mise en place d'un PPS (Projet Personnalisé de Scolarisation)", "Attribution d'une AESH (accompagnant)", "Orientation vers des structures spécialisées (ULIS, IME…)", "Accès à des aides financières ou matérielles"] },
+  { emoji: "🏛️", title: "ULIS", badge: "Scolaire spécialisé", color: "bg-purple-500", description: "Unité Localisée pour l'Inclusion Scolaire. Dispositif en école, collège ou lycée.", items: ["Troubles cognitifs ou intellectuels", "Troubles du spectre autistique (TSA)", "Troubles des fonctions motrices", "Troubles du langage et de la communication", "Besoins d'un enseignement adapté avec inclusion partielle"] },
+  { emoji: "🏠", title: "IME / ITEP", badge: "Médico-éducatif", color: "bg-fuchsia-500", description: "Institut Médico-Éducatif / Institut Thérapeutique, Éducatif et Pédagogique.", items: ["Déficience intellectuelle avec retentissement majeur", "Troubles du comportement sévères empêchant la scolarisation ordinaire", "Besoin d'un accompagnement éducatif, thérapeutique et pédagogique global", "TSA avec besoins de soins intensifs", "Orientation après décision MDPH/CDAPH"] },
+  { emoji: "🧑‍🤝‍🧑", title: "AESH", badge: "Accompagnement", color: "bg-yellow-500", description: "Accompagnant des Élèves en Situation de Handicap. Soutien au quotidien.", items: ["Élève nécessitant une aide humaine individuelle ou mutualisée", "Difficultés d'autonomie en classe (installation, prise de notes…)", "Troubles moteurs, sensoriels ou cognitifs impactant la vie scolaire", "Accompagnement lors des temps périscolaires si nécessaire", "Attribution via décision MDPH/CDAPH"] },
 ];
 
-function ProfessionBlock({ role, emoji, color, labelColor, champ, interventions }) {
+const TABS = [
+  { id: "rased", label: "🏫 RASED", emoji: "🏫" },
+  { id: "pros", label: "👤 Professionnels", emoji: "👤" },
+  { id: "structures", label: "🏛️ Structures", emoji: "🏛️" },
+];
+
+function AccordionCard({ emoji, title, description, dot, color, difficultes, index }) {
+  const [open, setOpen] = useState(false);
   return (
-    <div className={`rounded-xl border p-4 ${color}`}>
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-lg">{emoji}</span>
-        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${labelColor}`}>{role}</span>
-      </div>
-      <p className="text-xs text-muted-foreground italic mb-3">{champ}</p>
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Champ d'intervention</p>
-      <ul className="space-y-1.5">
-        {interventions.map((item, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04 }}
+      className={`rounded-2xl border-2 bg-white overflow-hidden ${color}`}
+    >
+      <button
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="text-xl shrink-0">{emoji}</span>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-foreground text-sm leading-tight">{title}</p>
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{description}</p>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 border-t border-border/50 pt-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Difficultés relevant de son champ</p>
+              <ul className="space-y-1.5">
+                {difficultes.map((d, j) => (
+                  <li key={j} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${dot}`} />
+                    {d}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
-function FicheCard({ emoji, color, badgeColor, badge, title, description, difficultes, professions, index }) {
+function StructureCard({ emoji, title, badge, color, description, items, index }) {
+  const [open, setOpen] = useState(false);
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className={`rounded-2xl border p-5 ${color}`}
+      transition={{ delay: index * 0.04 }}
+      className="rounded-2xl bg-white border border-border overflow-hidden shadow-sm"
     >
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-2xl">{emoji}</span>
-        <div>
-          <h3 className="font-semibold text-foreground text-lg leading-tight">{title}</h3>
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeColor}`}>{badge}</span>
+      <button className="w-full flex items-center gap-3 px-4 py-3.5 text-left" onClick={() => setOpen(!open)}>
+        <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shrink-0`}>
+          <span className="text-white text-lg">{emoji}</span>
         </div>
-      </div>
-      <p className="text-sm text-muted-foreground mb-4">{description}</p>
-      <div className="p-3 rounded-xl bg-white/60 mb-4">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Difficultés relevant de son champ</p>
-        <ul className="space-y-1.5">
-          {difficultes.map((d, j) => (
-            <li key={j} className="flex items-start gap-2 text-sm text-foreground">
-              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
-              {d}
-            </li>
-          ))}
-        </ul>
-      </div>
-      {professions && (
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Membres du RASED</p>
-          {professions.map((p) => (
-            <ProfessionBlock key={p.role} {...p} />
-          ))}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-foreground text-sm">{title}</p>
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">{badge}</span>
+          </div>
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{description}</p>
         </div>
-      )}
+        <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 border-t border-border/50 pt-3">
+              <ul className="space-y-1.5">
+                {items.map((item, j) => (
+                  <li key={j} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function ProfessionCard({ role, emoji, color, labelColor, champ, interventions, index }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06 }}
+      className={`rounded-2xl border-2 overflow-hidden ${color}`}
+    >
+      <button className="w-full flex items-center gap-3 px-4 py-4 text-left bg-white/70" onClick={() => setOpen(!open)}>
+        <span className="text-2xl shrink-0">{emoji}</span>
+        <div className="flex-1 min-w-0">
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${labelColor}`}>{role}</span>
+          <p className="text-xs text-muted-foreground mt-1 leading-snug">{champ}</p>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-3 border-t border-white/40">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Champ d'intervention</p>
+              <ul className="space-y-1.5">
+                {interventions.map((item, j) => (
+                  <li key={j} className="flex items-start gap-2 text-sm text-foreground">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 export default function ItemsProfessionnels() {
+  const [activeTab, setActiveTab] = useState("rased");
+
   return (
     <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
-      <ScreenLayout title="👩‍⚕️ Professionnels & Structures" subtitle="Fiches par professionnel ou structure et difficultés concernées">
-        <div className="space-y-5">
-          {/* Fiche RASED en premier */}
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-base font-bold text-foreground uppercase tracking-wider pt-2"
-          >
-            🏫 RASED
-          </motion.h2>
-          <FicheCard {...STRUCTURES[0]} index={0} />
+      <ScreenLayout title="📖 Ressources" subtitle="Fiches professionnels, structures et équipe RASED">
 
-          {/* Section professionnels */}
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="text-base font-bold text-foreground uppercase tracking-wider pt-4"
-          >
-            👤 Professionnels
-          </motion.h2>
-          {PROFESSIONNELS.map((item, i) => (
-            <FicheCard key={item.title} {...item} index={i + 1} />
-          ))}
-
-          {/* Section structures (sans RASED déjà affiché) */}
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-base font-bold text-foreground uppercase tracking-wider pt-4"
-          >
-            🏛️ Structures
-          </motion.h2>
-          {STRUCTURES.slice(1).map((item, i) => (
-            <FicheCard key={item.title} {...item} index={i} />
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 bg-muted rounded-2xl p-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 py-2 px-2 rounded-xl text-xs font-semibold transition-all ${
+                activeTab === tab.id
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
           ))}
         </div>
+
+        <AnimatePresence mode="wait">
+          {/* RASED Tab */}
+          {activeTab === "rased" && (
+            <motion.div
+              key="rased"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-3"
+            >
+              <div className="rounded-2xl bg-sky-50 border-2 border-sky-200 p-4 mb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">🏫</span>
+                  <div>
+                    <h3 className="font-bold text-foreground">RASED</h3>
+                    <p className="text-xs text-muted-foreground">Réseau d'Aides Spécialisées aux Élèves en Difficulté</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">Intervient directement à l'école auprès des élèves présentant des difficultés persistantes d'apprentissage ou de comportement.</p>
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Les 3 professions du RASED</p>
+              {RASED_PROFESSIONS.map((p, i) => (
+                <ProfessionCard key={p.role} {...p} index={i} />
+              ))}
+            </motion.div>
+          )}
+
+          {/* Professionnels Tab */}
+          {activeTab === "pros" && (
+            <motion.div
+              key="pros"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-3"
+            >
+              <p className="text-xs text-muted-foreground px-1 mb-4">Touchez une fiche pour voir les difficultés relevant du champ de ce professionnel.</p>
+              {PROFESSIONNELS.map((item, i) => (
+                <AccordionCard key={item.title} {...item} index={i} />
+              ))}
+            </motion.div>
+          )}
+
+          {/* Structures Tab */}
+          {activeTab === "structures" && (
+            <motion.div
+              key="structures"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-3"
+            >
+              <p className="text-xs text-muted-foreground px-1 mb-4">Touchez une structure pour voir les situations qui la concernent.</p>
+              {STRUCTURES.map((item, i) => (
+                <StructureCard key={item.title} {...item} index={i} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </ScreenLayout>
     </div>
   );
