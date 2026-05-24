@@ -109,6 +109,24 @@ export default function StatsAnnuelles() {
   const nbElevesParProf = (prof) =>
     new Set(diagnostics.filter(d => d.createdByProfession === prof).map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size;
 
+  // Élèves par domaine (élèves ayant au moins 1 sélection dans ce domaine)
+  const elevesParDomaine = (() => {
+    const domains = [
+      { name: 'Apprentissages', key: 'apprentissages' },
+      { name: 'Comportement',   key: 'comportement' },
+      { name: 'Développement',  key: 'developpement' },
+      { name: 'Contexte',       key: 'contexte' },
+    ];
+    return domains.map(({ name, key }) => ({
+      name,
+      value: new Set(
+        filteredDiagnostics
+          .filter(d => (d.selections?.[key] || []).length > 0)
+          .map(d => `${d.eleve_prenom}|${d.eleve_nom}`)
+      ).size,
+    })).filter(d => d.value > 0);
+  })();
+
   // Domaines
   const domaines = (() => {
     const counts = { Apprentissages: 0, Comportement: 0, Développement: 0, Contexte: 0 };
@@ -281,6 +299,42 @@ export default function StatsAnnuelles() {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* Élèves par domaine */}
+        <SectionCard title="Élèves par problématique" subtitle="Nombre d'élèves distincts ayant des difficultés dans chaque domaine" icon={Users} accentColor="#D4A574" delay={0.09}>
+          {elevesParDomaine.length === 0 ? <EmptyState /> : (
+            <div className="space-y-3">
+              {elevesParDomaine.sort((a,b) => b.value - a.value).map(({ name, value }) => {
+                const conf = DOMAIN_CONFIG[name] || {};
+                const Icon2 = conf.icon || ClipboardList;
+                const maxVal = Math.max(...elevesParDomaine.map(d => d.value));
+                const pct = maxVal > 0 ? Math.round((value / maxVal) * 100) : 0;
+                return (
+                  <div key={name} className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: conf.light || '#F5F0E8' }}>
+                      <Icon2 className="w-4 h-4" style={{ color: conf.color || '#D4A574' }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-[#0F172A]">{name}</span>
+                        <span className="text-xs font-bold" style={{ color: conf.color }}>{value} élève{value > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.7, delay: 0.2 }}
+                          className="h-full rounded-full"
+                          style={{ background: conf.color }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </SectionCard>
 
         {/* Domaines — barres horizontales lisibles */}
         <SectionCard title="Observations par domaine" subtitle="Nombre d'items sélectionnés" icon={Brain} delay={0.1}>
