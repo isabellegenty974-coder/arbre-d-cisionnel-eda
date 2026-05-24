@@ -10,19 +10,18 @@ import {
 import { useNavigate } from "react-router-dom";
 import {
   BarChart, Bar, Cell, AreaChart, Area, PieChart, Pie,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
 import { motion } from "framer-motion";
 
-// Design system
 const DOMAIN_CONFIG = {
-  Apprentissages: { color: "#4A90E2", bg: "from-blue-50 to-blue-100/40", icon: BookOpen, light: "#E8F0FB" },
-  Comportement:   { color: "#EC6B8A", bg: "from-pink-50 to-pink-100/40", icon: Heart,    light: "#FCE8EE" },
-  Développement:  { color: "#34C48A", bg: "from-emerald-50 to-emerald-100/40", icon: Brain, light: "#E4F8F0" },
-  Contexte:       { color: "#F59E0B", bg: "from-amber-50 to-amber-100/40", icon: TreePine, light: "#FEF3DC" },
+  Apprentissages: { color: "#4A90E2", icon: BookOpen, light: "#E8F0FB" },
+  Comportement:   { color: "#EC6B8A", icon: Heart,    light: "#FCE8EE" },
+  Développement:  { color: "#34C48A", icon: Brain,    light: "#E4F8F0" },
+  Contexte:       { color: "#F59E0B", icon: TreePine, light: "#FEF3DC" },
 };
 
-const PROF_COLORS = { 'MaDP': '#4A90E2', 'MaDR': '#EC6B8A', 'Psy EN EDA': '#34C48A', 'Autre': '#F59E0B' };
+const PROF_COLORS = { 'MaDP': '#4A90E2', 'MaDR': '#EC6B8A', 'Psy EN EDA': '#34C48A' };
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -46,7 +45,7 @@ function SectionCard({ title, subtitle, icon: Icon, accentColor = "#D4A574", chi
       transition={{ delay, duration: 0.35 }}
       className="bg-white rounded-3xl border-2 border-[#E8DCC8] shadow-sm overflow-hidden"
     >
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E8DCC8]" style={{ background: `linear-gradient(135deg, #FAFAF8 0%, #F5F0E8 100%)` }}>
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#E8DCC8]" style={{ background: 'linear-gradient(135deg, #FAFAF8 0%, #F5F0E8 100%)' }}>
         {Icon && (
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${accentColor}20` }}>
             <Icon className="w-5 h-5" style={{ color: accentColor }} />
@@ -78,6 +77,7 @@ export default function StatsAnnuelles() {
   const [fiches, setFiches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState(null);
+  const [selectedEcole, setSelectedEcole] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -90,9 +90,18 @@ export default function StatsAnnuelles() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const filteredDiagnostics = selectedProfession
+  // Filtre par profession
+  const filteredByProf = selectedProfession
     ? diagnostics.filter(d => d.createdByProfession === selectedProfession)
     : diagnostics;
+
+  // Filtre par école (jointure via les fiches)
+  const ecoleMap = new Map(fiches.map(f => [`${f.prenom}|${f.nom}`.toLowerCase(), f.ecole || '']));
+  const ecoles = [...new Set(fiches.map(f => f.ecole).filter(Boolean))].sort();
+  const filteredDiagnostics = selectedEcole
+    ? filteredByProf.filter(d => ecoleMap.get(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase()) === selectedEcole)
+    : filteredByProf;
+  const filteredFiches = selectedEcole ? fiches.filter(f => f.ecole === selectedEcole) : fiches;
 
   // KPIs
   const nbEleves = new Set(filteredDiagnostics.map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size;
@@ -109,7 +118,7 @@ export default function StatsAnnuelles() {
   const nbElevesParProf = (prof) =>
     new Set(diagnostics.filter(d => d.createdByProfession === prof).map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size;
 
-  // Élèves par domaine (élèves ayant au moins 1 sélection dans ce domaine)
+  // Élèves par domaine
   const elevesParDomaine = (() => {
     const domains = [
       { name: 'Apprentissages', key: 'apprentissages' },
@@ -127,7 +136,7 @@ export default function StatsAnnuelles() {
     })).filter(d => d.value > 0);
   })();
 
-  // Domaines
+  // Domaines (items)
   const domaines = (() => {
     const counts = { Apprentissages: 0, Comportement: 0, Développement: 0, Contexte: 0 };
     filteredDiagnostics.forEach(d => {
@@ -185,10 +194,20 @@ export default function StatsAnnuelles() {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   })();
 
-  // Répartition classes
-  const classeBreakdown = (() => {
+  // Répartition par école
+  const ecoleBreakdown = (() => {
     const counts = {};
     fiches.forEach(f => {
+      const e = f.ecole || 'Non renseignée';
+      counts[e] = (counts[e] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
+  })();
+
+  // Répartition classes (filtrée par école)
+  const classeBreakdown = (() => {
+    const counts = {};
+    filteredFiches.forEach(f => {
       const c = f.classe || 'Non renseignée';
       counts[c] = (counts[c] || 0) + 1;
     });
@@ -239,7 +258,7 @@ export default function StatsAnnuelles() {
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
 
-        {/* Filtres profession */}
+        {/* Filtre profession */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 flex-wrap">
           <button
             onClick={() => setSelectedProfession(null)}
@@ -271,6 +290,24 @@ export default function StatsAnnuelles() {
           })}
         </motion.div>
 
+        {/* Filtre école */}
+        {ecoles.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.03 }} className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-[#0F172A]/60">École :</span>
+            <select
+              value={selectedEcole || ''}
+              onChange={e => setSelectedEcole(e.target.value || null)}
+              className="h-8 rounded-xl border border-[#E8DCC8] bg-white text-xs font-semibold text-[#0F172A] px-3 focus:outline-none focus:ring-1 focus:ring-[#D4A574]"
+            >
+              <option value="">Toutes les écoles</option>
+              {ecoles.map(e => <option key={e} value={e}>{e}</option>)}
+            </select>
+            {selectedEcole && (
+              <button onClick={() => setSelectedEcole(null)} className="text-xs text-[#D4A574] hover:underline">× Effacer</button>
+            )}
+          </motion.div>
+        )}
+
         {/* KPIs */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -300,19 +337,19 @@ export default function StatsAnnuelles() {
           ))}
         </motion.div>
 
-        {/* Élèves par domaine */}
+        {/* Élèves par problématique */}
         <SectionCard title="Élèves par problématique" subtitle="Nombre d'élèves distincts ayant des difficultés dans chaque domaine" icon={Users} accentColor="#D4A574" delay={0.09}>
           {elevesParDomaine.length === 0 ? <EmptyState /> : (
             <div className="space-y-3">
-              {elevesParDomaine.sort((a,b) => b.value - a.value).map(({ name, value }) => {
+              {[...elevesParDomaine].sort((a,b) => b.value - a.value).map(({ name, value }) => {
                 const conf = DOMAIN_CONFIG[name] || {};
-                const Icon2 = conf.icon || ClipboardList;
+                const DomIcon = conf.icon || ClipboardList;
                 const maxVal = Math.max(...elevesParDomaine.map(d => d.value));
                 const pct = maxVal > 0 ? Math.round((value / maxVal) * 100) : 0;
                 return (
                   <div key={name} className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: conf.light || '#F5F0E8' }}>
-                      <Icon2 className="w-4 h-4" style={{ color: conf.color || '#D4A574' }} />
+                      <DomIcon className="w-4 h-4" style={{ color: conf.color || '#D4A574' }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
@@ -336,18 +373,18 @@ export default function StatsAnnuelles() {
           )}
         </SectionCard>
 
-        {/* Domaines — barres horizontales lisibles */}
+        {/* Domaines — observations */}
         <SectionCard title="Observations par domaine" subtitle="Nombre d'items sélectionnés" icon={Brain} delay={0.1}>
           {domaines.length === 0 ? <EmptyState /> : (
             <div className="space-y-3">
-              {domaines.sort((a,b) => b.value - a.value).map(({ name, value }) => {
+              {[...domaines].sort((a,b) => b.value - a.value).map(({ name, value }) => {
                 const conf = DOMAIN_CONFIG[name] || {};
                 const pct = totalDomainItems > 0 ? Math.round((value / totalDomainItems) * 100) : 0;
-                const Icon = conf.icon || ClipboardList;
+                const DomIcon = conf.icon || ClipboardList;
                 return (
                   <div key={name} className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: conf.light || '#F5F0E8' }}>
-                      <Icon className="w-4 h-4" style={{ color: conf.color || '#D4A574' }} />
+                      <DomIcon className="w-4 h-4" style={{ color: conf.color || '#D4A574' }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
@@ -371,22 +408,14 @@ export default function StatsAnnuelles() {
           )}
         </SectionCard>
 
-        {/* Répartition visuelle domaines - donut */}
+        {/* Répartition proportionnelle */}
         <SectionCard title="Répartition proportionnelle" subtitle="Vue circulaire des domaines" icon={TrendingUp} delay={0.13}>
           {domaines.length === 0 ? <EmptyState /> : (
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <ResponsiveContainer width={200} height={200}>
                 <PieChart>
                   <Tooltip content={<CustomTooltip />} />
-                  <Pie
-                    data={domaines}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    dataKey="value"
-                    paddingAngle={3}
-                  >
+                  <Pie data={domaines} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={3}>
                     {domaines.map((entry) => (
                       <Cell key={entry.name} fill={DOMAIN_CONFIG[entry.name]?.color || '#D4A574'} />
                     ))}
@@ -458,15 +487,8 @@ export default function StatsAnnuelles() {
                 <XAxis dataKey="mois" tick={{ fontSize: 10, fill: "#0F172A80" }} axisLine={false} tickLine={false} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#0F172A80" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="total"
-                  stroke="#4A90E2"
-                  strokeWidth={2.5}
-                  fill="url(#areaGrad)"
-                  dot={{ r: 4, fill: "#4A90E2", strokeWidth: 0 }}
-                  activeDot={{ r: 6, fill: "#D4A574", strokeWidth: 0 }}
-                />
+                <Area type="monotone" dataKey="total" stroke="#4A90E2" strokeWidth={2.5} fill="url(#areaGrad)"
+                  dot={{ r: 4, fill: "#4A90E2", strokeWidth: 0 }} activeDot={{ r: 6, fill: "#D4A574", strokeWidth: 0 }} />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -476,7 +498,7 @@ export default function StatsAnnuelles() {
         {profBreakdown.length > 0 && (
           <SectionCard title="Diagnostics par profession" subtitle="Activité de chaque membre de l'équipe" icon={Users} accentColor="#D4A574" delay={0.22}>
             <div className="space-y-3">
-              {profBreakdown.sort((a,b) => b.value - a.value).map(({ name, value }) => {
+              {[...profBreakdown].sort((a,b) => b.value - a.value).map(({ name, value }) => {
                 const total = diagnostics.length;
                 const pct = total > 0 ? Math.round((value / total) * 100) : 0;
                 const color = PROF_COLORS[name] || '#D4A574';
@@ -495,6 +517,42 @@ export default function StatsAnnuelles() {
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
                           transition={{ duration: 0.7, delay: 0.3 }}
+                          className="h-full rounded-full"
+                          style={{ background: color }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Répartition par école */}
+        {ecoleBreakdown.length > 0 && (
+          <SectionCard title="Élèves par école" subtitle="Nombre de fiches élèves par établissement" icon={BookOpen} accentColor="#34C48A" delay={0.24}>
+            <div className="space-y-3">
+              {ecoleBreakdown.map(({ name, value }, i) => {
+                const maxVal = ecoleBreakdown[0].value;
+                const pct = maxVal > 0 ? Math.round((value / maxVal) * 100) : 0;
+                const colors = ['#4A90E2','#34C48A','#D4A574','#EC6B8A','#8B5CF6','#F59E0B','#22d3ee','#6366f1','#a855f7','#ec4899'];
+                const color = colors[i % colors.length];
+                return (
+                  <div key={name} className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}20` }}>
+                      <BookOpen className="w-4 h-4" style={{ color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-[#0F172A] truncate pr-2">{name}</span>
+                        <span className="text-xs font-bold" style={{ color }}>{value} élève{value > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.7, delay: 0.2 + i * 0.04 }}
                           className="h-full rounded-full"
                           style={{ background: color }}
                         />
