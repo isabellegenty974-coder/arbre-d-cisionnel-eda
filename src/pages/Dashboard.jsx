@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 
@@ -13,22 +13,32 @@ const ITEMS_PER_PAGE = 10;
 export default function Dashboard() {
   const navigate = useNavigate();
   const [eleves, setEleves] = useState([]);
+  const [diagnostics, setDiagnostics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
+  const [domainFilter, setDomainFilter] = useState('');
   const [page, setPage] = useState(1);
 
   const loadEleves = async () => {
-    const fiches = await base44.entities.FicheEleve.list('-created_date', 100).catch(() => []);
-    const filtered = fiches.filter(f => f.id); // Garder que les fiches avec ID
+    const [fiches, diags] = await Promise.all([
+      base44.entities.FicheEleve.list('-created_date', 100).catch(() => []),
+      base44.entities.Diagnostic.list('-created_date', 200).catch(() => [])
+    ]);
+    const filtered = fiches.filter(f => f.id);
     setEleves(filtered);
+    setDiagnostics(diags);
     setLoading(false);
   };
 
   useEffect(() => {
     loadEleves();
     const unsubFiche = base44.entities.FicheEleve.subscribe(() => loadEleves());
-    return () => unsubFiche();
+    const unsubDiag = base44.entities.Diagnostic.subscribe(() => loadEleves());
+    return () => {
+      unsubFiche();
+      unsubDiag();
+    };
   }, []);
 
   const handleDelete = async (fiche) => {
@@ -50,10 +60,33 @@ export default function Dashboard() {
     }
   };
 
+  const getLastDiagnostic = (prenom, nom) => {
+    return diagnostics.find(
+      d => d.eleve_prenom?.toLowerCase() === prenom?.toLowerCase() &&
+           d.eleve_nom?.toLowerCase() === nom?.toLowerCase()
+    );
+  };
+
   const filtered = eleves.filter(e => {
     const nameMatch = `${e.prenom} ${e.nom}`.toLowerCase().includes(searchTerm.toLowerCase());
     const classMatch = !classFilter || e.classe === classFilter;
-    return nameMatch && classMatch;
+    
+    let domainMatch = true;
+    if (domainFilter) {
+      const lastDiag = getLastDiagnostic(e.prenom, e.nom);
+      if (lastDiag?.selections?.scores) {
+        const scores = lastDiag.selections.scores;
+        const threshold = 3;
+        if (domainFilter === 'apprentissages' && scores.apprentissages >= threshold) domainMatch = false;
+        if (domainFilter === 'comportement' && scores.comportement >= threshold) domainMatch = false;
+        if (domainFilter === 'developpement' && scores.developpement >= threshold) domainMatch = false;
+        if (domainFilter === 'contexte' && scores.contexte >= threshold) domainMatch = false;
+      } else {
+        domainMatch = false;
+      }
+    }
+    
+    return nameMatch && classMatch && domainMatch;
   });
 
   const uniqueClasses = [...new Set(eleves.map(e => e.classe).filter(Boolean))].sort();
@@ -87,6 +120,18 @@ export default function Dashboard() {
                 ))}
               </select>
             )}
+            <select
+              value={domainFilter}
+              onChange={(e) => { setDomainFilter(e.target.value); setPage(1); }}
+              className="px-3 py-2 rounded-md border border-[#D4A574] bg-white text-[#0F172A] text-sm"
+              title="Affiche les élèves avec un score critique (<3) dans ce domaine"
+            >
+              <option value="">Tous les domaines</option>
+              <option value="apprentissages">🔴 Apprentissages critiques</option>
+              <option value="comportement">🔴 Comportement critique</option>
+              <option value="developpement">🔴 Développement critique</option>
+              <option value="contexte">🔴 Contexte critique</option>
+            </select>
             <Link to="/fiche-eleve">
               <Button className="gap-2 shrink-0 bg-[#D4A574] hover:bg-[#C49464] text-white">
                 <Plus className="w-4 h-4" />
@@ -113,13 +158,21 @@ export default function Dashboard() {
                     transition={{ delay: Math.min(0.02 * idx, 0.1), duration: 0.2 }}
                     className="p-4 rounded-xl bg-white border border-[#D4A574] hover:border-[#D4A574] hover:shadow-lg transition-all"
                   >
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
                       <button
                         onClick={() => navigate(`/detail-fiche?id=${eleve.id}`)}
-                        className="text-left flex-1 p-2 rounded hover:bg-[#F5F0E8] transition-colors"
+                        className="text-left flex-1 p-2 rounded hover:bg-[#F5F0E8] transition-colors min-w-max"
                       >
                         <p className="font-semibold text-[#0F172A]">{eleve.prenom} {eleve.nom}</p>
                       </button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/synthese-eleve?id=${eleve.id}`)}
+                        className="gap-1"
+                      >
+                        <TrendingUp className="w-3 h-3" /> Synthèse
+                      </Button>
                       <Button
                         variant="destructive"
                         size="sm"
