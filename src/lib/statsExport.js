@@ -21,7 +21,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     h1 { color: #0C3B8C; font-size: 22px; margin-bottom: 4px; }
     h2 { color: #0C3B8C; font-size: 15px; margin: 24px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
     .meta { color: #666; font-size: 11px; margin-bottom: 24px; }
-    .kpis { display: flex; gap: 24px; margin-bottom: 8px; }
+    .kpis { display: flex; gap: 24px; margin-bottom: 8px; flex-wrap: wrap; }
     .kpi { background: #f0f4ff; border-radius: 8px; padding: 12px 20px; text-align: center; }
     .kpi-val { font-size: 28px; font-weight: bold; color: #0C3B8C; }
     .kpi-label { font-size: 11px; color: #555; margin-top: 2px; }
@@ -29,12 +29,19 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     th { background: #f0f4ff; color: #0C3B8C; padding: 6px 10px; text-align: left; font-size: 12px; }
     td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
     tr:last-child td { border-bottom: none; }
-    .bar-wrap { background: #eee; border-radius: 4px; height: 8px; }
-    .bar { background: #4A90E2; border-radius: 4px; height: 8px; }
-    @media print { body { margin: 16px; } }
+    @media print {
+      body { margin: 16px; }
+      .no-print { display: none; }
+    }
   </style>
 </head>
 <body>
+  <div class="no-print" style="margin-bottom:16px;">
+    <button onclick="window.print()" style="background:#0C3B8C;color:white;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;">
+      Imprimer / Enregistrer en PDF
+    </button>
+  </div>
+
   <h1>Statistiques des Diagnostics RASED</h1>
   <div class="meta">
     Genere le ${new Date().toLocaleDateString('fr-FR')}
@@ -80,13 +87,14 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
 </body>
 </html>`;
 
-  const win = window.open('', '_blank');
-  if (!win) {
-    alert('Veuillez autoriser les popups pour exporter en PDF.');
-    return;
-  }
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 500);
+  // Téléchargement via blob (évite les popups bloquées)
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'statistiques-rased-' + new Date().toISOString().split('T')[0] + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
