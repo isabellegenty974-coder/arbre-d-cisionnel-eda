@@ -15,7 +15,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     { name: 'Developpement' },
     { name: 'Contexte' },
   ].map(d => {
-    const found = (domaines || []).find(x => x.name === d.name || x.name === 'Développement' && d.name === 'Developpement');
+    const found = (domaines || []).find(x => x.name === d.name || (x.name === 'Développement' && d.name === 'Developpement'));
     return { name: d.name, value: found ? found.value : 0 };
   });
 
@@ -30,7 +30,8 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   <style>
     body { font-family: Arial, sans-serif; color: #111; margin: 32px; font-size: 13px; }
     h1 { color: #0C3B8C; font-size: 22px; margin-bottom: 4px; }
-    h2 { color: #0C3B8C; font-size: 15px; margin: 24px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    h2 { color: #0C3B8C; font-size: 15px; margin: 24px 0 4px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    .comment { color: #555; font-size: 11px; font-style: italic; margin-bottom: 8px; padding: 4px 8px; background: #f8f9ff; border-left: 3px solid #b0c4e8; border-radius: 2px; }
     .meta { color: #666; font-size: 11px; margin-bottom: 24px; }
     .kpis { display: flex; gap: 24px; margin-bottom: 8px; flex-wrap: wrap; }
     .kpi { background: #f0f4ff; border-radius: 8px; padding: 12px 20px; text-align: center; }
@@ -48,22 +49,32 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   <h1>Statistiques des Diagnostics RASED</h1>
   <div class="meta">
     Genere le ${new Date().toLocaleDateString('fr-FR')}
-    ${selectedProfession ? ' &mdash; Filtre : ' + selectedProfession : ''}
+    ${selectedProfession ? ' &mdash; Filtre : ' + selectedProfession : ' &mdash; Ensemble de l\'equipe'}
   </div>
 
   <div class="kpis">
     <div class="kpi"><div class="kpi-val">${nbEleves}</div><div class="kpi-label">Eleves suivis</div></div>
-    <div class="kpi"><div class="kpi-val">${nbDiagnostics}</div><div class="kpi-label">Diagnostics</div></div>
+    <div class="kpi"><div class="kpi-val">${nbDiagnostics}</div><div class="kpi-label">Diagnostics realises</div></div>
     <div class="kpi"><div class="kpi-val">${nbItems}</div><div class="kpi-label">Items observes</div></div>
   </div>
 
   <h2>Repartition par domaine</h2>
+  <div class="comment">
+    Ce tableau indique, pour chaque grand domaine d'intervention (Apprentissages, Comportement, Developpement, Contexte),
+    le nombre total d'items observes et leur part relative dans l'ensemble des observations. Il permet d'identifier
+    les domaines les plus sollicites par l'equipe RASED sur la periode.
+  </div>
   <table>
     <tr><th>Domaine</th><th>Observations</th><th>Pourcentage</th></tr>
     ${allDomaines.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
   </table>
 
   <h2>Top 10 observations frequentes</h2>
+  <div class="comment">
+    Ce tableau liste les 10 items les plus souvent selectionnes lors des diagnostics.
+    Il met en evidence les difficultes recurrentes rencontrees par les eleves suivis,
+    et peut orienter les priorites d'action pedagogique ou d'accompagnement specialise.
+  </div>
   <table>
     <tr><th>#</th><th>Observation</th><th>Occurrences</th></tr>
     ${topItemsAll.length > 0
@@ -73,11 +84,16 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   </table>
 
   <h2>Evolution mensuelle</h2>
+  <div class="comment">
+    Ce tableau retrace le nombre de diagnostics realises chaque mois sur les 12 derniers mois.
+    Il permet de suivre l'activite de l'equipe dans le temps, d'identifier les periodes de forte mobilisation
+    et de mesurer la progression du suivi des eleves au fil de l'annee scolaire.
+  </div>
   <table>
     <tr><th>Mois</th><th>Diagnostics</th></tr>
     ${evolutionAll.length > 0
       ? evolutionAll.map(m => `<tr><td>${m.mois}</td><td>${m.total}</td></tr>`).join('')
-      : '<tr><td colspan="2" class="empty">Aucune donnee mensuelle</td></tr>'
+      : '<tr><td colspan="2" class="empty">Aucune donnee mensuelle disponible</td></tr>'
     }
   </table>
 </body>
