@@ -194,7 +194,6 @@ export default function FicheEleve() {
           {!saved ? (
             <Button
               type="submit"
-              disabled={!isValid}
               className="w-full gap-2 bg-[#D4A574] hover:bg-[#C49464] disabled:opacity-50 disabled:cursor-not-allowed text-white"
             >
               <Plus className="w-4 h-4" />
