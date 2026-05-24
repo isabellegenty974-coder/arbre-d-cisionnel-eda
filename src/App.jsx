@@ -170,6 +170,20 @@ import ActionsChangements from './pages/contexte/ActionsChangements';
 import Absenteisme from './pages/contexte/Absenteisme';
 import ActionsAbsenteisme from './pages/contexte/ActionsAbsenteisme';
 
+// Inscription silencieuse : crée le profil plateforme puis redirige vers l'accueil (le popup guidera l'utilisateur)
+function AutoRegister() {
+  useEffect(() => {
+    base44.auth.updateMe({ full_name: ' ' }).finally(() => {
+      window.location.href = '/';
+    });
+  }, []);
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-background">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+    </div>
+  );
+}
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
@@ -183,7 +197,7 @@ const AuthenticatedApp = () => {
 
   if (authError) {
     if (authError.type === 'user_not_registered') {
-      return <Register />;
+      return <AutoRegister />;
     } else if (authError.type === 'auth_required') {
       navigateToLogin();
       return null;
