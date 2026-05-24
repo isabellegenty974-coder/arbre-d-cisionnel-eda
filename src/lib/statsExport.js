@@ -1,4 +1,4 @@
-export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession) => {
+export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats) => {
   const nbEleves = new Set(filteredDiagnostics.map(d => d.eleve_prenom + ' ' + d.eleve_nom)).size;
   const nbDiagnostics = filteredDiagnostics.length;
   let nbItems = 0;
@@ -16,6 +16,10 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
 
   const topItemsAll = topItems || [];
   const evolutionAll = evolution || [];
+  const profData = profBreakdown || [];
+  const ecoleData = ecoleBreakdown || [];
+  const ecoleStats = parEcoleStats || [];
+  const totalProf = profData.reduce((s, p) => s + p.value, 0);
 
   const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -25,7 +29,8 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   <style>
     body { font-family: Arial, sans-serif; color: #111; margin: 32px; font-size: 13px; }
     h1 { color: #0C3B8C; font-size: 22px; margin-bottom: 4px; }
-    h2 { color: #0C3B8C; font-size: 15px; margin: 24px 0 4px; border-bottom: 2px solid #dde3f5; padding-bottom: 4px; }
+    h2 { color: #0C3B8C; font-size: 15px; margin: 28px 0 4px; border-bottom: 2px solid #dde3f5; padding-bottom: 4px; }
+    h3 { color: #1a5c3a; font-size: 13px; margin: 16px 0 4px; }
     .meta { color: #666; font-size: 11px; margin-bottom: 20px; }
     .comment { color: #444; font-size: 11px; font-style: italic; margin-bottom: 10px; padding: 6px 10px; background: #f4f7ff; border-left: 3px solid #7fa8e8; border-radius: 2px; }
     .kpis { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -38,6 +43,10 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     tr:last-child td { border-bottom: none; }
     tr:nth-child(even) td { background: #fafbff; }
     .empty { color: #aaa; font-style: italic; }
+    .school-block { margin-bottom: 16px; padding: 10px 14px; border: 1px solid #dde3f5; border-radius: 6px; background: #fafbff; }
+    .school-title { font-weight: bold; color: #0C3B8C; font-size: 13px; margin-bottom: 6px; }
+    .school-table th { background: #e8edf8; }
+    @media print { body { margin: 16px; } }
   </style>
 </head>
 <body>
@@ -54,14 +63,54 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   </div>
 
   <h2>Répartition par domaine</h2>
-  <p class="comment">Ce tableau indique, pour chaque grand domaine d'intervention (Apprentissages, Comportement, Développement, Contexte), le nombre total d'items observés et leur part relative. Il permet d'identifier les domaines les plus sollicités par l'équipe RASED sur la période analysée.</p>
+  <p class="comment">Pour chaque grand domaine d'intervention, ce tableau présente le nombre total d'items observés et leur part relative dans l'ensemble des observations. Il permet d'identifier les domaines les plus sollicités sur la période.</p>
   <table>
     <tr><th>Domaine</th><th>Observations</th><th>Pourcentage</th></tr>
     ${allDomaines.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
   </table>
 
+  <h2>Répartition des diagnostics par professionnel RASED</h2>
+  <p class="comment">Ce tableau indique le nombre de diagnostics réalisés par chaque catégorie de professionnel RASED (MaDP, MaDR, Psy EN EDA). Il permet de mesurer la contribution de chaque membre de l'équipe et d'évaluer la répartition de la charge de travail.</p>
+  <table>
+    <tr><th>Profession</th><th>Diagnostics réalisés</th><th>Part (%)</th></tr>
+    ${profData.length > 0
+      ? [...profData].sort((a,b) => b.value - a.value).map(p => `<tr><td>${p.name}</td><td>${p.value}</td><td>${totalProf > 0 ? ((p.value / totalProf) * 100).toFixed(1) : 0}%</td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">Aucune donnée disponible</td></tr>'
+    }
+  </table>
+
+  <h2>Répartition des élèves par école</h2>
+  <p class="comment">Ce tableau présente le nombre de fiches élèves créées pour chaque établissement scolaire. Il donne une vue d'ensemble de la répartition géographique du suivi RASED et permet d'identifier les écoles les plus concernées.</p>
+  <table>
+    <tr><th>École</th><th>Nombre d'élèves</th></tr>
+    ${ecoleData.length > 0
+      ? ecoleData.map(e => `<tr><td>${e.name}</td><td>${e.value}</td></tr>`).join('')
+      : '<tr><td colspan="2" class="empty">Aucune école renseignée</td></tr>'
+    }
+  </table>
+
+  <h2>Activité des professionnels RASED par école</h2>
+  <p class="comment">Pour chaque école, ce tableau détaille les catégories de difficultés identifiées chez les élèves et les interventions réalisées par les différents professionnels RASED. Il permet de croiser les besoins des établissements avec les ressources mobilisées.</p>
+  ${ecoleStats.length > 0
+    ? ecoleStats.map(({ ecole, nbEleves: nb, domaines: doms, profs }) => `
+      <div class="school-block">
+        <div class="school-title">📍 ${ecole} — ${nb} élève${nb > 1 ? 's' : ''}</div>
+        <table class="school-table">
+          <tr><th>Domaine de difficulté</th><th>Nombre d'élèves concernés</th></tr>
+          ${doms.map(d => `<tr><td>${d.name}</td><td>${d.value}</td></tr>`).join('')}
+        </table>
+        ${profs.length > 0 ? `
+        <table class="school-table" style="margin-top:8px;">
+          <tr><th>Professionnel RASED</th><th>Élèves suivis</th></tr>
+          ${profs.map(p => `<tr><td>${p.prof}</td><td>${p.nb}</td></tr>`).join('')}
+        </table>` : ''}
+      </div>
+    `).join('')
+    : '<p class="empty">Aucune donnée disponible</p>'
+  }
+
   <h2>Top 10 des observations fréquentes</h2>
-  <p class="comment">Ce tableau liste les 10 items les plus souvent sélectionnés lors des diagnostics. Il met en évidence les difficultés récurrentes rencontrées par les élèves suivis et peut orienter les priorités d'action pédagogique ou d'accompagnement spécialisé.</p>
+  <p class="comment">Ce tableau liste les 10 items les plus souvent sélectionnés lors des diagnostics. Il met en évidence les difficultés récurrentes et peut orienter les priorités d'action pédagogique ou d'accompagnement spécialisé.</p>
   <table>
     <tr><th>#</th><th>Observation</th><th>Occurrences</th></tr>
     ${topItemsAll.length > 0
@@ -71,7 +120,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   </table>
 
   <h2>Évolution mensuelle</h2>
-  <p class="comment">Ce tableau retrace le nombre de diagnostics réalisés chaque mois sur les 12 derniers mois. Il permet de suivre l'activité de l'équipe dans le temps, d'identifier les périodes de forte mobilisation et de mesurer la progression du suivi des élèves au fil de l'année scolaire.</p>
+  <p class="comment">Ce tableau retrace le nombre de diagnostics réalisés chaque mois sur les 12 derniers mois. Il permet de suivre l'activité de l'équipe dans le temps et de mesurer la progression du suivi des élèves au fil de l'année scolaire.</p>
   <table>
     <tr><th>Mois</th><th>Diagnostics réalisés</th></tr>
     ${evolutionAll.length > 0

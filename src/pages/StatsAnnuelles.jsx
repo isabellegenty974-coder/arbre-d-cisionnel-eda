@@ -275,7 +275,7 @@ export default function StatsAnnuelles() {
               <p className="text-white/60 text-sm mt-1">Tableau de bord analytique RASED</p>
             </div>
             <Button
-              onClick={() => exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession)}
+              onClick={() => exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats)}
 
               className="gap-2 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] font-semibold border-0"
             >
