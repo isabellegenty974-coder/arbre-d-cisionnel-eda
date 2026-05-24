@@ -27,9 +27,8 @@ export default function Register() {
           setProfession(currentUser.profession || '');
         }
       } catch (err) {
-        // Utilisateur non authentifié — rediriger vers login
-        base44.auth.redirectToLogin('/register');
-        return;
+        // L'AuthProvider dans App.jsx gère la redirection si besoin
+        console.error('Erreur lors de la récupération du profil:', err);
       } finally {
         setLoading(false);
       }
