@@ -10,7 +10,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   // Titre
   doc.setFontSize(20);
   doc.setTextColor(12, 59, 140); // Bleu #0C3B8C
-  doc.text('📊 Statistiques des Diagnostics', margin, yPos);
+  doc.text('Statistiques des Diagnostics', margin, yPos);
   yPos += 10;
 
   // Date d'export
