@@ -96,7 +96,7 @@ export default function FicheEleve() {
             <div>
               <label className="text-sm font-medium text-[#0F172A] block mb-2">Âge</label>
               <Input
-                {...register('age', { ...eleveValidationRules.age, valueAsNumber: true })}
+                {...register('age', eleveValidationRules.age)}
                 type="number"
                 placeholder="Âge (3-12 ans)"
                 className={errors.age ? 'border-destructive' : ''}
