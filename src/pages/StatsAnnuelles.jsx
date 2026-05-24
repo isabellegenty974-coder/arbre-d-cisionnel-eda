@@ -204,6 +204,35 @@ export default function StatsAnnuelles() {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
   })();
 
+  // Statistiques détaillées par école
+  const parEcoleStats = (() => {
+    const schools = [...new Set(fiches.map(f => f.ecole).filter(Boolean))].sort();
+    return schools.map(ecole => {
+      const fichesDEcole = fiches.filter(f => f.ecole === ecole);
+      const studentKeys = new Set(fichesDEcole.map(f => `${f.prenom}|${f.nom}`.toLowerCase()));
+      const diagsDEcole = diagnostics.filter(d => studentKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase()));
+      const nbElevesEcole = studentKeys.size;
+      const domainKeys = [
+        { name: 'Apprentissages', key: 'apprentissages' },
+        { name: 'Comportement',   key: 'comportement' },
+        { name: 'Développement',  key: 'developpement' },
+        { name: 'Contexte',       key: 'contexte' },
+      ];
+      const domainesEcole = domainKeys.map(({ name, key }) => ({
+        name,
+        value: new Set(diagsDEcole.filter(d => (d.selections?.[key] || []).length > 0).map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size,
+      }));
+      const profsMap = {};
+      diagsDEcole.forEach(d => {
+        const p = d.createdByProfession || 'Autre';
+        if (!profsMap[p]) profsMap[p] = new Set();
+        profsMap[p].add(`${d.eleve_prenom}|${d.eleve_nom}`);
+      });
+      const profsData = Object.entries(profsMap).map(([prof, s]) => ({ prof, nb: s.size })).sort((a,b) => b.nb - a.nb);
+      return { ecole, nbEleves: nbElevesEcole, domaines: domainesEcole, profs: profsData };
+    });
+  })();
+
   // Répartition classes (filtrée par école)
   const classeBreakdown = (() => {
     const counts = {};
@@ -557,6 +586,72 @@ export default function StatsAnnuelles() {
                           style={{ background: color }}
                         />
                       </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Analyse détaillée par école */}
+        {parEcoleStats.length > 0 && (
+          <SectionCard title="Analyse détaillée par école" subtitle="Élèves, catégories de difficultés et interventions RASED" icon={Users} accentColor="#8B5CF6" delay={0.26}>
+            <div className="space-y-5">
+              {parEcoleStats.map(({ ecole, nbEleves: nb, domaines: doms, profs }, idx) => {
+                const eColors = ['#4A90E2','#34C48A','#D4A574','#EC6B8A','#8B5CF6','#F59E0B','#22d3ee','#6366f1','#a855f7','#ec4899'];
+                const eColor = eColors[idx % eColors.length];
+                const maxDom = Math.max(...doms.map(d => d.value), 1);
+                const maxProf = Math.max(...profs.map(p => p.nb), 1);
+                return (
+                  <div key={ecole} className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: `${eColor}40` }}>
+                    {/* Header école */}
+                    <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${eColor}12` }}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${eColor}25` }}>
+                        <BookOpen className="w-4 h-4" style={{ color: eColor }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-[#0F172A] text-sm truncate">{ecole}</p>
+                        <p className="text-xs" style={{ color: eColor }}>{nb} élève{nb > 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
+                    <div className="px-4 pb-4 pt-3 space-y-4">
+                      {/* Catégories de difficultés */}
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#0F172A]/50 mb-2">Catégories de difficultés</p>
+                        <div className="space-y-1.5">
+                          {doms.map(({ name, value: v }) => {
+                            const conf = DOMAIN_CONFIG[name] || {};
+                            const DomIcon = conf.icon || ClipboardList;
+                            const pct = maxDom > 0 ? Math.round((v / maxDom) * 100) : 0;
+                            return (
+                              <div key={name} className="flex items-center gap-2">
+                                <DomIcon className="w-3.5 h-3.5 shrink-0" style={{ color: conf.color || '#D4A574' }} />
+                                <span className="text-[10px] text-[#0F172A]/70 w-24 shrink-0">{name}</span>
+                                <div className="flex-1 h-1.5 rounded-full bg-[#F5F0E8] overflow-hidden">
+                                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: conf.color }} />
+                                </div>
+                                <span className="text-[10px] font-bold shrink-0 w-6 text-right" style={{ color: conf.color }}>{v}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      {/* Interventions RASED */}
+                      {profs.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-[#0F172A]/50 mb-2">Interventions RASED</p>
+                          <div className="flex flex-wrap gap-2">
+                            {profs.map(({ prof, nb: n }) => (
+                              <div key={prof} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: `${PROF_COLORS[prof] || '#D4A574'}18`, border: `1px solid ${PROF_COLORS[prof] || '#D4A574'}40` }}>
+                                <Users className="w-3 h-3" style={{ color: PROF_COLORS[prof] || '#D4A574' }} />
+                                <span className="text-[10px] font-semibold" style={{ color: PROF_COLORS[prof] || '#D4A574' }}>{prof}</span>
+                                <span className="text-[10px] font-bold text-[#0F172A]/70">{n} él.</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
