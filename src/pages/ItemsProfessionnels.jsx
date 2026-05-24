@@ -374,19 +374,30 @@ export default function ItemsProfessionnels() {
       <HamburgerMenu />
       <ScreenLayout title="👩‍⚕️ Professionnels & Structures" subtitle="Fiches par professionnel ou structure et difficultés concernées">
         <div className="space-y-5">
-          {/* Section professionnels */}
+          {/* Fiche RASED en premier */}
           <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-base font-bold text-foreground uppercase tracking-wider pt-2"
           >
+            🏫 RASED
+          </motion.h2>
+          <FicheCard {...STRUCTURES[0]} index={0} />
+
+          {/* Section professionnels */}
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="text-base font-bold text-foreground uppercase tracking-wider pt-4"
+          >
             👤 Professionnels
           </motion.h2>
           {PROFESSIONNELS.map((item, i) => (
-            <FicheCard key={item.title} {...item} index={i} />
+            <FicheCard key={item.title} {...item} index={i + 1} />
           ))}
 
-          {/* Section structures */}
+          {/* Section structures (sans RASED déjà affiché) */}
           <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -395,7 +406,7 @@ export default function ItemsProfessionnels() {
           >
             🏛️ Structures
           </motion.h2>
-          {STRUCTURES.map((item, i) => (
+          {STRUCTURES.slice(1).map((item, i) => (
             <FicheCard key={item.title} {...item} index={i} />
           ))}
         </div>
