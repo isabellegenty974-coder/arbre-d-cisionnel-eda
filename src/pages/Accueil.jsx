@@ -175,12 +175,6 @@ export default function Accueil() {
               <span className="ml-1 w-6 h-6 rounded-full border-2 border-[#0F172A]/30 flex items-center justify-center text-xs font-bold">+</span>
             </button>
           </Link>
-          <Link to="/evaluation-domains">
-            <button className="w-full flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/50 text-white font-semibold text-base rounded-full px-6 py-3.5 backdrop-blur-sm shadow transition-all">
-              <TreePine className="w-5 h-5" />
-              Arbre décisionnel
-            </button>
-          </Link>
         </motion.div>
 
         {/* Cards section */}
