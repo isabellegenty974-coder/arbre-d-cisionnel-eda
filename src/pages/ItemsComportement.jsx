@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Zap, Wind, Heart, ShieldAlert } from "lucide-react";
+import { Zap, Heart, ShieldAlert } from "lucide-react";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 

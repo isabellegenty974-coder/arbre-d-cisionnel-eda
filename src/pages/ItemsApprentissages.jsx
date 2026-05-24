@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BookOpen, PenLine, Calculator, Brain } from "lucide-react";
+import { BookOpen, PenLine, Calculator } from "lucide-react";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 

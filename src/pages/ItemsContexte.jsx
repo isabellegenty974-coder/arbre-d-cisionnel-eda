@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Home, Globe, Calendar, TrendingDown } from "lucide-react";
+import { Home, Calendar, TrendingDown } from "lucide-react";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 
