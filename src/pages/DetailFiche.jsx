@@ -295,48 +295,7 @@ export default function DetailFiche() {
             )}
           </motion.div>
 
-          {/* Rapports générés */}
-          {diagnostics.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.26 }}
-              className="space-y-3"
-            >
-              <h2 className="font-semibold text-foreground">Rapports générés</h2>
-              <div className="space-y-2">
-                {diagnostics.map((diag, idx) => (
-                  <motion.div
-                    key={diag.id}
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 + idx * 0.05 }}
-                    className="flex items-center justify-between gap-3 p-3 bg-card border border-border rounded-lg"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {new Date(diag.created_date).toLocaleDateString('fr-FR')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{diag.statut || 'Non spécifié'}</p>
-                    </div>
-                    {diag.rapport && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => {
-                          setSelectedRapport(diag);
-                          setSelectedDiagnosticId(diag.id);
-                          setShowRapport(true);
-                        }}
-                      >
-                        Voir
-                      </Button>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
+
 
           {/* Notes Section */}
           <motion.div
