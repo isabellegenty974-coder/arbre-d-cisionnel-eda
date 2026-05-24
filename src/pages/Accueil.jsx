@@ -178,7 +178,7 @@ export default function Accueil() {
           <Link to="/evaluation-domains">
             <button className="w-full flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 border border-white/50 text-white font-semibold text-base rounded-full px-6 py-3.5 backdrop-blur-sm shadow transition-all">
               <TreePine className="w-5 h-5" />
-              Arbre décisionnel
+              Domaines d'évaluation
             </button>
           </Link>
         </motion.div>
@@ -313,7 +313,7 @@ export default function Accueil() {
         {[
           { label: 'Accueil', icon: Home, to: '/', active: true },
           { label: 'Elèves', icon: Users, to: '/dashboard', active: false },
-          { label: 'Arbre', icon: TreePine, to: '/evaluation-domains', active: false },
+          { label: 'Domaines', icon: TreePine, to: '/evaluation-domains', active: false },
           { label: 'Stats', icon: BarChart2, to: '/stats-annuelles', active: false },
         ].map(({ label, icon: Icon, to, active }) => (
           <Link key={label} to={to} className="flex flex-col items-center gap-1">
