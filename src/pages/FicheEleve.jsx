@@ -14,6 +14,8 @@ import PhotoEEUpload from '@/components/PhotoEEUpload';
 export default function FicheEleve() {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
+  const [ecole, setEcole] = useState('');
+  const ECOLES = ['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'];
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
   const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({
@@ -32,6 +34,7 @@ export default function FicheEleve() {
       prenom: data.prenom,
       age: data.age ? Number(data.age) : undefined,
       classe: data.classe,
+      ecole: ecole || undefined,
       date: new Date().toISOString().split('T')[0],
       createdByName: fullName,
       createdByProfession: profession,
@@ -104,6 +107,17 @@ export default function FicheEleve() {
                   {errors.age.message}
                 </div>
               )}
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#0F172A] block mb-2">École</label>
+              <select
+                value={ecole}
+                onChange={e => setEcole(e.target.value)}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">-- Sélectionner une école --</option>
+                {ECOLES.map(e => <option key={e} value={e}>{e}</option>)}
+              </select>
             </div>
             <div>
               <label className="text-sm font-medium text-[#0F172A] block mb-2">Classe</label>

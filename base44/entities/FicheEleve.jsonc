@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Classe de l'\u00e9l\u00e8ve"
     },
+    "ecole": {
+      "type": "string",
+      "description": "\u00c9cole de l'\u00e9l\u00e8ve"
+    },
     "age": {
       "type": "number",
       "description": "\u00c2ge de l'\u00e9l\u00e8ve"
