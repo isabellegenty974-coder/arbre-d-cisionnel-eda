@@ -254,13 +254,10 @@ export default function StatsAnnuelles() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+          className="grid grid-cols-1 gap-3"
         >
           {[
             { label: "Élèves suivis", value: nbEleves, icon: Users, color: "#4A90E2", light: "#E8F0FB" },
-            { label: "Diagnostics", value: nbDiagnostics, icon: ClipboardList, color: "#8B5CF6", light: "#F0EBFD" },
-            { label: "Observations", value: nbItems, icon: TrendingUp, color: "#D4A574", light: "#F8EEE0" },
-            { label: "Moy. / diag.", value: avgItemsPerDiag, icon: Brain, color: "#34C48A", light: "#E4F8F0" },
           ].map(({ label, value, icon: Icon, color, light }, i) => (
             <motion.div
               key={label}
