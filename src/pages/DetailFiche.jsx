@@ -19,9 +19,9 @@ export default function DetailFiche() {
   const [selectedDiagnosticId, setSelectedDiagnosticId] = useState(null);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState('');
-  const [selectedTab, setSelectedTab] = useState('psy');
-  const [interventions, setInterventions] = useState({ psy: { date: '', description: '' }, madr: { date: '', description: '' }, madp: { date: '', description: '' } });
-  const [editingInterventions, setEditingInterventions] = useState(false);
+  const [interventions, setInterventions] = useState([]);
+  const [newIntervention, setNewIntervention] = useState({ date: '', profession: 'Psy EN EDA', description: '' });
+  const [addingIntervention, setAddingIntervention] = useState(false);
 
   const ficheId = searchParams.get('id');
 
@@ -37,10 +37,10 @@ export default function DetailFiche() {
     ])
       .then(([ficheData, allDiagnostics]) => {
         setFiche(ficheData);
-        if (ficheData?.interventions) {
+        if (ficheData?.interventions && Array.isArray(ficheData.interventions)) {
           setInterventions(ficheData.interventions);
         } else {
-          setInterventions({ psy: { date: '', description: '' }, madr: { date: '', description: '' }, madp: { date: '', description: '' } });
+          setInterventions([]);
         }
         if (ficheData && allDiagnostics) {
           const related = allDiagnostics.filter(
@@ -70,16 +70,22 @@ export default function DetailFiche() {
     setEditingNotes(false);
   };
 
-  const handleInterventionsChange = async () => {
+  const addIntervention = async () => {
+    if (!fiche || !newIntervention.date || !newIntervention.description) return;
+    const updated = [...interventions, newIntervention];
+    await base44.entities.FicheEleve.update(fiche.id, { interventions: updated });
+    setFiche({ ...fiche, interventions: updated });
+    setInterventions(updated);
+    setNewIntervention({ date: '', profession: 'Psy EN EDA', description: '' });
+    setAddingIntervention(false);
+  };
+
+  const deleteIntervention = async (index) => {
     if (!fiche) return;
-    const cleanedInterventions = {
-      psy: interventions.psy || { date: '', description: '' },
-      madr: interventions.madr || { date: '', description: '' },
-      madp: interventions.madp || { date: '', description: '' }
-    };
-    await base44.entities.FicheEleve.update(fiche.id, { interventions: cleanedInterventions });
-    setFiche({ ...fiche, interventions: cleanedInterventions });
-    setEditingInterventions(false);
+    const updated = interventions.filter((_, i) => i !== index);
+    await base44.entities.FicheEleve.update(fiche.id, { interventions: updated });
+    setFiche({ ...fiche, interventions: updated });
+    setInterventions(updated);
   };
 
   if (loading) {
@@ -182,93 +188,110 @@ export default function DetailFiche() {
             )}
           </motion.div>
 
-          {/* Onglets Interventions */}
+          {/* Tableau Interventions */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.24 }}
             className="space-y-3"
           >
-            <h2 className="font-semibold text-foreground">Interventions par profession</h2>
-            <div className="flex gap-2 border-b border-border pb-3">
-              {[
-                { key: 'psy', label: 'Psy EN EDA' },
-                { key: 'madr', label: 'MaDR' },
-                { key: 'madp', label: 'MaDP' }
-              ].map(tab => (
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-foreground">Interventions</h2>
+              {!addingIntervention && (
                 <button
-                  key={tab.key}
-                  onClick={() => setSelectedTab(tab.key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    selectedTab === tab.key
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-foreground hover:bg-secondary/80'
-                  }`}
+                  onClick={() => setAddingIntervention(true)}
+                  className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
-                  {tab.label}
+                  + Ajouter
                 </button>
-              ))}
+              )}
             </div>
 
-            {editingInterventions ? (
-              <div className="space-y-3">
+            {addingIntervention && (
+              <div className="p-4 rounded-lg bg-secondary/30 border border-border space-y-3">
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-2">Date</label>
                   <input
                     type="date"
-                    value={interventions[selectedTab]?.date || ''}
-                    onChange={(e) => setInterventions({ ...interventions, [selectedTab]: { ...interventions[selectedTab], date: e.target.value } })}
+                    value={newIntervention.date}
+                    onChange={(e) => setNewIntervention({ ...newIntervention, date: e.target.value })}
                     className="w-full h-9 px-3 rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div>
+                  <label className="text-sm font-medium text-foreground block mb-2">Profession</label>
+                  <select
+                    value={newIntervention.profession}
+                    onChange={(e) => setNewIntervention({ ...newIntervention, profession: e.target.value })}
+                    className="w-full h-9 px-3 rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option>Psy EN EDA</option>
+                    <option>MaDR</option>
+                    <option>MaDP</option>
+                  </select>
+                </div>
+                <div>
                   <label className="text-sm font-medium text-foreground block mb-2">Description</label>
                   <textarea
-                    value={interventions[selectedTab]?.description || ''}
-                    onChange={(e) => setInterventions({ ...interventions, [selectedTab]: { ...interventions[selectedTab], description: e.target.value } })}
-                    placeholder="Décrivez les interventions réalisées..."
-                    className="w-full min-h-40 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
+                    value={newIntervention.description}
+                    onChange={(e) => setNewIntervention({ ...newIntervention, description: e.target.value })}
+                    placeholder="Décrivez l'intervention..."
+                    className="w-full min-h-32 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => {
-                      setInterventions(fiche?.interventions || { psy: { date: '', description: '' }, madr: { date: '', description: '' }, madp: { date: '', description: '' } });
-                      setEditingInterventions(false);
+                      setNewIntervention({ date: '', profession: 'Psy EN EDA', description: '' });
+                      setAddingIntervention(false);
                     }}
                     className="px-4 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition-colors text-sm font-medium"
                   >
                     Annuler
                   </button>
                   <button
-                    onClick={handleInterventionsChange}
-                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
+                    onClick={addIntervention}
+                    disabled={!newIntervention.date || !newIntervention.description}
+                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
                   >
-                    Enregistrer
+                    Ajouter
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 space-y-2">
-                  {interventions[selectedTab]?.date && (
-                    <p className="text-sm font-medium text-muted-foreground">📅 {new Date(interventions[selectedTab].date).toLocaleDateString('fr-FR')}</p>
-                  )}
-                  <div className="min-h-40 p-4 rounded-lg bg-secondary/30 border border-border">
-                    {interventions[selectedTab]?.description ? (
-                      <p className="text-foreground whitespace-pre-wrap text-sm leading-relaxed">{interventions[selectedTab].description}</p>
-                    ) : (
-                      <p className="text-muted-foreground text-sm italic">Aucune intervention renseignée</p>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={() => setEditingInterventions(true)}
-                  className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors whitespace-nowrap"
-                >
-                  Éditer
-                </button>
+            )}
+
+            {interventions.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Date</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Profession</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Description</th>
+                      <th className="text-right py-2 px-3 font-medium text-muted-foreground">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {interventions.map((inter, idx) => (
+                      <tr key={idx} className="border-b border-border hover:bg-secondary/30 transition-colors">
+                        <td className="py-2 px-3 text-foreground">{new Date(inter.date).toLocaleDateString('fr-FR')}</td>
+                        <td className="py-2 px-3 text-foreground text-xs bg-secondary/30 rounded px-2 w-fit">{inter.profession}</td>
+                        <td className="py-2 px-3 text-foreground truncate max-w-xs">{inter.description}</td>
+                        <td className="py-2 px-3 text-right">
+                          <button
+                            onClick={() => deleteIntervention(idx)}
+                            className="text-xs text-destructive hover:text-destructive/80 transition-colors"
+                          >
+                            Supprimer
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic py-4">Aucune intervention enregistrée</p>
             )}
           </motion.div>
 

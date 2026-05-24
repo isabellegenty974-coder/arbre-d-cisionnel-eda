@@ -36,46 +36,28 @@
       "description": "Notes libres et observations rapides lors des entretiens"
     },
     "interventions": {
-      "type": "object",
-      "description": "Interventions r\u00e9alis\u00e9es par profession",
-      "properties": {
-        "psy": {
-          "type": "object",
-          "properties": {
-            "date": {
-              "type": "string",
-              "format": "date"
-            },
-            "description": {
-              "type": "string"
-            }
-          }
-        },
-        "madr": {
-          "type": "object",
-          "properties": {
-            "date": {
-              "type": "string",
-              "format": "date"
-            },
-            "description": {
-              "type": "string"
-            }
-          }
-        },
-        "madp": {
-          "type": "object",
-          "properties": {
-            "date": {
-              "type": "string",
-              "format": "date"
-            },
-            "description": {
-              "type": "string"
-            }
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "profession": {
+            "type": "string",
+            "enum": [
+              "Psy EN EDA",
+              "MaDR",
+              "MaDP"
+            ]
+          },
+          "description": {
+            "type": "string"
           }
         }
-      }
+      },
+      "description": "Liste des interventions r\u00e9alis\u00e9es"
     },
     "score_apprentissages": {
       "type": "number",
