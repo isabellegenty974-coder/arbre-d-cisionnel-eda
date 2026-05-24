@@ -1,6 +1,6 @@
 export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats) => {
   const nbEleves = new Set(filteredDiagnostics.map(d => d.eleve_prenom + ' ' + d.eleve_nom)).size;
-  const nbDiagnostics = filteredDiagnostics.length;
+  const nbInterventions = filteredDiagnostics.length;
   let nbItems = 0;
   filteredDiagnostics.forEach(d => {
     ['apprentissages', 'comportement', 'developpement', 'contexte'].forEach(cat => {
@@ -25,12 +25,11 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Statistiques RASED</title>
+  <title>Bilan d'activité RASED</title>
   <style>
     body { font-family: Arial, sans-serif; color: #111; margin: 32px; font-size: 13px; }
     h1 { color: #0C3B8C; font-size: 22px; margin-bottom: 4px; }
     h2 { color: #0C3B8C; font-size: 15px; margin: 28px 0 4px; border-bottom: 2px solid #dde3f5; padding-bottom: 4px; }
-    h3 { color: #1a5c3a; font-size: 13px; margin: 16px 0 4px; }
     .meta { color: #666; font-size: 11px; margin-bottom: 20px; }
     .comment { color: #444; font-size: 11px; font-style: italic; margin-bottom: 10px; padding: 6px 10px; background: #f4f7ff; border-left: 3px solid #7fa8e8; border-radius: 2px; }
     .kpis { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -50,58 +49,58 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   </style>
 </head>
 <body>
-  <h1>Statistiques des Diagnostics RASED</h1>
+  <h1>Bilan d'activité RASED</h1>
   <p class="meta">
     Généré le ${new Date().toLocaleDateString('fr-FR')}
-    ${selectedProfession ? ' — Filtre : ' + selectedProfession : ' — Ensemble de l\'équipe'}
+    ${selectedProfession ? ' — Professionnel : ' + selectedProfession : ' — Ensemble de l\'équipe'}
   </p>
 
   <div class="kpis">
-    <div class="kpi"><div class="kpi-val">${nbEleves}</div><div class="kpi-label">Élèves suivis</div></div>
-    <div class="kpi"><div class="kpi-val">${nbDiagnostics}</div><div class="kpi-label">Diagnostics réalisés</div></div>
-    <div class="kpi"><div class="kpi-val">${nbItems}</div><div class="kpi-label">Items observés</div></div>
+    <div class="kpi"><div class="kpi-val">${nbEleves}</div><div class="kpi-label">Élèves accompagnés</div></div>
+    <div class="kpi"><div class="kpi-val">${nbInterventions}</div><div class="kpi-label">Interventions réalisées</div></div>
+    <div class="kpi"><div class="kpi-val">${nbItems}</div><div class="kpi-label">Difficultés repérées</div></div>
   </div>
 
-  <h2>Répartition par domaine</h2>
-  <p class="comment">Pour chaque grand domaine d'intervention, ce tableau présente le nombre total d'items observés et leur part relative dans l'ensemble des observations. Il permet d'identifier les domaines les plus sollicités sur la période.</p>
+  <h2>Domaines de difficultés des élèves</h2>
+  <p class="comment">Ce tableau présente la répartition des difficultés repérées par domaine d'intervention RASED. Il permet d'identifier quelles catégories de besoins sont les plus fréquentes chez les élèves accompagnés sur la période, et d'orienter les priorités de l'équipe.</p>
   <table>
-    <tr><th>Domaine</th><th>Observations</th><th>Pourcentage</th></tr>
+    <tr><th>Domaine</th><th>Difficultés repérées</th><th>Part (%)</th></tr>
     ${allDomaines.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
   </table>
 
-  <h2>Répartition des diagnostics par professionnel RASED</h2>
-  <p class="comment">Ce tableau indique le nombre de diagnostics réalisés par chaque catégorie de professionnel RASED (MaDP, MaDR, Psy EN EDA). Il permet de mesurer la contribution de chaque membre de l'équipe et d'évaluer la répartition de la charge de travail.</p>
+  <h2>Activité par professionnel RASED</h2>
+  <p class="comment">Ce tableau indique le nombre d'interventions réalisées par chaque catégorie de professionnel RASED (MaDP, MaDR, Psy EN EDA). Il permet de visualiser la contribution de chaque membre de l'équipe et d'évaluer l'équilibre de la charge d'accompagnement.</p>
   <table>
-    <tr><th>Profession</th><th>Diagnostics réalisés</th><th>Part (%)</th></tr>
+    <tr><th>Profession</th><th>Interventions</th><th>Part (%)</th></tr>
     ${profData.length > 0
       ? [...profData].sort((a,b) => b.value - a.value).map(p => `<tr><td>${p.name}</td><td>${p.value}</td><td>${totalProf > 0 ? ((p.value / totalProf) * 100).toFixed(1) : 0}%</td></tr>`).join('')
       : '<tr><td colspan="3" class="empty">Aucune donnée disponible</td></tr>'
     }
   </table>
 
-  <h2>Répartition des élèves par école</h2>
-  <p class="comment">Ce tableau présente le nombre de fiches élèves créées pour chaque établissement scolaire. Il donne une vue d'ensemble de la répartition géographique du suivi RASED et permet d'identifier les écoles les plus concernées.</p>
+  <h2>Élèves accompagnés par école</h2>
+  <p class="comment">Ce tableau présente le nombre d'élèves accompagnés par le RASED dans chaque établissement scolaire. Il offre une vue d'ensemble de la couverture territoriale de l'équipe et permet d'identifier les écoles les plus demandeuses d'accompagnement.</p>
   <table>
-    <tr><th>École</th><th>Nombre d'élèves</th></tr>
+    <tr><th>École</th><th>Élèves accompagnés</th></tr>
     ${ecoleData.length > 0
       ? ecoleData.map(e => `<tr><td>${e.name}</td><td>${e.value}</td></tr>`).join('')
       : '<tr><td colspan="2" class="empty">Aucune école renseignée</td></tr>'
     }
   </table>
 
-  <h2>Activité des professionnels RASED par école</h2>
-  <p class="comment">Pour chaque école, ce tableau détaille les catégories de difficultés identifiées chez les élèves et les interventions réalisées par les différents professionnels RASED. Il permet de croiser les besoins des établissements avec les ressources mobilisées.</p>
+  <h2>Détail de l'activité RASED par école</h2>
+  <p class="comment">Pour chaque école, ce tableau détaille les types de difficultés identifiées chez les élèves accompagnés, ainsi que les interventions réalisées par chaque professionnel RASED. Il permet de croiser les besoins de chaque établissement avec les ressources mobilisées sur le terrain.</p>
   ${ecoleStats.length > 0
     ? ecoleStats.map(({ ecole, nbEleves: nb, domaines: doms, profs }) => `
       <div class="school-block">
-        <div class="school-title">📍 ${ecole} — ${nb} élève${nb > 1 ? 's' : ''}</div>
+        <div class="school-title">📍 ${ecole} — ${nb} élève${nb > 1 ? 's' : ''} accompagné${nb > 1 ? 's' : ''}</div>
         <table class="school-table">
-          <tr><th>Domaine de difficulté</th><th>Nombre d'élèves concernés</th></tr>
+          <tr><th>Domaine de difficulté</th><th>Élèves concernés</th></tr>
           ${doms.map(d => `<tr><td>${d.name}</td><td>${d.value}</td></tr>`).join('')}
         </table>
         ${profs.length > 0 ? `
         <table class="school-table" style="margin-top:8px;">
-          <tr><th>Professionnel RASED</th><th>Élèves suivis</th></tr>
+          <tr><th>Intervenant RASED</th><th>Élèves suivis</th></tr>
           ${profs.map(p => `<tr><td>${p.prof}</td><td>${p.nb}</td></tr>`).join('')}
         </table>` : ''}
       </div>
@@ -109,20 +108,20 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     : '<p class="empty">Aucune donnée disponible</p>'
   }
 
-  <h2>Top 10 des observations fréquentes</h2>
-  <p class="comment">Ce tableau liste les 10 items les plus souvent sélectionnés lors des diagnostics. Il met en évidence les difficultés récurrentes et peut orienter les priorités d'action pédagogique ou d'accompagnement spécialisé.</p>
+  <h2>Difficultés les plus fréquemment repérées</h2>
+  <p class="comment">Ce tableau liste les 10 indicateurs de difficulté les plus souvent relevés lors des accompagnements. Il met en lumière les problématiques récurrentes chez les élèves suivis et peut guider les actions de prévention ou de remédiation de l'équipe RASED.</p>
   <table>
-    <tr><th>#</th><th>Observation</th><th>Occurrences</th></tr>
+    <tr><th>#</th><th>Difficulté repérée</th><th>Fréquence</th></tr>
     ${topItemsAll.length > 0
       ? topItemsAll.map((item, i) => `<tr><td>${i + 1}</td><td>${item.name}</td><td><b>${item.total}×</b></td></tr>`).join('')
       : '<tr><td colspan="3" class="empty">Aucune observation enregistrée</td></tr>'
     }
   </table>
 
-  <h2>Évolution mensuelle</h2>
-  <p class="comment">Ce tableau retrace le nombre de diagnostics réalisés chaque mois sur les 12 derniers mois. Il permet de suivre l'activité de l'équipe dans le temps et de mesurer la progression du suivi des élèves au fil de l'année scolaire.</p>
+  <h2>Évolution mensuelle de l'activité</h2>
+  <p class="comment">Ce tableau retrace le nombre d'interventions réalisées chaque mois sur les 12 derniers mois. Il permet de suivre la dynamique d'activité de l'équipe RASED, d'identifier les périodes de forte sollicitation et d'analyser l'évolution du volume d'accompagnement au fil de l'année scolaire.</p>
   <table>
-    <tr><th>Mois</th><th>Diagnostics réalisés</th></tr>
+    <tr><th>Mois</th><th>Interventions réalisées</th></tr>
     ${evolutionAll.length > 0
       ? evolutionAll.map(m => `<tr><td>${m.mois}</td><td>${m.total}</td></tr>`).join('')
       : '<tr><td colspan="2" class="empty">Aucune donnée mensuelle disponible</td></tr>'
