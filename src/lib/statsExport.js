@@ -9,7 +9,18 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   });
 
   const totalDomaines = (domaines || []).reduce((s, d) => s + d.value, 0);
-  const domainesOk = (domaines || []).filter(d => d.value > 0);
+  const allDomaines = [
+    { name: 'Apprentissages' },
+    { name: 'Comportement' },
+    { name: 'Developpement' },
+    { name: 'Contexte' },
+  ].map(d => {
+    const found = (domaines || []).find(x => x.name === d.name || x.name === 'Développement' && d.name === 'Developpement');
+    return { name: d.name, value: found ? found.value : 0 };
+  });
+
+  const topItemsAll = (topItems || []).length > 0 ? topItems : [];
+  const evolutionAll = (evolution || []).length > 0 ? evolution : [];
 
   const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -29,6 +40,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     th { background: #f0f4ff; color: #0C3B8C; padding: 6px 10px; text-align: left; font-size: 12px; }
     td { padding: 5px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
     tr:last-child td { border-bottom: none; }
+    .empty { color: #aaa; font-style: italic; font-size: 12px; padding: 8px 10px; }
     @media print { body { margin: 16px; } }
   </style>
 </head>
@@ -45,30 +57,32 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     <div class="kpi"><div class="kpi-val">${nbItems}</div><div class="kpi-label">Items observes</div></div>
   </div>
 
-  ${domainesOk.length > 0 ? `
   <h2>Repartition par domaine</h2>
   <table>
     <tr><th>Domaine</th><th>Observations</th><th>Pourcentage</th></tr>
-    ${domainesOk.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
-  </table>` : ''}
+    ${allDomaines.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
+  </table>
 
-  ${(topItems || []).length > 0 ? `
   <h2>Top 10 observations frequentes</h2>
   <table>
     <tr><th>#</th><th>Observation</th><th>Occurrences</th></tr>
-    ${topItems.map((item, i) => `<tr><td>${i + 1}</td><td>${item.name}</td><td><b>${item.total}x</b></td></tr>`).join('')}
-  </table>` : ''}
+    ${topItemsAll.length > 0
+      ? topItemsAll.map((item, i) => `<tr><td>${i + 1}</td><td>${item.name}</td><td><b>${item.total}x</b></td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">Aucune observation enregistree</td></tr>'
+    }
+  </table>
 
-  ${(evolution || []).length > 0 ? `
   <h2>Evolution mensuelle</h2>
   <table>
     <tr><th>Mois</th><th>Diagnostics</th></tr>
-    ${evolution.map(m => `<tr><td>${m.mois}</td><td>${m.total}</td></tr>`).join('')}
-  </table>` : ''}
+    ${evolutionAll.length > 0
+      ? evolutionAll.map(m => `<tr><td>${m.mois}</td><td>${m.total}</td></tr>`).join('')
+      : '<tr><td colspan="2" class="empty">Aucune donnee mensuelle</td></tr>'
+    }
+  </table>
 </body>
 </html>`;
 
-  // Crée une iframe cachée pour imprimer sans popup blocker
   const iframe = document.createElement('iframe');
   iframe.style.position = 'fixed';
   iframe.style.top = '-9999px';
