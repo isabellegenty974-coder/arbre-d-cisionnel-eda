@@ -105,6 +105,10 @@ export default function StatsAnnuelles() {
   }, 0);
   const avgItemsPerDiag = nbDiagnostics > 0 ? Math.round(nbItems / nbDiagnostics) : 0;
 
+  // Élèves par profession
+  const nbElevesParProf = (prof) =>
+    new Set(diagnostics.filter(d => d.createdByProfession === prof).map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size;
+
   // Domaines
   const domaines = (() => {
     const counts = { Apprentissages: 0, Comportement: 0, Développement: 0, Contexte: 0 };
@@ -254,10 +258,13 @@ export default function StatsAnnuelles() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="grid grid-cols-1 gap-3"
+          className="grid grid-cols-2 gap-3"
         >
           {[
             { label: "Élèves suivis", value: nbEleves, icon: Users, color: "#4A90E2", light: "#E8F0FB" },
+            { label: "Bilantés par Psy EN EDA", value: nbElevesParProf('Psy EN EDA'), icon: Brain, color: "#8B5CF6", light: "#F0EBFD" },
+            { label: "Bilantés par MaDP", value: nbElevesParProf('MaDP'), icon: BookOpen, color: "#4A90E2", light: "#E8F0FB" },
+            { label: "Bilantés par MaDR", value: nbElevesParProf('MaDR'), icon: Heart, color: "#EC6B8A", light: "#FCE8EE" },
           ].map(({ label, value, icon: Icon, color, light }, i) => (
             <motion.div
               key={label}
