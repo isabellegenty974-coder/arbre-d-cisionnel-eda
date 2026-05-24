@@ -1,0 +1,32 @@
+{
+  "name": "MembreEquipe",
+  "type": "object",
+  "properties": {
+    "prenom": {
+      "type": "string",
+      "description": "Pr\u00e9nom du membre"
+    },
+    "nom": {
+      "type": "string",
+      "description": "Nom du membre"
+    },
+    "profession": {
+      "type": "string",
+      "enum": [
+        "MaDP",
+        "MaDR",
+        "Psy EN EDA"
+      ],
+      "description": "Profession du membre"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email du membre"
+    }
+  },
+  "required": [
+    "prenom",
+    "nom",
+    "profession"
+  ]
+}
