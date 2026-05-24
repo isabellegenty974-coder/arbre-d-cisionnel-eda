@@ -16,8 +16,21 @@ export default function FicheEleve() {
   const [saved, setSaved] = useState(false);
   const [ecole, setEcole] = useState('');
   const ECOLES = ['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'];
+  const [dateNaissance, setDateNaissance] = useState('');
+  const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
+
+  const handleDateNaissance = (value) => {
+    setDateNaissance(value);
+    if (!value) { setAgeCalcule(null); return; }
+    const today = new Date();
+    const birth = new Date(value);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    setAgeCalcule(age >= 0 ? age : null);
+  };
   const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({
     mode: 'onChange',
     defaultValues: { prenom: '', nom: '', age: '', classe: '' },
@@ -32,7 +45,8 @@ export default function FicheEleve() {
     const created = await base44.entities.FicheEleve.create({
       nom: data.nom,
       prenom: data.prenom,
-      age: data.age ? Number(data.age) : undefined,
+      age: ageCalcule !== null ? ageCalcule : undefined,
+      date_naissance: dateNaissance || undefined,
       classe: data.classe,
       ecole: ecole || undefined,
       date: new Date().toISOString().split('T')[0],
@@ -94,18 +108,15 @@ export default function FicheEleve() {
               )}
             </div>
             <div>
-              <label className="text-sm font-medium text-[#0F172A] block mb-2">Âge</label>
+              <label className="text-sm font-medium text-[#0F172A] block mb-2">Date de naissance</label>
               <Input
-                {...register('age', eleveValidationRules.age)}
-                type="number"
-                placeholder="Âge (3-12 ans)"
-                className={errors.age ? 'border-destructive' : ''}
+                type="date"
+                value={dateNaissance}
+                onChange={e => handleDateNaissance(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
               />
-              {errors.age && (
-                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {errors.age.message}
-                </div>
+              {ageCalcule !== null && (
+                <p className="text-xs text-[#0F172A]/60 mt-1.5">→ Âge calculé : <strong>{ageCalcule} ans</strong></p>
               )}
             </div>
             <div>

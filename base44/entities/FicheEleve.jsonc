@@ -22,6 +22,11 @@
       "type": "number",
       "description": "\u00c2ge de l'\u00e9l\u00e8ve"
     },
+    "date_naissance": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de naissance de l'\u00e9l\u00e8ve"
+    },
     "observations": {
       "type": "string",
       "description": "Observations compl\u00e9mentaires"
