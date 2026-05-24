@@ -14,7 +14,7 @@ const ITEMS_PER_PAGE = 5;
 export default function Accueil() {
   const navigate = useNavigate();
 
-  const [notAuthenticated, setNotAuthenticated] = useState(false);
+
   const [eleves, setEleves] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
@@ -38,15 +38,6 @@ export default function Accueil() {
     checkProfile();
   }, []);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const isAuth = await base44.auth.isAuthenticated();
-      if (!isAuth) {
-        setNotAuthenticated(true);
-      }
-    };
-    checkAuth();
-  }, []);
 
   const handleJoinTeam = () => {
     setShowInvitePopup(false);
@@ -106,20 +97,6 @@ export default function Accueil() {
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const pageEleves = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-  if (notAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: 'linear-gradient(180deg, rgba(10,30,80,1) 0%, rgba(8,20,70,1) 100%)' }}>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#7EB8F7', fontFamily: 'serif' }}>Arbre décisionnel RASED</h1>
-        <p className="text-white/60 text-sm mb-8">Connectez-vous pour accéder à l&apos;application</p>
-        <button
-          onClick={() => base44.auth.redirectToLogin()}
-          className="bg-white text-[#0F172A] font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-white/90 transition-all"
-        >
-          Se connecter
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen relative overflow-x-hidden pb-20">
