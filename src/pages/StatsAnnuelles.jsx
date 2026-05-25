@@ -233,21 +233,22 @@ export default function StatsAnnuelles() {
     });
   })();
 
-  // Équipes éducatives par école (toutes interventions enregistrées dans les fiches)
-  const equipesEduParEcole = (() => {
-    const schools = [...new Set(fiches.map(f => f.ecole).filter(Boolean))].sort();
-    return schools.map(ecole => {
-      const fichesDEcole = fiches.filter(f => f.ecole === ecole);
-      const profCounts = {};
-      fichesDEcole.forEach(f => {
-        (f.interventions || []).forEach(interv => {
-          const p = interv.profession || 'Autre';
-          profCounts[p] = (profCounts[p] || 0) + 1;
-        });
+  // Équipes éducatives : par professionnel, par école + total
+  const equipesEduParProf = (() => {
+    const profMap = {}; // { prof: { ecole: count } }
+    fiches.forEach(f => {
+      const ecole = f.ecole || 'École non renseignée';
+      (f.interventions || []).forEach(interv => {
+        const p = interv.profession || 'Autre';
+        if (!profMap[p]) profMap[p] = {};
+        profMap[p][ecole] = (profMap[p][ecole] || 0) + 1;
       });
-      const total = Object.values(profCounts).reduce((a, b) => a + b, 0);
-      return { ecole, total, profs: Object.entries(profCounts).map(([prof, nb]) => ({ prof, nb })).sort((a,b) => b.nb - a.nb) };
-    }).filter(e => e.total > 0);
+    });
+    return ['MaDP', 'MaDR', 'Psy EN EDA'].map(prof => {
+      const ecoleData = Object.entries(profMap[prof] || {}).map(([ecole, nb]) => ({ ecole, nb })).sort((a,b) => b.nb - a.nb);
+      const total = ecoleData.reduce((s, e) => s + e.nb, 0);
+      return { prof, total, ecoles: ecoleData };
+    }).filter(p => p.total > 0);
   })();
 
   // Répartition classes (filtrée par école)
@@ -292,7 +293,7 @@ export default function StatsAnnuelles() {
               <p className="text-white/60 text-sm mt-1">Tableau de bord analytique RASED</p>
             </div>
             <Button
-              onClick={() => exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats, equipesEduParEcole)}
+              onClick={() => exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats, equipesEduParProf)}
 
               className="gap-2 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] font-semibold border-0"
             >
@@ -673,27 +674,41 @@ export default function StatsAnnuelles() {
           </SectionCard>
         )}
 
-        {/* Équipes éducatives par école */}
-        {equipesEduParEcole.length > 0 && (
-          <SectionCard title="Équipes éducatives par école" subtitle="Participations RASED enregistrées dans les fiches élèves" icon={Users} accentColor="#F59E0B" delay={0.28}>
-            <div className="space-y-4">
-              {equipesEduParEcole.map(({ ecole, total, profs }, idx) => {
-                const eColors = ['#4A90E2','#34C48A','#D4A574','#EC6B8A','#8B5CF6','#F59E0B','#22d3ee','#6366f1'];
-                const eColor = eColors[idx % eColors.length];
+        {/* Équipes éducatives par professionnel */}
+        {equipesEduParProf.length > 0 && (
+          <SectionCard title="Équipes éducatives" subtitle="Participations des personnels RASED par école" icon={Users} accentColor="#F59E0B" delay={0.28}>
+            <div className="space-y-5">
+              {equipesEduParProf.map(({ prof, total, ecoles }) => {
+                const color = PROF_COLORS[prof] || '#F59E0B';
+                const maxNb = Math.max(...ecoles.map(e => e.nb), 1);
                 return (
-                  <div key={ecole} className="rounded-2xl border overflow-hidden" style={{ borderColor: `${eColor}40` }}>
-                    <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${eColor}10` }}>
-                      <span className="font-bold text-sm text-[#0F172A] truncate">{ecole}</span>
-                      <span className="text-xs font-bold ml-2 shrink-0" style={{ color: eColor }}>{total} participation{total > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className="px-4 py-3 flex flex-wrap gap-2">
-                      {profs.map(({ prof, nb }) => (
-                        <div key={prof} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: `${PROF_COLORS[prof] || '#F59E0B'}18`, border: `1px solid ${PROF_COLORS[prof] || '#F59E0B'}40` }}>
-                          <Users className="w-3 h-3" style={{ color: PROF_COLORS[prof] || '#F59E0B' }} />
-                          <span className="text-[10px] font-semibold" style={{ color: PROF_COLORS[prof] || '#F59E0B' }}>{prof}</span>
-                          <span className="text-[10px] font-bold text-[#0F172A]/70">{nb}×</span>
+                  <div key={prof} className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: `${color}40` }}>
+                    {/* Header professionnel */}
+                    <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${color}12` }}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}25` }}>
+                          <Users className="w-3.5 h-3.5" style={{ color }} />
                         </div>
-                      ))}
+                        <span className="font-bold text-sm text-[#0F172A]">{prof}</span>
+                      </div>
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: `${color}20`, color }}>
+                        {total} participation{total > 1 ? 's' : ''} au total
+                      </span>
+                    </div>
+                    {/* Détail par école */}
+                    <div className="px-4 py-3 space-y-2">
+                      {ecoles.map(({ ecole, nb }) => {
+                        const pct = Math.round((nb / maxNb) * 100);
+                        return (
+                          <div key={ecole} className="flex items-center gap-3">
+                            <span className="text-[10px] text-[#0F172A]/70 w-36 shrink-0 truncate">{ecole}</span>
+                            <div className="flex-1 h-1.5 rounded-full bg-[#F5F0E8] overflow-hidden">
+                              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                            </div>
+                            <span className="text-[10px] font-bold shrink-0 w-8 text-right" style={{ color }}>{nb}×</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );

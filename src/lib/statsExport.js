@@ -109,15 +109,16 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     : '<p class="empty">Aucune donnée disponible</p>'
   }
 
-  <h2>Équipes éducatives par école</h2>
-  <p class="comment">Ce tableau recense les participations des personnels RASED aux équipes éducatives, par école, sur la période.</p>
+  <h2>Équipes éducatives par professionnel et par école</h2>
+  <p class="comment">Ce tableau présente, pour chaque professionnel RASED, le nombre de participations aux équipes éducatives par école ainsi que le total sur l'ensemble des établissements.</p>
   ${equipesEdu.length > 0
-    ? `<table>
-        <tr><th>École</th><th>Profession</th><th>Participations</th></tr>
-        ${equipesEdu.flatMap(({ ecole, profs }) =>
-          profs.map(({ prof, nb }) => `<tr><td>${ecole}</td><td>${prof}</td><td>${nb}</td></tr>`)
-        ).join('')}
+    ? equipesEdu.map(({ prof, total, ecoles }) => `
+      <table style="margin-bottom:12px;">
+        <tr><th colspan="2" style="background:#e8edf8;">${prof} — <span style="font-weight:normal;">${total} participation${total > 1 ? 's' : ''} au total</span></th></tr>
+        <tr><th>École</th><th>Participations</th></tr>
+        ${ecoles.map(({ ecole, nb }) => `<tr><td>${ecole}</td><td>${nb}</td></tr>`).join('')}
       </table>`
+    ).join('')
     : '<p class="empty">Aucune participation enregistrée</p>'
   }
 
