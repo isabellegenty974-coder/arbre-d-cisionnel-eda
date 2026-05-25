@@ -233,16 +233,18 @@ export default function StatsAnnuelles() {
     });
   })();
 
-  // Équipes éducatives : par professionnel, par école + total
+  // Équipes éducatives : uniquement les interventions de type 'Équipe éducative'
   const equipesEduParProf = (() => {
-    const profMap = {}; // { prof: { ecole: count } }
+    const profMap = {};
     fiches.forEach(f => {
       const ecole = f.ecole || 'École non renseignée';
-      (f.interventions || []).forEach(interv => {
-        const p = interv.profession || 'Autre';
-        if (!profMap[p]) profMap[p] = {};
-        profMap[p][ecole] = (profMap[p][ecole] || 0) + 1;
-      });
+      (f.interventions || [])
+        .filter(interv => interv.type === 'Équipe éducative')
+        .forEach(interv => {
+          const p = interv.profession || 'Autre';
+          if (!profMap[p]) profMap[p] = {};
+          profMap[p][ecole] = (profMap[p][ecole] || 0) + 1;
+        });
     });
     return ['MaDP', 'MaDR', 'Psy EN EDA'].map(prof => {
       const ecoleData = Object.entries(profMap[prof] || {}).map(([ecole, nb]) => ({ ecole, nb })).sort((a,b) => b.nb - a.nb);
@@ -294,7 +296,6 @@ export default function StatsAnnuelles() {
             </div>
             <Button
               onClick={() => exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats, equipesEduParProf)}
-
               className="gap-2 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] font-semibold border-0"
             >
               <Download className="w-4 h-4" /> Exporter PDF
@@ -683,7 +684,6 @@ export default function StatsAnnuelles() {
                 const maxNb = Math.max(...ecoles.map(e => e.nb), 1);
                 return (
                   <div key={prof} className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: `${color}40` }}>
-                    {/* Header professionnel */}
                     <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${color}12` }}>
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}25` }}>
@@ -695,7 +695,6 @@ export default function StatsAnnuelles() {
                         {total} participation{total > 1 ? 's' : ''} au total
                       </span>
                     </div>
-                    {/* Détail par école */}
                     <div className="px-4 py-3 space-y-2">
                       {ecoles.map(({ ecole, nb }) => {
                         const pct = Math.round((nb / maxNb) * 100);

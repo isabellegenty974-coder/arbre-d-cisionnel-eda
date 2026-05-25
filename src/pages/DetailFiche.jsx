@@ -20,7 +20,18 @@ export default function DetailFiche() {
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState('');
   const [interventions, setInterventions] = useState([]);
-  const [newIntervention, setNewIntervention] = useState({ date: '', profession: 'Psy EN EDA', description: '' });
+  const [newIntervention, setNewIntervention] = useState({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
+
+  const TYPES_INTERVENTION = [
+    'Équipe éducative',
+    'Observation en classe',
+    'Entretien élève',
+    'Entretien avec la famille',
+    'Entretien avec l\'enseignant',
+    'Bilan / évaluation',
+    'Rééducation',
+    'Autre',
+  ];
   const [addingIntervention, setAddingIntervention] = useState(false);
 
   const ficheId = searchParams.get('id');
@@ -76,7 +87,7 @@ export default function DetailFiche() {
     await base44.entities.FicheEleve.update(fiche.id, { interventions: updated });
     setFiche({ ...fiche, interventions: updated });
     setInterventions(updated);
-    setNewIntervention({ date: '', profession: 'Psy EN EDA', description: '' });
+    setNewIntervention({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
     setAddingIntervention(false);
   };
 
@@ -219,6 +230,16 @@ export default function DetailFiche() {
                   />
                 </div>
                 <div>
+                  <label className="text-sm font-medium text-foreground block mb-2">Type d'intervention</label>
+                  <select
+                    value={newIntervention.type}
+                    onChange={(e) => setNewIntervention({ ...newIntervention, type: e.target.value })}
+                    className="w-full h-9 px-3 rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {TYPES_INTERVENTION.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
                   <label className="text-sm font-medium text-foreground block mb-2">Profession</label>
                   <select
                     value={newIntervention.profession}
@@ -242,7 +263,7 @@ export default function DetailFiche() {
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => {
-                      setNewIntervention({ date: '', profession: 'Psy EN EDA', description: '' });
+                      setNewIntervention({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
                       setAddingIntervention(false);
                     }}
                     className="px-4 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition-colors text-sm font-medium"
@@ -266,6 +287,7 @@ export default function DetailFiche() {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left py-2 px-3 font-medium text-muted-foreground">Date</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Type</th>
                       <th className="text-left py-2 px-3 font-medium text-muted-foreground">Profession</th>
                       <th className="text-left py-2 px-3 font-medium text-muted-foreground">Description</th>
                       <th className="text-right py-2 px-3 font-medium text-muted-foreground">Actions</th>
@@ -275,7 +297,8 @@ export default function DetailFiche() {
                     {interventions.map((inter, idx) => (
                       <tr key={idx} className="border-b border-border hover:bg-secondary/30 transition-colors">
                         <td className="py-2 px-3 text-foreground">{new Date(inter.date).toLocaleDateString('fr-FR')}</td>
-                        <td className="py-2 px-3 text-foreground text-xs bg-secondary/30 rounded px-2 w-fit">{inter.profession}</td>
+                         <td className="py-2 px-3"><span className="text-xs bg-amber-100 text-amber-800 rounded px-2 py-0.5">{inter.type || '—'}</span></td>
+                         <td className="py-2 px-3 text-foreground text-xs bg-secondary/30 rounded px-2 w-fit">{inter.profession}</td>
                         <td className="py-2 px-3 text-foreground truncate max-w-xs">{inter.description}</td>
                         <td className="py-2 px-3 text-right">
                           <button
