@@ -212,6 +212,7 @@ export default function DiagnosticEleve() {
   const getAllItems = (cat) => cat.groups.flatMap(g => g.items);
 
   const totalItems = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
+  const totalDomains = Object.values(checked).filter(arr => arr && arr.length > 0).length;
   const hasSelections = totalItems > 0;
 
   const handleGenerateRapport = async () => {
@@ -357,10 +358,13 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
         >
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-semibold text-[#0F172A]">Sélections</p>
-            <p className="text-sm font-bold text-[#D4A574]">{totalItems} item{totalItems > 1 ? "s" : ""} sélectionné{totalItems > 1 ? "s" : ""}</p>
+            <p className="text-sm font-bold text-[#D4A574]">
+              {totalItems} item{totalItems > 1 ? "s" : ""}
+              {totalDomains > 0 && <span className="text-[#D4A574]/70 font-normal"> — {totalDomains} domaine{totalDomains > 1 ? "s" : ""}</span>}
+            </p>
           </div>
           <div className="w-full bg-[#D4A574]/10 rounded-full h-2">
-            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: hasSelections ? '100%' : '0%'}}></div>
+            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: `${Math.min(totalItems * 5, 100)}%`}}></div>
           </div>
         </motion.div>
 
