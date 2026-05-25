@@ -69,7 +69,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   </table>
 
   <h2>Activité par professionnel RASED</h2>
-  <p class="comment">Ce tableau indique le nombre d'interventions réalisées par chaque catégorie de professionnel RASED (MaDP, MaDR, Psy EN EDA). Il permet de visualiser la contribution de chaque membre de l'équipe et d'évaluer l'équilibre de la charge d'accompagnement.</p>
+  <p class="comment">Ce tableau indique le nombre d'interventions réalisées par chaque catégorie de professionnel RASED (MaDP, MaDR, Psy EN EDA).</p>
   <table>
     <tr><th>Profession</th><th>Interventions</th><th>Part (%)</th></tr>
     ${profData.length > 0
