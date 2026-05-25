@@ -82,7 +82,7 @@ export default function DetailFiche() {
   };
 
   const addIntervention = async () => {
-    if (!fiche || !newIntervention.date || !newIntervention.description) return;
+    if (!fiche || !newIntervention.date) return;
     const updated = [...interventions, newIntervention];
     await base44.entities.FicheEleve.update(fiche.id, { interventions: updated });
     setFiche({ ...fiche, interventions: updated });
@@ -272,7 +272,7 @@ export default function DetailFiche() {
                   </button>
                   <button
                     onClick={addIntervention}
-                    disabled={!newIntervention.date || !newIntervention.description}
+                    disabled={!newIntervention.date}
                     className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
                   >
                     Ajouter
