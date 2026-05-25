@@ -233,6 +233,23 @@ export default function StatsAnnuelles() {
     });
   })();
 
+  // Équipes éducatives par école (toutes interventions enregistrées dans les fiches)
+  const equipesEduParEcole = (() => {
+    const schools = [...new Set(fiches.map(f => f.ecole).filter(Boolean))].sort();
+    return schools.map(ecole => {
+      const fichesDEcole = fiches.filter(f => f.ecole === ecole);
+      const profCounts = {};
+      fichesDEcole.forEach(f => {
+        (f.interventions || []).forEach(interv => {
+          const p = interv.profession || 'Autre';
+          profCounts[p] = (profCounts[p] || 0) + 1;
+        });
+      });
+      const total = Object.values(profCounts).reduce((a, b) => a + b, 0);
+      return { ecole, total, profs: Object.entries(profCounts).map(([prof, nb]) => ({ prof, nb })).sort((a,b) => b.nb - a.nb) };
+    }).filter(e => e.total > 0);
+  })();
+
   // Répartition classes (filtrée par école)
   const classeBreakdown = (() => {
     const counts = {};
@@ -275,7 +292,7 @@ export default function StatsAnnuelles() {
               <p className="text-white/60 text-sm mt-1">Tableau de bord analytique RASED</p>
             </div>
             <Button
-              onClick={() => exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats)}
+              onClick={() => exportStatsPDF(filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats, equipesEduParEcole)}
 
               className="gap-2 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] font-semibold border-0"
             >
@@ -602,10 +619,8 @@ export default function StatsAnnuelles() {
                 const eColors = ['#4A90E2','#34C48A','#D4A574','#EC6B8A','#8B5CF6','#F59E0B','#22d3ee','#6366f1','#a855f7','#ec4899'];
                 const eColor = eColors[idx % eColors.length];
                 const maxDom = Math.max(...doms.map(d => d.value), 1);
-                const maxProf = Math.max(...profs.map(p => p.nb), 1);
                 return (
                   <div key={ecole} className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: `${eColor}40` }}>
-                    {/* Header école */}
                     <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${eColor}12` }}>
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${eColor}25` }}>
                         <BookOpen className="w-4 h-4" style={{ color: eColor }} />
@@ -616,7 +631,6 @@ export default function StatsAnnuelles() {
                       </div>
                     </div>
                     <div className="px-4 pb-4 pt-3 space-y-4">
-                      {/* Catégories de difficultés */}
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-wider text-[#0F172A]/50 mb-2">Catégories de difficultés</p>
                         <div className="space-y-1.5">
@@ -637,7 +651,6 @@ export default function StatsAnnuelles() {
                           })}
                         </div>
                       </div>
-                      {/* Interventions RASED */}
                       {profs.length > 0 && (
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-wider text-[#0F172A]/50 mb-2">Interventions RASED</p>
@@ -652,6 +665,35 @@ export default function StatsAnnuelles() {
                           </div>
                         </div>
                       )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Équipes éducatives par école */}
+        {equipesEduParEcole.length > 0 && (
+          <SectionCard title="Équipes éducatives par école" subtitle="Participations RASED enregistrées dans les fiches élèves" icon={Users} accentColor="#F59E0B" delay={0.28}>
+            <div className="space-y-4">
+              {equipesEduParEcole.map(({ ecole, total, profs }, idx) => {
+                const eColors = ['#4A90E2','#34C48A','#D4A574','#EC6B8A','#8B5CF6','#F59E0B','#22d3ee','#6366f1'];
+                const eColor = eColors[idx % eColors.length];
+                return (
+                  <div key={ecole} className="rounded-2xl border overflow-hidden" style={{ borderColor: `${eColor}40` }}>
+                    <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${eColor}10` }}>
+                      <span className="font-bold text-sm text-[#0F172A] truncate">{ecole}</span>
+                      <span className="text-xs font-bold ml-2 shrink-0" style={{ color: eColor }}>{total} participation{total > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="px-4 py-3 flex flex-wrap gap-2">
+                      {profs.map(({ prof, nb }) => (
+                        <div key={prof} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style={{ background: `${PROF_COLORS[prof] || '#F59E0B'}18`, border: `1px solid ${PROF_COLORS[prof] || '#F59E0B'}40` }}>
+                          <Users className="w-3 h-3" style={{ color: PROF_COLORS[prof] || '#F59E0B' }} />
+                          <span className="text-[10px] font-semibold" style={{ color: PROF_COLORS[prof] || '#F59E0B' }}>{prof}</span>
+                          <span className="text-[10px] font-bold text-[#0F172A]/70">{nb}×</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );

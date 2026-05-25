@@ -1,4 +1,4 @@
-export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats) => {
+export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats, equipesEduParEcole) => {
   const nbEleves = new Set(filteredDiagnostics.map(d => d.eleve_prenom + ' ' + d.eleve_nom)).size;
   const nbInterventions = filteredDiagnostics.length;
   let nbItems = 0;
@@ -19,6 +19,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   const profData = profBreakdown || [];
   const ecoleData = ecoleBreakdown || [];
   const ecoleStats = parEcoleStats || [];
+  const equipesEdu = equipesEduParEcole || [];
   const totalProf = profData.reduce((s, p) => s + p.value, 0);
 
   const html = `<!DOCTYPE html>
@@ -106,6 +107,18 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
       </div>
     `).join('')
     : '<p class="empty">Aucune donnée disponible</p>'
+  }
+
+  <h2>Équipes éducatives par école</h2>
+  <p class="comment">Ce tableau recense les participations des personnels RASED aux équipes éducatives, par école, sur la période.</p>
+  ${equipesEdu.length > 0
+    ? `<table>
+        <tr><th>École</th><th>Profession</th><th>Participations</th></tr>
+        ${equipesEdu.flatMap(({ ecole, profs }) =>
+          profs.map(({ prof, nb }) => `<tr><td>${ecole}</td><td>${prof}</td><td>${nb}</td></tr>`)
+        ).join('')}
+      </table>`
+    : '<p class="empty">Aucune participation enregistrée</p>'
   }
 
   <h2>Difficultés les plus fréquemment repérées</h2>
