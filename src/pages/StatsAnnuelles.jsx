@@ -253,6 +253,24 @@ export default function StatsAnnuelles() {
     }).filter(p => p.total > 0);
   })();
 
+  // Types d'intervention par profession
+  const typeParProf = (() => {
+    const result = {};
+    fiches.forEach(f => {
+      (f.interventions || []).forEach(interv => {
+        const p = interv.profession || 'Autre';
+        const t = interv.type || 'Non renseigné';
+        if (!result[p]) result[p] = {};
+        result[p][t] = (result[p][t] || 0) + 1;
+      });
+    });
+    return ['MaDP', 'MaDR', 'Psy EN EDA'].map(prof => ({
+      prof,
+      types: Object.entries(result[prof] || {}).sort((a, b) => b[1] - a[1]).map(([type, nb]) => ({ type, nb })),
+      total: Object.values(result[prof] || {}).reduce((s, v) => s + v, 0)
+    })).filter(p => p.total > 0);
+  })();
+
   // Répartition classes (filtrée par école)
   const classeBreakdown = (() => {
     const counts = {};
@@ -705,6 +723,47 @@ export default function StatsAnnuelles() {
                               <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
                             </div>
                             <span className="text-[10px] font-bold shrink-0 w-8 text-right" style={{ color }}>{nb}×</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Types d'intervention par profession */}
+        {typeParProf.length > 0 && (
+          <SectionCard title="Types d'intervention par professionnel" subtitle="Répartition des activités de chaque membre RASED" icon={ClipboardList} accentColor="#8B5CF6" delay={0.29}>
+            <div className="space-y-5">
+              {typeParProf.map(({ prof, types, total }) => {
+                const color = PROF_COLORS[prof] || '#8B5CF6';
+                const maxNb = Math.max(...types.map(t => t.nb), 1);
+                return (
+                  <div key={prof} className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: `${color}40` }}>
+                    <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${color}12` }}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}25` }}>
+                          <Users className="w-3.5 h-3.5" style={{ color }} />
+                        </div>
+                        <span className="font-bold text-sm text-[#0F172A]">{prof}</span>
+                      </div>
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: `${color}20`, color }}>
+                        {total} intervention{total > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="px-4 py-3 space-y-2">
+                      {types.map(({ type, nb }) => {
+                        const pct = Math.round((nb / maxNb) * 100);
+                        return (
+                          <div key={type} className="flex items-center gap-3">
+                            <span className="text-[10px] text-[#0F172A]/70 w-36 shrink-0 truncate">{type}</span>
+                            <div className="flex-1 h-1.5 rounded-full bg-[#F5F0E8] overflow-hidden">
+                              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                            </div>
+                            <span className="text-[10px] font-bold shrink-0 w-6 text-right" style={{ color }}>{nb}×</span>
                           </div>
                         );
                       })}
