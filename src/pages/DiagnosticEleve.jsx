@@ -359,12 +359,12 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-semibold text-[#0F172A]">Observation</p>
             <p className="text-sm font-bold text-[#D4A574]">
-              {totalDomains} observation{totalDomains > 1 ? "s" : ""}
-              {totalItems > 0 && <span className="text-[#D4A574]/70 font-normal"> — {totalItems} item{totalItems > 1 ? "s" : ""}</span>}
+              {hasSelections ? "1 observation" : "0 observation"}
+              {totalItems > 0 && <span className="text-[#D4A574]/70 font-normal"> — {totalItems} item{totalItems > 1 ? "s" : ""} dans {totalDomains} domaine{totalDomains > 1 ? "s" : ""}</span>}
             </p>
           </div>
           <div className="w-full bg-[#D4A574]/10 rounded-full h-2">
-            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: `${Math.min(totalDomains * 25, 100)}%`}}></div>
+            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: hasSelections ? '100%' : '0%'}}></div>
           </div>
         </motion.div>
 
