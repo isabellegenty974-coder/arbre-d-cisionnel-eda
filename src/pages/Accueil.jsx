@@ -234,7 +234,15 @@ export default function Accueil() {
                     <div
                       key={i}
                       className="flex items-center gap-2 px-2 py-2 cursor-pointer hover:bg-white/5 transition-colors"
-                      onClick={ev => { ev.stopPropagation(); navigate(`/historique?eleve=${encodeURIComponent(`${e.prenom} ${e.nom}`)}`); }}
+                      onClick={async ev => {
+                        ev.stopPropagation();
+                        const fiches = await base44.entities.FicheEleve.filter({ nom: e.nom, prenom: e.prenom });
+                        if (fiches && fiches.length > 0) {
+                          navigate(`/detail-fiche?id=${fiches[0].id}`);
+                        } else {
+                          navigate(`/historique?eleve=${encodeURIComponent(`${e.prenom} ${e.nom}`)}`);
+                        }
+                      }}
                     >
                       <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(59,130,246,0.25)' }}>
                         <span className="text-[8px] font-bold text-[#7EB8F7]">{e.prenom?.[0]}{e.nom?.[0]}</span>
