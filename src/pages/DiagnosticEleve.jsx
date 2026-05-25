@@ -15,20 +15,38 @@ const CATEGORIES = [
     label: "📚 Apprentissages",
     color: "bg-blue-50 border-blue-200",
     headerColor: "bg-blue-100 text-blue-800",
-    items: [
-      { label: "Décodage lent et laborieux", desc: "Lecture très lente, syllabique, hésitante, même pour des mots fréquents — peu d'automatisation malgré l'entraînement" },
-      { label: "Confusions et inversions de lettres", desc: "Confusions visuelles (b/d, p/q, m/n) ou auditives (f/v, ch/j), inversions de syllabes (por→pro), omissions ou ajouts" },
-      { label: "Conscience phonémique fragile", desc: "Difficulté à manipuler les sons des mots : segmenter, rimer, supprimer ou fusionner des phonèmes" },
-      { label: "Lecture non fluide malgré la remédiation", desc: "Résistance aux apprentissages phonémiques même avec du soutien répété — signe d'alerte fort pour une dyslexie" },
-      { label: "Difficultés de compréhension en lecture", desc: "Peine à saisir le sens d'un texte lu, repérer les personnages, la chronologie ou l'implicite" },
-      { label: "Orthographe atteinte", desc: "Erreurs phonétiques massives, confusion de sons proches, mots outils jamais mémorisés, accords absents" },
-      { label: "Omissions / substitutions à l'écrit", desc: "Lettres ou syllabes oubliées, remplacées ou déplacées dans les mots, même courants" },
-      { label: "Graphisme illisible / douloureux", desc: "Tracé chaotique, lettres de tailles très irrégulières, espacement aléatoire, sortie fréquente des lignes" },
-      { label: "Écriture lente et fatigante", desc: "Coût moteur élevé de l'écriture, fatigue rapide, plaintes physiques (main, bras), refus d'écrire" },
-      { label: "Difficultés en calcul / numération", desc: "Compétences numériques très fragiles : dénombrement, comparaison, opérations élémentaires, sens des quantités" },
-      { label: "Difficultés en résolution de problèmes", desc: "Incompréhension de l'énoncé, absence de stratégie, confusion entre les données numériques" },
-      { label: "Lenteur généralisée dans les productions écrites", desc: "Travail rarement terminé, rythme très inférieur à la classe, coût cognitif global élevé" },
-      { label: "Difficultés de mémorisation des apprentissages scolaires", desc: "Oubli rapide des leçons, tables non retenues, difficulté à consolider les automatismes" },
+    groups: [
+      {
+        label: "Lecture",
+        items: [
+          { label: "Décodage lent et laborieux", desc: "Lecture très lente, peu d'automatisation malgré l'entraînement" },
+          { label: "Confusions et inversions de lettres", desc: "Confusions visuelles (b/d, p/q) ou auditives (f/v, ch/j)" },
+          { label: "Lecture non fluide", desc: "Résistance aux apprentissages phonémiques, signe d'alerte fort" },
+          { label: "Difficultés de compréhension", desc: "Peine à saisir le sens d'un texte, la chronologie ou l'implicite" },
+        ],
+      },
+      {
+        label: "Écriture",
+        items: [
+          { label: "Graphisme illisible", desc: "Tracé chaotique, lettres irrégulières, perte de lisibilité" },
+          { label: "Écriture lente et fatigante", desc: "Coût moteur élevé, fatigue rapide, plaintes physiques" },
+          { label: "Orthographe très atteinte", desc: "Erreurs massives, mots outils jamais mémorisés" },
+        ],
+      },
+      {
+        label: "Mathématiques",
+        items: [
+          { label: "Difficultés en calcul / numération", desc: "Compétences numériques fragiles, opérations élémentaires" },
+          { label: "Difficultés en résolution de problèmes", desc: "Incompréhension de l'énoncé, absence de stratégie" },
+        ],
+      },
+      {
+        label: "Transversal",
+        items: [
+          { label: "Lenteur généralisée", desc: "Travail rarement terminé, rythme très inférieur à la classe" },
+          { label: "Difficultés de mémorisation", desc: "Oubli rapide des leçons, tables non retenues" },
+        ],
+      },
     ],
   },
   {
@@ -36,78 +54,113 @@ const CATEGORIES = [
     label: "💝 Comportement",
     color: "bg-rose-50 border-rose-200",
     headerColor: "bg-rose-100 text-rose-800",
-    items: [
-      { label: "Agitation motrice permanente", desc: "Se lève sans permission, se tortille sur sa chaise, besoin constant de bouger, incapable de rester assis même brièvement" },
-      { label: "Mouvements parasites incessants", desc: "Agite les jambes, tapote, manipule des objets, fait du bruit avec la bouche ou le matériel en permanence" },
-      { label: "Agitation non liée au contexte", desc: "Hyperactivité présente dans tous les contextes (classe, récré, maison) et pas seulement lors de transitions ou d'ennui" },
-      { label: "Impulsivité verbale", desc: "Répond avant la fin de la question, coupe la parole, crie la réponse, parle sans lever le doigt de façon systématique" },
-      { label: "Impulsivité motrice", desc: "Agit avant de réfléchir, touche les affaires des autres, se lève sans autorisation, réponses gestuelles précipitées" },
-      { label: "Incapacité à attendre son tour", desc: "Tensions en jeux collectifs, files d'attente insupportables, frustration immédiate si délai même court" },
-      { label: "Passage à l'acte impulsif avec regrets", desc: "L'enfant regrette souvent après coup, reconnaît avoir agi trop vite, mais répète le comportement" },
-      { label: "Déficit d'inhibition comportementale", desc: "Peine à stopper une réponse automatique, difficultés à respecter une règle lorsque le contexte change" },
-      { label: "Persévération dans l'erreur", desc: "Répète la même réponse ou stratégie malgré le feedback négatif, difficulté à changer de procédure" },
-      { label: "Rires ou réactions inadaptés", desc: "Rit au mauvais moment, réponses émotionnelles décalées par rapport au contexte social" },
-      { label: "Décrochage attentionnel rapide", desc: "Perd le fil après quelques minutes, déconnecte en cours de consigne, regard dans le vide fréquent" },
-      { label: "Hypersensibilité aux distracteurs", desc: "Toute stimulation extérieure (bruit, mouvement, lumière) capte son attention et interrompt la tâche" },
-      { label: "Oubli des consignes en cours de tâche", desc: "Commence un exercice mais ne sait plus ce qu'il devait faire après 2 ou 3 étapes" },
-      { label: "Attention en éclairs uniquement", desc: "Ne concentre son attention que sur les activités qui le passionnent, jamais sur les tâches imposées" },
-      { label: "Anxiété scolaire spécifique", desc: "Peurs liées aux évaluations, aux exposés oraux, à la lecture à voix haute, panique en situation de performance" },
-      { label: "Anxiété généralisée", desc: "Inquiétudes excessives dans de nombreux domaines (famille, santé, avenir), difficultés à déconnecter" },
-      { label: "Somatisations régulières", desc: "Maux de ventre, de tête ou nausées récurrents le matin ou avant un contrôle, sans cause médicale identifiée" },
-      { label: "Refus ou évitement scolaire", desc: "Résistance à aller à l'école, pleurs le matin, demandes répétées de rester à la maison, fugues de classe" },
-      { label: "Comportements de réassurance", desc: "Demande sans cesse si c'est bien, cherche la validation de l'adulte, vérifie ses réponses compulsivement" },
-      { label: "Opposition aux règles scolaires", desc: "Refuse régulièrement de suivre les consignes, conteste les règles de classe, résistance passive ou active" },
-      { label: "Provocations ciblées", desc: "Cherche à agacer intentionnellement des pairs ou l'adulte, sourit quand il transgresse, semble y trouver du plaisir" },
-      { label: "Non-reconnaissance de ses torts", desc: "Reporte systématiquement la faute sur les autres, nie les faits même évidents, discours victimaire ancré" },
-      { label: "Crises de colère disproportionnées", desc: "Explosions de rage pour un refus ou une frustration minime, durée longue, récupération difficile" },
-      { label: "Labilité émotionnelle marquée", desc: "Passe d'une émotion à l'autre très rapidement, humeur imprévisible, pleurs ou rires sans raison apparente" },
-      { label: "Repli affectif / affect plat", desc: "Visage inexpressif, peu de réactions émotionnelles, isolement, regard vide, indifférence aux activités" },
-      { label: "Difficulté à tolérer la frustration", desc: "Réagit fortement à tout obstacle, toute limite, tout échec même mineur déclenche une réaction intense" },
-      { label: "Perfectionnisme rigide avec évitement", desc: "Refuse de commencer si risque d'erreur, efface compulsivement, abandonne rapidement face à la difficulté" },
-      { label: "Manque de confiance en soi", desc: "Dit souvent \"je suis nul(le)\", \"je sais pas\", \"j'y arriverai pas\" avant même d'essayer, se sous-estime de façon systématique" },
-      { label: "Sentiment d'incompétence scolaire", desc: "Convaincu(e) de ne pas être capable d'apprendre, perçoit ses difficultés comme permanentes et inhérentes à sa personne" },
-      { label: "Autodépréciation verbale", desc: "Tient des propos négatifs sur lui/elle-même : \"je suis bête\", \"tout le monde est meilleur que moi\", \"j'ai jamais rien\"" },
-      { label: "Hypersensibilité au regard des autres", desc: "Rougit, se fige ou refuse de participer à l'oral par peur d'être jugé(e), très affecté(e) par les moqueries même légères" },
-      { label: "Évitement des situations de mise en valeur", desc: "Refuse de montrer son travail, se cache quand félicité(e), ne lève jamais la main même quand il/elle connaît la réponse" },
-      { label: "Découragement rapide face à la difficulté", desc: "Abandonne dès le premier obstacle, ne persévère pas, expression de résignation apprise (\"ça sert à rien\")" },
-      { label: "Dépendance excessive au regard de l'adulte", desc: "A besoin d'être rassuré(e) en permanence pour agir, n'ose pas décider seul(e), attend une validation pour chaque étape" },
-      { label: "Repli identitaire scolaire", desc: "Se définit uniquement par ses échecs, a intégré une identité de \"mauvais élève\", désinvestissement global de la scolarité" },
+    groups: [
+      {
+        label: "Attention / Inhibition",
+        items: [
+          { label: "Décrochage attentionnel rapide", desc: "Perd le fil après quelques minutes, déconnexion fréquente" },
+          { label: "Hypersensibilité aux distracteurs", desc: "Tout stimulus extérieur (bruit, mouvement) capte l'attention" },
+          { label: "Oubli des consignes en cours de tâche", desc: "Oublie ce qu'il devait faire après 2-3 étapes" },
+          { label: "Déficit d'inhibition", desc: "Peine à stopper une réponse automatique, difficultés à respecter les règles" },
+        ],
+      },
+      {
+        label: "Impulsivité / Hyperactivité",
+        items: [
+          { label: "Agitation motrice permanente", desc: "Se lève sans permission, besoin constant de bouger" },
+          { label: "Impulsivité verbale", desc: "Répond avant la fin de la question, coupe la parole" },
+          { label: "Impulsivité motrice", desc: "Agit avant de réfléchir, touche les affaires des autres" },
+          { label: "Incapacité à attendre son tour", desc: "Frustration immédiate, tensions en jeux collectifs" },
+        ],
+      },
+      {
+        label: "Anxiété / Émotions",
+        items: [
+          { label: "Anxiété scolaire", desc: "Peurs des évaluations, exposés oraux, panique en performance" },
+          { label: "Somatisations régulières", desc: "Maux de ventre ou de tête le matin ou avant un contrôle" },
+          { label: "Refus ou évitement scolaire", desc: "Résistance à l'école, pleurs le matin" },
+          { label: "Crises de colère disproportionnées", desc: "Explosions de rage pour frustration minime, durée longue" },
+          { label: "Opposition aux règles", desc: "Refuse régulièrement les consignes, résistance active" },
+        ],
+      },
+      {
+        label: "Estime de soi",
+        items: [
+          { label: "Manque de confiance en soi", desc: "Auto-dénigrement : \"je suis nul(le)\", \"j'y arriverai pas\"" },
+          { label: "Hypersensibilité au jugement", desc: "Rougit, se fige, refuse l'oral par peur d'être jugé" },
+          { label: "Évitement des mises en valeur", desc: "Ne lève jamais la main même en connaissant la réponse" },
+          { label: "Découragement rapide", desc: "Abandonne dès le premier obstacle, résignation apprise" },
+        ],
+      },
     ],
   },
   {
     key: "developpement",
     label: "🌱 Développement",
-    color: "bg-teal-50 border-teal-200",
-    headerColor: "bg-teal-100 text-teal-800",
-    items: [
-      { label: "Retard ou difficultés de langage oral", desc: "Vocabulaire limité, phrases courtes ou syntaxe incorrecte pour l'âge, développement du langage tardif ou atypique" },
-      { label: "Difficultés de compréhension orale", desc: "Peine à suivre des consignes à plusieurs étapes, demande souvent de répéter, interprétations littérales" },
-      { label: "Maladresse globale / équilibre", desc: "Chutes fréquentes, difficultés en EPS (équilibre, coordination, saut), mouvements peu précis ou mal calibrés" },
-      { label: "Difficultés motrices fines", desc: "Prise du crayon difficile, découpage imprécis, boutonnage lent, assemblage laborieux, activités manuelles évitantes" },
-      { label: "Attention fragile et fluctuante", desc: "Distrait facilement, attention en éclairs, oublie la consigne en cours de tâche, travail irrégulier selon la stimulation" },
-      { label: "Difficultés d'interactions sociales", desc: "Peu d'amis, jeux solitaires, ne comprend pas les codes sociaux implicites, regard fuyant, difficulté à décoder les émotions" },
-      { label: "Comportements répétitifs / intérêts restreints", desc: "Rituels, routines rigides, intérêts très focalisés et exclusifs, résistance aux changements d'activité ou d'environnement" },
-      { label: "Troubles sensoriels", desc: "Réactions excessives ou absentes au bruit, au toucher, aux odeurs, à la lumière ou aux textures vestimentaires" },
-      { label: "Difficultés de mémoire de travail", desc: "Perd le fil en cours d'exercice, ne retient pas plusieurs informations simultanément, erreurs répétées par oubli" },
-      { label: "Décalage global de développement", desc: "Décalage notable avec les attendus de l'âge dans plusieurs domaines simultanément : langage, moteur, cognitif, social" },
+    color: "bg-emerald-50 border-emerald-200",
+    headerColor: "bg-emerald-100 text-emerald-800",
+    groups: [
+      {
+        label: "Langage oral",
+        items: [
+          { label: "Retard de langage oral", desc: "Vocabulaire limité, phrases courtes, syntaxe incorrecte" },
+          { label: "Difficultés de compréhension orale", desc: "Peine à suivre les consignes, demande souvent de répéter" },
+        ],
+      },
+      {
+        label: "Motricité",
+        items: [
+          { label: "Maladresse globale / équilibre", desc: "Chutes fréquentes, difficultés d'équilibre en EPS" },
+          { label: "Difficultés motrices fines", desc: "Prise du crayon difficile, découpage imprécis" },
+        ],
+      },
+      {
+        label: "Interactions sociales",
+        items: [
+          { label: "Difficultés d'interactions sociales", desc: "Peu d'amis, jeux solitaires, ne comprend pas les codes sociaux" },
+          { label: "Comportements répétitifs / routines rigides", desc: "Rituels, intérêts très focalisés, résistance aux changements" },
+        ],
+      },
+      {
+        label: "Fonctions cognitives",
+        items: [
+          { label: "Mémoire de travail fragile", desc: "Oublie en cours d'exercice, ne retient pas plusieurs infos" },
+          { label: "Troubles sensoriels", desc: "Réactions excessives au bruit, toucher, lumière ou odeurs" },
+        ],
+      },
     ],
   },
   {
     key: "contexte",
     label: "🏠 Contexte",
-    color: "bg-emerald-50 border-emerald-200",
-    headerColor: "bg-emerald-100 text-emerald-800",
-    items: [
-      { label: "Environnement familial difficile", desc: "Conflits parentaux, instabilité affective, manque de sécurité ou de suivi des apprentissages à la maison" },
-      { label: "Changement récent majeur", desc: "Déménagement, séparation parentale, naissance d'un enfant, deuil récent dans la famille" },
-      { label: "Absentéisme fréquent", desc: "Nombreuses absences non justifiées entraînant des lacunes importantes et une déscolarisation partielle" },
-      { label: "Mauvais climat de classe", desc: "Moqueries, harcèlement, conflits de groupe, tensions relationnelles récurrentes affectant le bien-être" },
-      { label: "Barrière linguistique", desc: "Langue parlée à la maison différente du français, scolarisation récente en France, bilinguisme non stabilisé" },
-      { label: "Précarité sociale", desc: "Conditions de vie difficiles (logement, alimentation) impactant la disponibilité aux apprentissages" },
-      { label: "Changement d'école ou d'enseignant", desc: "Rupture récente dans le suivi scolaire, adaptation difficile, perte des repères habituels" },
-      { label: "Événement traumatisant récent", desc: "Accident, violence, deuil ou événement choquant ayant pu engendrer un état de stress ou de choc" },
-      { label: "Manque de stimulation à la maison", desc: "Pas de soutien aux devoirs, peu de livres ou d'échanges verbaux, faible stimulation cognitive hors école" },
-      { label: "Troubles de santé récurrents", desc: "Maladies fréquentes, problèmes auditifs ou visuels non corrigés, fatigabilité liée à un état de santé" },
+    color: "bg-amber-50 border-amber-200",
+    headerColor: "bg-amber-100 text-amber-800",
+    groups: [
+      {
+        label: "Famille",
+        items: [
+          { label: "Environnement familial difficile", desc: "Conflits parentaux, instabilité affective, manque de suivi" },
+          { label: "Changement récent majeur", desc: "Déménagement, séparation parentale, deuil récent" },
+          { label: "Événement traumatisant", desc: "Accident, violence, deuil engendrant stress émotionnel" },
+          { label: "Précarité sociale", desc: "Conditions de vie difficiles impactant la disponibilité" },
+        ],
+      },
+      {
+        label: "Environnement scolaire",
+        items: [
+          { label: "Mauvais climat de classe", desc: "Moqueries, harcèlement, tensions relationnelles" },
+          { label: "Absentéisme fréquent", desc: "Nombreuses absences entraînant des lacunes importantes" },
+          { label: "Changement d'école ou d'enseignant", desc: "Rupture récente, adaptation difficile" },
+        ],
+      },
+      {
+        label: "Autres facteurs",
+        items: [
+          { label: "Barrière linguistique", desc: "Langue de la maison différente du français" },
+          { label: "Manque de stimulation", desc: "Pas de soutien aux devoirs, peu d'échanges verbaux" },
+          { label: "Troubles de santé récurrents", desc: "Maladies fréquentes, problèmes auditifs/visuels non corrigés" },
+        ],
+      },
     ],
   },
 ];
@@ -155,6 +208,8 @@ export default function DiagnosticEleve() {
       return { ...prev, [catKey]: exists ? current.filter(i => i !== item.label) : [...current, item.label] };
     });
   };
+
+  const getAllItems = (cat) => cat.groups.flatMap(g => g.items);
 
   const totalChecked = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
 
@@ -343,7 +398,6 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
           <AnimatePresence mode="wait">
             {CATEGORIES.map((cat) => {
               if (activeTab !== cat.key) return null;
-              const catChecked = checked[cat.key] || [];
               return (
                 <motion.div
                   key={cat.key}
@@ -351,52 +405,53 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -15 }}
                   transition={{ duration: 0.25 }}
-                  className="space-y-3"
+                  className="space-y-6"
                 >
-                  {cat.items.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>Aucun élément dans cette catégorie</p>
+                  {cat.groups.map((group, gIdx) => (
+                    <div key={group.label}>
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 px-1">{group.label}</p>
+                      <div className="space-y-2">
+                        {group.items.map((item, idx) => {
+                          const isChecked = (checked[cat.key] || []).includes(item.label);
+                          return (
+                            <motion.label
+                              key={item.label}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: (gIdx * 0.05) + idx * 0.03 }}
+                              className={`flex items-start gap-3 p-4 rounded-xl cursor-pointer border transition-all ${
+                                isChecked
+                                  ? "bg-white border-[#D4A574]/40 shadow-soft"
+                                  : "bg-white/50 border-transparent hover:bg-white hover:border-[#D4A574]/20"
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggle(cat.key, item)}
+                                className="mt-1 w-5 h-5 rounded shrink-0 cursor-pointer accent-[#D4A574]"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-semibold leading-snug ${
+                                  isChecked ? "text-[#0F172A]" : "text-foreground/80"
+                                }`}>
+                                  {item.label}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                  {item.desc}
+                                </p>
+                              </div>
+                              {isChecked && (
+                                <div className="shrink-0 w-5 h-5 rounded-full bg-[#D4A574]/20 flex items-center justify-center mt-0.5">
+                                  <span className="text-xs font-bold text-[#D4A574]">✓</span>
+                                </div>
+                              )}
+                            </motion.label>
+                          );
+                        })}
+                      </div>
                     </div>
-                  ) : (
-                    cat.items.map((item, idx) => {
-                      const isChecked = (checked[cat.key] || []).includes(item.label);
-                      return (
-                        <motion.label
-                          key={item.label}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.03 }}
-                          className={`flex items-start gap-3 p-4 rounded-xl cursor-pointer border transition-all ${
-                            isChecked 
-                              ? "bg-white border-[#D4A574]/40 shadow-soft" 
-                              : "bg-white/50 border-transparent hover:bg-white hover:border-[#D4A574]/20"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => toggle(cat.key, item)}
-                            className="mt-1 w-5 h-5 rounded shrink-0 cursor-pointer accent-[#D4A574]"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-semibold leading-snug ${
-                              isChecked ? "text-[#0F172A]" : "text-foreground/80"
-                            }`}>
-                              {item.label}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                              {item.desc}
-                            </p>
-                          </div>
-                          {isChecked && (
-                            <div className="shrink-0 w-5 h-5 rounded-full bg-[#D4A574]/20 flex items-center justify-center mt-0.5">
-                              <span className="text-xs font-bold text-[#D4A574]">✓</span>
-                            </div>
-                          )}
-                        </motion.label>
-                      );
-                    })
-                  )}
+                  ))}
                 </motion.div>
               );
             })}
