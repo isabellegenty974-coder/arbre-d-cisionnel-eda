@@ -16,6 +16,7 @@ export default function Accueil() {
 
 
   const [eleves, setEleves] = useState([]);
+  const [totalObservations, setTotalObservations] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -76,6 +77,7 @@ export default function Accueil() {
       else if (!map.get(key).lastDate) map.get(key).lastDate = d.created_date;
     });
     setEleves([...map.values()]);
+    setTotalObservations(diagnostics.filter(d => ficheKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase())).length);
     setPage(1);
   };
 
@@ -224,7 +226,7 @@ export default function Accueil() {
               <div className="flex items-center gap-1.5 px-2 py-2 border-b border-white/10">
                 <span className="text-[#7EB8F7] font-bold" style={{ fontFamily: 'serif', fontSize: 12 }}>&#936;</span>
                 <span className="text-white text-[10px] font-semibold flex-1">Elèves /</span>
-                <span className="text-white/50 text-[9px]">{filtered.length} élève{filtered.length !== 1 ? 's' : ''}</span>
+                <span className="text-white/50 text-[9px]">{filtered.length} élève{filtered.length !== 1 ? 's' : ''} • {totalObservations} obs.</span>
               </div>
               {pageEleves.length === 0 ? (
                 <p className="text-white/40 text-[10px] text-center py-3">Aucun élève trouvé</p>
