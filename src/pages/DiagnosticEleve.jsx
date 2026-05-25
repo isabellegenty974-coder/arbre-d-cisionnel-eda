@@ -357,14 +357,14 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
           className="mb-6 p-4 rounded-xl bg-white border border-[#D4A574]/20 shadow-soft"
         >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-semibold text-[#0F172A]">Sélections</p>
+            <p className="text-sm font-semibold text-[#0F172A]">Observation</p>
             <p className="text-sm font-bold text-[#D4A574]">
-              {totalItems} item{totalItems > 1 ? "s" : ""}
-              {totalDomains > 0 && <span className="text-[#D4A574]/70 font-normal"> — {totalDomains} domaine{totalDomains > 1 ? "s" : ""}</span>}
+              {totalDomains} observation{totalDomains > 1 ? "s" : ""}
+              {totalItems > 0 && <span className="text-[#D4A574]/70 font-normal"> — {totalItems} item{totalItems > 1 ? "s" : ""}</span>}
             </p>
           </div>
           <div className="w-full bg-[#D4A574]/10 rounded-full h-2">
-            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: `${Math.min(totalItems * 5, 100)}%`}}></div>
+            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: `${Math.min(totalDomains * 25, 100)}%`}}></div>
           </div>
         </motion.div>
 
