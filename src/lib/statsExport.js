@@ -69,16 +69,6 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
     ${allDomaines.map(d => `<tr><td>${d.name}</td><td>${d.value}</td><td>${totalDomaines > 0 ? ((d.value / totalDomaines) * 100).toFixed(1) : 0}%</td></tr>`).join('')}
   </table>
 
-  <h2>Activité par professionnel RASED</h2>
-  <p class="comment">Ce tableau indique le nombre d'interventions réalisées par chaque catégorie de professionnel RASED (MaDP, MaDR, Psy EN EDA).</p>
-  <table>
-    <tr><th>Profession</th><th>Interventions</th><th>Part (%)</th></tr>
-    ${profData.length > 0
-      ? [...profData].sort((a,b) => b.value - a.value).map(p => `<tr><td>${p.name}</td><td>${p.value}</td><td>${totalProf > 0 ? ((p.value / totalProf) * 100).toFixed(1) : 0}%</td></tr>`).join('')
-      : '<tr><td colspan="3" class="empty">Aucune donnée disponible</td></tr>'
-    }
-  </table>
-
   <h2>Élèves accompagnés par école</h2>
   <p class="comment">Ce tableau présente le nombre d'élèves accompagnés par le RASED dans chaque établissement scolaire. Il offre une vue d'ensemble de la couverture territoriale de l'équipe et permet d'identifier les écoles les plus demandeuses d'accompagnement.</p>
   <table>
