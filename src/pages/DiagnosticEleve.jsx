@@ -211,7 +211,8 @@ export default function DiagnosticEleve() {
 
   const getAllItems = (cat) => cat.groups.flatMap(g => g.items);
 
-  const totalChecked = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
+  const totalChecked = Object.values(checked).filter(arr => arr && arr.length > 0).length;
+  const totalItems = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
 
   const handleGenerateRapport = async () => {
     setGenerating(true);
@@ -356,10 +357,10 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
         >
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-semibold text-[#0F172A]">Sélections</p>
-            <p className="text-sm font-bold text-[#D4A574]">{totalChecked} observation{totalChecked > 1 ? "s" : ""}</p>
+            <p className="text-sm font-bold text-[#D4A574]">{totalChecked} domaine{totalChecked > 1 ? "s" : ""} — {totalItems} item{totalItems > 1 ? "s" : ""}</p>
           </div>
           <div className="w-full bg-[#D4A574]/10 rounded-full h-2">
-            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: `${Math.min(totalChecked * 5, 100)}%`}}></div>
+            <div className="bg-gradient-to-r from-[#D4A574] to-[#D4A574]/70 h-2 rounded-full transition-all" style={{width: `${Math.min(totalChecked * 25, 100)}%`}}></div>
           </div>
         </motion.div>
 
@@ -467,7 +468,7 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
         >
           <Button
             onClick={handleGenerateRapport}
-            disabled={totalChecked === 0 || generating}
+            disabled={totalItems === 0 || generating}
             variant="outline"
             className="w-full h-11 gap-2 border-2 border-[#D4A574] text-[#D4A574] hover:bg-[#D4A574]/5 font-semibold rounded-lg"
           >
@@ -475,12 +476,12 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
             {generating ? (
               <><span className="animate-spin">⟳</span> Génération en cours...</>
             ) : (
-              `Générer le rapport (${totalChecked})`
+              `Générer le rapport (${totalItems} item${totalItems > 1 ? 's' : ''})`
             )}
           </Button>
           <Button
             onClick={handleSave}
-            disabled={totalChecked === 0 || saving || saved}
+            disabled={totalItems === 0 || saving || saved}
             className={`w-full h-11 gap-2 font-semibold rounded-lg shadow-soft transition-all ${
               saved 
                 ? "bg-chart-2 hover:bg-chart-2/90" 
