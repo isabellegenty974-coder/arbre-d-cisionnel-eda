@@ -209,8 +209,6 @@ export default function DiagnosticEleve() {
     });
   };
 
-  const getAllItems = (cat) => cat.groups.flatMap(g => g.items);
-
   const totalItems = Object.values(checked).reduce((acc, arr) => acc + arr.length, 0);
   const totalDomains = Object.values(checked).filter(arr => arr && arr.length > 0).length;
   const hasSelections = totalItems > 0;
@@ -224,51 +222,46 @@ export default function DiagnosticEleve() {
         examinerName = user?.full_name || 'N/A';
       } catch (e) {}
 
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('fr-FR');
+      const dateStr = new Date().toLocaleDateString('fr-FR');
       const lignes = [];
       CATEGORIES.forEach(cat => {
         const items = checked[cat.key] || [];
         if (items.length > 0) {
-          lignes.push(`**${cat.label}** : ${items.join(" ; ")}`);
-        }
-      });
-      const prompt = `Élève : ${eleve?.prenom || 'N/A'} ${eleve?.nom || 'N/A'}
-Âge : ${eleve?.age || 'N/A'} ans
-Classe : ${eleve?.classe || 'N/A'}
-Examinateur : ${examinerName}
-Date : ${dateStr}
-
-Tu es un clinicien spécialisé dans l'évaluation et le diagnostic. Tu dois analyser les observations suivantes chez cet élève :\n\n${lignes.join("\n")}\n\nGénère un rapport clinique structuré en français avec :\n1. Un résumé synthétique des observations\n2. Les hypothèses diagnostiques prioritaires (avec leur nom clinique précis)\n3. Les orientations d'évaluation complémentaire recommandées\n4. Les recommandations d'accompagnement et d'aménagements\n\nRemplace chaque occurrence de "Patient" par "L'élève" ou "l'élève". Sois professionnel, rigoureux et clair. Évite de poser un diagnostic définitif.`;
-
-      const result = await base44.integrations.Core.InvokeLLM({ prompt });
-
-      const lignesAnalyse = [];
-      Object.entries(checked).forEach(([key, items]) => {
-        if (items && items.length > 0) {
-          const DOMAIN_NAMES = { apprentissages: 'Apprentissages', comportement: 'Comportement', developpement: 'Développement', contexte: 'Contexte' };
-          lignesAnalyse.push(`${DOMAIN_NAMES[key]}: ${items.join(', ')}`);
+          lignes.push(`- ${cat.label} : ${items.join(' ; ')}`);
         }
       });
 
-      const promptAnalyseCroisee = `Basé sur le rapport clinique suivant, analyse les LIENS et INTERACTIONS entre les différents domaines (apprentissages, comportement, développement, contexte).
+      const prompt = [
+        "Tu es un psychologue scolaire ou rééducateur spécialisé (RASED). Rédige un rapport d'observation clinique structuré, professionnel et bienveillant.",
+        "",
+        `ÉLÈVE : ${eleve?.prenom || 'N/A'} ${eleve?.nom || 'N/A'} | Âge : ${eleve?.age || 'N/A'} ans | Classe : ${eleve?.classe || 'N/A'}`,
+        `Date : ${dateStr} | Examinateur : ${examinerName}`,
+        "",
+        "OBSERVATIONS RECUEILLIES :",
+        ...lignes,
+        "",
+        "Rédige le rapport en 4 parties avec ces titres exacts en gras :",
+        "",
+        "**1. Synthèse clinique des observations**",
+        "Articule les observations de manière fluide et professionnelle. Montre les liens entre les domaines si plusieurs sont concernés. Utilise 'l'élève' (jamais 'le patient'). Sois précis mais non stigmatisant.",
+        "",
+        "**2. Hypothèses diagnostiques**",
+        "Propose 2 à 4 hypothèses hiérarchisées (de la plus probable à la moins probable). Pour chaque hypothèse : nom clinique précis, justification courte basée sur les observations, niveau de probabilité (élevée / modérée / à explorer). Ne pose pas de diagnostic définitif.",
+        "",
+        "**3. Orientations d'évaluation complémentaire**",
+        "Propose des bilans spécifiques à réaliser (orthophonique, psychomoteur, neuropsychologique, ophtalmologique, ORL, médical…) directement justifiés par les hypothèses. Sois précis et actionnable.",
+        "",
+        "**4. Préconisations et aménagements**",
+        "Liste les aménagements pédagogiques, adaptations en classe et accompagnements à mettre en place à court et moyen terme (enseignant, famille, équipe RASED). Formule des préconisations concrètes et réalistes.",
+      ].join('\n');
 
-Rapport:
-${result}
-
-Observations par domaine:
-${lignesAnalyse.join('\n')}
-
-Fournissez une courte analyse croisée (3-5 points) montrant comment les difficultés dans un domaine impactent les autres. Format: - Point 1\n- Point 2\n...`;
-
-      const analyseResult = await base44.integrations.Core.InvokeLLM({ prompt: promptAnalyseCroisee });
-      const rapportEnrichi = `${result}\n\n## Analyse croisée des domaines\n${analyseResult}`;
-      setRapport(rapportEnrichi);
-      setGeneratedRapport(rapportEnrichi);
+      const result = await base44.integrations.Core.InvokeLLM({ prompt, model: 'claude_sonnet_4_6' });
+      setRapport(result);
+      setGeneratedRapport(result);
 
       if (eleveId) {
         try {
-          await base44.entities.FicheEleve.update(eleveId, { rapport: rapportEnrichi });
+          await base44.entities.FicheEleve.update(eleveId, { rapport: result });
         } catch (err) {
           console.error('Erreur sauvegarde rapport FicheEleve:', err);
         }
@@ -330,9 +323,7 @@ Fournissez une courte analyse croisée (3-5 points) montrant comment les difficu
 
     if (eleveId && generatedRapport) {
       try {
-        await base44.entities.FicheEleve.update(eleveId, {
-          rapport: generatedRapport
-        });
+        await base44.entities.FicheEleve.update(eleveId, { rapport: generatedRapport });
       } catch (err) {
         console.error('Erreur mise à jour fiche élève:', err);
       }
