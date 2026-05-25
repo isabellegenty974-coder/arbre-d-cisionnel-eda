@@ -14,12 +14,17 @@ import PhotoEEUpload from '@/components/PhotoEEUpload';
 export default function FicheEleve() {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [ecole, setEcole] = useState('');
   const ECOLES = ['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'];
   const [dateNaissance, setDateNaissance] = useState('');
   const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(u => setCurrentUser(u)).catch(() => {});
+  }, []);
 
   const [jourNaissance, setJourNaissance] = useState('');
   const [moisNaissance, setMoisNaissance] = useState('');
@@ -56,9 +61,8 @@ export default function FicheEleve() {
   });
 
   const onSubmit = async (data) => {
-    const user = await base44.auth.me();
-    const fullName = user.full_name || 'Utilisateur';
-    const profession = user.profession || 'Profession non renseignée';
+    const fullName = currentUser?.full_name || 'Utilisateur';
+    const profession = currentUser?.profession || 'Profession non renseignée';
     
     const created = await base44.entities.FicheEleve.create({
       nom: data.nom,
