@@ -176,8 +176,8 @@ export default function Dashboard() {
       </aside>
 
       {/* MAIN */}
-      <div className="flex-1 flex flex-col min-h-screen" style={{ marginLeft: 0 }} id="main-content">
-        <style>{`@media(min-width:1024px){#main-content{margin-left:220px}}`}</style>
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-[220px]" id="main-content">
+        <style>{`#main-content{margin-left:0}@media(min-width:1024px){#main-content{margin-left:220px}}`}</style>
 
         {/* TOPBAR */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-7 border-b" style={{ background: '#fff', borderColor: '#DDE4EE', height: 56 }}>
