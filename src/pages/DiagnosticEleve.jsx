@@ -232,7 +232,7 @@ export default function DiagnosticEleve() {
       });
 
       const prompt = [
-        "Tu es un psychologue scolaire ou rééducateur spécialisé (RASED). Rédige un rapport d'observation clinique structuré, professionnel et bienveillant.",
+        "Tu es un psychologue scolaire spécialisé (RASED). Rédige un rapport d'observation clinique structuré, professionnel et bienveillant.",
         "",
         `ÉLÈVE : ${eleve?.prenom || 'N/A'} ${eleve?.nom || 'N/A'} | Âge : ${eleve?.age || 'N/A'} ans | Classe : ${eleve?.classe || 'N/A'}`,
         `Date : ${dateStr} | Examinateur : ${examinerName}`,
