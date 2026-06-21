@@ -1,18 +1,12 @@
-import ScreenLayout from "../../components/tree/ScreenLayout";
-import InfoList from "../../components/tree/InfoList";
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsClimatClasse() {
   return (
-    <ScreenLayout title="Actions recommandées – Climat de classe">
-      <InfoList
-        type="action"
-        items={[
-          "Rituels",
-          "Règles",
-          "Médiation",
-          "Aménagements",
-        ]}
-      />
-    </ScreenLayout>
+    <ActionsPage
+      title="Actions recommandées – Climat de classe"
+      domaine="contexte"
+      sousDomaine="climat de classe"
+      items={["Rituels", "Règles", "Médiation", "Aménagements"]}
+    />
   );
 }

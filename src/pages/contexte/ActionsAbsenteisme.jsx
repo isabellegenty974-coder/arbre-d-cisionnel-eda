@@ -1,18 +1,12 @@
-import ScreenLayout from "../../components/tree/ScreenLayout";
-import InfoList from "../../components/tree/InfoList";
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsAbsenteisme() {
   return (
-    <ScreenLayout title="Actions recommandées – Absentéisme">
-      <InfoList
-        type="action"
-        items={[
-          "Échanges famille",
-          "Plan de reprise",
-          "Suivi",
-          "Coordination équipe",
-        ]}
-      />
-    </ScreenLayout>
+    <ActionsPage
+      title="Actions recommandées – Absentéisme"
+      domaine="contexte"
+      sousDomaine="absentéisme"
+      items={["Échanges famille", "Plan de reprise", "Suivi", "Coordination équipe"]}
+    />
   );
 }

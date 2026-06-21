@@ -1,17 +1,12 @@
-import ScreenLayout from "../../components/tree/ScreenLayout";
-import InfoList from "../../components/tree/InfoList";
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsChangements() {
   return (
-    <ScreenLayout title="Actions recommandées – Changements">
-      <InfoList
-        type="action"
-        items={[
-          "Entretien famille",
-          "Temps d'adaptation",
-          "Soutien émotionnel",
-        ]}
-      />
-    </ScreenLayout>
+    <ActionsPage
+      title="Actions recommandées – Changements"
+      domaine="contexte"
+      sousDomaine="changements"
+      items={["Entretien famille", "Temps d'adaptation", "Soutien émotionnel"]}
+    />
   );
 }

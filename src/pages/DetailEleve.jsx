@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
-import { Download, ArrowLeft, Check, BarChart2 } from "lucide-react";
+import { Download, ArrowLeft, Check, BarChart2, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 import jsPDF from "jspdf";
 
@@ -168,6 +168,13 @@ export default function DetailEleve() {
 
           {/* Boutons */}
           <div className="space-y-3 pt-2">
+            <Button
+              onClick={() => navigate(`/diagnostic-eleve?id=${id}`)}
+              className="w-full gap-2 bg-[#D4A574] hover:bg-[#C49464] text-white"
+            >
+              <Brain className="w-4 h-4" />
+              Démarrer un nouveau diagnostic EDA
+            </Button>
             <Button onClick={handleExportPDF} className="w-full gap-2 bg-primary hover:bg-primary/90">
               <Download className="w-4 h-4" />
               Exporter en PDF

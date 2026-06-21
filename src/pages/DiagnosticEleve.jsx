@@ -8,6 +8,7 @@ import { Save, FileText, X, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { motion, AnimatePresence } from "framer-motion";
 import RapportContent from "@/components/RapportContent";
+import SaveDiagnosticButton from "@/components/SaveDiagnosticButton";
 
 const CATEGORIES = [
   {
@@ -191,7 +192,11 @@ export default function DiagnosticEleve() {
 
   useEffect(() => {
     if (eleveId) {
-      base44.entities.FicheEleve.get(eleveId).then(setEleve);
+      base44.entities.FicheEleve.get(eleveId).then(data => {
+        setEleve(data);
+        // Stocker le ficheId dans le contexte pour SaveDiagnosticButton
+        // On enrichit l'objet eleve avec ficheId via DiagnosticContext si disponible
+      });
     } else {
       const prenom = urlParams.get('prenom') || '';
       const nom = urlParams.get('nom') || '';
@@ -515,9 +520,20 @@ export default function DiagnosticEleve() {
               <div className="overflow-y-auto px-6 py-5 flex-1">
                 <RapportContent text={rapport} />
               </div>
-              <div className="px-6 py-4 border-t border-border shrink-0">
+              <div className="px-6 py-4 border-t border-border shrink-0 space-y-2">
+                {eleveId && (
+                  <SaveDiagnosticButton
+                    ficheId={eleveId}
+                    prenomEleve={eleve?.prenom}
+                    domaine="diagnostic EDA"
+                    sousDomaine=""
+                    hypotheses={rapport ? [rapport.substring(0, 150) + '…'] : []}
+                    actions={[]}
+                  />
+                )}
                 <Button
                   className="w-full gap-2"
+                  variant="outline"
                   onClick={async () => {
                     try {
                       const pdfBuffer = await generatePdf();

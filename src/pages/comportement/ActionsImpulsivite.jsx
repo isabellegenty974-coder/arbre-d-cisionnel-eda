@@ -1,18 +1,12 @@
-import ScreenLayout from "../../components/tree/ScreenLayout";
-import InfoList from "../../components/tree/InfoList";
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsImpulsivite() {
   return (
-    <ScreenLayout title="Actions recommandées – Impulsivité">
-      <InfoList
-        type="action"
-        items={[
-          "Routines",
-          "Consignes fractionnées",
-          "Renforcement positif",
-          "Place dans la classe",
-        ]}
-      />
-    </ScreenLayout>
+    <ActionsPage
+      title="Actions recommandées – Impulsivité"
+      domaine="comportement"
+      sousDomaine="impulsivité"
+      items={["Routines", "Consignes fractionnées", "Renforcement positif", "Place dans la classe"]}
+    />
   );
 }

@@ -1,17 +1,12 @@
-import ScreenLayout from "../../components/tree/ScreenLayout";
-import InfoList from "../../components/tree/InfoList";
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsLangageExpr() {
   return (
-    <ScreenLayout title="Actions recommandées – Expression">
-      <InfoList
-        type="action"
-        items={[
-          "Modélisation",
-          "Jeux de langage",
-          "Orientation orthophonie",
-        ]}
-      />
-    </ScreenLayout>
+    <ActionsPage
+      title="Actions recommandées – Expression"
+      domaine="développement"
+      sousDomaine="langage oral / expression"
+      items={["Modélisation", "Jeux de langage", "Orientation orthophonie"]}
+    />
   );
 }

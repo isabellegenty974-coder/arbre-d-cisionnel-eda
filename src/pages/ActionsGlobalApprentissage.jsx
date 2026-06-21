@@ -1,11 +1,16 @@
-import ListPage from '@/components/ListPage';
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsGlobalApprentissage() {
-  const items = [
-    "Bilan psychométrique si nécessaire",
-    "Concertation équipe pédagogique",
-    "Mise en place de supports adaptés"
-  ];
-
-  return <ListPage title="Actions – Difficultés globales" items={items} />;
+  return (
+    <ActionsPage
+      title="Actions – Difficultés globales"
+      domaine="apprentissage"
+      sousDomaine="global"
+      items={[
+        "Bilan psychométrique si nécessaire",
+        "Concertation équipe pédagogique",
+        "Mise en place de supports adaptés",
+      ]}
+    />
+  );
 }

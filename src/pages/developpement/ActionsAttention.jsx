@@ -1,18 +1,12 @@
-import ScreenLayout from "../../components/tree/ScreenLayout";
-import InfoList from "../../components/tree/InfoList";
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsAttention() {
   return (
-    <ScreenLayout title="Actions recommandées – Attention">
-      <InfoList
-        type="action"
-        items={[
-          "Routines",
-          "Consignes courtes",
-          "Place adaptée",
-          "Renforcement positif",
-        ]}
-      />
-    </ScreenLayout>
+    <ActionsPage
+      title="Actions recommandées – Attention"
+      domaine="développement"
+      sousDomaine="attention"
+      items={["Routines", "Consignes courtes", "Place adaptée", "Renforcement positif"]}
+    />
   );
 }

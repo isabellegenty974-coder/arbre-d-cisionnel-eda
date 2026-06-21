@@ -234,7 +234,7 @@ export default function MesEcoles() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                     className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => navigate(`/detail-ecole?id=${ecole.id}`)}
+                    onClick={(ev) => { if (ev.target.closest('button[data-import]')) return; navigate(`/detail-ecole?id=${ecole.id}`); }}
                   >
                     <div className="p-4 border-b border-gray-100 flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -251,7 +251,12 @@ export default function MesEcoles() {
                           {ecole.commune && <span className="text-xs text-gray-500">{ecole.commune}</span>}
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-400 shrink-0 mt-1" />
+                      <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                        <button data-import="true" onClick={() => navigate(`/import-pdf?ecoleId=${ecole.id}`)} className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-500" title="Importer liste PDF">
+                          <FileText className="w-3.5 h-3.5" />
+                        </button>
+                        <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+                      </div>
                     </div>
                     <div className="px-4 py-3 flex items-center justify-between gap-3">
                       <div className="flex gap-3">

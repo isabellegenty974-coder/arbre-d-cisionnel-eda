@@ -4,30 +4,42 @@
   "properties": {
     "eleve_id": {
       "type": "string",
-      "description": "Identifiant de l'\u00e9l\u00e8ve"
+      "description": "Identifiant de l'\u00e9l\u00e8ve (FicheEleve)"
     },
     "date": {
       "type": "string",
       "format": "date",
       "description": "Date de l'\u00e9valuation"
     },
+    "domaine": {
+      "type": "string",
+      "description": "Domaine principal explor\u00e9 (apprentissage, comportement, d\u00e9veloppement, contexte)"
+    },
+    "sous_domaine": {
+      "type": "string",
+      "description": "Sous-domaine explor\u00e9 (lecture, \u00e9criture, maths, anxi\u00e9t\u00e9, etc.)"
+    },
     "hypotheses": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Liste des hypoth\u00e8ses g\u00e9n\u00e9r\u00e9es"
+      "description": "Liste des hypoth\u00e8ses retenues"
     },
     "recommandations": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Liste des recommandations g\u00e9n\u00e9r\u00e9es"
+      "description": "Liste des actions recommand\u00e9es"
     },
     "scores": {
       "type": "object",
-      "description": "Scores par domaine (apprentissage, comportement, d\u00e9veloppement, contexte)"
+      "description": "Scores par domaine"
+    },
+    "diagnostic_id": {
+      "type": "string",
+      "description": "R\u00e9f\u00e9rence au Diagnostic associ\u00e9"
     }
   },
   "required": [

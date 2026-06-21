@@ -1,11 +1,16 @@
-import ListPage from '@/components/ListPage';
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsAnxieteSit() {
-  const items = [
-    "Identifier les situations déclenchantes précises",
-    "Proposer des aménagements contextuels",
-    "Techniques de gestion du stress adaptées"
-  ];
-
-  return <ListPage title="Actions – Anxiété situationnelle" items={items} />;
+  return (
+    <ActionsPage
+      title="Actions – Anxiété situationnelle"
+      domaine="comportement"
+      sousDomaine="anxiété situationnelle"
+      items={[
+        "Identifier les situations déclenchantes précises",
+        "Proposer des aménagements contextuels",
+        "Techniques de gestion du stress adaptées",
+      ]}
+    />
+  );
 }

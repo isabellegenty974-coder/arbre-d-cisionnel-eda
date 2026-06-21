@@ -111,6 +111,7 @@ export function DiagnosticProvider({ children }) {
 
   const setCurrentEleve = (elevData) => {
     setEleve(elevData);
+    if (elevData) localStorage.setItem('current_eleve', JSON.stringify(elevData));
   };
 
   return (

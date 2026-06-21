@@ -1,18 +1,12 @@
-import ScreenLayout from "../../components/tree/ScreenLayout";
-import InfoList from "../../components/tree/InfoList";
+import ActionsPage from "@/components/tree/ActionsPage";
 
 export default function ActionsInteractions() {
   return (
-    <ScreenLayout title="Actions recommandées – Interactions sociales">
-      <InfoList
-        type="action"
-        items={[
-          "Jeux coopératifs",
-          "Médiation",
-          "Observation cour",
-          "Échanges famille",
-        ]}
-      />
-    </ScreenLayout>
+    <ActionsPage
+      title="Actions recommandées – Interactions sociales"
+      domaine="développement"
+      sousDomaine="interactions sociales"
+      items={["Jeux coopératifs", "Médiation", "Observation cour", "Échanges famille"]}
+    />
   );
 }
