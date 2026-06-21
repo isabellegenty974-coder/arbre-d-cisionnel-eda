@@ -43,6 +43,14 @@ import MesEcoles from './pages/MesEcoles';
 import DetailEcole from './pages/DetailEcole';
 import ImportPDF from './pages/ImportPDF';
 
+// Pages orphelines déplacées aux bons chemins
+import ActionsAnxieteSit from './pages/ActionsAnxieteSit';
+import ActionsGlobalApprentissage from './pages/ActionsGlobalApprentissage';
+import HypoEcriture from './pages/HypoEcriture';
+import HypoMaths from './pages/HypoMaths';
+import MotriciteFine from './pages/MotriciteFine';
+import MotriciteGlobale from './pages/MotriciteGlobale';
+
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
 import Lecture from './pages/apprentissage/Lecture';
@@ -363,6 +371,9 @@ const AuthenticatedApp = () => {
       <Route path="/apprentissage/maths/problemes" element={<Problemes />} />
       <Route path="/apprentissage/maths/calcul" element={<Calcul />} />
       <Route path="/apprentissage/global" element={<GlobalApprentissage />} />
+      <Route path="/apprentissage/global/actions" element={<ActionsGlobalApprentissage />} />
+      <Route path="/apprentissage/ecriture/hypotheses" element={<HypoEcriture />} />
+      <Route path="/apprentissage/maths/hypotheses" element={<HypoMaths />} />
       
       {/* Comportement */}
       <Route path="/comportement" element={<Comportement />} />
@@ -408,6 +419,7 @@ const AuthenticatedApp = () => {
       <Route path="/comportement/impulsivite/actions" element={<ActionsImpulsivite />} />
       <Route path="/comportement/anxiete" element={<Anxiete />} />
       <Route path="/comportement/anxiete/situationnelle" element={<AnxieteSit />} />
+      <Route path="/comportement/anxiete/situationnelle/actions" element={<ActionsAnxieteSit />} />
       <Route path="/comportement/anxiete/generalisee" element={<AnxieteGen />} />
       <Route path="/comportement/anxiete/actions" element={<ActionsAnxiete />} />
       <Route path="/comportement/opposition" element={<Opposition />} />
@@ -448,6 +460,8 @@ const AuthenticatedApp = () => {
       <Route path="/developpement/langage-oral/expression/actions" element={<ActionsLangageExpr />} />
       <Route path="/developpement/motricite" element={<Motricite />} />
       <Route path="/developpement/motricite/actions" element={<ActionsMotricite />} />
+      <Route path="/developpement/motricite/fine" element={<MotriciteFine />} />
+      <Route path="/developpement/motricite/globale" element={<MotriciteGlobale />} />
       <Route path="/developpement/attention" element={<Attention />} />
       <Route path="/developpement/attention/actions" element={<ActionsAttention />} />
       <Route path="/developpement/interactions" element={<Interactions />} />
