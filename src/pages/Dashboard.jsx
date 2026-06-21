@@ -20,6 +20,12 @@ function daysSince(dateStr) {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
 }
 
+const S = {
+  bleu: '#1E3A5F', bleuMid: '#2C5282', bleuCiel: '#4A90C4', bleuPale: '#EBF4FB',
+  vert: '#276749', vertPale: '#E6F4ED', orange: '#C05621', orangePale: '#FEF0E6',
+  ardoise: '#F1F4F8', bord: '#DDE4EE', texte: '#1A2E45', doux: '#5A6E87', blanc: '#FFFFFF',
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -31,7 +37,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showDiagModal, setShowDiagModal] = useState(false);
   const [diagSearch, setDiagSearch] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const load = async () => {
     const [u, fiches, diags, ec, el, mb] = await Promise.all([
@@ -53,12 +58,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     load();
-    const unsubFiche = base44.entities.FicheEleve.subscribe(() => load());
-    const unsubDiag = base44.entities.Diagnostic.subscribe(() => load());
-    return () => { unsubFiche(); unsubDiag(); };
+    const u1 = base44.entities.FicheEleve.subscribe(() => load());
+    const u2 = base44.entities.Diagnostic.subscribe(() => load());
+    return () => { u1(); u2(); };
   }, []);
 
-  // Stats
   const now = Date.now();
   const thisMonth = new Date(); thisMonth.setDate(1); thisMonth.setHours(0, 0, 0, 0);
   const thirtyDays = 30 * 24 * 3600 * 1000;
@@ -71,12 +75,10 @@ export default function Dashboard() {
   });
   const elevesClotured = elevesRased.filter(e => e.statut === 'Clôturé').length;
 
-  // Activité récente (dernières fiches mises à jour)
   const recentActivity = [...eleves]
     .sort((a, b) => new Date(b.updated_date || b.created_date) - new Date(a.updated_date || a.created_date))
     .slice(0, 6);
 
-  // Écoles avec stats alertes
   const ecolesWithStats = ecoles.slice(0, 4).map(ec => {
     const ecEl = elevesRased.filter(e => e.ecole_id === ec.id);
     const alertes = ecEl.filter(e => {
@@ -86,7 +88,6 @@ export default function Dashboard() {
     return { ...ec, nbEleves: ecEl.length, alertes };
   });
 
-  // Alertes : élèves FicheEleve sans MAJ depuis 30j
   const alertesEleves = elevesSansMAJ
     .sort((a, b) => new Date(a.updated_date || a.created_date) - new Date(b.updated_date || b.created_date))
     .slice(0, 5);
@@ -96,378 +97,333 @@ export default function Dashboard() {
     e.ecole?.toLowerCase().includes(diagSearch.toLowerCase())
   );
 
-  const prenomUser = user?.full_name?.split(' ')[0] || 'Vous';
+  const prenomUser = user?.full_name?.split(' ')[0] || 'vous';
   const initials = user?.full_name
     ? user.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
     : 'ME';
-
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 
-  const NAV = [
-    { label: 'Tableau de bord', ico: '🏠', to: '/dashboard', active: true },
-    { label: 'Mes écoles', ico: '🏫', to: '/mes-ecoles' },
-    { label: 'Élèves suivis', ico: '👤', to: '/liste-eleves' },
-    { label: 'Diagnostics EDA', ico: '🧠', to: '/historique' },
+  const navItems = [
+    { label: 'Tableau de bord', ico: '🏠', to: '/dashboard', active: true, group: 'Principal' },
+    { label: 'Mes écoles', ico: '🏫', to: '/mes-ecoles', group: 'Principal' },
+    { label: 'Élèves suivis', ico: '👤', to: '/liste-eleves', group: 'Principal' },
+    { label: 'Diagnostics EDA', ico: '🧠', to: '/historique', group: 'Principal' },
+    { label: 'Importer PDF', ico: '📄', to: '/import-pdf', group: 'Gestion' },
+    { label: 'Équipe RASED', ico: '👥', to: '/equipe-rased', group: 'Gestion' },
+    { label: 'Statistiques', ico: '📊', to: '/stats-annuelles', group: 'Rapports' },
+    { label: 'Export annuel', ico: '📥', to: '/export-annuel', group: 'Rapports' },
   ];
-  const NAV2 = [
-    { label: 'Importer PDF', ico: '📄', to: '/import-pdf' },
-    { label: 'Équipe RASED', ico: '👥', to: '/equipe-rased' },
-    { label: 'Statistiques', ico: '📊', to: '/stats-annuelles' },
-    { label: 'Export annuel', ico: '📥', to: '/export-annuel' },
-  ];
+
+  const groups = ['Principal', 'Gestion', 'Rapports'];
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#F1F4F8', color: '#1A2E45', fontFamily: 'Inter, sans-serif' }}>
+    <>
+      {/* Inject global styles to override BottomBar padding on this page */}
+      <style>{`
+        body { overflow: hidden; }
+        #dashboard-root { position: fixed; inset: 0; display: flex; background: #F1F4F8; font-family: Inter, sans-serif; z-index: 100; }
+        .db-sidebar { width: 220px; flex-shrink: 0; background: #1E3A5F; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .db-main { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .db-scroll { flex: 1; overflow-y: auto; padding: 26px 28px 40px; }
+        @media(max-width:768px){ .db-sidebar{ display:none; } }
+      `}</style>
 
-      {/* Sidebar overlay mobile */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-
-      {/* SIDEBAR */}
-      <aside className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
-        style={{ width: 220, background: '#1E3A5F' }}>
-        <div className="px-5 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: 16, color: '#fff', lineHeight: 1.2 }}>
-            Arbre Décisionnel EDA
-            <span className="block mt-1" style={{ fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
-              Psy-EN · RASED
-            </span>
-          </div>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto px-2.5 py-3">
-          <p className="px-2 py-2 text-[9.5px] uppercase tracking-widest font-medium" style={{ color: 'rgba(255,255,255,0.3)' }}>Principal</p>
-          {NAV.map(item => (
-            <Link key={item.to} to={item.to} onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg mb-0.5 text-[13px] transition-all"
-              style={item.active
-                ? { background: '#4A90C4', color: '#fff', fontWeight: 500 }
-                : { color: 'rgba(255,255,255,0.65)' }}
-              onMouseEnter={e => { if (!item.active) e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { if (!item.active) { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; } }}
-            >
-              <span className="text-[15px] w-[18px] text-center shrink-0">{item.ico}</span>
-              {item.label}
-            </Link>
-          ))}
-          <p className="px-2 pt-3 pb-1.5 text-[9.5px] uppercase tracking-widest font-medium" style={{ color: 'rgba(255,255,255,0.3)' }}>Gestion</p>
-          {NAV2.map(item => (
-            <Link key={item.to} to={item.to} onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg mb-0.5 text-[13px] transition-all"
-              style={{ color: 'rgba(255,255,255,0.65)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
-            >
-              <span className="text-[15px] w-[18px] text-center shrink-0">{item.ico}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="px-4 py-3.5 flex items-center gap-2.5 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: '#4A90C4' }}>
-            {initials}
-          </div>
-          <div className="min-w-0">
-            <p className="text-[12.5px] font-medium text-white truncate">{user?.full_name || 'Utilisateur'}</p>
-            <p className="text-[10.5px] truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{membres.find(m => m.email === user?.email)?.profession || 'RASED'}</p>
-          </div>
-        </div>
-      </aside>
-
-      {/* MAIN */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-[220px]" id="main-content">
-        <style>{`#main-content{margin-left:0}@media(min-width:1024px){#main-content{margin-left:220px}}`}</style>
-
-        {/* TOPBAR */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-7 border-b" style={{ background: '#fff', borderColor: '#DDE4EE', height: 56 }}>
-          <div className="flex items-center gap-3">
-            <button className="lg:hidden p-2 rounded-lg hover:bg-gray-100" onClick={() => setSidebarOpen(true)}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
-            <div>
-              <p className="font-semibold text-[13.5px]" style={{ color: '#1A2E45' }}>Bonjour, {prenomUser} 👋</p>
-              <p className="text-[12px]" style={{ color: '#5A6E87' }}>{todayCap}</p>
+      <div id="dashboard-root">
+        {/* SIDEBAR */}
+        <div className="db-sidebar">
+          <div style={{ padding: '22px 18px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: 16, color: '#fff', lineHeight: 1.2 }}>
+              Arbre Décisionnel EDA
+              <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 10, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginTop: 3 }}>Psy-EN · RASED</span>
             </div>
           </div>
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setShowDiagModal(true)}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] font-medium text-white transition-colors"
-              style={{ background: '#4A90C4' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#2C5282'}
-              onMouseLeave={e => e.currentTarget.style.background = '#4A90C4'}
-            >
+
+          <nav style={{ flex: 1, padding: '14px 10px', overflowY: 'auto' }}>
+            {groups.map(group => (
+              <div key={group}>
+                <p style={{ fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)', padding: '14px 8px 5px', fontWeight: 500 }}>{group}</p>
+                {navItems.filter(n => n.group === group).map(item => (
+                  <Link key={item.to} to={item.to}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 7,
+                      fontSize: 13, color: item.active ? '#fff' : 'rgba(255,255,255,0.65)',
+                      background: item.active ? '#4A90C4' : 'transparent',
+                      fontWeight: item.active ? 500 : 400, marginBottom: 1,
+                      textDecoration: 'none', transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { if (!item.active) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#fff'; } }}
+                    onMouseLeave={e => { if (!item.active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; } }}
+                  >
+                    <span style={{ fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0 }}>{item.ico}</span>
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </nav>
+
+          <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#4A90C4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{initials}</div>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: 12.5, fontWeight: 500, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.full_name || 'Utilisateur'}</p>
+              <p style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)' }}>{membres.find(m => m.email === user?.email)?.profession || 'RASED'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN */}
+        <div className="db-main">
+          {/* TOPBAR */}
+          <div style={{ background: '#fff', borderBottom: `1px solid ${S.bord}`, height: 56, padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div>
+              <p style={{ fontSize: 13.5, fontWeight: 600, color: S.texte }}>Bonjour, {prenomUser} 👋</p>
+              <p style={{ fontSize: 12, color: S.doux }}>{todayCap}</p>
+            </div>
+            <button onClick={() => setShowDiagModal(true)}
+              style={{ padding: '7px 15px', borderRadius: 8, fontSize: 12.5, fontWeight: 500, background: S.bleuCiel, color: '#fff', border: 'none', cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.background = S.bleuMid}
+              onMouseLeave={e => e.currentTarget.style.background = S.bleuCiel}>
               + Nouveau diagnostic
             </button>
           </div>
-        </div>
 
-        {/* CONTENT */}
-        <div className="flex-1 overflow-auto" style={{ padding: '26px 28px 40px' }}>
+          {/* SCROLLABLE CONTENT */}
+          <div className="db-scroll">
 
-          {/* HERO */}
-          <div className="relative rounded-[14px] overflow-hidden mb-6 flex items-center justify-between flex-wrap gap-4" style={{ background: '#1E3A5F', padding: '24px 28px' }}>
-            <div className="absolute" style={{ right: -40, top: -60, width: 260, height: 260, borderRadius: '50%', background: 'rgba(74,144,196,0.15)', pointerEvents: 'none' }} />
-            <div className="absolute" style={{ right: 60, bottom: -80, width: 180, height: 180, borderRadius: '50%', background: 'rgba(74,144,196,0.08)', pointerEvents: 'none' }} />
-            <div className="relative z-10">
-              <p className="text-[11px] uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                {ecoles.length > 0 ? `${ecoles.length} école${ecoles.length > 1 ? 's' : ''}` : 'RASED'}
-              </p>
-              <p style={{ fontFamily: 'Georgia, serif', fontSize: 26, color: '#fff', lineHeight: 1.2, marginBottom: 8 }}>
-                Vous suivez <em style={{ fontStyle: 'italic', color: '#93C5E8' }}>{loading ? '…' : totalEleves} élève{totalEleves > 1 ? 's' : ''}</em><br />
-                cette année scolaire.
-              </p>
-              <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                {elevesSansMAJ.length > 0
-                  ? `${elevesSansMAJ.length} élève${elevesSansMAJ.length > 1 ? 's' : ''} sans mise à jour depuis plus de 30 jours.`
-                  : 'Tous les dossiers sont à jour.'}
-              </p>
-            </div>
-            <div className="flex gap-2.5 relative z-10 flex-wrap">
-              {elevesSansMAJ.length > 0 && (
-                <Link to="/dashboard"
-                  className="px-5 py-2.5 rounded-[9px] text-[13px] font-semibold text-white transition-colors"
-                  style={{ background: '#4A90C4' }}>
-                  Voir les alertes
-                </Link>
-              )}
-              <Link to="/mes-ecoles"
-                className="px-5 py-2.5 rounded-[9px] text-[13px] font-medium transition-colors"
-                style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                Mes écoles →
-              </Link>
-            </div>
-          </div>
-
-          {/* STAT CARDS */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
-            {[
-              { val: totalEleves, lbl: 'Élèves suivis', ico: '👤', colorClass: 'bleu', to: '/liste-eleves', warn: false },
-              { val: diagsCeMois, lbl: 'Diagnostics ce mois', ico: '🧠', colorClass: 'vert', to: '/historique', warn: false },
-              { val: elevesSansMAJ.length, lbl: 'Sans mise à jour +30j', ico: '⏰', colorClass: 'orange', to: '/dashboard', warn: true },
-              { val: elevesClotured, lbl: 'Suivis clôturés', ico: '✅', colorClass: 'bleu', to: '/mes-ecoles', warn: false },
-            ].map((card, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                <Link to={card.to} className="block rounded-[12px] border p-[18px_20px] cursor-pointer transition-all hover:shadow-md hover:-translate-y-px relative overflow-hidden group"
-                  style={{ background: '#fff', borderColor: '#DDE4EE' }}>
-                  {card.warn && card.val > 0 && (
-                    <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[12px]" style={{ background: '#C05621' }} />
-                  )}
-                  <div className="w-9 h-9 rounded-[9px] flex items-center justify-center text-lg mb-3"
-                    style={{ background: card.warn ? '#FEF0E6' : card.colorClass === 'vert' ? '#E6F4ED' : '#EBF4FB' }}>
-                    {card.ico}
-                  </div>
-                  <p className="text-[32px] leading-none mb-1 font-semibold" style={{ fontFamily: 'Georgia, serif', color: card.warn && card.val > 0 ? '#C05621' : '#1A2E45' }}>
-                    {loading ? '—' : card.val}
-                  </p>
-                  <p className="text-[12px] mb-2.5" style={{ color: '#5A6E87' }}>{card.lbl}</p>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* ACCÈS RAPIDE */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-            {[
-              { ico: '🧠', label: 'Nouveau diagnostic EDA', sub: "Lancer l'arbre décisionnel", bg: '#EBF4FB', action: () => setShowDiagModal(true) },
-              { ico: '📄', label: 'Importer une liste PDF', sub: 'Créer des fiches depuis Onde', bg: '#F0EEFF', to: '/import-pdf' },
-              { ico: '👤', label: 'Créer une fiche élève', sub: 'Saisie manuelle', bg: '#E6F4ED', to: '/fiche-eleve' },
-              { ico: '📊', label: 'Export annuel', sub: 'Statistiques & rapport IEN', bg: '#FEF0E6', to: '/export-annuel' },
-            ].map((card, i) => {
-              const inner = (
-                <>
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-xl mb-2.5" style={{ background: card.bg }}>{card.ico}</div>
-                  <p className="text-[12.5px] font-semibold leading-snug" style={{ color: '#1A2E45' }}>{card.label}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: '#5A6E87' }}>{card.sub}</p>
-                </>
-              );
-              return card.action ? (
-                <button key={i} onClick={card.action}
-                  className="flex flex-col items-start p-4 rounded-[12px] border text-left transition-all hover:border-[#4A90C4] hover:shadow-md"
-                  style={{ background: '#fff', borderColor: '#DDE4EE' }}>
-                  {inner}
-                </button>
-              ) : (
-                <Link key={i} to={card.to}
-                  className="flex flex-col items-start p-4 rounded-[12px] border transition-all hover:border-[#4A90C4] hover:shadow-md"
-                  style={{ background: '#fff', borderColor: '#DDE4EE' }}>
-                  {inner}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* TWO COL */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4.5 mb-4" style={{ gap: 18 }}>
-
-            {/* ACTIVITÉ RÉCENTE */}
-            <div className="rounded-[12px] border overflow-hidden" style={{ background: '#fff', borderColor: '#DDE4EE' }}>
-              <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: '#DDE4EE' }}>
-                <p className="font-semibold text-[13.5px]" style={{ color: '#1A2E45' }}>Activité récente</p>
-                <Link to="/historique" className="text-[12px] font-medium hover:underline" style={{ color: '#4A90C4' }}>Tout voir →</Link>
+            {/* HERO */}
+            <div style={{ background: S.bleu, borderRadius: 14, padding: '24px 28px', marginBottom: 22, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, position: 'relative', overflow: 'hidden', flexWrap: 'wrap' }}>
+              <div style={{ position: 'absolute', right: -40, top: -60, width: 260, height: 260, borderRadius: '50%', background: 'rgba(74,144,196,0.15)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', right: 60, bottom: -80, width: 180, height: 180, borderRadius: '50%', background: 'rgba(74,144,196,0.08)', pointerEvents: 'none' }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>
+                  {ecoles.length > 0 ? `${ecoles.length} école${ecoles.length > 1 ? 's' : ''}` : 'RASED'}
+                </p>
+                <p style={{ fontFamily: 'Georgia, serif', fontSize: 26, color: '#fff', lineHeight: 1.2, marginBottom: 8 }}>
+                  Vous suivez <em style={{ fontStyle: 'italic', color: '#93C5E8' }}>{loading ? '…' : totalEleves} élève{totalEleves !== 1 ? 's' : ''}</em><br />cette année scolaire.
+                </p>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+                  {elevesSansMAJ.length > 0 ? `${elevesSansMAJ.length} élève${elevesSansMAJ.length > 1 ? 's' : ''} sans mise à jour depuis plus de 30 jours.` : 'Tous les dossiers sont à jour.'}
+                </p>
               </div>
-              {recentActivity.length === 0 ? (
-                <p className="text-center py-10 text-[13px]" style={{ color: '#5A6E87' }}>Aucune activité récente</p>
-              ) : recentActivity.map((e, i) => {
-                const isNew = !e.updated_date || e.updated_date === e.created_date;
-                const ico = isNew ? '👤' : '🧠';
-                const avBg = isNew ? '#E6F4ED' : '#EBF4FB';
-                return (
-                  <button key={e.id} onClick={() => navigate(`/detail-fiche?id=${e.id}`)}
-                    className="w-full flex items-start gap-3 px-5 py-3 border-b text-left transition-colors hover:bg-[#FAFCFF]"
-                    style={{ borderColor: '#F1F4F8' }}>
-                    <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[14px] shrink-0 mt-0.5" style={{ background: avBg }}>{ico}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-medium truncate" style={{ color: '#1A2E45' }}>
-                        {isNew ? 'Fiche créée' : 'Fiche mise à jour'} — <strong style={{ color: '#2C5282' }}>{e.prenom} {e.nom}</strong>
-                      </p>
-                      <p className="text-[11.5px] mt-0.5" style={{ color: '#5A6E87' }}>
-                        {[e.ecole, e.classe].filter(Boolean).join(' · ') || 'Fiche élève'}
-                      </p>
-                    </div>
-                    <p className="text-[11px] shrink-0 mt-0.5" style={{ color: '#5A6E87' }}>{timeAgo(e.updated_date || e.created_date)}</p>
-                  </button>
+              <div style={{ display: 'flex', gap: 10, position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
+                {elevesSansMAJ.length > 0 && (
+                  <Link to="/liste-eleves" style={{ padding: '10px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600, background: S.bleuCiel, color: '#fff', textDecoration: 'none' }}>Voir les alertes</Link>
+                )}
+                <Link to="/mes-ecoles" style={{ padding: '10px 20px', borderRadius: 9, fontSize: 13, fontWeight: 500, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.2)', textDecoration: 'none' }}>Mes écoles →</Link>
+              </div>
+            </div>
+
+            {/* STAT CARDS */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 24 }}
+              className="db-stats-grid">
+              <style>{`.db-stats-grid { grid-template-columns: repeat(4,1fr); } @media(max-width:900px){.db-stats-grid{grid-template-columns:repeat(2,1fr);}}`}</style>
+              {[
+                { val: totalEleves, lbl: 'Élèves suivis', ico: '👤', bg: S.bleuPale, to: '/liste-eleves', warn: false },
+                { val: diagsCeMois, lbl: 'Diagnostics ce mois', ico: '🧠', bg: S.vertPale, to: '/historique', warn: false },
+                { val: elevesSansMAJ.length, lbl: 'Sans mise à jour +30j', ico: '⏰', bg: S.orangePale, to: '/liste-eleves', warn: true },
+                { val: elevesClotured, lbl: 'Suivis clôturés', ico: '✅', bg: S.bleuPale, to: '/mes-ecoles', warn: false },
+              ].map((c, i) => (
+                <Link key={i} to={c.to} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: '#fff', border: `1px solid ${S.bord}`, borderRadius: 12, padding: '18px 20px', cursor: 'pointer', position: 'relative', overflow: 'hidden', transition: 'box-shadow 0.15s, transform 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 18px rgba(30,58,95,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = ''; }}>
+                    {(c.warn && c.val > 0) && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: S.orange, borderRadius: '12px 12px 0 0' }} />}
+                    <div style={{ width: 36, height: 36, borderRadius: 9, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 12 }}>{c.ico}</div>
+                    <p style={{ fontFamily: 'Georgia, serif', fontSize: 32, color: c.warn && c.val > 0 ? S.orange : S.texte, lineHeight: 1, marginBottom: 3 }}>{loading ? '—' : c.val}</p>
+                    <p style={{ fontSize: 12, color: S.doux }}>{c.lbl}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* ACCÈS RAPIDE */}
+            <div style={{ display: 'grid', gap: 12, marginBottom: 24 }} className="db-quick-grid">
+              <style>{`.db-quick-grid{grid-template-columns:repeat(4,1fr);}@media(max-width:900px){.db-quick-grid{grid-template-columns:repeat(2,1fr);}}`}</style>
+              {[
+                { ico: '🧠', label: 'Nouveau diagnostic EDA', sub: "Lancer l'arbre décisionnel", bg: S.bleuPale, action: () => setShowDiagModal(true) },
+                { ico: '📄', label: 'Importer une liste PDF', sub: 'Créer des fiches depuis Onde', bg: '#F0EEFF', to: '/import-pdf' },
+                { ico: '👤', label: 'Créer une fiche élève', sub: 'Saisie manuelle', bg: S.vertPale, to: '/fiche-eleve' },
+                { ico: '📊', label: 'Export annuel', sub: 'Statistiques & rapport IEN', bg: S.orangePale, to: '/export-annuel' },
+              ].map((c, i) => {
+                const inner = (
+                  <>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 8 }}>{c.ico}</div>
+                    <p style={{ fontSize: 12.5, fontWeight: 600, color: S.texte, lineHeight: 1.3 }}>{c.label}</p>
+                    <p style={{ fontSize: 11, color: S.doux, marginTop: 2 }}>{c.sub}</p>
+                  </>
                 );
+                const cardStyle = { background: '#fff', border: `1px solid ${S.bord}`, borderRadius: 12, padding: '16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', transition: 'all 0.15s', textDecoration: 'none' };
+                const onHoverIn = e => { e.currentTarget.style.borderColor = S.bleuCiel; e.currentTarget.style.boxShadow = '0 3px 14px rgba(74,144,196,0.12)'; };
+                const onHoverOut = e => { e.currentTarget.style.borderColor = S.bord; e.currentTarget.style.boxShadow = ''; };
+                return c.action
+                  ? <button key={i} onClick={c.action} style={cardStyle} onMouseEnter={onHoverIn} onMouseLeave={onHoverOut}>{inner}</button>
+                  : <Link key={i} to={c.to} style={cardStyle} onMouseEnter={onHoverIn} onMouseLeave={onHoverOut}>{inner}</Link>;
               })}
             </div>
 
-            {/* COL DROITE */}
-            <div className="flex flex-col gap-4">
+            {/* TWO-COL */}
+            <div style={{ display: 'grid', gap: 18, marginBottom: 18 }} className="db-twocol">
+              <style>{`.db-twocol{grid-template-columns:1fr 340px;}@media(max-width:1000px){.db-twocol{grid-template-columns:1fr;}}`}</style>
 
-              {/* ALERTES */}
-              <div className="rounded-[12px] border overflow-hidden" style={{ background: '#fff', borderColor: '#DDE4EE' }}>
-                <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: '#DDE4EE' }}>
-                  <p className="font-semibold text-[13.5px]" style={{ color: '#1A2E45' }}>⚠️ À relancer</p>
-                  <Link to="/liste-eleves" className="text-[12px] font-medium hover:underline" style={{ color: '#4A90C4' }}>Voir tous →</Link>
+              {/* ACTIVITÉ RÉCENTE */}
+              <div style={{ background: '#fff', border: `1px solid ${S.bord}`, borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${S.bord}` }}>
+                  <p style={{ fontSize: 13.5, fontWeight: 600, color: S.texte }}>Activité récente</p>
+                  <Link to="/historique" style={{ fontSize: 12, color: S.bleuCiel, textDecoration: 'none', fontWeight: 500 }}>Tout voir →</Link>
                 </div>
-                {alertesEleves.length === 0 ? (
-                  <p className="text-center py-8 text-[13px]" style={{ color: '#5A6E87' }}>✅ Aucune alerte</p>
-                ) : alertesEleves.map(e => (
-                  <button key={e.id} onClick={() => navigate(`/detail-fiche?id=${e.id}`)}
-                    className="w-full flex items-center gap-3 px-5 py-2.5 border-b text-left transition-colors hover:bg-[#FFFAF6]"
-                    style={{ borderColor: '#F1F4F8' }}>
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#C05621' }} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12.5px] font-medium" style={{ color: '#1A2E45' }}>{e.prenom} {e.nom}</p>
-                      <p className="text-[11.5px] mt-0.5" style={{ color: '#5A6E87' }}>{[e.classe, e.ecole].filter(Boolean).join(' · ') || '—'}</p>
-                    </div>
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-[10px] shrink-0"
-                      style={{ background: '#FEF0E6', color: '#C05621' }}>
-                      +{daysSince(e.updated_date || e.created_date)}j
-                    </span>
-                  </button>
-                ))}
+                {recentActivity.length === 0
+                  ? <p style={{ textAlign: 'center', padding: '40px 0', fontSize: 13, color: S.doux }}>Aucune activité</p>
+                  : recentActivity.map((e, i) => {
+                    const isNew = !e.updated_date || e.updated_date === e.created_date;
+                    return (
+                      <button key={e.id} onClick={() => navigate(`/detail-fiche?id=${e.id}`)}
+                        style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 20px', borderBottom: i < recentActivity.length - 1 ? `1px solid ${S.ardoise}` : 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#FAFCFF'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <div style={{ width: 34, height: 34, borderRadius: '50%', background: isNew ? S.vertPale : S.bleuPale, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0, marginTop: 1 }}>
+                          {isNew ? '👤' : '🧠'}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 13, fontWeight: 500, color: S.texte, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {isNew ? 'Fiche créée' : 'Fiche mise à jour'} — <strong style={{ color: S.bleuMid }}>{e.prenom} {e.nom}</strong>
+                          </p>
+                          <p style={{ fontSize: 11.5, color: S.doux }}>{[e.ecole, e.classe].filter(Boolean).join(' · ') || 'Fiche élève'}</p>
+                        </div>
+                        <p style={{ fontSize: 11, color: S.doux, flexShrink: 0, marginTop: 3 }}>{timeAgo(e.updated_date || e.created_date)}</p>
+                      </button>
+                    );
+                  })}
               </div>
 
-              {/* MES ÉCOLES */}
-              <div className="rounded-[12px] border overflow-hidden" style={{ background: '#fff', borderColor: '#DDE4EE' }}>
-                <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: '#DDE4EE' }}>
-                  <p className="font-semibold text-[13.5px]" style={{ color: '#1A2E45' }}>Mes écoles</p>
-                  <Link to="/mes-ecoles" className="text-[12px] font-medium hover:underline" style={{ color: '#4A90C4' }}>Gérer →</Link>
-                </div>
-                {ecolesWithStats.length === 0 ? (
-                  <p className="text-center py-8 text-[13px]" style={{ color: '#5A6E87' }}>
-                    <Link to="/mes-ecoles" className="hover:underline" style={{ color: '#4A90C4' }}>Ajouter une école →</Link>
-                  </p>
-                ) : (
-                  <div className="px-3 py-2 flex flex-col gap-1.5">
-                    {ecolesWithStats.map(ec => (
-                      <button key={ec.id} onClick={() => navigate(`/detail-ecole?id=${ec.id}`)}
-                        className="flex items-center gap-3 px-2.5 py-2.5 rounded-[9px] text-left transition-colors hover:bg-[#F1F4F8] w-full">
-                        <div className="w-9 h-9 rounded-[9px] flex items-center justify-center text-[17px] shrink-0" style={{ background: '#1E3A5F' }}>🏫</div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[12.5px] font-semibold truncate" style={{ color: '#1A2E45' }}>{ec.nom}</p>
-                          <p className="text-[11px] mt-0.5" style={{ color: '#5A6E87' }}>{ec.type || 'École'} · {ec.nbEleves} élève{ec.nbEleves > 1 ? 's' : ''}</p>
+              {/* COLONNE DROITE */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+                {/* ALERTES */}
+                <div style={{ background: '#fff', border: `1px solid ${S.bord}`, borderRadius: 12, overflow: 'hidden' }}>
+                  <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${S.bord}` }}>
+                    <p style={{ fontSize: 13.5, fontWeight: 600, color: S.texte }}>⚠️ À relancer</p>
+                    <Link to="/liste-eleves" style={{ fontSize: 12, color: S.bleuCiel, textDecoration: 'none', fontWeight: 500 }}>Voir tous →</Link>
+                  </div>
+                  {alertesEleves.length === 0
+                    ? <p style={{ textAlign: 'center', padding: '30px 0', fontSize: 13, color: S.doux }}>✅ Aucune alerte</p>
+                    : alertesEleves.map((e, i) => (
+                      <button key={e.id} onClick={() => navigate(`/detail-fiche?id=${e.id}`)}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderBottom: i < alertesEleves.length - 1 ? `1px solid ${S.ardoise}` : 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s' }}
+                        onMouseEnter={ev => ev.currentTarget.style.background = '#FFFAF6'}
+                        onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: S.orange, flexShrink: 0 }} />
+                        <div style={{ flex: 1 }}>
+                          <p style={{ fontSize: 12.5, fontWeight: 500, color: S.texte }}>{e.prenom} {e.nom}</p>
+                          <p style={{ fontSize: 11.5, color: S.doux, marginTop: 1 }}>{[e.classe, e.ecole].filter(Boolean).join(' · ') || '—'}</p>
                         </div>
-                        {ec.alertes > 0 ? (
-                          <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-[10px] shrink-0" style={{ background: '#FEF0E6', color: '#C05621' }}>{ec.alertes} alerte{ec.alertes > 1 ? 's' : ''}</span>
-                        ) : (
-                          <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-[10px] shrink-0" style={{ background: '#E6F4ED', color: '#276749' }}>À jour</span>
-                        )}
+                        <span style={{ fontSize: 11, fontWeight: 600, color: S.orange, background: S.orangePale, padding: '2px 8px', borderRadius: 10, flexShrink: 0 }}>+{daysSince(e.updated_date || e.created_date)}j</span>
                       </button>
                     ))}
+                </div>
+
+                {/* MES ÉCOLES */}
+                <div style={{ background: '#fff', border: `1px solid ${S.bord}`, borderRadius: 12, overflow: 'hidden' }}>
+                  <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${S.bord}` }}>
+                    <p style={{ fontSize: 13.5, fontWeight: 600, color: S.texte }}>Mes écoles</p>
+                    <Link to="/mes-ecoles" style={{ fontSize: 12, color: S.bleuCiel, textDecoration: 'none', fontWeight: 500 }}>Gérer →</Link>
                   </div>
-                )}
+                  <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {ecolesWithStats.length === 0
+                      ? <p style={{ textAlign: 'center', padding: '20px 0', fontSize: 13, color: S.doux }}><Link to="/mes-ecoles" style={{ color: S.bleuCiel }}>Ajouter une école →</Link></p>
+                      : ecolesWithStats.map(ec => (
+                        <button key={ec.id} onClick={() => navigate(`/detail-ecole?id=${ec.id}`)}
+                          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px', borderRadius: 9, background: 'transparent', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'background 0.12s' }}
+                          onMouseEnter={e => e.currentTarget.style.background = S.ardoise}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <div style={{ width: 36, height: 36, borderRadius: 9, background: S.bleu, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>🏫</div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 12.5, fontWeight: 600, color: S.texte, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ec.nom}</p>
+                            <p style={{ fontSize: 11, color: S.doux, marginTop: 1 }}>{ec.type || 'École'} · {ec.nbEleves} élève{ec.nbEleves !== 1 ? 's' : ''}</p>
+                          </div>
+                          <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 8px', borderRadius: 10, flexShrink: 0, background: ec.alertes > 0 ? S.orangePale : S.vertPale, color: ec.alertes > 0 ? S.orange : S.vert }}>
+                            {ec.alertes > 0 ? `${ec.alertes} alerte${ec.alertes > 1 ? 's' : ''}` : 'À jour'}
+                          </span>
+                        </button>
+                      ))}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* ÉQUIPE RASED */}
-          {membres.length > 0 && (
-            <div className="rounded-[12px] border flex items-center gap-4 flex-wrap" style={{ background: '#fff', borderColor: '#DDE4EE', padding: '16px 20px' }}>
-              <p className="text-[12px] font-semibold uppercase tracking-wider shrink-0" style={{ color: '#5A6E87' }}>Équipe RASED</p>
-              <div className="flex flex-wrap gap-2.5 flex-1">
-                {membres.map(m => {
-                  const colors = { 'Psy EN EDA': '#4A90C4', 'MaDR': '#276749', 'MaDP': '#C05621' };
-                  const bg = colors[m.profession] || '#4A90C4';
-                  const init = `${m.prenom?.[0] || ''}${m.nom?.[0] || ''}`;
-                  return (
-                    <div key={m.id} className="flex items-center gap-1.5 rounded-[20px] border px-3 py-1" style={{ background: '#F1F4F8', borderColor: '#DDE4EE' }}>
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ background: bg }}>{init}</div>
-                      <div>
-                        <p className="text-[12px] font-medium leading-none" style={{ color: '#1A2E45' }}>{m.prenom} {m.nom}</p>
-                        <p className="text-[10px] leading-none mt-0.5" style={{ color: '#5A6E87' }}>{m.profession}</p>
+            {/* ÉQUIPE RASED */}
+            {membres.length > 0 && (
+              <div style={{ background: '#fff', border: `1px solid ${S.bord}`, borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: S.doux, textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>Équipe RASED</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, flex: 1 }}>
+                  {membres.map(m => {
+                    const profColors = { 'Psy EN EDA': S.bleuCiel, 'MaDR': S.vert, 'MaDP': S.orange };
+                    const bg = profColors[m.profession] || S.bleuCiel;
+                    const init = `${m.prenom?.[0] || ''}${m.nom?.[0] || ''}`;
+                    return (
+                      <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 7, background: S.ardoise, border: `1px solid ${S.bord}`, borderRadius: 20, padding: '4px 12px 4px 5px' }}>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{init}</div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 500, color: S.texte, lineHeight: 1 }}>{m.prenom} {m.nom}</p>
+                          <p style={{ fontSize: 10, color: S.doux, lineHeight: 1, marginTop: 2 }}>{m.profession}</p>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                <Link to="/invite-users" style={{ padding: '7px 15px', borderRadius: 8, fontSize: 12.5, fontWeight: 500, color: S.texte, border: `1px solid ${S.bord}`, textDecoration: 'none', flexShrink: 0 }}>+ Inviter un membre</Link>
               </div>
-              <Link to="/invite-users"
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg border text-[12.5px] font-medium transition-colors hover:bg-[#F1F4F8] shrink-0"
-                style={{ color: '#1A2E45', borderColor: '#DDE4EE' }}>
-                + Inviter un membre
-              </Link>
-            </div>
-          )}
+            )}
 
-        </div>
-      </div>
+          </div>{/* /db-scroll */}
+        </div>{/* /db-main */}
+      </div>{/* /dashboard-root */}
 
       {/* Modal diagnostic */}
       <AnimatePresence>
         {showDiagModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4"
+            style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
             onClick={() => setShowDiagModal(false)}>
             <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white rounded-2xl w-full max-w-md max-h-[70vh] flex flex-col shadow-xl overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: '#DDE4EE' }}>
-                <h2 className="font-semibold text-[14px]" style={{ color: '#1A2E45' }}>🧠 Choisir un élève</h2>
-                <button onClick={() => setShowDiagModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100"><X className="w-4 h-4" /></button>
+              style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 440, maxHeight: '70vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${S.bord}` }}>
+                <p style={{ fontWeight: 600, fontSize: 14, color: S.texte }}>🧠 Choisir un élève</p>
+                <button onClick={() => setShowDiagModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><X className="w-4 h-4" /></button>
               </div>
-              <div className="px-4 pt-3 pb-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <div style={{ padding: '12px 16px 8px' }}>
+                <div style={{ position: 'relative' }}>
+                  <Search style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: '#9ca3af' }} />
                   <input autoFocus value={diagSearch} onChange={e => setDiagSearch(e.target.value)}
                     placeholder="Rechercher un élève..."
-                    className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border focus:outline-none"
-                    style={{ borderColor: '#DDE4EE' }} />
+                    style={{ width: '100%', paddingLeft: 36, paddingRight: 12, paddingTop: 8, paddingBottom: 8, fontSize: 14, border: `1px solid ${S.bord}`, borderRadius: 10, outline: 'none' }} />
                 </div>
               </div>
-              <div className="overflow-y-auto flex-1 px-2 pb-3">
-                {diagSearchFiltered.length === 0 ? (
-                  <p className="text-center text-sm py-8" style={{ color: '#5A6E87' }}>Aucun élève trouvé</p>
-                ) : diagSearchFiltered.slice(0, 20).map(e => (
-                  <button key={e.id}
-                    onClick={() => { setShowDiagModal(false); navigate(`/diagnostic-eleve?id=${e.id}`); }}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors text-left hover:bg-[#F1F4F8]">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: '#4A90C4' }}>
-                      {e.prenom?.[0]}{e.nom?.[0]}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold" style={{ color: '#1A2E45' }}>{e.prenom} {e.nom}</p>
-                      <p className="text-xs" style={{ color: '#5A6E87' }}>{e.classe || ''}{e.ecole ? ` · ${e.ecole}` : ''}</p>
-                    </div>
-                    <Brain className="w-4 h-4 shrink-0" style={{ color: '#4A90C4' }} />
-                  </button>
-                ))}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 12px' }}>
+                {diagSearchFiltered.length === 0
+                  ? <p style={{ textAlign: 'center', padding: '32px 0', fontSize: 13, color: S.doux }}>Aucun élève trouvé</p>
+                  : diagSearchFiltered.slice(0, 20).map(e => (
+                    <button key={e.id}
+                      onClick={() => { setShowDiagModal(false); navigate(`/diagnostic-eleve?id=${e.id}`); }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, background: 'transparent', cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s' }}
+                      onMouseEnter={ev => ev.currentTarget.style.background = S.ardoise}
+                      onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: S.bleuCiel, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+                        {e.prenom?.[0]}{e.nom?.[0]}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: S.texte }}>{e.prenom} {e.nom}</p>
+                        <p style={{ fontSize: 12, color: S.doux }}>{e.classe || ''}{e.ecole ? ` · ${e.ecole}` : ''}</p>
+                      </div>
+                      <Brain style={{ width: 16, height: 16, color: S.bleuCiel, flexShrink: 0 }} />
+                    </button>
+                  ))}
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
