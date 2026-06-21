@@ -158,6 +158,9 @@ export default function MesEcoles() {
                 className="pl-9 pr-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-56"
               />
             </div>
+            <Button onClick={() => navigate('/import-pdf')} variant="outline" className="gap-2 border-blue-300 text-blue-600 hover:bg-blue-50">
+              <FileText className="w-4 h-4" /> Importer liste PDF
+            </Button>
             <Button onClick={() => setShowAddEcole(true)} className="gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white">
               <Plus className="w-4 h-4" /> Ajouter une école
             </Button>

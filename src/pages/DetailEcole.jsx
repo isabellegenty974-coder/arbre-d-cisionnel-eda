@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, Download, AlertTriangle, Loader } from 'lucide-react';
+import { ArrowLeft, Plus, Download, AlertTriangle, Loader, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEleveModal from '@/components/rased/AddEleveModal';
 
@@ -115,7 +115,10 @@ export default function DetailEcole() {
                 {ecole.nombre_classes && <span className="text-white/60 text-sm">{ecole.nombre_classes} classe{ecole.nombre_classes > 1 ? 's' : ''}</span>}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              <Button onClick={() => navigate(`/import-pdf?ecole_id=${ecoleId}`)} variant="outline" className="gap-2 border-blue-300 text-blue-300 hover:bg-blue-500/20 border-opacity-60">
+                <FileText className="w-4 h-4" /> Importer liste PDF
+              </Button>
               <Button onClick={() => setShowAddEleve(true)} className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0">
                 <Plus className="w-4 h-4" /> Ajouter un élève
               </Button>

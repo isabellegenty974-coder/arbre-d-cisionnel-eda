@@ -41,6 +41,7 @@ import EquipeRased from './pages/EquipeRased';
 import SyntheseEleve from './pages/SyntheseEleve';
 import MesEcoles from './pages/MesEcoles';
 import DetailEcole from './pages/DetailEcole';
+import ImportPDF from './pages/ImportPDF';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -241,6 +242,7 @@ const AuthenticatedApp = () => {
         <Route path="/synthese-eleve" element={<SyntheseEleve />} />
         <Route path="/mes-ecoles" element={<MesEcoles />} />
         <Route path="/detail-ecole" element={<DetailEcole />} />
+        <Route path="/import-pdf" element={<ImportPDF />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
