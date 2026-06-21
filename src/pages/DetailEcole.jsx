@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, Download, AlertTriangle, Loader, FileText } from 'lucide-react';
+import {
+  ArrowLeft, Plus, Download, AlertTriangle, Loader, FileText,
+  Phone, Mail, User, MapPin, Pencil, School
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEleveModal from '@/components/rased/AddEleveModal';
+import AddEcoleModal from '@/components/rased/AddEcoleModal';
 
 const STATUS_CONFIG = {
   'Suivi actif': { color: '#16a34a', bg: '#dcfce7', label: 'Suivi actif' },
@@ -25,22 +29,27 @@ export default function DetailEcole() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const ecoleId = searchParams.get('id');
+  const defaultClasse = searchParams.get('classe');
+
   const [ecole, setEcole] = useState(null);
   const [classes, setClasses] = useState([]);
   const [eleves, setEleves] = useState([]);
+  const [membres, setMembres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeClasse, setActiveClasse] = useState(null);
   const [showAddEleve, setShowAddEleve] = useState(false);
+  const [showEditEcole, setShowEditEcole] = useState(false);
 
   const load = async () => {
     if (!ecoleId) { setLoading(false); return; }
-    const [ec, cls, el] = await Promise.all([
+    const [ec, cls, el, mb] = await Promise.all([
       base44.entities.EcoleRased.get(ecoleId).catch(() => null),
       base44.entities.ClasseEcole.filter({ ecole_id: ecoleId }).catch(() => []),
       base44.entities.EleveRased.filter({ ecole_id: ecoleId }).catch(() => []),
+      base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
     ]);
     setEcole(ec);
-    // Trier les classes
+    setMembres(mb);
     const sorted = [...cls].sort((a, b) => {
       const ia = CLASSES_ORDER.indexOf(a.nom);
       const ib = CLASSES_ORDER.indexOf(b.nom);
@@ -51,7 +60,13 @@ export default function DetailEcole() {
     });
     setClasses(sorted);
     setEleves(el);
-    if (sorted.length > 0 && !activeClasse) setActiveClasse(sorted[0].id);
+    if (defaultClasse) {
+      const found = sorted.find(c => c.nom.toLowerCase() === defaultClasse.toLowerCase());
+      if (found) setActiveClasse(found.id);
+      else if (sorted.length > 0) setActiveClasse(sorted[0].id);
+    } else if (sorted.length > 0 && !activeClasse) {
+      setActiveClasse(sorted[0].id);
+    }
     setLoading(false);
   };
 
@@ -70,12 +85,10 @@ export default function DetailEcole() {
       <p style="color:#666;font-size:12px">Enseignant·e : ${activeClasseData?.enseignant || '—'} | Exporté le ${new Date().toLocaleDateString('fr-FR')}</p>
       <table><thead><tr><th>Nom Prénom</th><th>Date de naissance</th><th>Statut</th><th>Dernière action</th></tr></thead>
       <tbody>${activeEleves.map(e => `
-        <tr>
-          <td>${e.prenom} ${e.nom}</td>
-          <td>${e.date_naissance ? new Date(e.date_naissance).toLocaleDateString('fr-FR') : '—'}</td>
-          <td>${e.statut || '—'}</td>
-          <td>${e.date_derniere_action ? new Date(e.date_derniere_action).toLocaleDateString('fr-FR') : '—'}</td>
-        </tr>`).join('')}
+        <tr><td>${e.prenom} ${e.nom}</td>
+        <td>${e.date_naissance ? new Date(e.date_naissance).toLocaleDateString('fr-FR') : '—'}</td>
+        <td>${e.statut || '—'}</td>
+        <td>${e.date_derniere_action ? new Date(e.date_derniere_action).toLocaleDateString('fr-FR') : '—'}</td></tr>`).join('')}
       </tbody></table></body></html>`;
     const w = window.open('', '_blank');
     w.document.write(html);
@@ -100,7 +113,7 @@ export default function DetailEcole() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
-      {/* Header */}
+      {/* Header dark */}
       <div className="bg-[#0F172A] px-6 pt-10 pb-6">
         <div className="max-w-5xl mx-auto">
           <button onClick={() => navigate('/mes-ecoles')} className="flex items-center gap-2 text-white/60 hover:text-white text-sm mb-4 transition-colors">
@@ -109,14 +122,13 @@ export default function DetailEcole() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h1 className="text-white font-bold text-2xl">{ecole.nom}</h1>
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
                 {ecole.type && <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300">{ecole.type}</span>}
                 {ecole.commune && <span className="text-white/60 text-sm">{ecole.commune}</span>}
-                {ecole.nombre_classes && <span className="text-white/60 text-sm">{ecole.nombre_classes} classe{ecole.nombre_classes > 1 ? 's' : ''}</span>}
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Button onClick={() => navigate(`/import-pdf?ecole_id=${ecoleId}`)} variant="outline" className="gap-2 border-blue-300 text-blue-300 hover:bg-blue-500/20 border-opacity-60">
+              <Button onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)} variant="outline" className="gap-2 border-white/20 text-white/80 hover:bg-white/10 bg-transparent">
                 <FileText className="w-4 h-4" /> Importer liste PDF
               </Button>
               <Button onClick={() => setShowAddEleve(true)} className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0">
@@ -127,11 +139,91 @@ export default function DetailEcole() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-6">
+      <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+        {/* Fiche école récapitulative */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center">
+                <School className="w-5 h-5 text-blue-600" />
+              </div>
+              <h2 className="font-bold text-[#0F172A]">Fiche école</h2>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setShowEditEcole(true)} className="gap-1.5">
+              <Pencil className="w-3.5 h-3.5" /> Modifier
+            </Button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
+            {ecole.directeur && (
+              <div className="flex items-start gap-2.5">
+                <User className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Direction</p>
+                  <p className="text-sm text-gray-800 font-medium">{ecole.directeur}</p>
+                </div>
+              </div>
+            )}
+            {ecole.telephone && (
+              <div className="flex items-start gap-2.5">
+                <Phone className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Téléphone</p>
+                  <a href={`tel:${ecole.telephone}`} className="text-sm text-blue-600 hover:underline font-medium">{ecole.telephone}</a>
+                </div>
+              </div>
+            )}
+            {ecole.email && (
+              <div className="flex items-start gap-2.5">
+                <Mail className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email</p>
+                  <a href={`mailto:${ecole.email}`} className="text-sm text-blue-600 hover:underline font-medium break-all">{ecole.email}</a>
+                </div>
+              </div>
+            )}
+            {ecole.adresse && (
+              <div className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Adresse</p>
+                  <p className="text-sm text-gray-800">{ecole.adresse}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Membres RASED affectés */}
+          {ecole.membres_rased?.length > 0 && membres.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Membres RASED affectés</p>
+              <div className="flex flex-wrap gap-2">
+                {ecole.membres_rased.map(mid => {
+                  const m = membres.find(mb => mb.id === mid);
+                  if (!m) return null;
+                  return (
+                    <span key={mid} className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-100">
+                      {m.prenom} {m.nom} · {m.profession}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Placeholder si aucune info */}
+          {!ecole.directeur && !ecole.telephone && !ecole.email && !ecole.adresse && (
+            <div className="text-center py-3">
+              <p className="text-sm text-gray-400">Aucune information de contact renseignée.</p>
+              <button onClick={() => setShowEditEcole(true)} className="text-blue-500 text-sm hover:underline mt-1">+ Compléter la fiche école</button>
+            </div>
+          )}
+        </motion.div>
+
         {/* Onglets classes */}
         {classes.length > 0 ? (
           <>
-            <div className="flex items-center gap-2 flex-wrap mb-6">
+            <div className="flex items-center gap-2 flex-wrap">
               {classes.map(cls => (
                 <button
                   key={cls.id}
@@ -156,26 +248,36 @@ export default function DetailEcole() {
                     {activeClasseData.enseignant && (
                       <p className="text-sm text-gray-500 mt-0.5">Enseignant·e : {activeClasseData.enseignant}</p>
                     )}
+                    <p className="text-xs text-gray-400 mt-0.5">{activeEleves.length} élève{activeEleves.length > 1 ? 's' : ''}</p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={exportClassePDF} className="gap-2">
-                    <Download className="w-4 h-4" /> Exporter PDF
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={exportClassePDF} className="gap-2">
+                      <Download className="w-4 h-4" /> Exporter PDF
+                    </Button>
+                  </div>
                 </div>
 
                 {activeEleves.length === 0 ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <p className="text-sm">Aucun élève dans cette classe</p>
-                    <button onClick={() => setShowAddEleve(true)} className="mt-3 text-blue-500 text-sm hover:underline">+ Ajouter un élève</button>
+                  <div className="text-center py-12 text-gray-400 space-y-3">
+                    <p className="text-sm font-medium text-gray-500">Aucun élève importé dans cette classe</p>
+                    <button
+                      onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)}
+                      className="inline-flex items-center gap-2 text-blue-500 text-sm hover:underline font-medium"
+                    >
+                      <FileText className="w-4 h-4" /> Importer une liste PDF
+                    </button>
+                    <span className="text-gray-300 mx-2">ou</span>
+                    <button onClick={() => setShowAddEleve(true)} className="text-blue-500 text-sm hover:underline">Ajouter un élève manuellement</button>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-gray-100">
-                          <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Nom Prénom</th>
+                          <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Nom</th>
+                          <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Prénom</th>
                           <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Date de naissance</th>
-                          <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
-                          <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Dernière action</th>
+                          <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Statut suivi</th>
                           <th className="text-right px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
@@ -185,12 +287,13 @@ export default function DetailEcole() {
                           const stale = isStaleEleve(eleve);
                           return (
                             <tr key={eleve.id} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-5 py-3">
+                              <td className="px-5 py-3 font-semibold text-[#0F172A]">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-[#0F172A]">{eleve.prenom} {eleve.nom}</span>
+                                  {eleve.nom}
                                   {stale && <AlertTriangle className="w-3.5 h-3.5 text-amber-500" title="Aucune mise à jour depuis +30 jours" />}
                                 </div>
                               </td>
+                              <td className="px-5 py-3 text-gray-700">{eleve.prenom}</td>
                               <td className="px-5 py-3 text-gray-600">
                                 {eleve.date_naissance ? new Date(eleve.date_naissance).toLocaleDateString('fr-FR') : '—'}
                               </td>
@@ -198,11 +301,6 @@ export default function DetailEcole() {
                                 <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: conf.bg, color: conf.color }}>
                                   {conf.label}
                                 </span>
-                              </td>
-                              <td className="px-5 py-3 text-gray-500 text-xs">
-                                {eleve.date_derniere_action
-                                  ? new Date(eleve.date_derniere_action).toLocaleDateString('fr-FR')
-                                  : '—'}
                               </td>
                               <td className="px-5 py-3 text-right">
                                 {eleve.fiche_eleve_id ? (
@@ -229,10 +327,15 @@ export default function DetailEcole() {
         ) : (
           <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
             <p className="text-gray-500 font-medium">Aucune classe dans cette école</p>
-            <p className="text-gray-400 text-sm mt-1">Ajoutez un élève pour créer automatiquement une classe</p>
-            <Button onClick={() => setShowAddEleve(true)} className="mt-4 gap-2 bg-blue-500 hover:bg-blue-600 text-white">
-              <Plus className="w-4 h-4" /> Ajouter un élève
-            </Button>
+            <p className="text-gray-400 text-sm mt-1">Importez une liste PDF ou ajoutez un élève manuellement</p>
+            <div className="flex justify-center gap-3 mt-4 flex-wrap">
+              <Button onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)} variant="outline" className="gap-2 border-blue-300 text-blue-600 hover:bg-blue-50">
+                <FileText className="w-4 h-4" /> Importer liste PDF
+              </Button>
+              <Button onClick={() => setShowAddEleve(true)} className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0">
+                <Plus className="w-4 h-4" /> Ajouter un élève
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -243,6 +346,14 @@ export default function DetailEcole() {
         ecoleId={ecoleId}
         classes={classes}
         onSaved={() => { setShowAddEleve(false); load(); }}
+      />
+
+      <AddEcoleModal
+        open={showEditEcole}
+        onClose={() => setShowEditEcole(false)}
+        membres={membres}
+        ecole={ecole}
+        onSaved={() => { setShowEditEcole(false); load(); }}
       />
     </div>
   );

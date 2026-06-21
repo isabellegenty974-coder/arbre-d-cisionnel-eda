@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export default function ImportStep4({ stats, ecoleId, onRestart }) {
   const navigate = useNavigate();
-  const { created = 0, duplicatesIgnored = 0, missingDates = 0 } = stats || {};
+  const { created = 0, duplicatesIgnored = 0, missingDates = 0, classeName = '' } = stats || {};
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
@@ -64,14 +64,14 @@ export default function ImportStep4({ stats, ecoleId, onRestart }) {
 
         {ecoleId && (
           <button
-            onClick={() => navigate(`/detail-ecole?id=${ecoleId}`)}
+            onClick={() => navigate(`/detail-ecole?id=${ecoleId}${classeName ? `&classe=${encodeURIComponent(classeName)}` : ''}`)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-left"
           >
             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
               <School className="w-4 h-4 text-blue-600" />
             </div>
             <div>
-              <p className="font-semibold text-[#0F172A] text-sm">Voir la liste de la classe</p>
+              <p className="font-semibold text-[#0F172A] text-sm">Voir la liste de la classe{classeName ? ` ${classeName}` : ''}</p>
               <p className="text-xs text-gray-500">Consulter les élèves importés</p>
             </div>
           </button>

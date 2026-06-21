@@ -88,7 +88,7 @@ export default function ImportStep3({ rows, setRows, analysisResult, ecoleId, on
     }
 
     setImporting(false);
-    onImportDone({ created, duplicatesIgnored: nbDuplicates, missingDates });
+    onImportDone({ created, duplicatesIgnored: nbDuplicates, missingDates, classeId, classeName });
   };
 
   return (

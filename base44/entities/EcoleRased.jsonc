@@ -19,6 +19,22 @@
       "type": "string",
       "description": "Commune"
     },
+    "adresse": {
+      "type": "string",
+      "description": "Adresse postale compl\u00e8te"
+    },
+    "telephone": {
+      "type": "string",
+      "description": "Num\u00e9ro de t\u00e9l\u00e9phone"
+    },
+    "email": {
+      "type": "string",
+      "description": "Adresse email de l'\u00e9cole"
+    },
+    "directeur": {
+      "type": "string",
+      "description": "Nom du directeur / de la directrice"
+    },
     "nombre_classes": {
       "type": "number",
       "description": "Nombre de classes"

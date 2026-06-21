@@ -1,9 +1,8 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Upload, FileText, Check, AlertTriangle, X, Plus, ChevronRight, School } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import ImportStepper from '@/components/rased/ImportStepper';
 import ImportStep1 from '@/components/rased/ImportStep1';
 import ImportStep2 from '@/components/rased/ImportStep2';
@@ -13,7 +12,8 @@ import ImportStep4 from '@/components/rased/ImportStep4';
 export default function ImportPDF() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const ecoleId = searchParams.get('ecole_id');
+  // Support both ?ecoleId= and legacy ?ecole_id=
+  const ecoleId = searchParams.get('ecoleId') || searchParams.get('ecole_id');
 
   const [step, setStep] = useState(1);
   const [file, setFile] = useState(null);
@@ -39,7 +39,6 @@ export default function ImportPDF() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
-      {/* Header */}
       <div className="bg-[#0F172A] px-6 pt-10 pb-6">
         <div className="max-w-4xl mx-auto">
           <button
@@ -47,7 +46,7 @@ export default function ImportPDF() {
             className="flex items-center gap-2 text-white/60 hover:text-white text-sm mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            {ecoleId ? 'Retour à l\'école' : 'Mes écoles'}
+            {ecoleId ? "Retour à l'école" : 'Mes écoles'}
           </button>
           <h1 className="text-white font-bold text-2xl">Import liste de classe</h1>
           <p className="text-white/60 text-sm mt-1">Créez automatiquement les fiches élèves depuis un document PDF</p>

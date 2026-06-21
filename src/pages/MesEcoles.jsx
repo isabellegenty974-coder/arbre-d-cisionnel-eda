@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import {
-  School, Users, BarChart2, FileText, Bell, Share2,
-  ChevronRight, Plus, AlertTriangle, CheckCircle, Clock,
-  Home, Search, X
+  School, Users, BarChart2, FileText, Bell,
+  ChevronRight, Plus, AlertTriangle, CheckCircle,
+  Home, Search, Phone, Mail, User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEcoleModal from '@/components/rased/AddEcoleModal';
@@ -24,13 +24,6 @@ const PROF_CONFIG = {
   'Psy EN EDA': { color: '#8B5CF6', bg: '#F0EBFD', label: 'Psy-EN' },
   'MaDP': { color: '#4A90E2', bg: '#E8F0FB', label: 'Maître G' },
   'MaDR': { color: '#EC6B8A', bg: '#FCE8EE', label: 'Maître E' },
-};
-
-const STATUS_CONFIG = {
-  'Suivi actif': { color: '#16a34a', bg: '#dcfce7' },
-  'En attente': { color: '#d97706', bg: '#fef3c7' },
-  'Nouveau': { color: '#2563eb', bg: '#dbeafe' },
-  'Clôturé': { color: '#6b7280', bg: '#f3f4f6' },
 };
 
 export default function MesEcoles() {
@@ -75,7 +68,6 @@ export default function MesEcoles() {
       actif: el.filter(e => e.statut === 'Suivi actif').length,
       attente: el.filter(e => e.statut === 'En attente').length,
       cloture: el.filter(e => e.statut === 'Clôturé').length,
-      nouveau: el.filter(e => e.statut === 'Nouveau').length,
     };
   };
 
@@ -101,7 +93,6 @@ export default function MesEcoles() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] flex">
-      {/* Sidebar overlay mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -123,9 +114,7 @@ export default function MesEcoles() {
               key={id}
               onClick={() => handleNavClick(id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                activeNav === id
-                  ? 'bg-[#3B82F6] text-white'
-                  : 'text-white/60 hover:text-white hover:bg-white/10'
+                activeNav === id ? 'bg-[#3B82F6] text-white' : 'text-white/60 hover:text-white hover:bg-white/10'
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -160,9 +149,6 @@ export default function MesEcoles() {
                 className="pl-9 pr-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-56"
               />
             </div>
-            <Button onClick={() => navigate('/import-pdf')} variant="outline" className="gap-2 border-blue-300 text-blue-600 hover:bg-blue-50">
-              <FileText className="w-4 h-4" /> Importer liste PDF
-            </Button>
             <Button onClick={() => setShowAddEcole(true)} className="gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white">
               <Plus className="w-4 h-4" /> Ajouter une école
             </Button>
@@ -170,27 +156,7 @@ export default function MesEcoles() {
         </div>
 
         <div className="px-6 py-6 space-y-6">
-          {/* Bandeau équipe RASED */}
-          {membres.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-200 p-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Équipe RASED</p>
-              <div className="flex flex-wrap gap-2">
-                {membres.map(m => {
-                  const conf = PROF_CONFIG[m.profession] || { color: '#6b7280', bg: '#f3f4f6', label: m.profession };
-                  return (
-                    <div key={m.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: conf.bg, color: conf.color }}>
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: conf.color, color: 'white' }}>
-                        {m.prenom?.[0]}{m.nom?.[0]}
-                      </div>
-                      {m.prenom} {m.nom} · {conf.label}
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* 4 stat cards */}
+          {/* Stat cards */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: 'Élèves suivis', value: totalSuivis, icon: Users, color: '#16a34a', bg: '#dcfce7' },
@@ -233,31 +199,59 @@ export default function MesEcoles() {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={(ev) => { if (ev.target.closest('button[data-import]')) return; navigate(`/detail-ecole?id=${ecole.id}`); }}
+                    className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col"
                   >
-                    <div className="p-4 border-b border-gray-100 flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-[#0F172A] truncate">{ecole.nom}</h3>
-                          {stale && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                              <AlertTriangle className="w-3 h-3" /> +30j
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          {ecole.type && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">{ecole.type}</span>}
-                          {ecole.commune && <span className="text-xs text-gray-500">{ecole.commune}</span>}
+                    {/* Header */}
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-bold text-[#0F172A] truncate">{ecole.nom}</h3>
+                            {stale && (
+                              <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                                <AlertTriangle className="w-3 h-3" /> +30j
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            {ecole.type && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">{ecole.type}</span>}
+                            {ecole.commune && <span className="text-xs text-gray-500">{ecole.commune}</span>}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                        <button data-import="true" onClick={() => navigate(`/import-pdf?ecoleId=${ecole.id}`)} className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-500" title="Importer liste PDF">
-                          <FileText className="w-3.5 h-3.5" />
-                        </button>
-                        <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+
+                      {/* Contact info */}
+                      <div className="space-y-1">
+                        {ecole.directeur && (
+                          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                            <User className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <span className="truncate">{ecole.directeur}</span>
+                          </div>
+                        )}
+                        {ecole.telephone && (
+                          <a
+                            href={`tel:${ecole.telephone}`}
+                            onClick={e => e.stopPropagation()}
+                            className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 hover:underline"
+                          >
+                            <Phone className="w-3.5 h-3.5 shrink-0" />
+                            <span>{ecole.telephone}</span>
+                          </a>
+                        )}
+                        {ecole.email && (
+                          <a
+                            href={`mailto:${ecole.email}`}
+                            onClick={e => e.stopPropagation()}
+                            className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 hover:underline truncate"
+                          >
+                            <Mail className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{ecole.email}</span>
+                          </a>
+                        )}
                       </div>
                     </div>
+
+                    {/* Stats */}
                     <div className="px-4 py-3 flex items-center justify-between gap-3">
                       <div className="flex gap-3">
                         <div className="text-center">
@@ -277,6 +271,22 @@ export default function MesEcoles() {
                         <p className="text-2xl font-bold text-[#0F172A]">{stats.total}</p>
                         <p className="text-[10px] text-gray-500">élèves</p>
                       </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="px-4 pb-4 flex gap-2">
+                      <button
+                        onClick={() => navigate(`/import-pdf?ecoleId=${ecole.id}`)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-blue-200 text-blue-600 text-xs font-semibold hover:bg-blue-50 transition-colors"
+                      >
+                        <FileText className="w-3.5 h-3.5" /> Importer PDF
+                      </button>
+                      <button
+                        onClick={() => navigate(`/detail-ecole?id=${ecole.id}`)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#0F172A] text-white text-xs font-semibold hover:bg-[#1e293b] transition-colors"
+                      >
+                        Voir les classes <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </motion.div>
                 );
