@@ -1,0 +1,42 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "dossier_partage",
+        "fiche_mise_a_jour",
+        "eleve_sans_maj",
+        "diagnostic_termine"
+      ],
+      "description": "Type de notification"
+    },
+    "titre": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "fiche_id": {
+      "type": "string"
+    },
+    "eleve_nom": {
+      "type": "string"
+    },
+    "destinataire_email": {
+      "type": "string"
+    },
+    "lu": {
+      "type": "boolean",
+      "default": false
+    },
+    "expediteur_nom": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "titre"
+  ]
+}

@@ -59,6 +59,32 @@
       },
       "description": "Liste des interventions r\u00e9alis\u00e9es"
     },
+    "intervenants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "membre_id": {
+            "type": "string"
+          },
+          "nom": {
+            "type": "string"
+          },
+          "profession": {
+            "type": "string"
+          },
+          "acces": {
+            "type": "string",
+            "enum": [
+              "lecture",
+              "commentaire",
+              "modification"
+            ]
+          }
+        }
+      },
+      "description": "Membres de l'\u00e9quipe ayant acc\u00e8s \u00e0 ce dossier"
+    },
     "score_apprentissages": {
       "type": "number",
       "description": "Score du domaine Apprentissages"

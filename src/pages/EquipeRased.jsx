@@ -3,10 +3,15 @@ import { base44 } from '@/api/base44Client';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Pencil, UserPlus, CheckCircle, Trash2 } from 'lucide-react';
+import { UserCircle, Pencil, UserPlus, CheckCircle, Trash2, School, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 
+const PROFESSION_CONFIG = {
+  'Psy EN EDA': { label: 'Psychologue EN EDA', color: '#2563eb', bg: '#dbeafe', shortLabel: 'Psy-EN' },
+  'MaDR': { label: 'Maître à dominante relationnelle', color: '#16a34a', bg: '#dcfce7', shortLabel: 'Maître E' },
+  'MaDP': { label: 'Maître à dominante pédagogique', color: '#d97706', bg: '#fef3c7', shortLabel: 'Maître G' },
+};
 const PROFESSION_LABELS = {
   'MaDP': 'Maître à dominante pédagogique (MaDP)',
   'MaDR': 'Maître à dominante relationnelle (MaDR)',
@@ -28,10 +33,16 @@ export default function EquipeRased() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  const [ecoles, setEcoles] = useState([]);
+
   const loadMembers = async () => {
     try {
-      const list = await base44.entities.MembreEquipe.list();
+      const [list, ecolesList] = await Promise.all([
+        base44.entities.MembreEquipe.list(),
+        base44.entities.EcoleRased.list('-created_date', 100).catch(() => []),
+      ]);
       setMembers(list);
+      setEcoles(ecolesList);
     } catch (err) {
       console.error('Erreur chargement membres:', err);
     } finally {
@@ -120,31 +131,46 @@ export default function EquipeRased() {
                   transition={{ delay: i * 0.05 }}
                   className="flex items-center gap-4 p-4 rounded-2xl border-2 bg-white shadow-sm border-[#E8DCC8]"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#E8DCC8] flex items-center justify-center shrink-0">
-                    <UserCircle className="w-7 h-7 text-[#0F172A]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[#0F172A]">{member.prenom} {member.nom}</p>
-                    <p className="text-sm text-[#0F172A]/70 mt-0.5">
-                      {PROFESSION_LABELS[member.profession] || member.profession}
-                    </p>
-                  </div>
+                  {(() => {
+                    const conf = PROFESSION_CONFIG[member.profession] || { color: '#6b7280', bg: '#f3f4f6', shortLabel: member.profession };
+                    const ecolesAffectees = ecoles.filter(e => (e.membres_rased || []).includes(member.id));
+                    return (
+                      <>
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-sm font-bold" style={{ background: conf.bg, color: conf.color }}>
+                          {member.prenom?.[0]}{member.nom?.[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-[#0F172A]">{member.prenom} {member.nom}</p>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: conf.bg, color: conf.color }}>{conf.shortLabel}</span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${member.actif === false ? 'bg-gray-100 text-gray-500' : 'bg-green-100 text-green-700'}`}>
+                              {member.actif === false ? 'Inactif' : 'Actif'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-[#0F172A]/60 mt-0.5">{PROFESSION_CONFIG[member.profession]?.label || member.profession}</p>
+                          {ecolesAffectees.length > 0 && (
+                            <div className="flex items-center gap-1 mt-1 flex-wrap">
+                              <School className="w-3 h-3 text-gray-400" />
+                              {ecolesAffectees.map(e => (
+                                <span key={e.id} className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{e.nom}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                   <div className="flex gap-2 shrink-0">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openEditForm(member)}
-                      className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]"
-                    >
-                      <Pencil className="w-3 h-3" />
-                      Modifier
+                    <Button size="sm" variant="outline" onClick={() => openEditForm(member)} className="gap-1 border-[#D4A574] text-[#0F172A] hover:bg-[#F5F0E8]">
+                      <Pencil className="w-3 h-3" /> Modifier
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowDeleteConfirm(member.id)}
-                      className="gap-1 border-red-300 text-red-600 hover:bg-red-50"
+                    <Button size="sm" variant="outline"
+                      onClick={async () => { await base44.entities.MembreEquipe.update(member.id, { actif: member.actif === false }); loadMembers(); }}
+                      className="gap-1 border-gray-300 text-gray-500 hover:bg-gray-50"
                     >
+                      {member.actif === false ? <ToggleLeft className="w-3 h-3" /> : <ToggleRight className="w-3 h-3" />}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(member.id)} className="gap-1 border-red-300 text-red-600 hover:bg-red-50">
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>

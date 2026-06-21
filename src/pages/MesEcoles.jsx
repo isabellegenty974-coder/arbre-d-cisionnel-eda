@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEcoleModal from '@/components/rased/AddEcoleModal';
+import NotificationsBadge from '@/components/rased/NotificationsBadge';
 
 const NAV_ITEMS = [
   { id: 'ecoles', label: 'Mes écoles', icon: School },
@@ -148,6 +149,7 @@ export default function MesEcoles() {
           </button>
           <h1 className="font-bold text-[#0F172A] text-lg flex-1">Mes écoles</h1>
           <div className="flex items-center gap-2">
+            <NotificationsBadge />
             <div className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input

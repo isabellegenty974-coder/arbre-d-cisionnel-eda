@@ -7,6 +7,7 @@ import { ArrowLeft, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PhotoEEUpload from '@/components/PhotoEEUpload';
 import RapportContent from '@/components/RapportContent';
+import IntervenantsSection from '@/components/rased/IntervenantsSection';
 
 export default function DetailFiche() {
   const [searchParams] = useSearchParams();
@@ -197,6 +198,15 @@ export default function DetailFiche() {
                 />
               </div>
             )}
+          </motion.div>
+
+          {/* Intervenants (partage dossier) */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.22 }}
+            className="p-4 rounded-xl border border-border bg-card">
+            <IntervenantsSection
+              ficheId={ficheId}
+              fichePrenomNom={`${fiche.prenom} ${fiche.nom}`}
+            />
           </motion.div>
 
           {/* Tableau Interventions */}

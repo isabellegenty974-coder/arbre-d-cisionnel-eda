@@ -22,6 +22,11 @@
     "email": {
       "type": "string",
       "description": "Email du membre"
+    },
+    "actif": {
+      "type": "boolean",
+      "default": true,
+      "description": "Statut actif/inactif"
     }
   },
   "required": [
