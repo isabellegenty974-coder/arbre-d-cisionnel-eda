@@ -1,0 +1,41 @@
+{
+  "name": "EcoleRased",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "description": "Nom de l'\u00e9cole"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Maternelle",
+        "\u00c9l\u00e9mentaire",
+        "Les deux"
+      ],
+      "description": "Type d'\u00e9cole"
+    },
+    "commune": {
+      "type": "string",
+      "description": "Commune"
+    },
+    "nombre_classes": {
+      "type": "number",
+      "description": "Nombre de classes"
+    },
+    "membres_rased": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs des membres RASED affect\u00e9s"
+    },
+    "reseau_id": {
+      "type": "string",
+      "description": "ID du r\u00e9seau"
+    }
+  },
+  "required": [
+    "nom"
+  ]
+}

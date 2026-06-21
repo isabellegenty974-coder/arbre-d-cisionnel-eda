@@ -1,0 +1,21 @@
+{
+  "name": "Reseau",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "description": "Nom du r\u00e9seau RASED"
+    },
+    "annee_scolaire": {
+      "type": "string",
+      "description": "Ann\u00e9e scolaire ex: 2025-2026"
+    },
+    "circonscription": {
+      "type": "string",
+      "description": "Circonscription de rattachement"
+    }
+  },
+  "required": [
+    "nom"
+  ]
+}

@@ -286,6 +286,19 @@ export default function Accueil() {
               </div>
             </Link>
 
+            <Link to="/mes-ecoles">
+              <div
+                className="rounded-2xl border border-[#3B82F6]/30 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/60 transition-all"
+                style={{ background: 'rgba(10,18,40,0.55)', backdropFilter: 'blur(10px)' }}
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)' }}>
+                  <Home className="w-5 h-5 text-[#7EB8F7]" />
+                </div>
+                <p className="font-bold text-white text-sm leading-tight">Mes écoles</p>
+                <p className="text-white/55 text-[10px]">Suivi réseau RASED</p>
+              </div>
+            </Link>
+
             <Link to="/politique-confidentialite">
               <div
                 className="rounded-2xl border border-white/15 p-3 flex flex-col gap-2 hover:border-[#3B82F6]/40 transition-all"
@@ -324,6 +337,7 @@ export default function Accueil() {
           { label: 'Accueil', icon: Home, to: '/', active: true },
           { label: 'Elèves', icon: Users, to: '/dashboard', active: false },
           { label: 'Domaines', icon: TreePine, to: '/evaluation-domains', active: false },
+          { label: 'Écoles', icon: Home, to: '/mes-ecoles', active: false },
           { label: 'Stats', icon: BarChart2, to: '/stats-annuelles', active: false },
         ].map(({ label, icon: Icon, to, active }) => (
           <Link key={label} to={to} className="flex flex-col items-center gap-1">

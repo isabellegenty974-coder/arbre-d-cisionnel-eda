@@ -39,6 +39,8 @@ import InviteUsers from './pages/InviteUsers';
 import Register from './pages/Register';
 import EquipeRased from './pages/EquipeRased';
 import SyntheseEleve from './pages/SyntheseEleve';
+import MesEcoles from './pages/MesEcoles';
+import DetailEcole from './pages/DetailEcole';
 
 // Apprentissage
 import Apprentissage from './pages/apprentissage/Apprentissage';
@@ -237,6 +239,8 @@ const AuthenticatedApp = () => {
         <Route path="/invite-users" element={<InviteUsers />} />
         <Route path="/equipe-rased" element={<EquipeRased />} />
         <Route path="/synthese-eleve" element={<SyntheseEleve />} />
+        <Route path="/mes-ecoles" element={<MesEcoles />} />
+        <Route path="/detail-ecole" element={<DetailEcole />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />

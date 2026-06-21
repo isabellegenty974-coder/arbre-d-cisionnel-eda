@@ -1,0 +1,55 @@
+{
+  "name": "EleveRased",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "description": "Nom de l'\u00e9l\u00e8ve"
+    },
+    "prenom": {
+      "type": "string",
+      "description": "Pr\u00e9nom de l'\u00e9l\u00e8ve"
+    },
+    "date_naissance": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de naissance"
+    },
+    "classe_id": {
+      "type": "string",
+      "description": "ID de la classe parente"
+    },
+    "ecole_id": {
+      "type": "string",
+      "description": "ID de l'\u00e9cole parente"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Nouveau",
+        "Suivi actif",
+        "En attente",
+        "Cl\u00f4tur\u00e9"
+      ],
+      "default": "Nouveau",
+      "description": "Statut du suivi"
+    },
+    "date_derniere_action": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de la derni\u00e8re action"
+    },
+    "motif_signalement": {
+      "type": "string",
+      "description": "Motif de signalement initial"
+    },
+    "fiche_eleve_id": {
+      "type": "string",
+      "description": "Lien vers la FicheEleve EDA associ\u00e9e"
+    }
+  },
+  "required": [
+    "nom",
+    "prenom"
+  ]
+}

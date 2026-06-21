@@ -1,0 +1,22 @@
+{
+  "name": "ClasseEcole",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "description": "Nom de la classe ex: CP, CE1, CM2"
+    },
+    "enseignant": {
+      "type": "string",
+      "description": "Nom de l'enseignant\u00b7e responsable"
+    },
+    "ecole_id": {
+      "type": "string",
+      "description": "ID de l'\u00e9cole parente"
+    }
+  },
+  "required": [
+    "nom",
+    "ecole_id"
+  ]
+}

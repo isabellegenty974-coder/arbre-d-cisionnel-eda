@@ -19,5 +19,8 @@
       ],
       "description": "Profession du membre RASED"
     }
-  }
+  },
+  "required": [
+    "profession"
+  ]
 }
