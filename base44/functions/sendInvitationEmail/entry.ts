@@ -13,19 +13,33 @@ Deno.serve(async (req) => {
 
     const emailBody = `Bonjour,
 
-Vous êtes invité(e) à rejoindre l'application Suivis RASED de l'équipe RASED de La Possession.
+Vous êtes invité(e) à rejoindre Suivis RASED, l'application collaborative de l'équipe RASED de la Circonscription de La Possession (La Réunion).
 
-Cliquez ici pour créer votre compte et accéder à l'application.
+Cette application vous permet de :
+- Suivre les élèves en difficulté de manière partagée avec toute l'équipe
+- Ajouter vos observations et notes de suivi sur les fiches élèves
+- Consulter les hypothèses de travail formulées par la Psy-EN
+- Accéder aux fiches élèves par école et par classe
 
-Ce lien est valable 7 jours.
+Pour créer votre compte, cliquez sur le lien d'invitation reçu et renseignez votre prénom, nom, rôle et mot de passe.
 
-RASED · La Possession · La Réunion`;
+Une fois votre compte créé, vous aurez immédiatement accès à l'application.
 
-    await base44.asServiceRole.integrations.Core.SendEmail({
+L'application est accessible depuis votre navigateur sur téléphone ou ordinateur.
+
+À très bientôt dans l'équipe !
+
+RASED · Circonscription de La Possession
+La Réunion
+
+---
+Ce lien est personnel et valable 7 jours.
+Ne le partagez pas.`;
+
+    await base44.integrations.Core.SendEmail({
       to: email,
       subject: 'Invitation Suivis RASED · La Possession',
-      body: emailBody,
-      from_name: 'RASED La Possession'
+      body: emailBody
     });
 
     return Response.json({ success: true });
