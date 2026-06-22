@@ -310,6 +310,14 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
               }} style={{ fontSize: 12, color: '#1E7A52', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap' }}>
                 📥 PDF
               </button>
+              <button onClick={async () => {
+                if (confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')) {
+                  await base44.entities.FicheEleve.update(ficheId, { rapport: '' });
+                  setFiche(f => ({ ...f, rapport: '' }));
+                }
+              }} style={{ fontSize: 12, color: '#B85C1A', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                🗑️
+              </button>
             </div>
           </div>
         </Card>
