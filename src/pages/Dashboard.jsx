@@ -50,7 +50,7 @@ const NAV = [
   { section: 'Gestion' },
   { label: 'Importer PDF',    ico: '📄', to: '/import-pdf' },
   { label: 'Équipe RASED',    ico: '👥', to: '/equipe-rased' },
-  { label: 'Notifications',   ico: '🔔', to: null, badge: true },
+  { label: 'Notifications',   ico: '🔔', to: '/notifications', badge: true },
   { section: 'Rapports' },
   { label: 'Statistiques',    ico: '📊', to: '/stats-annuelles' },
   { label: 'Export annuel',   ico: '📥', to: '/export-annuel' },

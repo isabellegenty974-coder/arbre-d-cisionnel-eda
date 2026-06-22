@@ -45,6 +45,7 @@ import DetailEcole from './pages/DetailEcole';
 import ImportPDF from './pages/ImportPDF';
 import Parametres from './pages/Parametres';
 import Login from './pages/Login';
+import Notifications from './pages/Notifications.jsx';
 
 // Pages orphelines déplacées aux bons chemins
 import ActionsAnxieteSit from './pages/ActionsAnxieteSit';
@@ -257,6 +258,7 @@ const AuthenticatedApp = () => {
         <Route path="/detail-ecole" element={<DetailEcole />} />
         <Route path="/import-pdf" element={<ImportPDF />} />
         <Route path="/parametres" element={<Parametres />} />
+        <Route path="/notifications" element={<Notifications />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />
