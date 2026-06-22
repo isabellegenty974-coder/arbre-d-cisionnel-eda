@@ -21,9 +21,16 @@ export default function FicheEleve() {
   const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
+  const [anneeActive, setAnneeActive] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(u => setCurrentUser(u)).catch(() => {});
+    Promise.all([
+      base44.auth.me(),
+      base44.entities.AnneeScolaire.filter({ est_active: true }).catch(() => [])
+    ]).then(([u, annees]) => {
+      setCurrentUser(u);
+      if (annees.length > 0) setAnneeActive(annees[0].libelle);
+    }).catch(() => {});
   }, []);
 
   const [jourNaissance, setJourNaissance] = useState('');
@@ -62,7 +69,9 @@ export default function FicheEleve() {
 
   const onSubmit = async (data) => {
     const fullName = currentUser?.full_name || '';
-    const profession = currentUser?.profession || '';
+    // Récupérer la profession du profil utilisateur
+    const membre = await base44.entities.MembreEquipe.filter({ email: currentUser?.email }).catch(() => []);
+    const profession = membre.length > 0 ? membre[0].profession : '';
     
     const created = await base44.entities.FicheEleve.create({
       nom: data.nom,
@@ -72,6 +81,7 @@ export default function FicheEleve() {
       classe: data.classe,
       ecole: ecole || undefined,
       date: new Date().toISOString().split('T')[0],
+      annee_scolaire: anneeActive || undefined,
       createdByName: fullName,
       createdByProfession: profession,
     });
