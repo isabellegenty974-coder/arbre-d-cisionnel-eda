@@ -3,7 +3,6 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Loader, ArrowLeft, Search, Clock, Info, ClipboardList, Plus, Trash2, X, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import PhotoEEUpload from '@/components/PhotoEEUpload';
 import RapportContent from '@/components/RapportContent';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import NotesMembreSection from '@/components/rased/NotesMembreSection';
@@ -157,6 +156,9 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   const [addingIntervention, setAddingIntervention] = useState(false);
   const [newIntervention, setNewIntervention] = useState({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
   const [showRapport, setShowRapport] = useState(false);
+  const [addingSynthese, setAddingSynthese] = useState(false);
+  const [newSynthese, setNewSynthese] = useState({ date: '', membres: '', decisions: '', fichier_url: '' });
+  const [syntheses, setSyntheses] = useState(fiche.syntheses_ee || []);
 
   const handleSaveStatut = async () => {
     setSavingStatut(true);
@@ -180,6 +182,28 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
     await base44.entities.FicheEleve.update(ficheId, { interventions: updated });
     setFiche(f => ({ ...f, interventions: updated }));
     setInterventions(updated);
+  };
+
+  const addSynthese = async () => {
+    if (!newSynthese.date) return;
+    const synthese = {
+      ...newSynthese,
+      created_at: new Date().toISOString(),
+      created_by_name: user?.full_name || 'Inconnu'
+    };
+    const updated = [...syntheses, synthese];
+    await base44.entities.FicheEleve.update(ficheId, { syntheses_ee: updated });
+    setFiche(f => ({ ...f, syntheses_ee: updated }));
+    setSyntheses(updated);
+    setNewSynthese({ date: '', membres: '', decisions: '', fichier_url: '' });
+    setAddingSynthese(false);
+  };
+
+  const deleteSynthese = async (idx) => {
+    const updated = syntheses.filter((_, i) => i !== idx);
+    await base44.entities.FicheEleve.update(ficheId, { syntheses_ee: updated });
+    setFiche(f => ({ ...f, syntheses_ee: updated }));
+    setSyntheses(updated);
   };
 
   return (
@@ -210,14 +234,48 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </Card>
       )}
 
-      {/* Photo EE */}
+      {/* Synthèse Équipe Éducative */}
       <Card>
-        <CardHead icon="📸" title="Synthèse EE (photo)" />
+        <CardHead icon="📋" title="Synthèse d'Équipe Éducative (ESS/EE)"
+          action={addingSynthese ? undefined : '+ Ajouter une synthèse EE'}
+          onAction={() => setAddingSynthese(true)} />
         <div style={{ padding: 14 }}>
-          <PhotoEEUpload ficheId={ficheId} />
-          {fiche.photo_ee_url && (
-            <img src={fiche.photo_ee_url} alt="Photo EE" style={{ width: '100%', borderRadius: 8, marginTop: 10, maxHeight: 300, objectFit: 'cover' }} />
+          {addingSynthese && (
+            <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { label: 'Date de la réunion EE ou ESS', content: <input type="date" value={newSynthese.date} onChange={e => setNewSynthese({...newSynthese, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
+                { label: 'Membres présents', content: <textarea value={newSynthese.membres} onChange={e => setNewSynthese({...newSynthese, membres: e.target.value})} placeholder="Énumérez les participants…" style={{ width: '100%', minHeight: 60, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+                { label: 'Décisions prises', content: <textarea value={newSynthese.decisions} onChange={e => setNewSynthese({...newSynthese, decisions: e.target.value})} placeholder="Résumez les décisions et actions…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+              ].map(({ label, content }) => (
+                <div key={label}>
+                  <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
+                  {content}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => setAddingSynthese(false)} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
+                <button onClick={addSynthese} disabled={!newSynthese.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newSynthese.date ? 0.5 : 1 }}>Ajouter</button>
+              </div>
+            </div>
           )}
+          {syntheses.length === 0 && !addingSynthese && (
+            <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Aucune synthèse EE enregistrée</p>
+          )}
+          {syntheses.map((syn, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 0', borderBottom: idx < syntheses.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#182840' }}>📅 {new Date(syn.date).toLocaleDateString('fr-FR')}</span>
+                  <span style={{ fontSize: 10.5, color: '#566880', padding: '2px 8px', background: '#F0F3F8', borderRadius: 4 }}>par {syn.created_by_name}</span>
+                </div>
+                {syn.membres && <div style={{ fontSize: 12.5, color: '#182840', marginBottom: 6, padding: '8px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #3B82C4' }}><strong>Présents:</strong> {syn.membres}</div>}
+                {syn.decisions && <div style={{ fontSize: 12.5, color: '#182840', marginBottom: 6, padding: '8px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #1E7A52' }}><strong>Décisions:</strong> {syn.decisions}</div>}
+              </div>
+              <button onClick={() => deleteSynthese(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
         </div>
       </Card>
 
@@ -229,17 +287,17 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </div>
       </Card>
 
-      {/* Intervenants */}
+      {/* Intervenants RASED */}
       <Card>
         <CardHead icon="👥" title="Intervenants RASED" />
         <div style={{ padding: 14 }}>
-          <IntervenantsSection ficheId={ficheId} fichePrenomNom={`${fiche.prenom} ${fiche.nom}`} />
+          <IntervenantsSection ficheId={ficheId} fichePrenomNom={`${fiche.prenom} ${fiche.nom}`} createdByName={fiche.createdByName} createdByProfession={fiche.createdByProfession} />
         </div>
       </Card>
 
-      {/* Interventions */}
+      {/* Séances et interventions */}
       <Card>
-        <CardHead icon="📋" title="Interventions"
+        <CardHead icon="📋" title="Séances et interventions"
           action={addingIntervention ? undefined : '+ Ajouter'}
           onAction={() => setAddingIntervention(true)} />
         <div style={{ padding: 14 }}>
@@ -249,7 +307,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                 { label: 'Date', content: <input type="date" value={newIntervention.date} onChange={e => setNewIntervention({...newIntervention, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
                 { label: 'Type', content: <select value={newIntervention.type} onChange={e => setNewIntervention({...newIntervention, type: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', background: '#fff' }}>{TYPES_INTERVENTION.map(t => <option key={t}>{t}</option>)}</select> },
                 { label: 'Profession', content: <select value={newIntervention.profession} onChange={e => setNewIntervention({...newIntervention, profession: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', background: '#fff' }}><option>Psy EN EDA</option><option>MaDR</option><option>MaDP</option></select> },
-                { label: 'Description', content: <textarea value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} placeholder="Décrivez l'intervention…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+                { label: 'Description', content: <textarea value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} placeholder="Décrivez la séance ou intervention…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
               ].map(({ label, content }) => (
                 <div key={label}>
                   <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
@@ -263,7 +321,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
             </div>
           )}
           {interventions.length === 0 && !addingIntervention && (
-            <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Aucune intervention enregistrée</p>
+            <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Aucune séance enregistrée — cliquez sur + Ajouter pour enregistrer une séance ou intervention</p>
           )}
           {interventions.map((iv, idx) => (
             <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: idx < interventions.length - 1 ? '1px solid #F0F3F8' : 'none' }}>

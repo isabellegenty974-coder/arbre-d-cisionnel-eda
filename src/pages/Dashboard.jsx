@@ -400,10 +400,9 @@ export default function Dashboard() {
           </div>
 
           {/* STATS */}
-          <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>
+          <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 13, marginBottom: 20 }}>
             {[
               { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#EAF2FB', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
-              { val: null, lbl: 'Ressources', ico: '', ibg: '#EEE9FF', trend: 'RASED · Professionnels · Structures', warn: false, to: '/items-professionnels' },
               { val: alertesFiches.length, lbl: 'Sans mise à jour +30j', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
             ].map((c, i) => (
@@ -560,7 +559,7 @@ export default function Dashboard() {
                         onClick={() => navigate(`/detail-ecole?id=${ec.id}`)}>
                         <div style={{ width: 34, height: 34, borderRadius: 8, background: '#1A3353', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🏫</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ec.nom}</div>
+                          <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ec.nom.charAt(0).toUpperCase() + ec.nom.slice(1).toLowerCase()}</div>
                           <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{ec.type || 'École'} · {ec.nbEl} élève{ec.nbEl !== 1 ? 's' : ''}</div>
                         </div>
                         <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10, flexShrink: 0, background: ec.nbAl > 0 ? '#FEF0E4' : '#E4F4ED', color: ec.nbAl > 0 ? '#B85C1A' : '#1E7A52' }}>
