@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 import { Bell, X, CheckCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,6 +12,7 @@ const TYPE_CONFIG = {
 };
 
 export default function NotificationsBadge() {
+  const navigate = useNavigate();
   const [notifs, setNotifs] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -42,6 +44,22 @@ export default function NotificationsBadge() {
   const markRead = async (id) => {
     await base44.entities.Notification.update(id, { lu: true }).catch(() => {});
     setNotifs(prev => prev.map(n => n.id === id ? { ...n, lu: true } : n));
+  };
+
+  const handleNotificationClick = async (notification) => {
+    await markRead(notification.id);
+    setOpen(false);
+
+    // Navigation basée sur le type de notification
+    if (notification.fiche_id) {
+      navigate(`/detail-fiche?id=${notification.fiche_id}`);
+    } else if (notification.type === 'diagnostic_termine') {
+      navigate('/hypotheses-eleve');
+    } else if (notification.type === 'dossier_partage') {
+      navigate('/liste-eleves');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   return (
@@ -101,7 +119,7 @@ export default function NotificationsBadge() {
                     return (
                       <div
                         key={n.id}
-                        onClick={() => markRead(n.id)}
+                        onClick={() => handleNotificationClick(n)}
                         className={`flex items-start gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors ${!n.lu ? 'bg-blue-50/40' : ''}`}
                       >
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0 mt-0.5" style={{ background: conf.bg }}>
