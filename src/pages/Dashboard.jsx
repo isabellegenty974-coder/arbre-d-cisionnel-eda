@@ -362,7 +362,7 @@ export default function Dashboard() {
           <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>
             {[
               { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#EAF2FB', trend: '↑ depuis septembre',   warn: false, to: '/liste-eleves' },
-              { val: fiches.filter(d => new Date(d.created_date) >= startMonth).length, lbl: 'Hypothèses ce mois', ico: '🔍', ibg: '#EEE9FF', trend: '↑ vs mois dernier',     warn: false, to: '/historique' },
+              { val: null, lbl: 'Ressources', ico: '📖', ibg: '#EEE9FF', trend: 'RASED · Professionnels · Structures', warn: false, to: '/items-professionnels' },
               { val: alertesFiches.length, lbl: 'Sans mise à jour +30j', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis septembre',      warn: false, to: '/mes-ecoles' },
             ].map((c, i) => (
@@ -371,7 +371,7 @@ export default function Dashboard() {
                   onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 18px rgba(26,51,83,.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
                   <div style={{ width: 34, height: 34, borderRadius: 8, background: c.ibg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, marginBottom: 11 }}>{c.ico}</div>
-                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 34, lineHeight: 1, color: c.warn && c.val > 0 ? '#B85C1A' : '#182840', marginBottom: 3 }}>{loading ? '—' : c.val}</div>
+                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 34, lineHeight: 1, color: c.warn && c.val > 0 ? '#B85C1A' : '#182840', marginBottom: 3 }}>{c.val === null ? '📖' : loading ? '—' : c.val}</div>
                   <div style={{ fontSize: 12, color: '#566880', marginBottom: 8 }}>{c.lbl}</div>
                   <div style={{ fontSize: 11, color: c.warn && c.val > 0 ? '#B85C1A' : '#1E7A52', fontWeight: 500 }}>{c.trend}</div>
                 </div>
