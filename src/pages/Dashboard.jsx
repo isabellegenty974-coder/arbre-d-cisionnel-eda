@@ -361,10 +361,10 @@ export default function Dashboard() {
           {/* STATS */}
           <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>
             {[
-              { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#EAF2FB', trend: '↑ depuis septembre',   warn: false, to: '/liste-eleves' },
+              { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#EAF2FB', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
               { val: null, lbl: 'Ressources', ico: '📖', ibg: '#EEE9FF', trend: 'RASED · Professionnels · Structures', warn: false, to: '/items-professionnels' },
               { val: alertesFiches.length, lbl: 'Sans mise à jour +30j', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
-              { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis septembre',      warn: false, to: '/mes-ecoles' },
+              { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
             ].map((c, i) => (
               <Link key={i} to={c.to} style={{ textDecoration: 'none' }}>
                 <div style={{ background: '#fff', border: `1px solid #D8E1EE`, borderRadius: 12, padding: '16px 18px', cursor: 'pointer', transition: 'box-shadow .15s, transform .15s', borderTop: c.warn && c.val > 0 ? '3px solid #B85C1A' : undefined }}
