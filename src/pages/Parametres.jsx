@@ -112,6 +112,7 @@ function FormAjoutAnnee({ onSave, onCancel, saving }) {
             style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', background: '#fff', boxSizing: 'border-box' }}>
             <option value="a_venir">À venir</option>
             <option value="en_cours">En cours</option>
+            <option value="archivee">Archivée</option>
           </select>
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -279,7 +280,7 @@ export default function Parametres() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[...annees].sort((a, b) => b.libelle.localeCompare(a.libelle)).map(a => {
+              {[...annees].sort((a, b) => a.libelle.localeCompare(b.libelle) * -1).map(a => {
                 const statut = getStatut(a);
                 const cfg = statutConfig[statut] || statutConfig.a_venir;
                 const active = isActive(a);
@@ -357,7 +358,7 @@ export default function Parametres() {
               </tr>
             </thead>
             <tbody>
-              {[...annees].sort((a, b) => b.libelle.localeCompare(a.libelle)).map((a, i, arr) => {
+              {[...annees].sort((a, b) => a.libelle.localeCompare(b.libelle) * -1).map((a, i, arr) => {
                 const s = statsParAnnee(a);
                 const active = isActive(a);
                 const isSelected = selected === a.id;
