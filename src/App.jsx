@@ -42,6 +42,7 @@ import SyntheseEleve from './pages/SyntheseEleve';
 import MesEcoles from './pages/MesEcoles';
 import DetailEcole from './pages/DetailEcole';
 import ImportPDF from './pages/ImportPDF';
+import Parametres from './pages/Parametres';
 
 // Pages orphelines déplacées aux bons chemins
 import ActionsAnxieteSit from './pages/ActionsAnxieteSit';
@@ -253,6 +254,7 @@ const AuthenticatedApp = () => {
         <Route path="/mes-ecoles" element={<MesEcoles />} />
         <Route path="/detail-ecole" element={<DetailEcole />} />
         <Route path="/import-pdf" element={<ImportPDF />} />
+        <Route path="/parametres" element={<Parametres />} />
       
       {/* Apprentissage */}
       <Route path="/apprentissage" element={<Apprentissage />} />

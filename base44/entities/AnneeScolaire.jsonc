@@ -1,0 +1,38 @@
+{
+  "name": "AnneeScolaire",
+  "type": "object",
+  "properties": {
+    "libelle": {
+      "type": "string",
+      "description": "Ex: 2025-2026"
+    },
+    "date_debut": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de d\u00e9but"
+    },
+    "date_fin": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de fin"
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Ann\u00e9e scolaire en cours"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archivee",
+        "future"
+      ],
+      "default": "future",
+      "description": "Statut de l'ann\u00e9e"
+    }
+  },
+  "required": [
+    "libelle"
+  ]
+}
