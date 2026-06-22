@@ -204,6 +204,7 @@ function AutoRegister() {
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     if (user && !user.first_login_seen) {
@@ -228,7 +229,11 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
+  // Allow /register and /login pages without authentication
+  const publicPages = ['/register', '/login'];
+  const isPublicPage = publicPages.some(page => location.pathname.startsWith(page));
+
+  if (authError && !isPublicPage) {
     if (authError.type === 'user_not_registered') {
       return <AutoRegister />;
     } else if (authError.type === 'auth_required') {
