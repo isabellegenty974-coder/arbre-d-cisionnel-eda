@@ -8,6 +8,7 @@ import { CheckCircle, Loader, AlertCircle } from 'lucide-react';
 
 export default function Register() {
   const navigate = useNavigate();
+  const [inviteToken, setInviteToken] = useState(null);
   const [email, setEmail] = useState('');
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
@@ -20,24 +21,47 @@ export default function Register() {
   const [invalidToken, setInvalidToken] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        if (currentUser) {
-          // Utilisateur déjà connecté
-          setEmail(currentUser.email || '');
-          setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
-          setPrenom(currentUser.full_name?.split(' ')[0] || '');
-          setProfession(currentUser.profession || '');
+    const initializeForm = async () => {
+      // Extraire le token d'invitation de l'URL
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token') || params.get('invitation_token');
+      
+      if (token) {
+        setInviteToken(token);
+        // Valider le token en essayant de récupérer le profil utilisateur
+        try {
+          // Le token est déjà défini dans les headers par le SDK
+          const currentUser = await base44.auth.me();
+          if (currentUser) {
+            setEmail(currentUser.email || '');
+            setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
+            setPrenom(currentUser.full_name?.split(' ')[0] || '');
+            setProfession(currentUser.profession || '');
+          }
+        } catch (err) {
+          // Token invalide ou expiré
+          console.error('Token invalide:', err);
+          setInvalidToken(true);
         }
-      } catch (err) {
-        // Utilisateur pas connecté — c'est normal pour une invitation
-        console.log('Utilisateur non authentifié — en attente d\'inscription via invitation');
-      } finally {
-        setLoading(false);
+      } else {
+        // Pas de token, vérifier si utilisateur connecté
+        try {
+          const currentUser = await base44.auth.me();
+          if (currentUser) {
+            setEmail(currentUser.email || '');
+            setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
+            setPrenom(currentUser.full_name?.split(' ')[0] || '');
+            setProfession(currentUser.profession || '');
+          }
+        } catch (err) {
+          console.log('Utilisateur non authentifié');
+        }
       }
+      
+      setLoading(false);
     };
-    checkAuth();
+    
+    initializeForm();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -63,21 +87,25 @@ export default function Register() {
     setError(null);
     try {
       // Mettre à jour le profil utilisateur
-      await base44.auth.updateMe({
+      const updateData = {
         profession,
         full_name: `${prenom.trim()} ${nom.trim()}`,
-      });
+        first_login_seen: false, // Force réaffichage du message de bienvenue
+      };
       
-      // Créer automatiquement le profil MembreEquipe
+      await base44.auth.updateMe(updateData);
+      
+      // Créer le profil MembreEquipe
       await base44.entities.MembreEquipe.create({
         prenom: prenom.trim(),
         nom: nom.trim(),
         profession,
-        email: email.trim(),
+        email: email || 'unknown@rased.re',
         actif: true,
       });
       
-      // Redirection vers dashboard avec réaffichage du message de bienvenue
+      // Redirection automatique vers dashboard
+      // Le WelcomeModal s'affichera automatiquement car first_login_seen = false
       window.location.href = '/dashboard';
     } catch (err) {
       setError(err.message || 'Erreur lors de l\'inscription');
