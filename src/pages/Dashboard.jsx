@@ -154,29 +154,28 @@ export default function Dashboard() {
   const [elevesR, setElevesR] = useState([]);
   const [membres, setMembres] = useState([]);
   const [notifs, setNotifs]   = useState([]);
-  const [annees, setAnnees]   = useState([]);
-  const [anneeActive, setAnneeActive] = useState(null);
   const [loading, setLoading] = useState(true);
   const [diagModal, setDiagModal] = useState(false);
   const [search, setSearch]   = useState('');
+  const [annees, setAnnees]   = useState([]);
+  const [anneeActive, setAnneeActive] = useState(null);
 
   useEffect(() => {
     async function load() {
-      const [u, f, ec, el, mb, no, ans] = await Promise.all([
+      const [u, f, ec, el, mb, no, an] = await Promise.all([
         base44.auth.me().catch(() => null),
         base44.entities.FicheEleve.list('-updated_date', 200).catch(() => []),
         base44.entities.EcoleRased.list('-created_date', 100).catch(() => []),
         base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
         base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
         base44.entities.Notification.filter({ lu: false }).catch(() => []),
-        base44.entities.AnneeScolaire.list('-libelle', 50).catch(() => []),
+        base44.entities.AnneeScolaire.list('-libelle', 20).catch(() => []),
       ]);
       setUser(u); setFiches(f); setEcoles(ec);
       setElevesR(el); setMembres(mb); setNotifs(no);
-      const anneesData = ans.filter(a => !a.archivee);
-      setAnnees(anneesData);
-      const active = anneesData.find(a => a.active) || null;
-      setAnneeActive(active?.id || '__all__');
+      setAnnees(an);
+      const active = an.find(a => a.active) || an[0] || null;
+      setAnneeActive(active?.id || null);
       setLoading(false);
     }
     load();
@@ -186,22 +185,11 @@ export default function Dashboard() {
   const MS30  = 30 * 86400000;
   const startMonth = new Date(); startMonth.setDate(1); startMonth.setHours(0, 0, 0, 0);
 
-  // Filtrage par année scolaire
-  const anneeSelectionnee = annees.find(a => a.id === anneeActive);
-  const fichesFiltrees = anneeSelectionnee
-    ? fiches.filter(f => {
-        const d = new Date(f.created_date);
-        const debut = anneeSelectionnee.date_debut ? new Date(anneeSelectionnee.date_debut) : new Date(`${anneeSelectionnee.libelle.split('-')[0]}-09-01`);
-        const fin   = anneeSelectionnee.date_fin   ? new Date(anneeSelectionnee.date_fin)   : new Date(`${anneeSelectionnee.libelle.split('-')[1]}-08-31`);
-        return d >= debut && d <= fin;
-      })
-    : fiches;
-
-  const totalEleves    = fichesFiltrees.length;
-  const alertesFiches  = fichesFiltrees.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
+  const totalEleves    = fiches.length;
+  const alertesFiches  = fiches.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
   const elevesClotured = elevesR.filter(e => e.statut === 'Clôturé').length;
 
-  const recentActivity = [...fichesFiltrees]
+  const recentActivity = [...fiches]
     .sort((a, b) => new Date(b.updated_date || b.created_date) - new Date(a.updated_date || a.created_date))
     .slice(0, 5);
 
@@ -215,7 +203,7 @@ export default function Dashboard() {
     return { ...ec, nbEl, nbAl };
   });
 
-  const searchRes = fichesFiltrees.filter(e =>
+  const searchRes = fiches.filter(e =>
     `${e.prenom} ${e.nom}`.toLowerCase().includes(search.toLowerCase()) ||
     (e.ecole || '').toLowerCase().includes(search.toLowerCase())
   );
@@ -263,13 +251,10 @@ export default function Dashboard() {
             <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{todayLabel()} · Année scolaire {anneeScolaire()}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Sélecteur année scolaire */}
+            {/* Sélecteur d'année scolaire */}
             {annees.length > 0 && (
-              <select
-                value={anneeActive || '__all__'}
-                onChange={e => setAnneeActive(e.target.value)}
-                style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid #D8E1EE', background: '#fff', fontSize: 12.5, fontWeight: 600, color: '#182840', cursor: 'pointer', outline: 'none', fontFamily: 'Inter, sans-serif' }}>
-                <option value="__all__">Toutes les années</option>
+              <select value={anneeActive || ''} onChange={e => setAnneeActive(e.target.value)}
+                style={{ padding: '7px 12px', fontSize: 13, fontWeight: 600, border: '1px solid #D8E1EE', borderRadius: 8, background: '#F0F3F8', color: '#182840', cursor: 'pointer', outline: 'none' }}>
                 {annees.map(a => (
                   <option key={a.id} value={a.id}>{a.libelle}{a.active ? ' ★' : ''}</option>
                 ))}
