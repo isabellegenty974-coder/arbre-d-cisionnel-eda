@@ -4,42 +4,58 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
-import { CheckCircle, Loader } from 'lucide-react';
+import { CheckCircle, Loader, AlertCircle } from 'lucide-react';
 
 export default function Register() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState('');
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [profession, setProfession] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [invalidToken, setInvalidToken] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const checkAuth = async () => {
       try {
         const currentUser = await base44.auth.me();
         if (currentUser) {
-          setUser(currentUser);
+          // Utilisateur déjà connecté
+          setEmail(currentUser.email || '');
           setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
           setPrenom(currentUser.full_name?.split(' ')[0] || '');
           setProfession(currentUser.profession || '');
         }
       } catch (err) {
-        // L'AuthProvider dans App.jsx gère la redirection si besoin
-        console.error('Erreur lors de la récupération du profil:', err);
+        // Utilisateur pas connecté — c'est normal pour une invitation
+        console.log('Utilisateur non authentifié — en attente d\'inscription via invitation');
       } finally {
         setLoading(false);
       }
     };
-    fetchUser();
+    checkAuth();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nom.trim() || !prenom.trim() || !profession) {
+    
+    // Validation
+    if (!nom.trim() || !prenom.trim() || !profession || !password.trim()) {
       setError('Tous les champs sont requis');
+      return;
+    }
+    
+    if (password !== passwordConfirm) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
+    
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères');
       return;
     }
 
@@ -57,14 +73,14 @@ export default function Register() {
         prenom: prenom.trim(),
         nom: nom.trim(),
         profession,
-        email: user?.email,
+        email: email.trim(),
         actif: true,
       });
       
-      // Redirection avec message de bienvenue
-      window.location.href = '/dashboard?welcome=true';
+      // Redirection vers dashboard avec réaffichage du message de bienvenue
+      window.location.href = '/dashboard';
     } catch (err) {
-      setError(err.message || 'Erreur lors de la sauvegarde');
+      setError(err.message || 'Erreur lors de l\'inscription');
     } finally {
       setSaving(false);
     }
@@ -74,6 +90,31 @@ export default function Register() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (invalidToken) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md"
+        >
+          <div className="bg-white rounded-2xl border border-border shadow-sm p-8 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-4">Lien expiré</h1>
+            <p className="text-muted-foreground mb-6">
+              Ce lien d'invitation n'est plus valide. Contactez votre administrateur pour recevoir une nouvelle invitation.
+            </p>
+            <Button onClick={() => navigate('/')} className="w-full">
+              Retour à l'accueil
+            </Button>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -96,18 +137,6 @@ export default function Register() {
               Équipe RASED · Circonscription de La Possession
             </p>
           </div>
-
-          {/* Email display */}
-          {user ? (
-            <div className="mb-6 p-3 bg-secondary/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Email</p>
-              <p className="text-sm font-medium text-foreground">{user.email}</p>
-            </div>
-          ) : (
-            <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">Authentification en cours...</p>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Prénom */}
@@ -141,7 +170,7 @@ export default function Register() {
             {/* Profession */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Profession
+                Rôle dans l'équipe
               </label>
               <select
                 value={profession}
@@ -150,16 +179,44 @@ export default function Register() {
                 className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 <option value="">Sélectionner un rôle</option>
-                <option value="Psy EN EDA">Psychologue de l'EN (Psy-EN)</option>
-                <option value="MaDR">Maître de Rééducation (MaDR)</option>
-                <option value="MaDP">Maître de Prévention (MaDP)</option>
+                <option value="Psy EN EDA">Psychologue de l'Éducation Nationale · Spécialité EDA</option>
+                <option value="MaDR">Maître à Dominante Relationnelle (MaDR)</option>
+                <option value="MaDP">Maître à Dominante Pédagogique (MaDP)</option>
               </select>
+            </div>
+
+            {/* Mot de passe */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Mot de passe
+              </label>
+              <Input
+                type="password"
+                placeholder="Au moins 8 caractères"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Confirmer mot de passe */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Confirmer le mot de passe
+              </label>
+              <Input
+                type="password"
+                placeholder="Confirmez votre mot de passe"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                required
+              />
             </div>
 
             {/* Error */}
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-xs text-red-800">{error}</p>
+                <p className="text-sm text-red-800">{error}</p>
               </div>
             )}
 
