@@ -14,7 +14,7 @@ import BottomBar from '@/components/Navigation/BottomBar';
 // Pages
 import Accueil from './pages/Accueil';
 import Resume from './pages/Resume';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard.jsx';
 import Historique from './pages/Historique';
 import FicheEleve from './pages/FicheEleve';
 import PolitiqueConfidentialite from './pages/PolitiqueConfidentialite';
