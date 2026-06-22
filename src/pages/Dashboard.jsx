@@ -411,7 +411,7 @@ export default function Dashboard() {
           <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>
             {[
               { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#EAF2FB', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
-              { val: null, lbl: 'Ressources', ico: '📖', ibg: '#EEE9FF', trend: 'RASED · Professionnels · Structures', warn: false, to: '/items-professionnels' },
+              { val: null, lbl: 'Ressources', ico: '', ibg: '#EEE9FF', trend: 'RASED · Professionnels · Structures', warn: false, to: '/items-professionnels' },
               { val: alertesFiches.length, lbl: 'Sans mise à jour +30j', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
             ].map((c, i) => (
