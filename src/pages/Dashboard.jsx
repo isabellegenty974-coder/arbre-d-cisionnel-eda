@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Search } from 'lucide-react';
+import { usePresence } from '@/lib/usePresence';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -58,7 +59,7 @@ const NAV = [
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 
-function Sidebar({ membres, notifications, onDiagClick }) {
+function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [] }) {
   const location = window.location.pathname;
 
   return (
@@ -116,24 +117,28 @@ function Sidebar({ membres, notifications, onDiagClick }) {
         })}
       </nav>
 
-      {/* Membres */}
+      {/* Membres avec présence réelle */}
       {membres.length > 0 && (
         <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
           <div style={{ fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '.08em', color: 'rgba(255,255,255,.3)', marginBottom: 8 }}>
-            Membres connectés
+            Équipe RASED
           </div>
-          {membres.slice(0, 3).map((m, i) => {
+          {membres.slice(0, 4).map((m, i) => {
             const bg = PROF_COLOR[m.profession] || '#3B82C4';
             const init = `${m.prenom?.[0] || ''}${m.nom?.[0] || ''}`;
+            const isOnline = membresEnLigne.some(p =>
+              p.user_name === `${m.prenom} ${m.nom}` ||
+              p.user_profession === m.profession
+            );
             return (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0, position: 'relative' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0, position: 'relative', opacity: isOnline ? 1 : 0.5 }}>
                   {init}
-                  <span style={{ position: 'absolute', bottom: 0, right: 0, width: 8, height: 8, borderRadius: '50%', background: '#4ADE80', border: '1.5px solid #1A3353' }} />
+                  <span style={{ position: 'absolute', bottom: 0, right: 0, width: 8, height: 8, borderRadius: '50%', background: isOnline ? '#4ADE80' : '#6B7280', border: '1.5px solid #1A3353' }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,.85)' }}>{m.prenom} {m.nom?.[0]}.</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,.38)' }}>{PROF_LABEL[m.profession] || m.profession}</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: isOnline ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.4)' }}>{m.prenom} {m.nom?.[0]}.</div>
+                  <div style={{ fontSize: 10, color: isOnline ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.25)' }}>{isOnline ? '● En ligne' : '○ Hors ligne'} · {PROF_LABEL[m.profession] || m.profession}</div>
                 </div>
               </div>
             );
@@ -160,6 +165,9 @@ export default function Dashboard() {
   const [annees, setAnnees]   = useState([]);
   const [anneeActive, setAnneeActive] = useState(null);
 
+  // Présence temps réel (qui est en ligne)
+  const { online: membresEnLigne } = usePresence(null);
+
   useEffect(() => {
     async function load() {
       const [u, f, ec, el, mb, no, an] = await Promise.all([
@@ -179,6 +187,18 @@ export default function Dashboard() {
       setLoading(false);
     }
     load();
+
+    // Souscription temps réel sur FicheEleve (fil d'activité live)
+    const unsub = base44.entities.FicheEleve.subscribe((event) => {
+      if (event.type === 'create') {
+        setFiches(prev => [event.data, ...prev].slice(0, 200));
+      } else if (event.type === 'update') {
+        setFiches(prev => prev.map(f => f.id === event.data.id ? { ...f, ...event.data } : f));
+      } else if (event.type === 'delete') {
+        setFiches(prev => prev.filter(f => f.id !== event.entity_id));
+      }
+    });
+    return unsub;
   }, []);
 
   const now   = Date.now();
@@ -238,7 +258,7 @@ export default function Dashboard() {
 
       {/* SIDEBAR */}
       <div className="db-sidebar">
-        <Sidebar membres={membres} notifications={notifs.length} onDiagClick={() => setDiagModal(true)} />
+        <Sidebar membres={membres} notifications={notifs.length} onDiagClick={() => setDiagModal(true)} membresEnLigne={membresEnLigne} />
       </div>
 
       {/* MAIN */}

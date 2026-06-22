@@ -1,0 +1,39 @@
+{
+  "name": "Presence",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID de l'utilisateur"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nom de l'utilisateur"
+    },
+    "user_profession": {
+      "type": "string",
+      "description": "Profession (Psy EN EDA, MaDR, MaDP)"
+    },
+    "fiche_id": {
+      "type": "string",
+      "description": "ID de la fiche consult\u00e9e (vide si hors fiche)"
+    },
+    "page": {
+      "type": "string",
+      "description": "Page courante (/dashboard, /detail-fiche, etc.)"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Dernier heartbeat"
+    },
+    "is_online": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "user_id",
+    "user_name"
+  ]
+}

@@ -8,6 +8,9 @@ import { motion } from 'framer-motion';
 import PhotoEEUpload from '@/components/PhotoEEUpload';
 import RapportContent from '@/components/RapportContent';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
+import PresenceBandeau from '@/components/rased/PresenceBandeau';
+import NotesMembreSection from '@/components/rased/NotesMembreSection';
+import { usePresence } from '@/lib/usePresence';
 
 export default function DetailFiche() {
   const [searchParams] = useSearchParams();
@@ -36,6 +39,7 @@ export default function DetailFiche() {
   const [addingIntervention, setAddingIntervention] = useState(false);
 
   const ficheId = searchParams.get('id');
+  const { onFiche } = usePresence(ficheId);
 
   useEffect(() => {
     if (!ficheId) {
@@ -126,6 +130,7 @@ export default function DetailFiche() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-2xl mx-auto space-y-6"
         >
+          <PresenceBandeau onFiche={onFiche} />
           {/* Âge */}
           {fiche.age && (
             <motion.div
@@ -207,6 +212,12 @@ export default function DetailFiche() {
               ficheId={ficheId}
               fichePrenomNom={`${fiche.prenom} ${fiche.nom}`}
             />
+          </motion.div>
+
+          {/* Notes par membre */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.23 }}
+            className="p-4 rounded-xl border border-border bg-card">
+            <NotesMembreSection ficheId={ficheId} />
           </motion.div>
 
           {/* Tableau Interventions */}

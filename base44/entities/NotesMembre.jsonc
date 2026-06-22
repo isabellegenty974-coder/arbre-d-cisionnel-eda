@@ -1,0 +1,32 @@
+{
+  "name": "NotesMembre",
+  "type": "object",
+  "properties": {
+    "fiche_id": {
+      "type": "string",
+      "description": "ID de la fiche \u00e9l\u00e8ve"
+    },
+    "membre_id": {
+      "type": "string",
+      "description": "ID du membre (user_id)"
+    },
+    "membre_nom": {
+      "type": "string"
+    },
+    "membre_profession": {
+      "type": "string"
+    },
+    "contenu": {
+      "type": "string",
+      "description": "Notes personnelles du membre sur cet \u00e9l\u00e8ve"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "fiche_id",
+    "membre_id"
+  ]
+}
