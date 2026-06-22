@@ -33,6 +33,7 @@ import DetailEleve from './pages/DetailEleve';
 import DetailFiche from './pages/DetailFiche';
 import HistoriqueEleve from './pages/HistoriqueEleve';
 import ExportAnnuel from './pages/ExportAnnuel';
+import RapportAnnuel from './pages/RapportAnnuel';
 import EditEleve from './pages/EditEleve';
 import ItemsProfessionnels from './pages/ItemsProfessionnels';
 import DiagnosticEleve from './pages/DiagnosticEleve'; // renommé en hypotheses-eleve
@@ -277,6 +278,7 @@ const AuthenticatedApp = () => {
         <Route path="/detail-fiche" element={<DetailFiche />} />
         <Route path="/historique-eleve" element={<HistoriqueEleve />} />
         <Route path="/export-annuel" element={<ExportAnnuel />} />
+        <Route path="/rapport-annuel" element={<RapportAnnuel />} />
         <Route path="/edit-eleve" element={<EditEleve />} />
         <Route path="/items-professionnels" element={<ItemsProfessionnels />} />
         <Route path="/hypotheses-eleve" element={<DiagnosticEleve />} />
