@@ -29,13 +29,19 @@ export default function InviteUsers() {
     setLoading(true);
     setResult(null);
     try {
-      // Inviter l'utilisateur - Base44 gère automatiquement l'email d'invitation
+      // Inviter l'utilisateur
       await base44.users.inviteUser(email.trim(), 'user');
       
-      // Enregistrer la profession dans les données utilisateur via la fonction backend
+      // Enregistrer la profession dans les données utilisateur
       await base44.functions.invoke('inviteUsers', { 
         email: email.trim(), 
         role: 'user',
+        profession: profession
+      });
+
+      // Envoyer l'email de bienvenue personnalisé
+      await base44.functions.invoke('sendInvitationEmail', { 
+        email: email.trim(),
         profession: profession
       });
 
