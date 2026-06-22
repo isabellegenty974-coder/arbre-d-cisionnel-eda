@@ -7,6 +7,7 @@ import PhotoEEUpload from '@/components/PhotoEEUpload';
 import RapportContent from '@/components/RapportContent';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import NotesMembreSection from '@/components/rased/NotesMembreSection';
+import ReportExportModal from '@/components/rased/ReportExportModal';
 import { usePresence } from '@/lib/usePresence';
 import { jsPDF } from 'jspdf';
 
@@ -429,7 +430,9 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
 }
 
 // ── Onglet Infos ──────────────────────────────────────────────────────────────
-function TabInfos({ fiche, ficheId, navigate }) {
+function TabInfos({ fiche, ficheId, navigate, user }) {
+  const [showReportModal, setShowReportModal] = useState(false);
+  
   const InfoRow = ({ label, value }) => (
     <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8' }}>
       <div style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 600, marginBottom: 3 }}>{label}</div>
@@ -455,7 +458,7 @@ function TabInfos({ fiche, ficheId, navigate }) {
         <CardHead icon="📤" title="Exporter" />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
           {[
-            { ico: '📄', lbl: 'Synthèse de suivi', sub: 'Notes et hypothèses en PDF', action: () => navigate(`/synthese-eleve?id=${ficheId}`) },
+            { ico: '📄', lbl: 'Rapport de suivi', sub: 'Générer un PDF officiel', action: () => setShowReportModal(true) },
             { ico: '📝', lbl: 'Hypothèses EDA',    sub: 'Lancer l\'arbre décisionnel', action: () => navigate(`/hypotheses-eleve?id=${ficheId}`) },
           ].map((opt, i) => (
             <div key={i} onClick={opt.action} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', transition: 'all .14s', background: '#fff' }}
@@ -470,6 +473,15 @@ function TabInfos({ fiche, ficheId, navigate }) {
           ))}
         </div>
       </Card>
+
+      {/* Modal d'export de rapport */}
+      <ReportExportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        eleve={fiche}
+        user={user}
+        reportType="synthese"
+      />
     </div>
   );
 }
@@ -483,6 +495,7 @@ export default function DetailFiche() {
   const [activeTab, setActiveTab] = useState('suivi');
   const [interventions, setInterventions] = useState([]);
   const [historiqueEDA, setHistoriqueEDA] = useState([]);
+  const [user, setUser] = useState(null);
 
   const ficheId = searchParams.get('id');
   const { onFiche } = usePresence(ficheId);
@@ -492,10 +505,12 @@ export default function DetailFiche() {
     Promise.all([
       base44.entities.FicheEleve.get(ficheId),
       base44.entities.HistoriqueEDA.filter({ eleve_id: ficheId }).catch(() => []),
-    ]).then(([ficheData, histo]) => {
+      base44.auth.me().catch(() => null),
+    ]).then(([ficheData, histo, userData]) => {
       setFiche(ficheData);
       setInterventions(ficheData?.interventions || []);
       setHistoriqueEDA(histo.sort((a, b) => new Date(b.date || b.created_date) - new Date(a.date || a.created_date)));
+      setUser(userData);
     }).catch(() => setFiche(null)).finally(() => setLoading(false));
   }, [ficheId]);
 
@@ -534,7 +549,7 @@ export default function DetailFiche() {
               <TabHistorique fiche={fiche} interventions={interventions} historiqueEDA={historiqueEDA} />
             )}
             {activeTab === 'infos' && (
-              <TabInfos fiche={fiche} ficheId={ficheId} navigate={navigate} />
+              <TabInfos fiche={fiche} ficheId={ficheId} navigate={navigate} user={user} />
             )}
           </motion.div>
         </AnimatePresence>
