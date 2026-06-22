@@ -343,7 +343,7 @@ export default function DiagnosticEleve() {
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAF8] to-[#F5F0E8] pb-20">
       <HamburgerMenu />
       <ScreenLayout
-        title={`🔍 Hypothèses — Construire une hypothèse de travail`}
+        title={`🔍 Hypothèses de travail`}
         subtitle={eleve ? `${eleve.prenom} ${eleve.nom}${eleve.classe ? ` — ${eleve.classe}` : ""}` : ""}
       >
         {/* Barre de progression */}
