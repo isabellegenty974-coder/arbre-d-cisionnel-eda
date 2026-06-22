@@ -431,7 +431,7 @@ export default function Dashboard() {
           {/* RACCOURCIS */}
           <div className="db-raccourcis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
             {[
-              { ico: '🔍', ibg: '#EEE9FF', lbl: 'Nouvelles hypothèses',   sub: 'Lancer l\'arbre EDA',         action: () => setDiagModal(true) },
+              { ico: '🔍', ibg: '#EEE9FF', lbl: 'Nouvelles hypothèses',   sub: 'Démarrer une analyse de situation',         action: () => setDiagModal(true) },
               { ico: '📄', ibg: '#EAF2FB', lbl: 'Importer une liste PDF',  sub: 'Créer des fiches depuis Onde', to: '/import-pdf' },
               { ico: '👤', ibg: '#E4F4ED', lbl: 'Créer une fiche élève',   sub: 'Saisie manuelle',             to: '/fiche-eleve' },
               { ico: '📊', ibg: '#FEF0E4', lbl: 'Export annuel',           sub: 'Rapport pour l\'IEN',          to: '/export-annuel' },

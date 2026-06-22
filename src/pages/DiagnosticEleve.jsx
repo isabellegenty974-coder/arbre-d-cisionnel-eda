@@ -285,7 +285,7 @@ export default function DiagnosticEleve() {
     const name = norm(`${eleve?.prenom || ''} ${eleve?.nom || ''}`.trim());
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('Rapport - Hypotheses EDA', 15, 20);
+    doc.text('Rapport - Hypothèses de travail', 15, 20);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     if (name) doc.text(`Eleve : ${name}`, 15, 30);
@@ -525,7 +525,7 @@ export default function DiagnosticEleve() {
                   <SaveDiagnosticButton
                     ficheId={eleveId}
                     prenomEleve={eleve?.prenom}
-                    domaine="hypothèses EDA"
+                    domaine="hypothèses de travail"
                     sousDomaine=""
                     hypotheses={rapport ? [rapport.substring(0, 150) + '…'] : []}
                     actions={[]}
