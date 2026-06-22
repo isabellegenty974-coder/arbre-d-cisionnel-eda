@@ -86,49 +86,25 @@ function AssistantRentree({ annee, ecolesPrecedentes, onClose }) {
 
 // ── Formulaire ajout année ──────────────────────────────────────────────────
 function FormAjoutAnnee({ onSave, onCancel, saving }) {
-  const [libelle, setLibelle]       = useState('');
-  const [dateDebut, setDateDebut]   = useState('');
-  const [dateFin, setDateFin]       = useState('');
-  const [statut, setStatut]         = useState('a_venir');
-
+  const [libelle, setLibelle] = useState('');
+  const [statut, setStatut]   = useState('a_venir');
   const valid = libelle.trim().length > 0;
 
   const handleSubmit = () => {
     if (!valid) return;
-    onSave({ libelle: libelle.trim(), date_debut: dateDebut || null, date_fin: dateFin || null, statut, est_active: false, active: false });
-  };
-
-  // Auto-remplir libellé → dates
-  const handleLibelleChange = (val) => {
-    setLibelle(val);
-    const parts = val.split('-');
-    if (parts.length === 2 && parts[0].length === 4 && parts[1].length === 4) {
-      setDateDebut(`${parts[0]}-09-01`);
-      setDateFin(`${parts[1]}-07-04`);
-    }
+    onSave({ libelle: libelle.trim(), statut, est_active: false, active: false });
   };
 
   return (
-    <div style={{ marginBottom: 20, padding: '18px 18px', background: '#F8FAFD', borderRadius: 14, border: '1px solid #D8E1EE' }}>
+    <div style={{ marginBottom: 20, padding: '18px', background: '#F8FAFD', borderRadius: 14, border: '1px solid #D8E1EE' }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: '#182840', marginBottom: 14 }}>Nouvelle année scolaire</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Libellé *</label>
-          <input autoFocus value={libelle} onChange={e => handleLibelleChange(e.target.value)}
+          <input autoFocus value={libelle} onChange={e => setLibelle(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
             placeholder="Ex : 2026-2027"
             style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div>
-            <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Date de début</label>
-            <input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)}
-              style={{ width: '100%', padding: '9px 10px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
-          </div>
-          <div>
-            <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Date de fin</label>
-            <input type="date" value={dateFin} onChange={e => setDateFin(e.target.value)}
-              style={{ width: '100%', padding: '9px 10px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
-          </div>
         </div>
         <div>
           <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Statut</label>
@@ -136,17 +112,16 @@ function FormAjoutAnnee({ onSave, onCancel, saving }) {
             style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', background: '#fff', boxSizing: 'border-box' }}>
             <option value="a_venir">À venir</option>
             <option value="en_cours">En cours</option>
-            <option value="archivee">Archivée</option>
           </select>
         </div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={onCancel}
             style={{ padding: '9px 16px', background: 'transparent', color: '#566880', border: '1px solid #D8E1EE', borderRadius: 8, cursor: 'pointer', fontSize: 13 }}>
             Annuler
           </button>
           <button onClick={handleSubmit} disabled={saving || !valid}
             style={{ padding: '9px 18px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13, opacity: !valid || saving ? .5 : 1 }}>
-            {saving ? 'Création…' : '+ Créer'}
+            {saving ? 'Création…' : 'Créer'}
           </button>
         </div>
       </div>
