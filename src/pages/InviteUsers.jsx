@@ -9,9 +9,9 @@ import { Mail, Send, Check, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const PROFESSIONS = [
-  { value: 'Psy EN EDA', label: 'Psychologue de l\'EN (Psy-EN)' },
-  { value: 'MaDR', label: 'Maître de Rééducation (MaDR)' },
-  { value: 'MaDP', label: 'Maître de Prévention (MaDP)' },
+  { value: 'Psy EN EDA', label: 'Psychologue de l\'Éducation Nationale · Spécialité EDA' },
+  { value: 'MaDR', label: 'Maître à Dominante Relationnelle (MaDR)' },
+  { value: 'MaDP', label: 'Maître à Dominante Pédagogique (MaDP)' },
 ];
 
 export default function InviteUsers() {
@@ -29,13 +29,39 @@ export default function InviteUsers() {
     setLoading(true);
     setResult(null);
     try {
+      const user = await base44.auth.me();
+      const userName = user?.full_name || 'Un administrateur';
+      
+      // Créer l'utilisateur
       await base44.functions.invoke('inviteUsers', { 
         email: email.trim(), 
         role: 'user',
         profession: profession
       });
+      
+      // Envoyer l'email d'invitation
+      const registrationUrl = `${window.location.origin}/register`;
+      const emailBody = `Bonjour,
+
+Vous avez été invité(e) à rejoindre l'application Suivis RASED de la Circonscription de La Possession par ${userName}.
+
+Cliquez sur le lien ci-dessous pour créer votre compte :
+${registrationUrl}
+
+Ce lien est valable 7 jours.
+
+RASED · Circonscription de La Possession
+La Réunion`;
+
+      await base44.integrations.Core.SendEmail({
+        to: email.trim(),
+        subject: 'Invitation à rejoindre Suivis RASED · La Possession',
+        body: emailBody,
+        from_name: 'Suivis RASED'
+      });
+
       setInvitedList([...invitedList, { email: email.trim(), profession }]);
-      setResult({ success: true, message: `${email} a été invité(e)` });
+      setResult({ success: true, message: `${email} a été invité(e) — L'email a été envoyé` });
       setEmail('');
       setProfession('');
     } catch (err) {
@@ -116,22 +142,30 @@ export default function InviteUsers() {
            <motion.div
              initial={{ opacity: 0 }}
              animate={{ opacity: 1 }}
-             className="bg-blue-50 rounded-2xl border border-blue-200 p-4 max-w-lg"
+             className="space-y-3"
            >
-             <p className="text-sm font-semibold text-blue-900 mb-3">
-               ✓ {invitedList.length} collègue{invitedList.length > 1 ? 's' : ''} invité{invitedList.length > 1 ? 's' : ''}
-             </p>
-             <div className="space-y-2">
-               {invitedList.map((item, i) => {
-                 const prof = PROFESSIONS.find(p => p.value === item.profession);
-                 return (
-                   <div key={i} className="text-xs text-blue-800 flex items-center gap-2">
-                     <Check className="w-3 h-3" />
-                     <span>{item.email}</span>
-                     <span className="ml-auto text-blue-600 font-semibold">{prof?.label}</span>
-                   </div>
-                 );
-               })}
+             <div className="bg-blue-50 rounded-2xl border border-blue-200 p-4">
+               <p className="text-sm font-semibold text-blue-900 mb-3">
+                 ✓ {invitedList.length} collègue{invitedList.length > 1 ? 's' : ''} invité{invitedList.length > 1 ? 's' : ''}
+               </p>
+               <div className="space-y-2">
+                 {invitedList.map((item, i) => {
+                   const prof = PROFESSIONS.find(p => p.value === item.profession);
+                   return (
+                     <div key={i} className="text-xs text-blue-800 flex items-center gap-2">
+                       <Check className="w-3 h-3" />
+                       <span>{item.email}</span>
+                       <span className="ml-auto text-blue-600 font-semibold">{prof?.label}</span>
+                     </div>
+                   );
+                 })}
+               </div>
+             </div>
+
+             <div className="bg-amber-50 rounded-2xl border border-amber-200 p-3">
+               <p className="text-xs text-amber-800">
+                 <span className="font-semibold">💡 Conseil :</span> Si le destinataire ne reçoit pas l'email, vérifiez vos spams ou dossier de courrier indésirable. L'email vient de l'adresse d'envoi automatique de Suivis RASED.
+               </p>
              </div>
            </motion.div>
           )}
