@@ -357,7 +357,7 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <Card>
-        <CardHead icon="🔍" title="Hypothèses EDA formulées"
+        <CardHead icon="🔍" title="Hypothèses de travail formulées"
           action="+ Nouvelles hypothèses"
           onAction={() => navigate(`/hypotheses-eleve?id=${ficheId}`)} />
 
@@ -368,7 +368,7 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
             <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 18 }}>Utilisez l'arbre décisionnel EDA pour analyser les difficultés de {fiche.prenom}.</div>
             <button onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 9, fontSize: 13.5, fontWeight: 700, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer' }}>
-              🔍 Formuler des hypothèses EDA
+              🔍 Formuler des hypothèses de travail
             </button>
           </div>
         ) : (
@@ -490,7 +490,7 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
           {[
             { ico: '📄', lbl: 'Rapport de suivi', sub: 'Générer un PDF officiel', action: () => setShowReportModal(true) },
-            { ico: '📝', lbl: 'Hypothèses EDA',    sub: 'Lancer l\'arbre décisionnel', action: () => navigate(`/hypotheses-eleve?id=${ficheId}`) },
+            { ico: '📝', lbl: 'Hypothèses de travail',    sub: 'Lancer l\'analyse de situation', action: () => navigate(`/hypotheses-eleve?id=${ficheId}`) },
           ].map((opt, i) => (
             <div key={i} onClick={opt.action} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', transition: 'all .14s', background: '#fff' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; }}
