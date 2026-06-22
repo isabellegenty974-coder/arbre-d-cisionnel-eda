@@ -239,7 +239,7 @@ const AuthenticatedApp = () => {
         <Route path="/items-contexte" element={<ItemsContexte />} />
         <Route path="/analyse-eda" element={<AnalyseEDA />} />
         <Route path="/liste-eleves" element={<ListeEleves />} />
-        <Route path="/detail-eleve" element={<DetailEleve />} />
+        <Route path="/detail-eleve" element={<DetailFiche />} />
         <Route path="/detail-fiche" element={<DetailFiche />} />
         <Route path="/historique-eleve" element={<HistoriqueEleve />} />
         <Route path="/export-annuel" element={<ExportAnnuel />} />

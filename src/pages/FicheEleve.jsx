@@ -267,11 +267,11 @@ export default function FicheEleve() {
               </motion.div>
               
               <Button
-                onClick={() => navigate(`/hypotheses-eleve?id=${savedId}`)}
+                onClick={() => navigate(`/detail-eleve?id=${savedId}`)}
                 className="w-full gap-2 h-11 bg-[#D4A574] hover:bg-[#C49464] text-white font-semibold rounded-lg shadow-soft"
               >
                 <ClipboardList className="w-5 h-5" />
-                🔍 Formuler des hypothèses EDA
+                Voir la fiche complète
               </Button>
               <Button
                 onClick={() => navigate('/dashboard')}
