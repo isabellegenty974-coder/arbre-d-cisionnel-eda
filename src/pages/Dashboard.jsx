@@ -419,8 +419,8 @@ export default function Dashboard() {
                 <div style={{ background: '#fff', border: `1px solid #D8E1EE`, borderRadius: 12, padding: '16px 18px', cursor: 'pointer', transition: 'box-shadow .15s, transform .15s', borderTop: c.warn && c.val > 0 ? '3px solid #B85C1A' : undefined }}
                   onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 18px rgba(26,51,83,.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 8, background: c.ibg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, marginBottom: 11 }}>{c.ico}</div>
-                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 34, lineHeight: 1, color: c.warn && c.val > 0 ? '#B85C1A' : '#182840', marginBottom: 3 }}>{c.val === null ? '📖' : loading ? '—' : c.val}</div>
+                  {c.ico && <div style={{ width: 34, height: 34, borderRadius: 8, background: c.ibg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, marginBottom: 11 }}>{c.ico}</div>}
+                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 34, lineHeight: 1, color: c.warn && c.val > 0 ? '#B85C1A' : '#182840', marginBottom: 3 }}>{c.val === null ? '' : loading ? '—' : c.val}</div>
                   <div style={{ fontSize: 12, color: '#566880', marginBottom: 8 }}>{c.lbl}</div>
                   <div style={{ fontSize: 11, color: c.warn && c.val > 0 ? '#B85C1A' : '#1E7A52', fontWeight: 500 }}>{c.trend}</div>
                 </div>
