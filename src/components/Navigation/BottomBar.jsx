@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Home, Users, TreePine, BarChart2, Settings } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useOfflineSync } from '@/lib/useOfflineSync';
 
 const NAV_ITEMS = [
   { icon: Home,      label: 'Accueil',    to: '/dashboard' },
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
 export default function BottomBar() {
   const { pathname } = useLocation();
   const [user, setUser] = useState(null);
+  const { isOnline } = useOfflineSync();
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -34,8 +36,8 @@ export default function BottomBar() {
           >
             <Icon className={`w-5 h-5 transition-transform ${active ? 'scale-110' : ''}`} />
             <span className="text-[10px] font-medium">{label}</span>
-            {isSettings && user && (
-              <span className="absolute top-2.5 right-2 w-2 h-2 rounded-full bg-accent"></span>
+            {isSettings && user && isOnline && (
+              <span className="absolute top-2.5 right-2 w-2 h-2 rounded-full bg-green-500"></span>
             )}
           </Link>
         );

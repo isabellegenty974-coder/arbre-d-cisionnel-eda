@@ -4,21 +4,21 @@ import { motion } from 'framer-motion';
 export default function ConnectionIndicator() {
   const { isOnline, isSyncing, syncMessage } = useOfflineSync();
 
+  // Afficher uniquement le bandeau hors ligne / synchronisation
+  if (isOnline && !isSyncing) return null;
+
   const getStatusColor = () => {
     if (isSyncing) return '#3B82C4';
-    if (isOnline) return '#1E7A52';
     return '#D97706';
   };
 
   const getStatusText = () => {
     if (isSyncing) return 'Synchronisation...';
-    if (isOnline) return 'En ligne';
     return 'Hors ligne · modifications enregistrées localement';
   };
 
   const getStatusIcon = () => {
     if (isSyncing) return '🔄';
-    if (isOnline) return '🟢';
     return '🟠';
   };
 
