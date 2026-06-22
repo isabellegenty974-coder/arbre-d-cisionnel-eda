@@ -278,7 +278,7 @@ export default function FicheEleve() {
               </motion.div>
               
               <Button
-                onClick={() => navigate(`/detail-eleve?id=${savedId}`)}
+                onClick={() => navigate(`/detail-fiche?id=${savedId}`)}
                 className="w-full gap-2 h-11 bg-[#D4A574] hover:bg-[#C49464] text-white font-semibold rounded-lg shadow-soft"
               >
                 <ClipboardList className="w-5 h-5" />

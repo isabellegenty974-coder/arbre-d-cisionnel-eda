@@ -56,7 +56,7 @@ export default function EditEleve() {
       observations: form.observations,
       annee_scolaire: annee_scolaire || undefined,
     });
-    navigate(`/detail-eleve?id=${id}`);
+    navigate(`/detail-fiche?id=${id}`);
   };
 
   const set = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -122,11 +122,11 @@ export default function EditEleve() {
           <Button
             variant="outline"
             className="w-full gap-2"
-            onClick={() => navigate(`/detail-eleve?id=${id}`)}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Retour
-          </Button>
+            onClick={() => navigate(`/detail-fiche?id=${id}`)}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Retour
+            </Button>
         </motion.div>
       </ScreenLayout>
     </div>
