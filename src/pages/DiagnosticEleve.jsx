@@ -285,7 +285,7 @@ export default function DiagnosticEleve() {
     const name = norm(`${eleve?.prenom || ''} ${eleve?.nom || ''}`.trim());
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('Rapport - Hypothese(s) diagnostique(s)', 15, 20);
+    doc.text('Rapport - Hypotheses EDA', 15, 20);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     if (name) doc.text(`Eleve : ${name}`, 15, 30);

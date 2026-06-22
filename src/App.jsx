@@ -245,7 +245,6 @@ const AuthenticatedApp = () => {
         <Route path="/export-annuel" element={<ExportAnnuel />} />
         <Route path="/edit-eleve" element={<EditEleve />} />
         <Route path="/items-professionnels" element={<ItemsProfessionnels />} />
-        <Route path="/diagnostic-eleve" element={<DiagnosticEleve />} />
         <Route path="/hypotheses-eleve" element={<DiagnosticEleve />} />
         <Route path="/tableau-synthese" element={<TableauSynthese />} />
         <Route path="/invite-users" element={<InviteUsers />} />
