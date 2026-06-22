@@ -68,7 +68,7 @@ export default function Register() {
     e.preventDefault();
     
     // Validation
-    if (!nom.trim() || !prenom.trim() || !profession || !password.trim()) {
+    if (!email.trim() || !nom.trim() || !prenom.trim() || !profession || !password.trim()) {
       setError('Tous les champs sont requis');
       return;
     }
@@ -86,23 +86,29 @@ export default function Register() {
     setSaving(true);
     setError(null);
     try {
-      // Mettre à jour le profil utilisateur
+      // Mettre à jour le profil utilisateur avec le rôle (profession)
       const updateData = {
-        profession,
         full_name: `${prenom.trim()} ${nom.trim()}`,
+        profession, // Stocker le rôle RASED
+        role: 'user', // Rôle système (non-admin par défaut)
         first_login_seen: false, // Force réaffichage du message de bienvenue
       };
       
       await base44.auth.updateMe(updateData);
       
-      // Créer le profil MembreEquipe
-      await base44.entities.MembreEquipe.create({
-        prenom: prenom.trim(),
-        nom: nom.trim(),
-        profession,
-        email: email || 'unknown@rased.re',
-        actif: true,
-      });
+      // Créer/Mettre à jour le profil MembreEquipe
+      try {
+        await base44.entities.MembreEquipe.create({
+          prenom: prenom.trim(),
+          nom: nom.trim(),
+          profession,
+          email: email.trim(),
+          actif: true,
+        });
+      } catch (err) {
+        // Le membre existe peut-être déjà, ignorer l'erreur
+        console.log('Profil équipe existe peut-être déjà');
+      }
       
       // Redirection automatique vers dashboard avec forçage du welcome modal
       window.location.href = '/dashboard?first_login=true';
@@ -159,9 +165,9 @@ export default function Register() {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">👤</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Créer mon compte</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Créer votre compte</h1>
             <p className="text-sm text-muted-foreground">
-              Équipe RASED · Circonscription de La Possession
+              Suivis RASED · La Possession
             </p>
           </div>
 

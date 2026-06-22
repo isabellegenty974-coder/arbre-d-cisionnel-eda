@@ -17,7 +17,7 @@
         "MaDR",
         "Psy EN EDA"
       ],
-      "description": "Profession du membre"
+      "description": "Profession du membre \u2014 r\u00f4le dans l'\u00e9quipe RASED"
     },
     "email": {
       "type": "string",
