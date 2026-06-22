@@ -39,13 +39,8 @@ export default function InviteUsers() {
         profession: profession
       });
 
-      // Envoyer l'email d'accompagnement simplifié
-      await base44.functions.invoke('sendInvitationEmail', { 
-        email: email.trim()
-      });
-
       setInvitedList([...invitedList, { email: email.trim(), profession }]);
-      setResult({ success: true, message: `${email} a été invité(e) — L'email d'invitation a été envoyé` });
+      setResult({ success: true, message: `${email} a été invité(e) — Un email d'invitation a été envoyé` });
       setEmail('');
       setProfession('');
     } catch (err) {
