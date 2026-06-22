@@ -479,6 +479,22 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
       setShowDeleteConfirm(false);
     }
   };
+
+  const getAnneeFromDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    return month >= 7 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+  };
+
+  const handleAutoFillAnnee = async () => {
+    const annee = getAnneeFromDate(fiche.created_date);
+    if (annee) {
+      await base44.entities.FicheEleve.update(ficheId, { annee_scolaire: annee });
+      window.location.reload();
+    }
+  };
   
   const InfoRow = ({ label, value }) => (
     <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8' }}>
@@ -497,7 +513,18 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <InfoRow label="Âge" value={fiche.age ? `${fiche.age} ans` : null} />
         <InfoRow label="École" value={fiche.ecole} />
         <InfoRow label="Classe" value={fiche.classe} />
-        <InfoRow label="Année scolaire" value={fiche.annee_scolaire} />
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 600, marginBottom: 3 }}>Année scolaire</div>
+            <div style={{ fontSize: 13.5, fontWeight: 500, color: fiche.annee_scolaire ? '#182840' : '#94A3B8', fontStyle: fiche.annee_scolaire ? 'normal' : 'italic' }}>{fiche.annee_scolaire || 'Non renseigné'}</div>
+          </div>
+          {!fiche.annee_scolaire && (
+            <button onClick={handleAutoFillAnnee}
+              style={{ fontSize: 11.5, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, whiteSpace: 'nowrap', paddingLeft: 12 }}>
+              Remplir auto →
+            </button>
+          )}
+        </div>
         <InfoRow label="Créé par" value={fiche.createdByName ? `${fiche.createdByName} · ${PROF_LABEL[fiche.createdByProfession] || fiche.createdByProfession}` : null} />
         <InfoRow label="Date de création" value={fiche.created_date ? new Date(fiche.created_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
         <InfoRow label="Dernière modification" value={fiche.updated_date ? new Date(fiche.updated_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
