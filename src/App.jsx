@@ -219,6 +219,27 @@ const AuthenticatedApp = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    // Vérifier si l'utilisateur a accepté les conditions RGPD
+    if (user && user.email) {
+      const storedConsent = localStorage.getItem(`rgpd_consent_${user.email}`);
+      if (!storedConsent) {
+        // Afficher le modal de consentement si pas encore accepté
+        setTimeout(() => {
+          if (window.confirm(
+            "En utilisant cette application, vous vous engagez à respecter la confidentialité des données des élèves conformément au RGPD et aux règles de l'Éducation Nationale.\n\nVous acceptez ces conditions ?"
+          )) {
+            localStorage.setItem(`rgpd_consent_${user.email}`, JSON.stringify({
+              acceptedAt: new Date().toISOString(),
+              memberName: user.full_name,
+              email: user.email
+            }));
+          }
+        }, 500);
+      }
+    }
+  }, [user]);
+
   const handleWelcomeClose = async () => {
     setShowWelcome(false);
     try {

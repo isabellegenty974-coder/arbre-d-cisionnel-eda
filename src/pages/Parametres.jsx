@@ -445,6 +445,130 @@ export default function Parametres() {
           </table>
         </div>
 
+        {/* RGPD & PROTECTION DES DONNÉES */}
+        <div style={{ marginTop: 36 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#182840', margin: '0 0 20px' }}>🔒 Protection des données (RGPD)</h2>
+
+          {/* Informations légales */}
+          <div style={{ background: '#fff', borderRadius: 16, padding: '20px', marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,.05)' }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: '#182840', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>📋</span> Informations légales
+            </h3>
+            <div style={{ fontSize: 13, color: '#566880', lineHeight: 1.7, background: '#F8FAFD', padding: '14px', borderRadius: 10, borderLeft: '3px solid #3B82C4' }}>
+              <p style={{ margin: '0 0 10px 0' }}>
+                Les données enregistrées dans cette application concernent des élèves mineurs et sont soumises au Règlement Général sur la Protection des Données (RGPD) ainsi qu'aux règles de confidentialité de l'Éducation Nationale.
+              </p>
+              <ul style={{ margin: '0', paddingLeft: '20px' }}>
+                <li><strong>Responsable du traitement :</strong> Circonscription de La Possession, La Réunion</li>
+                <li><strong>Finalité :</strong> suivi des élèves en difficulté par l'équipe RASED</li>
+                <li><strong>Accès aux données :</strong> réservé aux 3 membres de l'équipe RASED connectés</li>
+                <li><strong>Durée de conservation :</strong> données archivées par année scolaire, supprimables sur demande</li>
+                <li><strong>Données collectées :</strong> nom, prénom, date de naissance, école, classe, notes de suivi — aucune donnée médicale au sens strict</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Droits des personnes */}
+          <div style={{ background: '#fff', borderRadius: 16, padding: '20px', marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,.05)' }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: '#182840', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>⚖️</span> Droits des personnes
+            </h3>
+            <div style={{ fontSize: 13, color: '#566880', lineHeight: 1.7, background: '#F8FAFD', padding: '14px', borderRadius: 10, borderLeft: '3px solid #1E7A52' }}>
+              <p style={{ margin: '0 0 10px 0', fontWeight: 600 }}>Conformément au RGPD, les familles des élèves concernés disposent des droits suivants :</p>
+              <ul style={{ margin: '0', paddingLeft: '20px' }}>
+                <li>Droit d'accès à leurs données</li>
+                <li>Droit de rectification</li>
+                <li>Droit à l'effacement</li>
+                <li>Droit d'opposition</li>
+              </ul>
+              <p style={{ margin: '10px 0 0 0', fontSize: 12 }}>
+                Pour exercer ces droits, contacter le Délégué à la Protection des Données (DPO) de l'académie de La Réunion.
+              </p>
+            </div>
+          </div>
+
+          {/* Bonnes pratiques */}
+          <div style={{ background: '#fff', borderRadius: 16, padding: '20px', marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,.05)' }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: '#182840', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>✅</span> Bonnes pratiques pour l'équipe
+            </h3>
+            <div style={{ fontSize: 13, color: '#566880', lineHeight: 1.7, background: '#F8FAFD', padding: '14px', borderRadius: 10, borderLeft: '3px solid #B85C1A' }}>
+              <ul style={{ margin: '0', paddingLeft: '20px' }}>
+                <li>Ne jamais partager vos identifiants</li>
+                <li>Ne pas noter de données médicales détaillées dans les fiches</li>
+                <li>Utiliser uniquement sur des appareils sécurisés</li>
+                <li>Se déconnecter après chaque session sur un appareil partagé</li>
+                <li>En cas de perte ou vol d'appareil, contacter immédiatement l'administratrice pour révoquer l'accès</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Suppression de données (admin) */}
+          {user?.role === 'admin' && (
+            <div style={{ background: '#FEF0E4', borderRadius: 16, padding: '20px', marginBottom: 16, border: '1px solid #B85C1A' }}>
+              <h3 style={{ fontSize: 13, fontWeight: 700, color: '#B85C1A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>⚠️</span> Suppression de données (administratrice)
+              </h3>
+              <p style={{ fontSize: 13, color: '#B85C1A', marginBottom: 14 }}>Vous pouvez supprimer définitivement les données d'une année scolaire archivée.</p>
+              <div>
+                <label style={{ fontSize: 11.5, fontWeight: 600, color: '#B85C1A', textTransform: 'uppercase', letterSpacing: '.05em', display: 'block', marginBottom: 8 }}>
+                  Sélectionner l'année à supprimer
+                </label>
+                <select 
+                  style={{ 
+                    width: '100%', 
+                    padding: '10px 12px', 
+                    border: '1px solid #B85C1A', 
+                    borderRadius: 8, 
+                    fontSize: 13, 
+                    outline: 'none',
+                    marginBottom: 12,
+                    background: '#fff',
+                    color: '#182840'
+                  }}
+                  onChange={e => {
+                    if (e.target.value && window.confirm(`Cette action est irréversible. Toutes les fiches élèves de l'année ${e.target.value} seront supprimées définitivement.\n\nConfirmer la suppression ?`)) {
+                      // TODO: Implémenter la suppression des données
+                      alert('Suppression en cours... (À implémenter)');
+                    }
+                    e.target.value = '';
+                  }}
+                >
+                  <option value="">-- Sélectionner une année archivée --</option>
+                  {annees
+                    .filter(a => (a.statut === 'archivee' || (!a.est_active && !a.active)))
+                    .map(a => <option key={a.id} value={a.id}>{a.libelle}</option>)
+                  }
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Politique de confidentialité */}
+          <div style={{ background: '#fff', borderRadius: 16, padding: '20px', marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,.05)', textAlign: 'center' }}>
+            <p style={{ fontSize: 13, color: '#566880', margin: '0 0 12px' }}>
+              Consulter notre politique complète
+            </p>
+            <a href="/politique-confidentialite" 
+              style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: 6, 
+                padding: '10px 20px', 
+                background: '#3B82C4', 
+                color: '#fff', 
+                borderRadius: 10, 
+                fontSize: 13, 
+                fontWeight: 600, 
+                textDecoration: 'none',
+                cursor: 'pointer',
+                border: 'none'
+              }}>
+              📄 Politique de confidentialité complète
+            </a>
+          </div>
+        </div>
+
       </div>
 
       {/* Assistant de rentrée */}
