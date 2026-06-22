@@ -422,7 +422,7 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
 function TabHistorique({ fiche, interventions, historiqueEDA }) {
   const events = [
     ...interventions.map(iv => ({ date: new Date(iv.date), ico: '💬', type: 'note', title: `Intervention : ${iv.type || 'Action'}`, meta: iv.description })),
-    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: `Hypothèses formulées — ${h.domaine}`, meta: `${h.hypotheses?.length || 0} hypothèse(s) retenue(s)` })),
+    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: `Hypothèses de travail — ${h.domaine}`, meta: `${h.hypotheses?.length || 0} hypothèse(s) retenue(s)` })),
     { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: `${fiche.ecole || ''}${fiche.classe ? ' · ' + fiche.classe : ''}` },
   ].sort((a, b) => b.date - a.date);
 

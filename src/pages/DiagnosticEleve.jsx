@@ -250,7 +250,7 @@ export default function DiagnosticEleve() {
         "**1. Synthèse clinique des observations**",
         "Articule les observations de manière fluide et professionnelle. Montre les liens entre les domaines si plusieurs sont concernés. Utilise 'l'élève' (jamais 'le patient'). Sois précis mais non stigmatisant.",
         "",
-        "**2. Hypothèses diagnostiques**",
+        "**2. Hypothèses de travail**",
         "Propose 2 à 4 hypothèses hiérarchisées (de la plus probable à la moins probable). Pour chaque hypothèse : nom clinique précis, justification courte basée sur les observations, niveau de probabilité (élevée / modérée / à explorer). Ne pose pas de diagnostic définitif.",
         "",
         "**3. Orientations d'évaluation complémentaire**",
