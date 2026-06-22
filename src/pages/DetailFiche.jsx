@@ -483,7 +483,6 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <InfoRow label="Âge" value={fiche.age ? `${fiche.age} ans` : null} />
         <InfoRow label="École" value={fiche.ecole} />
         <InfoRow label="Classe" value={fiche.classe} />
-        <InfoRow label="Enseignant·e responsable" value={fiche.enseignant} />
         <InfoRow label="Année scolaire" value={fiche.annee_scolaire} />
         <InfoRow label="Créé par" value={fiche.createdByName ? `${fiche.createdByName} · ${PROF_LABEL[fiche.createdByProfession] || fiche.createdByProfession}` : null} />
         <InfoRow label="Date de création" value={fiche.created_date ? new Date(fiche.created_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
