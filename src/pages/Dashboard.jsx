@@ -130,15 +130,23 @@ function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [] }) {
               p.user_name === `${m.prenom} ${m.nom}` ||
               p.user_profession === m.profession
             );
+            const shortProf = m.profession === 'Psy EN EDA' ? 'Psy-EN EDA' : m.profession;
             return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
                 <div style={{ width: 28, height: 28, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0, position: 'relative', opacity: isOnline ? 1 : 0.5 }}>
                   {init}
-                  <span style={{ position: 'absolute', bottom: 0, right: 0, width: 8, height: 8, borderRadius: '50%', background: isOnline ? '#4ADE80' : '#6B7280', border: '1.5px solid #1A3353' }} />
+                  <span style={{ position: 'absolute', bottom: 0, right: 0, width: 8, height: 8, borderRadius: '50%', background: isOnline ? bg : '#6B7280', border: '1.5px solid #1A3353' }} />
                 </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: isOnline ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.4)' }}>{m.prenom} {m.nom?.[0]}.</div>
-                  <div style={{ fontSize: 10, color: isOnline ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.25)' }}>{isOnline ? '● En ligne' : '○ Hors ligne'} · {PROF_LABEL[m.profession] || m.profession}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,.9)' }}>{m.prenom} {m.nom?.[0]}.</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                    <span style={{ fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: PROF_BG[m.profession], color: PROF_TEXT[m.profession] }}>
+                      {shortProf}
+                    </span>
+                    <span style={{ fontSize: 9, color: isOnline ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.35)' }}>
+                      {isOnline ? '🟢' : '⚫'}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -576,20 +584,20 @@ export default function Dashboard() {
           {/* BANDE ÉQUIPE */}
           {membres.length > 0 && (
             <div style={{ background: '#fff', border: '1px solid #D8E1EE', borderRadius: 12, padding: '16px 22px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#566880', flexShrink: 0 }}>Équipe RASED</div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#566880', flexShrink: 0 }}>👥 Équipe RASED</div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', flex: 1 }}>
                 {membres.map(m => {
                   const bg = PROF_COLOR[m.profession] || '#3B82C4';
                   const init = `${m.prenom?.[0] || ''}${m.nom?.[0] || ''}`;
                   return (
-                    <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#F0F3F8', border: '1px solid #D8E1EE', borderRadius: 20, padding: '5px 12px 5px 5px' }}>
-                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', position: 'relative', flexShrink: 0 }}>
+                    <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 9, background: '#F8FAFD', border: `1.5px solid ${PROF_BG[m.profession]}`, borderRadius: 12, padding: '8px 12px' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', position: 'relative', flexShrink: 0 }}>
                         {init}
-                        <span style={{ position: 'absolute', bottom: 0, right: 0, width: 7, height: 7, borderRadius: '50%', background: '#4ADE80', border: '1.5px solid #F0F3F8' }} />
+                        <span style={{ position: 'absolute', bottom: -1, right: -1, width: 9, height: 9, borderRadius: '50%', background: bg, border: '2px solid #F8FAFD' }} />
                       </div>
                       <div>
-                        <div style={{ fontSize: 12, fontWeight: 500, color: '#182840' }}>{m.prenom} {m.nom}</div>
-                        <div style={{ fontSize: 10, color: '#566880' }}>{PROF_LABEL[m.profession] || m.profession}</div>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', margin: 0, marginBottom: 2 }}>{m.prenom} {m.nom}</div>
+                        <div style={{ fontSize: 10.5, color: '#566880', lineHeight: 1.3 }}>{PROF_LABEL[m.profession] || m.profession}</div>
                       </div>
                     </div>
                   );
