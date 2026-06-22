@@ -39,13 +39,8 @@ export default function InviteUsers() {
         profession: profession
       });
 
-      // Envoyer l'email personnalisé
-      await base44.functions.invoke('sendInvitationEmail', { 
-        email: email.trim()
-      });
-
       setInvitedList([...invitedList, { email: email.trim(), profession }]);
-      setResult({ success: true, message: `${email} a été invité(e) — Email personnalisé envoyé` });
+      setResult({ success: true, message: `${email} a été invité(e) — Un email d'invitation a été envoyé` });
       setEmail('');
       setProfession('');
     } catch (err) {
