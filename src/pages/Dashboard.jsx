@@ -107,7 +107,7 @@ export default function Dashboard() {
       <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 50 }}>
         <div>
           <p style={{ fontSize: 15, fontWeight: 600, color: '#1A2E45' }}>Bonjour, {prenom} 👋</p>
-          <p style={{ fontSize: 11.5, color: '#64748B' }}>{today} · Équipe RASED · La Possession</p>
+          <p style={{ fontSize: 11.5, color: '#64748B' }}>Suivis RASED · La Possession · {today}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 38, height: 38, borderRadius: 10, background: '#F1F4F8', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, position: 'relative' }}>

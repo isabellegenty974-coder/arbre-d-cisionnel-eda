@@ -50,7 +50,8 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   </style>
 </head>
 <body>
-  <h1>Bilan d'activité RASED</h1>
+  <h1>Suivis RASED — Bilan d'activité</h1>
+  <p style="color:#666;font-size:11px;margin-bottom:2px;">Équipe RASED · Circonscription de La Possession · La Réunion (974)</p>
   <p class="meta">
     Généré le ${new Date().toLocaleDateString('fr-FR')}
     ${selectedProfession ? ' — Professionnel : ' + selectedProfession : ' — Ensemble de l\'équipe'}

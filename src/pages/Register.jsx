@@ -86,9 +86,9 @@ export default function Register() {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">👤</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Bienvenue sur EDA Guide Flow</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Bienvenue sur Suivis RASED</h1>
             <p className="text-sm text-muted-foreground">
-              Outil de suivi de l'équipe RASED de la circonscription de La Possession
+              Équipe RASED · Circonscription de La Possession
             </p>
           </div>
 

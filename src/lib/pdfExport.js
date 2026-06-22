@@ -85,7 +85,7 @@ export function exportFullPDF(eleve, selections, crossRecommendations, diagnosti
   const ctx = makeDoc();
   const { doc, section, line, bullet, divider } = ctx;
 
-  addHeader(ctx, 'ARBRE EDA — RAPPORT COMPLET');
+  addHeader(ctx, 'SUIVIS RASED — RAPPORT COMPLET');
 
   // 1. Infos élève
   if (eleve?.nom || eleve?.prenom) {
@@ -183,7 +183,7 @@ export function exportAnnuelPDF({ data, nbEleves, hypCounts, monthly }) {
   const ctx = makeDoc();
   const { doc, section, line, bullet, divider } = ctx;
 
-  addHeader(ctx, 'ARBRE EDA — RAPPORT ANNUEL');
+  addHeader(ctx, 'SUIVIS RASED — RAPPORT ANNUEL');
 
   // 1. Vue d'ensemble
   section('Vue d\'ensemble');
