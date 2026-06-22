@@ -61,8 +61,8 @@ export default function FicheEleve() {
   });
 
   const onSubmit = async (data) => {
-    const fullName = currentUser?.full_name || 'Utilisateur';
-    const profession = currentUser?.profession || 'Profession non renseignée';
+    const fullName = currentUser?.full_name || '';
+    const profession = currentUser?.profession || '';
     
     const created = await base44.entities.FicheEleve.create({
       nom: data.nom,
