@@ -183,7 +183,7 @@ export default function ReportExportModal({ isOpen, onClose, eleve, user, report
               {/* Actions */}
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#182840', marginBottom: 6 }}>
-                  Préconisations et actions <span style={{ fontSize: 11, color: '#94A3B8' }}>(une par ligne)</span>
+                  Recommandations et actions <span style={{ fontSize: 11, color: '#94A3B8' }}>(une par ligne)</span>
                 </label>
                 <textarea
                   value={formData.actions.join('\n')}

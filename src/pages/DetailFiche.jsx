@@ -15,7 +15,7 @@ import { jsPDF } from 'jspdf';
 const PROF_COLOR  = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
 const PROF_BG     = { 'Psy EN EDA': '#EAF2FB', 'MaDR': '#E4F4ED', 'MaDP': '#FEF0E4' };
 const PROF_TEXT   = { 'Psy EN EDA': '#254D7A', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
-const PROF_LABEL  = { 'Psy EN EDA': 'Psy-EN', 'MaDR': 'MaDR', 'MaDP': 'MaDP' };
+const PROF_LABEL  = { 'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA', 'MaDR': 'Maître à Dominante Relationnelle (MaDR)', 'MaDP': 'Maître à Dominante Pédagogique (MaDP)' };
 
 const STATUT_CFG = {
   'Nouveau':      { ico: '🆕', lbl: 'Nouveau',     sub: 'Demande reçue',   pill: '#EAF2FB', pillT: '#3B82C4' },

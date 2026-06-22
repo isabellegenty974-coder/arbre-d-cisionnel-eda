@@ -71,9 +71,9 @@ export async function generateReport(data, user) {
   doc.setTextColor(0, 0, 0);
 
   const professionLabel = {
-    'Psy EN EDA': 'Psychologue de l\'Éducation Nationale',
-    'MaDR': 'Maître de Rééducation',
-    'MaDP': 'Maître de Prévention'
+    'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA',
+    'MaDR': 'Maître à Dominante Relationnelle (MaDR)',
+    'MaDP': 'Maître à Dominante Pédagogique (MaDP)'
   };
 
   doc.text(`${user.full_name || 'Utilisateur'}`, marginLeft, yPosition);

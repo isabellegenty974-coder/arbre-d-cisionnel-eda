@@ -35,7 +35,7 @@ function todayLabel() {
 }
 
 const PROF_COLOR = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
-const PROF_LABEL = { 'Psy EN EDA': 'Psy-EN', 'MaDR': 'Maître G', 'MaDP': 'Maître E' };
+const PROF_LABEL = { 'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA', 'MaDR': 'Maître à Dominante Relationnelle (MaDR)', 'MaDP': 'Maître à Dominante Pédagogique (MaDP)' };
 const PROF_BG    = { 'Psy EN EDA': '#EAF2FB', 'MaDR': '#E4F4ED', 'MaDP': '#FEF0E4' };
 const PROF_TEXT  = { 'Psy EN EDA': '#254D7A', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
 
