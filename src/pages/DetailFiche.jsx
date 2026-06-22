@@ -315,8 +315,10 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                   await base44.entities.FicheEleve.update(ficheId, { rapport: '' });
                   setFiche(f => ({ ...f, rapport: '' }));
                 }
-              }} style={{ fontSize: 12, color: '#B85C1A', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap' }}>
-                🗑️
+              }} style={{ fontSize: 12, color: '#B85C1A', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap', padding: '4px 6px', borderRadius: 4 }}
+                onMouseEnter={e => e.currentTarget.style.background = '#FEF0E4'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                Supprimer
               </button>
             </div>
           </div>
