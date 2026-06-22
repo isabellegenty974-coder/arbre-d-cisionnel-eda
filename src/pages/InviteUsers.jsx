@@ -29,25 +29,29 @@ export default function InviteUsers() {
     setLoading(true);
     setResult(null);
     try {
-      // Inviter l'utilisateur
-      await base44.users.inviteUser(email.trim(), 'user');
-      
-      // Enregistrer la profession dans les données utilisateur
-      await base44.functions.invoke('inviteUsers', { 
-        email: email.trim(), 
-        role: 'user',
-        profession: profession
-      });
+      // Inviter l'utilisateur via le système natif de Base44
+      try {
+        await base44.users.inviteUser(email.trim(), 'user');
+        
+        // Enregistrer la profession dans les données utilisateur
+        await base44.functions.invoke('inviteUsers', { 
+          email: email.trim(), 
+          role: 'user',
+          profession: profession
+        });
 
-      // Envoyer l'email d'accompagnement personnalisé
-      await base44.functions.invoke('sendInvitationEmail', { 
-        email: email.trim()
-      });
-
-      setInvitedList([...invitedList, { email: email.trim(), profession }]);
-      setResult({ success: true, message: `${email} a été invité(e) — L'email d'invitation a été envoyé` });
-      setEmail('');
-      setProfession('');
+        setInvitedList([...invitedList, { email: email.trim(), profession }]);
+        setResult({ success: true, message: `${email} a été invité(e) — L'email d'invitation a été envoyé` });
+        setEmail('');
+        setProfession('');
+      } catch (err) {
+        // Si l'envoi automatique échoue, afficher le message avec lien manuel
+        setResult({ 
+          success: true, 
+          message: `L'envoi automatique a échoué. Un email doit être envoyé manuellement à ${email} avec un lien d'inscription.`,
+          isWarning: true 
+        });
+      }
     } catch (err) {
       setResult({ success: false, message: err.message || 'Erreur lors de l\'invitation' });
     } finally {
