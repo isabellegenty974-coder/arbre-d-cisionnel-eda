@@ -221,7 +221,8 @@ const AuthenticatedApp = () => {
       <ResumeButton />
       <BottomBar />
       <Routes>
-        <Route path="/" element={<Accueil />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/accueil" element={<Accueil />} />
         <Route path="/register" element={<Register />} />
         <Route path="/resume" element={<Resume />} />
         <Route path="/fiche-eleve" element={<FicheEleve />} />
