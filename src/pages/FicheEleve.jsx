@@ -68,10 +68,11 @@ export default function FicheEleve() {
   });
 
   const onSubmit = async (data) => {
-    const fullName = currentUser?.full_name || '';
-    // Récupérer la profession du profil utilisateur
-    const membre = await base44.entities.MembreEquipe.filter({ email: currentUser?.email }).catch(() => []);
-    const profession = membre.length > 0 ? membre[0].profession : '';
+    if (!currentUser) return;
+    
+    const fullName = currentUser.full_name || '';
+    const membres = await base44.entities.MembreEquipe.filter({ email: currentUser.email }).catch(() => []);
+    const profession = membres.length > 0 ? membres[0].profession : '';
     
     const created = await base44.entities.FicheEleve.create({
       nom: data.nom,
