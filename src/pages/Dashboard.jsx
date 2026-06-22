@@ -107,7 +107,7 @@ export default function Dashboard() {
       <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 50 }}>
         <div>
           <p style={{ fontSize: 15, fontWeight: 600, color: '#1A2E45' }}>Bonjour, {prenom} 👋</p>
-          <p style={{ fontSize: 11.5, color: '#64748B' }}>{today} · Année scolaire {anneeScolaire()}</p>
+          <p style={{ fontSize: 11.5, color: '#64748B' }}>{today} · Équipe RASED · La Possession</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 38, height: 38, borderRadius: 10, background: '#F1F4F8', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 18, position: 'relative' }}>
@@ -131,7 +131,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, position: 'relative', zIndex: 1 }}>
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,.45)', marginBottom: 10 }}>
-                RASED · Année scolaire {anneeScolaire()}
+                RASED · La Possession · La Réunion · {anneeScolaire()}
               </p>
               <p style={{ fontFamily: 'DM Serif Display, serif', fontSize: 30, color: '#fff', lineHeight: 1.2, marginBottom: 14 }}>
                 Vous suivez{' '}
