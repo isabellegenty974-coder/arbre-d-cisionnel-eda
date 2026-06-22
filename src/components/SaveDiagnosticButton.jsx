@@ -69,7 +69,7 @@ export default function SaveDiagnosticButton({ ficheId, prenomEleve, domaine, so
       {status === 'saving' ? (
         <><Loader className="w-4 h-4 animate-spin" /> Enregistrement...</>
       ) : (
-        <><Save className="w-4 h-4" /> Enregistrer dans la fiche{prenomEleve ? ` de ${prenomEleve}` : ''}</>
+        <><Save className="w-4 h-4" /> Enregistrer dans la fiche élève{prenomEleve ? ` de ${prenomEleve}` : ''}</>
       )}
     </Button>
   );

@@ -267,11 +267,11 @@ export default function FicheEleve() {
               </motion.div>
               
               <Button
-                onClick={() => navigate(`/diagnostic-eleve?id=${savedId}`)}
+                onClick={() => navigate(`/hypotheses-eleve?id=${savedId}`)}
                 className="w-full gap-2 h-11 bg-[#D4A574] hover:bg-[#C49464] text-white font-semibold rounded-lg shadow-soft"
               >
                 <ClipboardList className="w-5 h-5" />
-                Démarrer l'observation diagnostic
+                🔍 Formuler des hypothèses EDA
               </Button>
               <Button
                 onClick={() => navigate('/dashboard')}
