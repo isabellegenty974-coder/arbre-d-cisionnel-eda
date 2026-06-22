@@ -26,6 +26,8 @@ export default function Notifications() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('toutes');
   const [selectedType, setSelectedType] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -63,6 +65,51 @@ export default function Notifications() {
     handleMarkAsRead(notif.id);
     if (notif.fiche_id) {
       navigate(`/detail-fiche?id=${notif.fiche_id}`);
+    }
+  };
+
+  const handleDeleteNotif = async (id) => {
+    await base44.entities.Notification.delete(id).catch(() => null);
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    setSelected(prev => { const s = new Set(prev); s.delete(id); return s; });
+  };
+
+  const handleDeleteSelected = async () => {
+    await Promise.all(
+      Array.from(selected).map(id =>
+        base44.entities.Notification.delete(id).catch(() => null)
+      )
+    );
+    setNotifications(prev => prev.filter(n => !selected.has(n.id)));
+    setSelected(new Set());
+  };
+
+  const handleDeleteAll = async () => {
+    await Promise.all(
+      notifications.map(n =>
+        base44.entities.Notification.delete(n.id).catch(() => null)
+      )
+    );
+    setNotifications([]);
+    setSelected(new Set());
+    setShowDeleteAllModal(false);
+  };
+
+  const handleToggleSelect = (id) => {
+    const newSelected = new Set(selected);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelected(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selected.size === filtered.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filtered.map(n => n.id)));
     }
   };
 
@@ -131,28 +178,69 @@ export default function Notifications() {
           ))}
         </div>
 
-        {/* Bouton Tout marquer comme lu */}
-        {nonLuesCount > 0 && (
-          <button
-            onClick={handleMarkAllAsRead}
-            style={{
-              marginBottom: 16,
-              padding: '8px 14px',
-              borderRadius: 6,
-              border: '1px solid #D8E1EE',
-              background: 'transparent',
-              color: '#3B82C4',
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all .15s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = '#EAF2FB'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          >
-            ✓ Tout marquer comme lu
-          </button>
-        )}
+        {/* Boutons d'actions */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          {nonLuesCount > 0 && (
+            <button
+              onClick={handleMarkAllAsRead}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: '1px solid #D8E1EE',
+                background: 'transparent',
+                color: '#3B82C4',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all .15s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#EAF2FB'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              ✓ Tout marquer comme lu
+            </button>
+          )}
+          {notifications.length > 0 && (
+            <button
+              onClick={() => setShowDeleteAllModal(true)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: '1px solid #FEE4E2',
+                background: 'transparent',
+                color: '#B85C1A',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all .15s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#FEF0E4'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              🗑️ Tout supprimer
+            </button>
+          )}
+          {selected.size > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 6,
+                border: '1px solid #FEE4E2',
+                background: '#FEF0E4',
+                color: '#B85C1A',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all .15s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#FED7CE'}
+              onMouseLeave={e => e.currentTarget.style.background = '#FEF0E4'}
+            >
+              🗑️ Supprimer la sélection ({selected.size})
+            </button>
+          )}
+        </div>
 
         {/* Liste des notifications */}
         {loading ? (
@@ -169,26 +257,48 @@ export default function Notifications() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {selected.size > 0 && (
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={selected.size === filtered.length && filtered.length > 0}
+                  onChange={handleSelectAll}
+                  style={{ width: 18, height: 18, cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: 12, color: '#566880', fontWeight: 500 }}>
+                  {selected.size === filtered.length ? 'Désélectionner tout' : `Tout sélectionner (${filtered.length})`}
+                </span>
+              </div>
+            )}
             {filtered.map((notif, idx) => (
               <motion.div
                 key={notif.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                onClick={() => handleNotifClick(notif)}
                 style={{
                   background: notif.lu ? '#fff' : '#F0F3F8',
-                  border: `1px solid ${notif.lu ? '#D8E1EE' : '#3B82C4'}`,
+                  border: `1px solid ${selected.has(notif.id) ? '#3B82C4' : notif.lu ? '#D8E1EE' : '#3B82C4'}`,
                   borderRadius: 10,
                   padding: '14px 16px',
                   cursor: 'pointer',
                   transition: 'all .15s',
-                  borderLeft: `4px solid ${notif.lu ? '#D8E1EE' : '#3B82C4'}`
+                  borderLeft: `4px solid ${selected.has(notif.id) ? '#3B82C4' : notif.lu ? '#D8E1EE' : '#3B82C4'}`,
+                  backgroundColor: selected.has(notif.id) ? '#F0F3F8' : (notif.lu ? '#fff' : '#F0F3F8')
                 }}
                 onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,196,.12)'; e.currentTarget.style.transform = 'translateX(2px)'; }}
                 onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  {/* Checkbox */}
+                  <input
+                    type="checkbox"
+                    checked={selected.has(notif.id)}
+                    onChange={() => handleToggleSelect(notif.id)}
+                    onClick={e => e.stopPropagation()}
+                    style={{ width: 18, height: 18, cursor: 'pointer', marginTop: 2, flexShrink: 0 }}
+                  />
+
                   {/* Icône et indicateur lu */}
                   <div style={{ position: 'relative', flexShrink: 0 }}>
                     <div style={{ fontSize: 20 }}>{ICONS[notif.type] || '📢'}</div>
@@ -198,7 +308,7 @@ export default function Notifications() {
                   </div>
 
                   {/* Contenu */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ flex: 1, minWidth: 0 }} onClick={() => handleNotifClick(notif)}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -257,13 +367,106 @@ export default function Notifications() {
                     </div>
                   </div>
 
-                  {/* Indicateur non lu */}
-                  {!notif.lu && (
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3B82C4', flexShrink: 0, marginTop: 6 }} />
-                  )}
+                  {/* Bouton suppression individuelle */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteNotif(notif.id); }}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      border: 'none',
+                      background: 'transparent',
+                      color: '#B85C1A',
+                      fontSize: 16,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: 2,
+                      transition: 'all .15s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#FEF0E4'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    ✕
+                  </button>
                 </div>
               </motion.div>
             ))}
+          </div>
+        )}
+
+        {/* Modal suppression de toutes les notifications */}
+        {showDeleteAllModal && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{
+                background: '#fff',
+                borderRadius: 12,
+                padding: '24px',
+                maxWidth: 400,
+                textAlign: 'center',
+                boxShadow: '0 10px 40px rgba(0,0,0,.2)'
+              }}
+            >
+              <div style={{ fontSize: 40, marginBottom: 16 }}>🗑️</div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#182840', marginBottom: 8 }}>Supprimer toutes les notifications ?</h3>
+              <p style={{ fontSize: 13, color: '#566880', marginBottom: 20, lineHeight: 1.5 }}>
+                Cette action est irréversible. Vous ne pourrez pas récupérer ces notifications.
+              </p>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                <button
+                  onClick={() => setShowDeleteAllModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    borderRadius: 6,
+                    border: '1px solid #D8E1EE',
+                    background: 'transparent',
+                    color: '#182840',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all .15s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F0F3F8'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleDeleteAll}
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: '#B85C1A',
+                    color: '#fff',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all .15s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#A64D0F'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#B85C1A'}
+                >
+                  Tout supprimer
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
       </div>
