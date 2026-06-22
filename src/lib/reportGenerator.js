@@ -9,66 +9,76 @@ export async function generateReport(data, user) {
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginLeft = 20;
-  const marginRight = 20;
-  const marginTop = 25;
-  const marginBottom = 20;
+  const marginLeft = 25;
+  const marginRight = 25;
+  const marginTop = 20;
+  const marginBottom = 25;
   const contentWidth = pageWidth - marginLeft - marginRight;
 
+  let currentPage = 1;
   let yPosition = marginTop;
+  let isFirstPage = true;
 
-  // ──────────────────────────────────────────────────────
-  // FONCTION : Ajouter pied de page
-  // ──────────────────────────────────────────────────────
+  // Fonction pour ajouter le pied de page
   const addFooter = (pageNum, totalPages) => {
-    doc.setFont('Arial', 'normal');
+    doc.setFont('Calibri', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(128, 128, 128);
+    doc.setTextColor(100, 100, 100);
 
-    const footerY = pageHeight - marginBottom + 5;
+    const footerY = pageHeight - marginBottom + 8;
 
-    // Gauche
+    // Ligne séparatrice
+    doc.setDrawColor(200, 200, 200);
+    doc.line(marginLeft, pageHeight - marginBottom + 3, pageWidth - marginRight, pageHeight - marginBottom + 3);
+
+    // Contenu du pied
     doc.text('Suivis RASED · Circonscription de La Possession', marginLeft, footerY);
 
-    // Centre
-    const centerText = `Page ${pageNum}/${totalPages}`;
-    const centerX = pageWidth / 2;
-    doc.text(centerText, centerX, footerY, { align: 'center' });
+    const centerText = 'Document confidentiel';
+    doc.text(centerText, pageWidth / 2, footerY, { align: 'center' });
 
-    // Droite
     const today = new Date().toLocaleDateString('fr-FR');
-    doc.text(today, pageWidth - marginRight, footerY, { align: 'right' });
+    const rightText = `Page ${pageNum} / ${totalPages} · ${today}`;
+    doc.text(rightText, pageWidth - marginRight, footerY, { align: 'right' });
   };
 
-  // ──────────────────────────────────────────────────────
-  // FONCTION : Vérifier si on doit passer à la page suivante
-  // ──────────────────────────────────────────────────────
+  // Fonction pour vérifier et créer une nouvelle page si nécessaire
   const checkPageBreak = (requiredSpace = 30) => {
     if (yPosition + requiredSpace > pageHeight - marginBottom) {
-      addFooter(doc.getNumberOfPages(), '?'); // sera mis à jour après
+      addFooter(currentPage, '?'); // Sera mis à jour après
       doc.addPage();
+      currentPage += 1;
       yPosition = marginTop;
+      isFirstPage = false;
     }
   };
 
   // ──────────────────────────────────────────────────────
-  // EN-TÊTE OFFICIEL
+  // EN-TÊTE (première page seulement)
   // ──────────────────────────────────────────────────────
-  doc.setFont('Arial', 'bold');
-  doc.setFontSize(12);
-  doc.setTextColor(26, 51, 83);
+  
+  // Bandeau
+  doc.setFillColor(26, 51, 83);
+  doc.rect(0, 0, pageWidth, 20, 'F');
+  
+  doc.setFont('Calibri', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(255, 255, 255);
+  doc.text('RASED · Circonscription de La Possession', pageWidth / 2, 12, { align: 'center' });
+  
+  yPosition = 30;
 
-  doc.text('RASED · Circonscription de La Possession', pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 5;
-  doc.setFont('Arial', 'normal');
-  doc.setFontSize(10);
-  doc.text('La Réunion', pageWidth / 2, yPosition, { align: 'center' });
-  yPosition += 12;
+  // Ligne séparatrice
+  doc.setDrawColor(200, 200, 200);
+  doc.line(marginLeft, 28, pageWidth - marginRight, 28);
 
-  // Bloc auteur
-  doc.setFont('Arial', 'normal');
+  // Informations rédacteur (droite)
+  doc.setFont('Calibri', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
+
+  const fullName = user?.full_name || 'Non renseigné';
+  const profession = user?.profession || 'Non renseigné';
 
   const professionLabel = {
     'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA',
@@ -76,145 +86,170 @@ export async function generateReport(data, user) {
     'MaDP': 'Maître à Dominante Pédagogique (MaDP)'
   };
 
-  doc.text(`${user.full_name || 'Utilisateur'}`, marginLeft, yPosition);
-  yPosition += 6;
-  doc.text(`Rôle : ${professionLabel[user.profession] || user.profession}`, marginLeft, yPosition);
-  yPosition += 10;
+  const officialTitle = professionLabel[profession] || profession;
 
-  // Date du jour
+  doc.text(fullName, pageWidth - marginRight, yPosition, { align: 'right' });
+  yPosition += 5;
+  doc.text(officialTitle, pageWidth - marginRight, yPosition, { align: 'right' });
+  yPosition += 5;
+
   const today = new Date();
   const formattedDate = today.toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
-  doc.text(`La Possession, le ${formattedDate}`, marginLeft, yPosition);
-  yPosition += 15;
-
-  // ──────────────────────────────────────────────────────
-  // TITRE PRINCIPAL
-  // ──────────────────────────────────────────────────────
-  checkPageBreak(40);
-  doc.setFont('Arial', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(26, 51, 83);
-
-  const reportTitle = data.type === 'synthese' ? 'SYNTHÈSE DE SUIVI' : 'COMPTE-RENDU D\'HYPOTHÈSES';
-  doc.text(reportTitle, pageWidth / 2, yPosition, { align: 'center' });
+  doc.text(`La Possession, le ${formattedDate}`, pageWidth - marginRight, yPosition, { align: 'right' });
   yPosition += 12;
 
+  // Ligne séparatrice
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.5);
+  doc.line(marginLeft, yPosition, pageWidth - marginRight, yPosition);
+  yPosition += 8;
+
   // ──────────────────────────────────────────────────────
-  // INFORMATIONS ÉLÈVE
+  // TITRE ET IDENTITÉ ÉLÈVE
   // ──────────────────────────────────────────────────────
-  checkPageBreak(25);
-  doc.setFont('Arial', 'normal');
-  doc.setFontSize(11);
+  
+  doc.setFont('Calibri', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(26, 51, 83);
+  
+  const reportTitle = data.type === 'synthese' ? 'SYNTHÈSE DE SUIVI' : 'COMPTE-RENDU D\'HYPOTHÈSES';
+  doc.text(reportTitle, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 10;
+
+  // Identité de l'élève
+  doc.setFont('Calibri', 'normal');
+  doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
 
   const eleve = data.eleve;
-  const infoElements = [
-    `Élève : ${eleve.prenom} ${eleve.nom}`,
-    `Classe : ${eleve.classe || 'Non renseignée'}`,
-    `École : ${eleve.ecole || 'Non renseignée'}`,
-    eleve.date_naissance ? `Date de naissance : ${new Date(eleve.date_naissance).toLocaleDateString('fr-FR')}` : null
-  ].filter(Boolean);
+  const eleveName = `${eleve.prenom} ${eleve.nom}`;
+  const eleveClass = eleve.classe || '—';
+  const eleveSchool = eleve.ecole || '—';
+  const eleveBirthDate = eleve.date_naissance 
+    ? new Date(eleve.date_naissance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : '—';
 
-  infoElements.forEach(info => {
-    doc.text(info, marginLeft, yPosition);
-    yPosition += 5;
-  });
-  yPosition += 5;
+  const identityText = `${eleveName} · ${eleveClass} · ${eleveSchool} · Née le ${eleveBirthDate}`;
+  doc.text(identityText, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 8;
+
+  // Ligne séparatrice
+  doc.setDrawColor(200, 200, 200);
+  doc.line(marginLeft, yPosition, pageWidth - marginRight, yPosition);
+  yPosition += 8;
 
   // ──────────────────────────────────────────────────────
-  // SECTIONS DU RAPPORT
+  // CORPS DU RAPPORT
   // ──────────────────────────────────────────────────────
+
+  doc.setFont('Calibri', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.setLineHeightFactor(1.4);
 
   const sections = [
     {
+      num: '1',
       titre: 'Motif du signalement',
-      contenu: data.motif || 'Non renseigné'
+      contenu: data.motif || '—'
     },
     {
-      titre: 'Observations',
-      contenu: data.observations || 'Aucune observation enregistrée'
+      num: '2',
+      titre: 'Observations cliniques',
+      contenu: data.observations || '—'
     },
     {
-      titre: 'Hypothèses formulées',
+      num: '3',
+      titre: 'Hypothèses de travail',
       contenu: data.hypotheses && data.hypotheses.length > 0
-        ? data.hypotheses.map((h, i) => `${i + 1}. ${h}`).join('\n')
-        : 'Aucune hypothèse formulée'
+        ? data.hypotheses.map(h => `— ${h}`).join('\n')
+        : '—'
     },
     {
-      titre: 'Préconisations et actions',
+      num: '4',
+      titre: 'Préconisations',
       contenu: data.actions && data.actions.length > 0
-        ? data.actions.map((a, i) => `${i + 1}. ${a}`).join('\n')
-        : 'Aucune action enregistrée'
+        ? data.actions.map(a => `— ${a}`).join('\n')
+        : '—'
     },
     {
+      num: '5',
       titre: 'Suites envisagées',
-      contenu: data.suites || 'À déterminer'
+      contenu: data.suites || '—'
     }
   ];
 
   sections.forEach((section) => {
     checkPageBreak(25);
 
-    // Titre de section
-    doc.setFont('Arial', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(59, 130, 196);
-    doc.text(section.titre, marginLeft, yPosition);
-    yPosition += 7;
+    // Titre de section avec numérotation
+    doc.setFont('Calibri', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(26, 51, 83);
+    const sectionTitle = `${section.num}. ${section.titre}`;
+    doc.text(sectionTitle, marginLeft, yPosition);
+    yPosition += 6;
 
     // Contenu
-    doc.setFont('Arial', 'normal');
-    doc.setFontSize(10);
+    doc.setFont('Calibri', 'normal');
+    doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
 
-    const splitText = doc.splitTextToSize(section.contenu, contentWidth - 5);
+    // Nettoyer le contenu des caractères parasites
+    let cleanContent = section.contenu
+      .replace(/[^\w\s\-À-ÿ«».,;:!?()]/g, '') // Supprime les caractères spéciaux
+      .replace(/\s+/g, ' ') // Nettoie les espaces multiples
+      .trim();
+
+    const splitText = doc.splitTextToSize(cleanContent, contentWidth - 5);
     splitText.forEach((line) => {
-      checkPageBreak(8);
+      checkPageBreak(6);
       doc.text(line, marginLeft + 5, yPosition);
       yPosition += 5;
     });
 
-    yPosition += 3;
+    yPosition += 4;
   });
 
   // ──────────────────────────────────────────────────────
-  // SIGNATURE
+  // SIGNATURE (dernière page)
   // ──────────────────────────────────────────────────────
-  checkPageBreak(50);
-  yPosition += 10;
+  
+  checkPageBreak(60);
+  yPosition += 15;
 
-  doc.setFont('Arial', 'normal');
-  doc.setFontSize(10);
+  doc.setFont('Calibri', 'normal');
+  doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
 
-  doc.text('Fait à La Possession,', marginLeft, yPosition);
-  yPosition += 5;
-  doc.text(`le ${formattedDate}`, marginLeft, yPosition);
+  doc.text(`Fait à La Possession, le ${formattedDate}`, marginLeft, yPosition);
   yPosition += 12;
 
-  // Ligne de signature
-  doc.setDrawColor(0);
+  // Espace pour signature
+  doc.setDrawColor(0, 0, 0);
   doc.line(marginLeft, yPosition, marginLeft + 50, yPosition);
   yPosition += 3;
-  doc.setFont('Arial', 'normal');
+  doc.setFont('Calibri', 'normal');
   doc.setFontSize(9);
-  doc.text('(Signature)', marginLeft, yPosition + 5);
-  yPosition += 8;
+  doc.setTextColor(100, 100, 100);
+  doc.text('Signature', marginLeft, yPosition + 5);
+  yPosition += 12;
 
-  // Bloc signature
-  doc.setFont('Arial', 'normal');
-  doc.setFontSize(10);
-  doc.text(user.full_name || 'Utilisateur', marginLeft, yPosition);
+  // Bloc identité signataire
+  doc.setFont('Calibri', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text(fullName, marginLeft, yPosition);
   yPosition += 5;
-  doc.text(professionLabel[user.profession] || user.profession, marginLeft, yPosition);
+  doc.text(officialTitle, marginLeft, yPosition);
   yPosition += 5;
-  doc.setFont('Arial', 'normal');
+  doc.setFont('Calibri', 'normal');
   doc.setFontSize(9);
-  doc.setTextColor(128, 128, 128);
+  doc.setTextColor(100, 100, 100);
   doc.text('RASED · Circonscription de La Possession', marginLeft, yPosition);
 
   // ──────────────────────────────────────────────────────
