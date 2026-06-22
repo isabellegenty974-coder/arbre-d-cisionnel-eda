@@ -286,33 +286,31 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
       {/* Rapport */}
       {fiche.rapport && (
         <Card>
-          <CardHead icon="📄" title="Rapport généré" 
-            action={
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => setShowRapport(true)} style={{ fontSize: 12, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
-                  Voir →
-                </button>
-                <button onClick={async () => {
-                  const doc = await generateReport({
-                    type: 'synthese',
-                    eleve: fiche,
-                    motif: fiche.observations || '',
-                    observations: fiche.rapport,
-                    hypotheses: fiche.hypotheses || [],
-                    actions: fiche.recommandations || [],
-                    suites: 'À déterminer'
-                  }, { ...user, profession: fiche.createdByProfession, full_name: fiche.createdByName });
-                  downloadReport(doc, `Rapport_${fiche.prenom}_${fiche.nom}_${new Date().toISOString().split('T')[0]}.pdf`);
-                }} style={{ fontSize: 12, color: '#1E7A52', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  📥 PDF
-                </button>
-              </div>
-            }
-            onAction={() => {}} />
-          <div style={{ padding: '10px 16px 14px' }}>
-            <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+          <CardHead icon="📄" title="Rapport généré" />
+          <div style={{ padding: '14px 16px', display: 'flex', gap: 10, justifyContent: 'space-between' }}>
+            <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', flex: 1 }}>
               {fiche.rapport.substring(0, 200)}…
             </p>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <button onClick={() => setShowRapport(true)} style={{ fontSize: 12, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                Voir →
+              </button>
+              <button onClick={async () => {
+                const userInfo = user || { full_name: fiche.createdByName, profession: fiche.createdByProfession };
+                const doc = await generateReport({
+                  type: 'synthese',
+                  eleve: fiche,
+                  motif: fiche.observations || '',
+                  observations: fiche.rapport,
+                  hypotheses: fiche.hypotheses || [],
+                  actions: fiche.recommandations || [],
+                  suites: 'À déterminer'
+                }, { ...userInfo, profession: userInfo.profession || fiche.createdByProfession, full_name: userInfo.full_name || fiche.createdByName });
+                downloadReport(doc, `Rapport_${fiche.prenom}_${fiche.nom}_${new Date().toISOString().split('T')[0]}.pdf`);
+              }} style={{ fontSize: 12, color: '#1E7A52', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                📥 PDF
+              </button>
+            </div>
           </div>
         </Card>
       )}
