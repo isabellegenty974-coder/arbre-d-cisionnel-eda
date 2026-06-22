@@ -270,11 +270,17 @@ export default function Dashboard() {
         .db-ec:hover  { background: #F0F3F8 !important; }
         .db-nav:hover { background: rgba(255,255,255,.07); color: #fff; }
         @media (max-width: 900px) {
-          .db-sidebar { display: none !important; }
-          .db-main    { margin-left: 0 !important; }
-          .db-stats   { grid-template-columns: 1fr 1fr !important; }
+          .db-sidebar    { display: none !important; }
+          .db-main       { margin-left: 0 !important; }
+          .db-stats      { grid-template-columns: 1fr 1fr !important; }
           .db-raccourcis { grid-template-columns: 1fr 1fr !important; }
-          .db-twocol  { grid-template-columns: 1fr !important; }
+          .db-twocol     { grid-template-columns: 1fr !important; }
+          .db-topbar-actions { display: none !important; }
+          .db-topbar-year { max-width: 130px !important; font-size: 11px !important; padding: 5px 8px !important; }
+          .db-hero       { flex-direction: column !important; align-items: flex-start !important; }
+          .db-hero-btns  { flex-direction: row !important; width: 100% !important; }
+          .db-content    { padding: 12px 12px 100px !important; }
+          .db-topbar     { padding: 0 12px !important; height: auto !important; min-height: 54px !important; flex-wrap: wrap !important; gap: 6px !important; padding-top: 8px !important; padding-bottom: 8px !important; }
         }
       `}</style>
 
@@ -287,41 +293,44 @@ export default function Dashboard() {
       <div className="db-main" style={{ marginLeft: 230, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
         {/* TOPBAR */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #D8E1EE', height: 54, padding: '0 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 20 }}>
-          <div>
-            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#182840' }}>Équipe RASED · La Possession</div>
-            <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{todayLabel()} · Année scolaire {anneeScolaire()}</div>
+        <div className="db-topbar" style={{ background: '#fff', borderBottom: '1px solid #D8E1EE', height: 54, padding: '0 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 20 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#182840', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Équipe RASED · La Possession</div>
+            <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{todayLabel()}</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Sélecteur d'année scolaire */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {/* Sélecteur d'année scolaire — toujours visible */}
             {annees.length > 0 && (
-              <select value={anneeActive || ''} onChange={e => setAnneeActive(e.target.value)}
-                style={{ padding: '7px 12px', fontSize: 13, fontWeight: 600, border: '1px solid #3B82C4', borderRadius: 8, background: '#EAF2FB', color: '#1A3353', cursor: 'pointer', outline: 'none' }}>
+              <select className="db-topbar-year" value={anneeActive || ''} onChange={e => setAnneeActive(e.target.value)}
+                style={{ padding: '6px 10px', fontSize: 12, fontWeight: 600, border: '1px solid #3B82C4', borderRadius: 8, background: '#EAF2FB', color: '#1A3353', cursor: 'pointer', outline: 'none', maxWidth: 160 }}>
                 {[...annees].sort((a, b) => b.libelle.localeCompare(a.libelle)).map(a => (
                   <option key={a.id} value={a.id}>
-                    {a.libelle}{(a.est_active || a.active) ? ' ★ En cours' : a.statut === 'archivee' ? ' · Archivée' : ' · À venir'}
+                    {a.libelle}{(a.est_active || a.active) ? ' ★' : ''}
                   </option>
                 ))}
               </select>
             )}
-            <div style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#F0F3F8', border: '1px solid #D8E1EE', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16 }}>
-              🔔
-              {notifs.length > 0 && <span style={{ position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: '50%', background: '#B85C1A', border: '1.5px solid #fff' }} />}
+            {/* Actions masquées sur mobile */}
+            <div className="db-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#F0F3F8', border: '1px solid #D8E1EE', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16 }}>
+                🔔
+                {notifs.length > 0 && <span style={{ position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: '50%', background: '#B85C1A', border: '1.5px solid #fff' }} />}
+              </div>
+              <Link to="/import-pdf" style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: '1px solid #D8E1EE', background: 'transparent', color: '#182840', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                📄 Importer PDF
+              </Link>
+              <button onClick={() => setDiagModal(true)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#3B82C4', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                + Nouvelles hypothèses
+              </button>
             </div>
-            <Link to="/import-pdf" style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: '1px solid #D8E1EE', background: 'transparent', color: '#182840', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              📄 Importer PDF
-            </Link>
-            <button onClick={() => setDiagModal(true)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#3B82C4', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              + Nouvelles hypothèses
-            </button>
           </div>
         </div>
 
         {/* CONTENT */}
-        <div style={{ padding: '24px 26px 48px' }}>
+        <div className="db-content" style={{ padding: '24px 26px 100px' }}>
 
           {/* HERO */}
-          <div style={{ background: '#1A3353', borderRadius: 14, padding: '22px 26px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, overflow: 'hidden', position: 'relative' }}>
+          <div className="db-hero" style={{ background: '#1A3353', borderRadius: 14, padding: '18px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, overflow: 'hidden', position: 'relative', boxSizing: 'border-box', width: '100%' }}>
             <div style={{ position: 'absolute', right: -60, top: -80, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,196,.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,.45)', marginBottom: 7, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -339,11 +348,11 @@ export default function Dashboard() {
                   : `✅ Tous les dossiers sont à jour · ${membres.length} membre${membres.length !== 1 ? 's' : ''} actif${membres.length !== 1 ? 's' : ''}`}
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', zIndex: 1, flexShrink: 0 }}>
-              <Link to="/liste-eleves" style={{ padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', textAlign: 'center' }}>
-                ⚠️ Voir les alertes
+            <div className="db-hero-btns" style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', zIndex: 1, flexShrink: 0 }}>
+              <Link to="/liste-eleves" style={{ padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 600, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', textAlign: 'center' }}>
+                ⚠️ Alertes
               </Link>
-              <Link to="/mes-ecoles" style={{ padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 500, background: 'rgba(255,255,255,.1)', color: 'rgba(255,255,255,.8)', border: '1px solid rgba(255,255,255,.18)', cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', textAlign: 'center' }}>
+              <Link to="/mes-ecoles" style={{ padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500, background: 'rgba(255,255,255,.1)', color: 'rgba(255,255,255,.8)', border: '1px solid rgba(255,255,255,.18)', cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', textAlign: 'center' }}>
                 Mes écoles →
               </Link>
             </div>
