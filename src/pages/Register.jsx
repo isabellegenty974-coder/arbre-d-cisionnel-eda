@@ -106,15 +106,66 @@ export default function Register() {
           actif: true,
         });
       } catch (err) {
-        // Le membre existe peut-être déjà, ignorer l'erreur
         console.log('Profil équipe existe peut-être déjà');
       }
       
-      // Redirection automatique vers dashboard avec forçage du welcome modal
-      window.location.href = '/dashboard?first_login=true';
+      // Mapper profession pour l'email
+      const professionLabels = {
+        'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA',
+        'MaDR': 'Maître à Dominante Relationnelle (MaDR)',
+        'MaDP': 'Maître à Dominante Pédagogique (MaDP)',
+      };
+      const profLabel = professionLabels[profession] || profession;
+      
+      // Envoyer email de confirmation au nouveau membre
+      const appUrl = window.location.origin;
+      const emailBody = `Bonjour ${prenom.trim()},
+
+Votre compte a bien été créé sur l'application Suivis RASED de l'équipe RASED de la Circonscription de La Possession.
+
+Vos informations :
+· Nom : ${prenom.trim()} ${nom.trim()}
+· Rôle : ${profLabel}
+· Email : ${email.trim()}
+
+Vous pouvez dès maintenant vous connecter à l'application :
+${appUrl}
+
+Bienvenue dans l'équipe !
+
+RASED · Circonscription de La Possession
+La Réunion`;
+
+      await base44.integrations.Core.SendEmail({
+        to: email.trim(),
+        subject: 'Confirmation de votre compte Suivis RASED · La Possession',
+        body: emailBody,
+        from_name: 'RASED La Possession',
+      });
+
+      // Notifier les administratrices (Psy-EN)
+      try {
+        const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+        for (const admin of admins) {
+          await base44.asServiceRole.entities.Notification.create({
+            type: 'membre_rejoint',
+            titre: '👋 Nouveau membre',
+            message: `${prenom.trim()} ${nom.trim()} a rejoint l'équipe en tant que ${profLabel}`,
+            destinataire_email: admin.email,
+            lu: false,
+          });
+        }
+      } catch (err) {
+        console.log('Erreur lors de la création de la notification admin:', err);
+      }
+
+      // Afficher le message de succès
+      setError(null);
+      setTimeout(() => {
+        window.location.href = '/dashboard?first_login=true';
+      }, 2000);
     } catch (err) {
       setError(err.message || 'Erreur lors de l\'inscription');
-    } finally {
       setSaving(false);
     }
   };
@@ -245,6 +296,24 @@ export default function Register() {
                 required
               />
             </div>
+
+            {/* Success Message */}
+            {saving && !error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-green-50 border border-green-200 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-semibold text-green-800">Compte créé !</p>
+                    <p className="text-sm text-green-700 mt-1">Un email de confirmation a été envoyé à <strong>{email.trim()}</strong></p>
+                    <p className="text-xs text-green-600 mt-2">Redirection en cours...</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Error */}
             {error && (
