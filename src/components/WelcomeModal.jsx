@@ -49,9 +49,9 @@ export default function WelcomeModal({ onClose }) {
             <div className="flex gap-4">
               <div className="text-2xl">🔍</div>
               <div>
-                <h3 className="font-semibold text-foreground mb-1">Formuler des hypothèses de travail</h3>
+                <h3 className="font-semibold text-foreground mb-1">Outil d'aide aux hypothèses de travail</h3>
                 <p className="text-sm text-muted-foreground">
-                  Utilisez l'arbre décisionnel EDA pour explorer les difficultés des élèves et formuler des hypothèses de travail.
+                  Chaque membre de l'équipe peut utiliser l'outil d'aide à la formulation d'hypothèses de travail, accessible depuis la fiche de chaque élève suivi.
                 </p>
               </div>
             </div>
