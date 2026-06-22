@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, TreePine, BarChart2, Settings } from 'lucide-react';
+import { Home, Users, TreePine, BarChart2, BookOpen } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { icon: Home,      label: 'Accueil',  to: '/dashboard' },
-  { icon: Users,     label: 'Élèves',   to: '/liste-eleves' },
-  { icon: TreePine,  label: 'Arbre',    to: '/evaluation-domains' },
-  { icon: BarChart2, label: 'Stats',    to: '/stats-annuelles' },
-  { icon: Settings,  label: 'Paramètres', to: '/parametres' },
+  { icon: Home,      label: 'Accueil',    to: '/dashboard' },
+  { icon: Users,     label: 'Élèves',     to: '/liste-eleves' },
+  { icon: TreePine,  label: 'Arbre',      to: '/evaluation-domains' },
+  { icon: BarChart2, label: 'Stats',      to: '/stats-annuelles' },
+  { icon: BookOpen,  label: 'Ressources', to: '/items-professionnels' },
 ];
 
 export default function BottomBar() {
