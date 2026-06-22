@@ -207,8 +207,15 @@ const AuthenticatedApp = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if (user && !user.first_login_seen) {
+    const params = new URLSearchParams(window.location.search);
+    const isFirstLogin = params.get('first_login') === 'true';
+    
+    if (user && (!user.first_login_seen || isFirstLogin)) {
       setShowWelcome(true);
+      // Nettoyer le paramètre de l'URL
+      if (isFirstLogin) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
     }
   }, [user]);
 

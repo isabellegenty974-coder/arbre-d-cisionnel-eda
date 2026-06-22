@@ -104,9 +104,8 @@ export default function Register() {
         actif: true,
       });
       
-      // Redirection automatique vers dashboard
-      // Le WelcomeModal s'affichera automatiquement car first_login_seen = false
-      window.location.href = '/dashboard';
+      // Redirection automatique vers dashboard avec forçage du welcome modal
+      window.location.href = '/dashboard?first_login=true';
     } catch (err) {
       setError(err.message || 'Erreur lors de l\'inscription');
     } finally {
