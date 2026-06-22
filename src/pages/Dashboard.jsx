@@ -463,7 +463,7 @@ export default function Dashboard() {
                   const pill = pillMap[e.statut] || { bg: '#EEE9FF', c: '#5B3FA6', lbl: e.statut };
                   return (
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}
-                      onClick={() => fiche && navigate(`/detail-fiche?id=${fiche.id}`)}>
+                      onClick={() => navigate(`/detail-eleve?id=${e.id}`)}>
                       <div style={{ width: 30, height: 30, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{init}</div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>

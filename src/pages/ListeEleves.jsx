@@ -46,7 +46,7 @@ export default function ListeEleves() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  onClick={() => navigate(`/dashboard?id=${eleve.id}`)}
+                  onClick={() => navigate(`/detail-eleve?id=${eleve.id}`)}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-soft transition-all text-left"
                 >
                   <div className="p-2 rounded-lg bg-primary/10 shrink-0">
