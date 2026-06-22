@@ -200,8 +200,8 @@ export default function Parametres() {
 
   // Stats par année (basé sur les dates de l'année ou les champs annee_scolaire_id)
   const statsParAnnee = (annee) => {
-    const debut = annee.date_debut ? new Date(annee.date_debut) : new Date(`${annee.libelle.split('-')[0]}-09-01`);
-    const fin   = annee.date_fin   ? new Date(annee.date_fin)   : new Date(`${(annee.libelle.split('-')[1] || String(parseInt(annee.libelle.split('-')[0]) + 1))}-08-31`);
+    const debut = annee.date_debut ? new Date(annee.date_debut) : new Date(`${annee.libelle.split('-')[0]}-08-01`);
+    const fin   = annee.date_fin   ? new Date(annee.date_fin)   : new Date(`${(annee.libelle.split('-')[1] || String(parseInt(annee.libelle.split('-')[0]) + 1))}-07-31`);
     const fichesAnnee = fiches.filter(f => {
       if (f.annee_scolaire_id) return f.annee_scolaire_id === annee.id;
       const d = new Date(f.created_date);

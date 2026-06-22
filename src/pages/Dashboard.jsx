@@ -217,10 +217,10 @@ export default function Dashboard() {
     // Sinon filtrer par dates
     const debut = anneeSelectionnee.date_debut
       ? new Date(anneeSelectionnee.date_debut)
-      : new Date(`${anneeSelectionnee.libelle.split('-')[0]}-09-01`);
+      : new Date(`${anneeSelectionnee.libelle.split('-')[0]}-08-01`);
     const fin = anneeSelectionnee.date_fin
       ? new Date(anneeSelectionnee.date_fin)
-      : new Date(`${anneeSelectionnee.libelle.split('-')[1] || String(parseInt(anneeSelectionnee.libelle.split('-')[0]) + 1)}-08-31`);
+      : new Date(`${anneeSelectionnee.libelle.split('-')[1] || String(parseInt(anneeSelectionnee.libelle.split('-')[0]) + 1)}-07-31`);
     return fiches.filter(f => {
       const d = new Date(f.created_date);
       return d >= debut && d <= fin;
