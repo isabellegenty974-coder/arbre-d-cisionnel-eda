@@ -9,6 +9,7 @@ import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import NotesMembreSection from '@/components/rased/NotesMembreSection';
 import ReportExportModal from '@/components/rased/ReportExportModal';
 import { usePresence } from '@/lib/usePresence';
+import { generateReport, downloadReport } from '@/lib/reportGenerator';
 import { jsPDF } from 'jspdf';
 
 const PROF_COLOR  = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
@@ -150,7 +151,7 @@ function CardHead({ icon, title, action, onAction }) {
 }
 
 // ── Onglet Suivi ──────────────────────────────────────────────────────────────
-function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions }) {
+function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
@@ -285,7 +286,29 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions })
       {/* Rapport */}
       {fiche.rapport && (
         <Card>
-          <CardHead icon="📄" title="Rapport généré" action="Voir →" onAction={() => setShowRapport(true)} />
+          <CardHead icon="📄" title="Rapport généré" 
+            action={
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setShowRapport(true)} style={{ fontSize: 12, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
+                  Voir →
+                </button>
+                <button onClick={async () => {
+                  const doc = await generateReport({
+                    type: 'synthese',
+                    eleve: fiche,
+                    motif: fiche.observations || '',
+                    observations: fiche.rapport,
+                    hypotheses: fiche.hypotheses || [],
+                    actions: fiche.recommandations || [],
+                    suites: 'À déterminer'
+                  }, { ...user, profession: fiche.createdByProfession, full_name: fiche.createdByName });
+                  downloadReport(doc, `Rapport_${fiche.prenom}_${fiche.nom}_${new Date().toISOString().split('T')[0]}.pdf`);
+                }} style={{ fontSize: 12, color: '#1E7A52', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  📥 PDF
+                </button>
+              </div>
+            }
+            onAction={() => {}} />
           <div style={{ padding: '10px 16px 14px' }}>
             <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
               {fiche.rapport.substring(0, 200)}…
@@ -540,7 +563,7 @@ export default function DetailFiche() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
             {activeTab === 'suivi' && (
-              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} />
+              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} />
             )}
             {activeTab === 'hypotheses' && (
               <TabHypotheses fiche={fiche} ficheId={ficheId} navigate={navigate} historiqueEDA={historiqueEDA} />
