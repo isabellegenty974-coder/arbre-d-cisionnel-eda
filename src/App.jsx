@@ -11,6 +11,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { DiagnosticProvider } from '@/lib/DiagnosticContext';
 import ResumeButton from '@/components/tree/ResumeButton';
 import BottomBar from '@/components/Navigation/BottomBar';
+import WelcomeModal from '@/components/WelcomeModal';
 
 // Pages
 import Accueil from './pages/Accueil';
@@ -201,7 +202,23 @@ function AutoRegister() {
 }
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (user && !user.first_login_seen) {
+      setShowWelcome(true);
+    }
+  }, [user]);
+
+  const handleWelcomeClose = async () => {
+    setShowWelcome(false);
+    try {
+      await base44.auth.updateMe({ first_login_seen: true });
+    } catch (err) {
+      console.error('Error updating first_login_seen:', err);
+    }
+  };
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -222,6 +239,7 @@ const AuthenticatedApp = () => {
 
   return (
     <>
+      {showWelcome && <WelcomeModal onClose={handleWelcomeClose} />}
       <ResumeButton />
       <BottomBar />
       <Routes>
