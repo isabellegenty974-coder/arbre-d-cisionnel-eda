@@ -595,11 +595,8 @@ export default function Dashboard() {
                   );
                 })}
               </div>
-              <Link to="/invite-users" style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1px solid #D8E1EE', background: 'transparent', color: '#182840', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                + Inviter un membre
-              </Link>
-            </div>
-          )}
+              </div>
+              )}
 
         </div>
       </div>
