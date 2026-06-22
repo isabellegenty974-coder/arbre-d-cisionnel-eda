@@ -29,14 +29,13 @@ import ItemsDeveloppement from './pages/ItemsDeveloppement';
 import ItemsContexte from './pages/ItemsContexte';
 import AnalyseEDA from './pages/AnalyseEDA';
 import ListeEleves from './pages/ListeEleves';
-import DetailEleve from './pages/DetailEleve';
 import DetailFiche from './pages/DetailFiche';
 import HistoriqueEleve from './pages/HistoriqueEleve';
 import ExportAnnuel from './pages/ExportAnnuel';
 import RapportAnnuel from './pages/RapportAnnuel';
 import EditEleve from './pages/EditEleve';
 import ItemsProfessionnels from './pages/ItemsProfessionnels';
-import DiagnosticEleve from './pages/DiagnosticEleve'; // renommé en hypotheses-eleve
+import DiagnosticEleve from './pages/DiagnosticEleve';
 import TableauSynthese from './pages/TableauSynthese';
 import InviteUsers from './pages/InviteUsers';
 import Register from './pages/Register';
@@ -274,7 +273,6 @@ const AuthenticatedApp = () => {
         <Route path="/items-contexte" element={<ItemsContexte />} />
         <Route path="/analyse-eda" element={<AnalyseEDA />} />
         <Route path="/liste-eleves" element={<ListeEleves />} />
-        <Route path="/detail-eleve" element={<DetailFiche />} />
         <Route path="/detail-fiche" element={<DetailFiche />} />
         <Route path="/historique-eleve" element={<HistoriqueEleve />} />
         <Route path="/export-annuel" element={<ExportAnnuel />} />
