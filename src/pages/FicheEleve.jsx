@@ -258,15 +258,17 @@ export default function FicheEleve() {
             </div>
             <div>
               <label className="text-sm font-semibold text-[#0F172A] block mb-2">École</label>
-              <select
-                value={ecole}
-                onChange={e => setEcole(e.target.value)}
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                <option value="">-- Sélectionner une école --</option>
-                {ECOLES.map(e => <option key={e} value={e}>{e}</option>)}
-              </select>
-              {ecole && urlParams.get('ecole') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+              <div>
+                <select
+                  value={ecole}
+                  onChange={e => setEcole(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">-- Sélectionner une école --</option>
+                  {ECOLES.map(e => <option key={e} value={e}>{e}</option>)}
+                </select>
+                {ecole && urlParams.get('ecole') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+              </div>
             </div>
           </motion.div>
 
