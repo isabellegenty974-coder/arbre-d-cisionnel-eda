@@ -17,18 +17,28 @@ export default function EditEleve() {
   const [form, setForm] = useState({ nom: "", prenom: "", classe: "", age: "", observations: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [record, setRecord] = useState(null);
+
+  const getAnneeFromDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    return month >= 7 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+  };
 
   useEffect(() => {
     if (!id) return;
     base44.entities.FicheEleve.filter({ id }).then((results) => {
-      const record = results[0];
-      if (record) {
+      const rec = results[0];
+      if (rec) {
+        setRecord(rec);
         setForm({
-          nom: record.nom || "",
-          prenom: record.prenom || "",
-          classe: record.classe || "",
-          age: record.age || "",
-          observations: record.observations || "",
+          nom: rec.nom || "",
+          prenom: rec.prenom || "",
+          classe: rec.classe || "",
+          age: rec.age || "",
+          observations: rec.observations || "",
         });
       }
       setLoading(false);
@@ -37,12 +47,14 @@ export default function EditEleve() {
 
   const handleSave = async () => {
     setSaving(true);
+    const annee_scolaire = getAnneeFromDate(record?.created_date);
     await base44.entities.FicheEleve.update(id, {
       nom: form.nom,
       prenom: form.prenom,
       classe: form.classe,
       age: form.age ? Number(form.age) : undefined,
       observations: form.observations,
+      annee_scolaire: annee_scolaire || undefined,
     });
     navigate(`/detail-eleve?id=${id}`);
   };
