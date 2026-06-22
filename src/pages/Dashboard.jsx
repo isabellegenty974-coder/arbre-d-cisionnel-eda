@@ -320,8 +320,8 @@ export default function Dashboard() {
               </select>
             )}
             {/* Actions masquées sur mobile */}
-            <div className="db-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setShowNotifs(!showNotifs); }} style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#F0F3F8', border: '1px solid #D8E1EE', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16, padding: 0 }}>
+            <div className="db-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button type="button" onClick={() => setShowNotifs(!showNotifs)} style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#F0F3F8', border: '1px solid #D8E1EE', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16, padding: 0 }}>
                 🔔
                 {notifs.length > 0 && <span style={{ position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: '50%', background: '#B85C1A', border: '1.5px solid #fff' }} />}
               </button>
@@ -333,6 +333,38 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
+
+          {/* Notifications Dropdown */}
+          <AnimatePresence>
+            {showNotifs && (
+              <>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  style={{ position: 'fixed', inset: 0, zIndex: 200 }} onClick={() => setShowNotifs(false)} />
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                  style={{ position: 'fixed', top: 62, right: 26, width: 320, maxHeight: 400, background: '#fff', border: '1px solid #D8E1EE', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', zIndex: 201 }}>
+                  <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8', fontWeight: 600, fontSize: 14, color: '#182840' }}>Notifications ({notifs.length})</div>
+                  <div style={{ flex: 1, overflowY: 'auto' }}>
+                    {notifs.length === 0 ? (
+                      <p style={{ textAlign: 'center', padding: '20px', fontSize: 12, color: '#566880' }}>Aucune notification</p>
+                    ) : (
+                      notifs.map(n => (
+                        <div key={n.id} onClick={() => { navigate(n.fiche_id ? `/detail-fiche?id=${n.fiche_id}` : '/dashboard'); setShowNotifs(false); }}
+                          style={{ padding: '12px 14px', borderBottom: '1px solid #F0F3F8', cursor: 'pointer', transition: 'background .1s' }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#F8FAFD'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <div style={{ fontWeight: 500, fontSize: 13, color: '#182840', marginBottom: 4 }}>{n.titre}</div>
+                          <div style={{ fontSize: 12, color: '#566880', marginBottom: 4 }}>{n.message}</div>
+                          <div style={{ fontSize: 11, color: '#94A3B8' }}>
+                            {new Date(n.created_date).toLocaleDateString('fr-FR', { day: 'short', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* CONTENT */}
@@ -572,38 +604,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* NOTIFICATIONS PANEL */}
-      <AnimatePresence>
-        {showNotifs && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              style={{ position: 'fixed', inset: 0, zIndex: 200 }} onClick={() => setShowNotifs(false)} />
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              onClick={e => e.stopPropagation()}
-              style={{ position: 'absolute', top: 54, right: 26, width: 320, maxHeight: 400, background: '#fff', border: '1px solid #D8E1EE', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', zIndex: 201 }}>
-              <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8', fontWeight: 600, fontSize: 14, color: '#182840' }}>Notifications ({notifs.length})</div>
-              <div style={{ flex: 1, overflowY: 'auto' }}>
-                {notifs.length === 0 ? (
-                  <p style={{ textAlign: 'center', padding: '20px', fontSize: 12, color: '#566880' }}>Aucune notification</p>
-                ) : (
-                  notifs.map(n => (
-                    <div key={n.id} onClick={() => { navigate(n.fiche_id ? `/detail-fiche?id=${n.fiche_id}` : '/dashboard'); setShowNotifs(false); }}
-                      style={{ padding: '12px 14px', borderBottom: '1px solid #F0F3F8', cursor: 'pointer', transition: 'background .1s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#F8FAFD'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <div style={{ fontWeight: 500, fontSize: 13, color: '#182840', marginBottom: 4 }}>{n.titre}</div>
-                      <div style={{ fontSize: 12, color: '#566880', marginBottom: 4 }}>{n.message}</div>
-                      <div style={{ fontSize: 11, color: '#94A3B8' }}>
-                        {new Date(n.created_date).toLocaleDateString('fr-FR', { day: 'short', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+
 
       {/* MESSAGE DE BIENVENUE */}
       <AnimatePresence>
