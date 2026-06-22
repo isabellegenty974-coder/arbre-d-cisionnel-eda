@@ -95,7 +95,7 @@ export default function ImportPDF() {
                   {step === 4 && <ImportStep4 stats={importStats} ecoleId={ecoleId} onRestart={() => { reset(); }} />}
                 </div>
               ) : (
-                <ImportElevesPDF onDone={() => navigate('/liste-eleves')} />
+                <ImportElevesPDF onDone={() => navigate('/mes-ecoles')} />
               )}
             </motion.div>
           )}
