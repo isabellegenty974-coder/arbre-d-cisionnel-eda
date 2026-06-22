@@ -155,15 +155,19 @@ export default function Parametres() {
   const [saving, setSaving]     = useState(false);
   const [selected, setSelected] = useState(null);
   const [assistantAnnee, setAssistantAnnee] = useState(null); // annee activée → ouvre assistant
+  const [user, setUser] = useState(null);
+  const [userMembre, setUserMembre] = useState(null);
 
   const load = async () => {
-    const [ans, f, d, el, ec] = await Promise.all([
+    const [u, ans, f, d, el, ec] = await Promise.all([
+      base44.auth.me().catch(() => null),
       base44.entities.AnneeScolaire.list('libelle', 50).catch(() => []),
       base44.entities.FicheEleve.list('-created_date', 500).catch(() => []),
       base44.entities.HistoriqueEDA.list('-date', 1000).catch(() => []),
       base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
       base44.entities.EcoleRased.list('-created_date', 100).catch(() => []),
     ]);
+    setUser(u);
     setAnnees(ans);
     setFiches(f);
     setDiags(d);
@@ -171,6 +175,13 @@ export default function Parametres() {
     setEcoles(ec);
     const active = ans.find(a => a.est_active || a.active);
     if (active && !selected) setSelected(active.id);
+    
+    // Récupérer le profil MembreEquipe du user
+    if (u && u.email) {
+      const membres = await base44.entities.MembreEquipe.filter({ email: u.email }).catch(() => []);
+      if (membres.length > 0) setUserMembre(membres[0]);
+    }
+    
     setLoading(false);
   };
 
@@ -260,6 +271,45 @@ export default function Parametres() {
           style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#566880', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, marginBottom: 20 }}>
           <ArrowLeft size={14} /> Tableau de bord
         </button>
+
+        {/* Mon profil */}
+        {user && userMembre && (
+          <div style={{ background: '#fff', borderRadius: 18, padding: '20px', boxShadow: '0 2px 16px rgba(0,0,0,.06)', marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#182840', marginBottom: 14 }}>👤 Mon profil</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#566880', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>Nom complet</div>
+                <div style={{ fontSize: 14, color: '#182840' }}>{userMembre.prenom} {userMembre.nom}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#566880', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>Rôle dans l'équipe</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: '#182840' }}>
+                    {userMembre.profession === 'Psy EN EDA' 
+                      ? 'Psychologue de l\'Éducation Nationale · Spécialité EDA'
+                      : userMembre.profession === 'MaDR'
+                      ? 'Maître à Dominante Relationnelle (MaDR)'
+                      : userMembre.profession === 'MaDP'
+                      ? 'Maître à Dominante Pédagogique (MaDP)'
+                      : userMembre.profession}
+                  </div>
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: 
+                    userMembre.profession === 'Psy EN EDA' ? '#3B82C4' :
+                    userMembre.profession === 'MaDR' ? '#1E7A52' :
+                    userMembre.profession === 'MaDP' ? '#B85C1A' : '#D8E1EE'
+                  }} />
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#566880', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>Email</div>
+                <div style={{ fontSize: 14, color: '#182840' }}>{user.email}</div>
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 12, paddingTop: 12, borderTop: '1px solid #F0F3F8' }}>
+              ℹ️ Ces informations ont été définies lors de votre inscription et ne peuvent pas être modifiées ici.
+            </div>
+          </div>
+        )}
 
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#182840', margin: '0 0 6px' }}>Années scolaires</h1>
         <p style={{ fontSize: 13, color: '#566880', margin: '0 0 28px', lineHeight: 1.6 }}>

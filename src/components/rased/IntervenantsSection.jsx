@@ -10,12 +10,12 @@ const ACCESS_LEVELS = [
 ];
 
 const PROF_COLORS = {
-  'Psy EN EDA': { color: '#2563eb', bg: '#dbeafe' },
-  'MaDR': { color: '#16a34a', bg: '#dcfce7' },
-  'MaDP': { color: '#d97706', bg: '#fef3c7' },
+  'Psy EN EDA': { color: '#3B82C4', bg: '#EAF2FB' },
+  'MaDR': { color: '#1E7A52', bg: '#E4F4ED' },
+  'MaDP': { color: '#B85C1A', bg: '#FEF0E4' },
 };
 
-export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom }) {
+export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom, createdByName, createdByProfession }) {
   const [membres, setMembres] = useState([]);
   const [intervenants, setIntervenants] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
@@ -32,11 +32,24 @@ export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom 
         base44.auth.me().catch(() => null),
       ]);
       setMembres(m);
-      setIntervenants(fiche?.intervenants || []);
+      let intervs = fiche?.intervenants || [];
+      
+      // Ajouter automatiquement le créateur s'il n'est pas déjà présent
+      if (createdByName && createdByProfession) {
+        const creatorExists = intervs.some(i => i.nom === createdByName);
+        if (!creatorExists) {
+          intervs = [
+            { nom: createdByName, profession: createdByProfession, acces: 'modification', membre_id: 'creator' },
+            ...intervs.filter(i => i.membre_id !== 'creator')
+          ];
+        }
+      }
+      
+      setIntervenants(intervs);
       setCurrentUser(user);
     };
     load();
-  }, [ficheId]);
+  }, [ficheId, createdByName, createdByProfession]);
 
   const handleAdd = async () => {
     if (!selectedMembre) return;
@@ -135,29 +148,32 @@ export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom 
       )}
 
       {intervenants.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">Aucun intervenant sur ce dossier</p>
+       <p className="text-sm text-muted-foreground italic">Aucun intervenant sur ce dossier</p>
       ) : (
-        <div className="space-y-2">
+       <div className="space-y-2">
           {intervenants.map(({ membre_id, nom, profession, acces }) => {
             const accessConf = ACCESS_LEVELS.find(a => a.value === acces) || ACCESS_LEVELS[0];
             const profConf = PROF_COLORS[profession] || { color: '#6b7280', bg: '#f3f4f6' };
             const AccessIcon = accessConf.icon;
+            const isCreator = membre_id === 'creator';
             return (
               <div key={membre_id} className="flex items-center gap-3 p-2.5 rounded-xl bg-secondary/20 border border-border">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: profConf.bg, color: profConf.color }}>
                   {nom?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{nom}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{nom} {isCreator && '(Créateur)'}</p>
                   <p className="text-xs text-muted-foreground">{profession}</p>
                 </div>
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0" style={{ background: accessConf.bg, color: accessConf.color }}>
                   <AccessIcon className="w-3 h-3" />
                   {accessConf.label}
                 </div>
-                <button onClick={() => handleRemove(membre_id)} className="text-gray-300 hover:text-red-400 transition-colors shrink-0">
-                  <X className="w-4 h-4" />
-                </button>
+                {!isCreator && (
+                  <button onClick={() => handleRemove(membre_id)} className="text-gray-300 hover:text-red-400 transition-colors shrink-0">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             );
           })}
