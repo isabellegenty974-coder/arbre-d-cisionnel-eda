@@ -464,6 +464,8 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
 function TabInfos({ fiche, ficheId, navigate, user }) {
   const [showReportModal, setShowReportModal] = useState(false);
   
+  const PROF_LABEL = { 'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA', 'MaDR': 'Maître à Dominante Relationnelle (MaDR)', 'MaDP': 'Maître à Dominante Pédagogique (MaDP)' };
+  
   const InfoRow = ({ label, value }) => (
     <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8' }}>
       <div style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 600, marginBottom: 3 }}>{label}</div>
@@ -481,8 +483,11 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <InfoRow label="Âge" value={fiche.age ? `${fiche.age} ans` : null} />
         <InfoRow label="École" value={fiche.ecole} />
         <InfoRow label="Classe" value={fiche.classe} />
-        <InfoRow label="Créé par" value={fiche.createdByName} />
-        <InfoRow label="Profession" value={fiche.createdByProfession} />
+        <InfoRow label="Enseignant·e responsable" value={fiche.enseignant} />
+        <InfoRow label="Année scolaire" value={fiche.annee_scolaire} />
+        <InfoRow label="Créé par" value={fiche.createdByName ? `${fiche.createdByName} · ${PROF_LABEL[fiche.createdByProfession] || fiche.createdByProfession}` : null} />
+        <InfoRow label="Date de création" value={fiche.created_date ? new Date(fiche.created_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
+        <InfoRow label="Dernière modification" value={fiche.updated_date ? new Date(fiche.updated_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
       </Card>
 
       <Card>
