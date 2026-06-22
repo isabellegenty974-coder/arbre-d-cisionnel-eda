@@ -18,8 +18,9 @@ export default function FicheEleve() {
   const [currentUser, setCurrentUser] = useState(null);
   const [ecole, setEcole] = useState(urlParams.get('ecole') || '');
   const [classe, setClasse] = useState(urlParams.get('classe') || '');
+  const [enseignant, setEnseignant] = useState(urlParams.get('enseignant') || '');
   const ECOLES = ['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'];
-  const [dateNaissance, setDateNaissance] = useState('');
+  const [dateNaissance, setDateNaissance] = useState(urlParams.get('date_naissance') || '');
   const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
@@ -33,6 +34,18 @@ export default function FicheEleve() {
       setCurrentUser(u);
       if (annees.length > 0) setAnneeActive(annees[0].libelle);
     }).catch(() => {});
+    
+    // Pré-remplir la date de naissance si elle est passée en paramètre
+    const dnParam = urlParams.get('date_naissance');
+    if (dnParam) {
+      const d = new Date(dnParam);
+      setJourNaissance(String(d.getDate()));
+      setMoisNaissance(String(d.getMonth() + 1));
+      setAnneeNaissance(String(d.getFullYear()));
+      setDateNaissance(dnParam);
+      const age = Math.floor((new Date() - d) / 31536000000);
+      setAgeCalcule(age >= 0 ? age : null);
+    }
   }, []);
 
   const [jourNaissance, setJourNaissance] = useState('');
@@ -88,6 +101,7 @@ export default function FicheEleve() {
       date_naissance: dateNaissance || undefined,
       classe: classe || data.classe || undefined,
       ecole: ecole || undefined,
+      notes: enseignant ? `Enseignant·e : ${enseignant}` : undefined,
       date: new Date().toISOString().split('T')[0],
       annee_scolaire: anneeActive || undefined,
       createdByName: fullName,
@@ -194,8 +208,9 @@ export default function FicheEleve() {
                   ) : (
                     <span className="text-sm text-[#0F172A]/30 whitespace-nowrap">— ans</span>
                   )}
-                </div>
-              </div>
+                  </div>
+                  {dateNaissance && urlParams.get('date_naissance') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+                  </div>
               <div>
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">Classe</label>
                 <Input
@@ -212,6 +227,18 @@ export default function FicheEleve() {
                   </div>
                 )}
                 {classe && urlParams.get('classe') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Enseignant·e</label>
+                <Input
+                  type="text"
+                  placeholder="Nom de l'enseignant·e"
+                  value={enseignant}
+                  onChange={e => setEnseignant(e.target.value)}
+                  className="rounded-lg"
+                />
+                {enseignant && urlParams.get('enseignant') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
               </div>
             </div>
           </motion.div>
