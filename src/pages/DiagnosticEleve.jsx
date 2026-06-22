@@ -343,7 +343,7 @@ export default function DiagnosticEleve() {
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAF8] to-[#F5F0E8] pb-20">
       <HamburgerMenu />
       <ScreenLayout
-        title={`🔍 Diagnostic — Construire une hypothèse`}
+        title={`🔍 Hypothèses — Construire une hypothèse de travail`}
         subtitle={eleve ? `${eleve.prenom} ${eleve.nom}${eleve.classe ? ` — ${eleve.classe}` : ""}` : ""}
       >
         {/* Barre de progression */}
@@ -489,7 +489,7 @@ export default function DiagnosticEleve() {
             }`}
           >
             <Save className="w-5 h-5" />
-            {saved ? "✓ Diagnostic enregistré !" : saving ? "Enregistrement..." : `Enregistrer le diagnostic`}
+            {saved ? "✓ Hypothèses enregistrées !" : saving ? "Enregistrement..." : `Enregistrer les hypothèses`}
           </Button>
         </motion.div>
       </ScreenLayout>
@@ -525,7 +525,7 @@ export default function DiagnosticEleve() {
                   <SaveDiagnosticButton
                     ficheId={eleveId}
                     prenomEleve={eleve?.prenom}
-                    domaine="diagnostic EDA"
+                    domaine="hypothèses EDA"
                     sousDomaine=""
                     hypotheses={rapport ? [rapport.substring(0, 150) + '…'] : []}
                     actions={[]}

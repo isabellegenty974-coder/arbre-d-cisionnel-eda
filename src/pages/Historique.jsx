@@ -52,7 +52,7 @@ export default function Historique() {
             <div className="text-center py-8 text-muted-foreground">Chargement...</div>
           ) : diagnostics.length === 0 ? (
            <div className="text-center py-8 p-6 rounded-lg bg-secondary/30 border border-secondary">
-             <p className="text-muted-foreground">Aucune hypothèse diagnostique pour cet élève</p>
+             <p className="text-muted-foreground">Aucune hypothèse de travail pour cet élève</p>
            </div>
           ) : (
             <div className="space-y-3">
@@ -67,7 +67,7 @@ export default function Historique() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground">
-                           Hypothèses diagnostiques {new Date(diag.created_date).toLocaleDateString('fr-FR')}
+                           Hypothèses de travail — {new Date(diag.created_date).toLocaleDateString('fr-FR')}
                           </h3>
                       <div className="text-xs text-muted-foreground mt-2 space-y-1">
                         <p>Créé: {new Date(diag.created_date).toLocaleString('fr-FR')}</p>

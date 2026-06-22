@@ -86,7 +86,7 @@ export default function SyntheseEleve() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <ScreenLayout title={`📊 Synthèse — ${fiche.prenom} ${fiche.nom}`} subtitle={`Classe : ${fiche.classe || 'N/A'} · ${historique.length} diagnostic(s) enregistré(s)`}>
+      <ScreenLayout title={`📊 Synthèse — ${fiche.prenom} ${fiche.nom}`} subtitle={`Classe : ${fiche.classe || 'N/A'} · ${historique.length} hypothèse(s) enregistrée(s)`}>
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 max-w-2xl mx-auto">
 
           {/* Actions */}
@@ -101,13 +101,13 @@ export default function SyntheseEleve() {
 
           {!hasData && (
             <div className="text-center py-12 rounded-xl bg-secondary/30 border border-secondary">
-              <p className="text-muted-foreground font-medium">Aucun diagnostic enregistré</p>
+              <p className="text-muted-foreground font-medium">Aucune hypothèse enregistrée</p>
               <p className="text-sm text-muted-foreground mt-1">Lancez un parcours depuis l'arbre EDA pour alimenter cette synthèse.</p>
               <Button
-                onClick={() => navigate(`/diagnostic-eleve?id=${ficheId}`)}
+                onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
                 className="mt-4 bg-[#D4A574] hover:bg-[#C49464] text-white"
               >
-                Démarrer un diagnostic EDA
+                Démarrer les hypothèses EDA
               </Button>
             </div>
           )}
@@ -154,14 +154,14 @@ export default function SyntheseEleve() {
 
               {/* Bar chart par domaine */}
               <div className="p-4 rounded-xl bg-card border border-border">
-                <h3 className="font-semibold mb-4 text-foreground text-sm">Diagnostics par domaine</h3>
+                <h3 className="font-semibold mb-4 text-foreground text-sm">Hypothèses par domaine</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={domaineCounts}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="domaine" tick={{ fontSize: 11 }} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                     <Tooltip />
-                    <Bar dataKey="count" name="Diagnostics" fill="#D4A574" radius={[6,6,0,0]} />
+                    <Bar dataKey="count" name="Hypothèses" fill="#D4A574" radius={[6,6,0,0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

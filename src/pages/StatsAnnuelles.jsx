@@ -539,7 +539,7 @@ export default function StatsAnnuelles() {
         </SectionCard>
 
         {/* Évolution mensuelle */}
-        <SectionCard title="Évolution mensuelle" subtitle="Diagnostics réalisés par mois" icon={TrendingUp} accentColor="#4A90E2" delay={0.19}>
+        <SectionCard title="Évolution mensuelle" subtitle="Hypothèses formulées par mois" icon={TrendingUp} accentColor="#4A90E2" delay={0.19}>
           {evolution.length === 0 ? <EmptyState /> : (
             <ResponsiveContainer width="100%" height={180}>
               <AreaChart data={evolution} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
@@ -562,7 +562,7 @@ export default function StatsAnnuelles() {
 
         {/* Répartition par profession */}
         {profBreakdown.length > 0 && (
-          <SectionCard title="Diagnostics par profession" subtitle="Activité de chaque membre de l'équipe" icon={Users} accentColor="#D4A574" delay={0.22}>
+          <SectionCard title="Hypothèses par profession" subtitle="Activité de chaque membre de l'équipe" icon={Users} accentColor="#D4A574" delay={0.22}>
             <div className="space-y-3">
               {[...profBreakdown].sort((a,b) => b.value - a.value).map(({ name, value }) => {
                 const total = diagnostics.length;
@@ -576,7 +576,7 @@ export default function StatsAnnuelles() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-semibold text-[#0F172A] truncate pr-2">{name}</span>
-                        <span className="text-xs font-bold" style={{ color }}>{value} diag. · {pct}%</span>
+                        <span className="text-xs font-bold" style={{ color }}>{value} hyp. · {pct}%</span>
                       </div>
                       <div className="h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
                         <motion.div

@@ -12,7 +12,7 @@ const DOMAINE_COLORS = {
   comportement:  "bg-rose-100 text-rose-700 border-rose-200",
   développement: "bg-emerald-100 text-emerald-700 border-emerald-200",
   contexte:      "bg-amber-100 text-amber-700 border-amber-200",
-  "diagnostic EDA": "bg-violet-100 text-violet-700 border-violet-200",
+  "hypothèses EDA": "bg-violet-100 text-violet-700 border-violet-200",
 };
 
 function EntryCard({ entry, index }) {
@@ -131,7 +131,7 @@ export default function HistoriqueEleve() {
     <div className="min-h-screen bg-background pb-20">
       <HamburgerMenu />
       <ScreenLayout
-        title="📅 Historique des diagnostics"
+        title="📅 Historique des hypothèses"
         subtitle={eleve ? `${eleve.prenom} ${eleve.nom}` : ''}
       >
         <div className="max-w-md mx-auto space-y-3">
@@ -145,8 +145,8 @@ export default function HistoriqueEleve() {
           {!loading && historique.length === 0 && (
             <div className="text-center py-12 rounded-xl bg-secondary/30 border border-secondary">
               <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground font-medium text-sm">Aucun diagnostic enregistré</p>
-              <p className="text-xs text-muted-foreground mt-1">Les diagnostics sauvegardés depuis l'arbre EDA apparaîtront ici.</p>
+              <p className="text-muted-foreground font-medium text-sm">Aucune hypothèse enregistrée</p>
+              <p className="text-xs text-muted-foreground mt-1">Les hypothèses sauvegardées depuis l'arbre EDA apparaîtront ici.</p>
             </div>
           )}
 
@@ -157,10 +157,10 @@ export default function HistoriqueEleve() {
           <div className="space-y-2 pt-2">
             {eleveId && (
               <Button
-                onClick={() => navigate(`/diagnostic-eleve?id=${eleveId}`)}
+                onClick={() => navigate(`/hypotheses-eleve?id=${eleveId}`)}
                 className="w-full gap-2 bg-[#D4A574] hover:bg-[#C49464] text-white"
               >
-                Nouveau diagnostic EDA
+                Nouvelles hypothèses EDA
               </Button>
             )}
             <Button

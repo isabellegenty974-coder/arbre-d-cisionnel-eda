@@ -403,10 +403,10 @@ export default function DetailFiche() {
               Retour
             </Button>
             <Button
-              onClick={() => navigate(`/diagnostic-eleve?id=${ficheId}`)}
+              onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
               className="gap-2"
             >
-              Observation
+              Hypothèses EDA
             </Button>
           </motion.div>
 
@@ -423,7 +423,7 @@ export default function DetailFiche() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h2 className="font-semibold text-foreground mb-2">
-                  {selectedDiagnosticId ? 'Rapport - Diagnostic' : 'Rapport - Fiche élève'}
+                  {selectedDiagnosticId ? 'Rapport - Hypothèses' : 'Rapport - Fiche élève'}
                 </h2>
                 <p className="text-xs text-muted-foreground mb-4">
                   {new Date(selectedRapport.created_date).toLocaleDateString('fr-FR')}

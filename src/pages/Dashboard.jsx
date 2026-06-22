@@ -116,7 +116,7 @@ export default function Dashboard() {
           </div>
           <button onClick={() => setDiagModal(true)}
             style={{ padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: '#4A90C4', color: '#fff', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            + Nouveau diagnostic
+            + Nouvelles hypothèses
           </button>
         </div>
       </div>
@@ -164,7 +164,7 @@ export default function Dashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {[
             { val: totalEleves, lbl: 'Élèves suivis', ico: '👤', bg: '#EBF4FB', sub: '↑ depuis septembre', subColor: '#276749', to: '/liste-eleves', warn: false },
-            { val: diagsCeMois, lbl: 'Diagnostics ce mois', ico: '🧠', bg: '#E6F4ED', sub: '↑ vs mois dernier', subColor: '#276749', to: '/historique', warn: false },
+            { val: diagsCeMois, lbl: 'Hypothèses ce mois', ico: '🧠', bg: '#E6F4ED', sub: '↑ vs mois dernier', subColor: '#276749', to: '/historique', warn: false },
             { val: alertesFiches.length, lbl: 'Sans mise à jour +30j', ico: '⏰', bg: '#FEF0E6', sub: 'À relancer', subColor: '#C05621', to: '/liste-eleves', warn: true },
             { val: elevesClotured, lbl: 'Suivis clôturés', ico: '✅', bg: '#EBF4FB', sub: 'depuis septembre', subColor: '#276749', to: '/mes-ecoles', warn: false },
           ].map((c, i) => (
@@ -182,7 +182,7 @@ export default function Dashboard() {
         {/* RACCOURCIS — grille 2x2 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {[
-            { ico: '🧠', label: 'Nouveau diagnostic EDA', sub: "Lancer l'arbre décisionnel", bg: '#EBF4FB', action: () => setDiagModal(true) },
+            { ico: '🧠', label: 'Nouvelles hypothèses EDA', sub: "Lancer l'arbre décisionnel", bg: '#EBF4FB', action: () => setDiagModal(true) },
             { ico: '📄', label: 'Importer une liste PDF', sub: 'Créer des fiches depuis Onde', bg: '#F0EEFF', to: '/import-pdf' },
             { ico: '👤', label: 'Créer une fiche élève', sub: 'Saisie manuelle', bg: '#E6F4ED', to: '/fiche-eleve' },
             { ico: '📊', label: 'Export annuel', sub: 'Statistiques & rapport IEN', bg: '#FEF0E6', to: '/export-annuel' },
@@ -316,7 +316,7 @@ export default function Dashboard() {
               style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 640, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 -8px 40px rgba(0,0,0,.15)' }}>
               <div style={{ width: 36, height: 4, background: '#E2E8F0', borderRadius: 2, margin: '12px auto 0' }} />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 10px', borderBottom: '1px solid #F1F4F8' }}>
-                <p style={{ fontWeight: 600, fontSize: 15, color: '#1A2E45' }}>🧠 Choisir un élève</p>
+                <p style={{ fontWeight: 600, fontSize: 15, color: '#1A2E45' }}>🧠 Nouvelles hypothèses — Choisir un élève</p>
                 <button onClick={() => setDiagModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><X className="w-4 h-4" /></button>
               </div>
               <div style={{ padding: '10px 14px 6px' }}>
@@ -330,7 +330,7 @@ export default function Dashboard() {
                 {searchRes.length === 0
                   ? <p style={{ textAlign: 'center', padding: '32px 0', fontSize: 13, color: '#64748B' }}>Aucun élève trouvé</p>
                   : searchRes.slice(0, 20).map(e => (
-                    <button key={e.id} onClick={() => { setDiagModal(false); navigate(`/diagnostic-eleve?id=${e.id}`); }}
+                    <button key={e.id} onClick={() => { setDiagModal(false); navigate(`/hypotheses-eleve?id=${e.id}`); }}
                       style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 12, background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
                       onMouseEnter={ev => ev.currentTarget.style.background = '#F8FAFC'}
                       onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}>
