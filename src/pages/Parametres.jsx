@@ -1,74 +1,252 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Calendar } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Plus, Calendar, Check, X } from 'lucide-react';
 
+// ── Assistant de rentrée ────────────────────────────────────────────────────
+function AssistantRentree({ annee, ecolesPrecedentes, onClose }) {
+  const [step, setStep] = useState(1);
+  const [reconduireEcoles, setReconduireEcoles] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const handleReconduire = async (oui) => {
+    setReconduireEcoles(oui);
+    if (oui && ecolesPrecedentes.length > 0) {
+      setSaving(true);
+      // Les écoles sont déjà dans la base, pas besoin de les dupliquer
+      setSaving(false);
+    }
+    setStep(2);
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div style={{ background: '#fff', borderRadius: 20, maxWidth: 440, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
+        {/* Header */}
+        <div style={{ background: '#1A3353', padding: '22px 24px 18px' }}>
+          <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>
+            Nouvelle rentrée · {annee?.libelle}
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>🎒 Assistant de démarrage</div>
+        </div>
+
+        <div style={{ padding: '24px' }}>
+          {step === 1 && (
+            <>
+              <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7, marginBottom: 20 }}>
+                L'année <strong>{annee?.libelle}</strong> est maintenant active.<br />
+                Voulez-vous reconduire les <strong>{ecolesPrecedentes.length} école{ecolesPrecedentes.length !== 1 ? 's' : ''}</strong> de l'année précédente ?
+              </p>
+              <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, marginBottom: 22, padding: '10px 14px', background: '#FEF0E4', borderRadius: 10 }}>
+                ⚠️ Les élèves ne sont <strong>pas reconduits automatiquement</strong>. Ils devront être importés via PDF pour cette nouvelle année.
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => handleReconduire(false)} disabled={saving}
+                  style={{ flex: 1, padding: '12px', border: '1px solid #D8E1EE', borderRadius: 10, background: '#fff', color: '#566880', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+                  Non, pas maintenant
+                </button>
+                <button onClick={() => handleReconduire(true)} disabled={saving}
+                  style={{ flex: 1, padding: '12px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  {saving ? 'En cours…' : 'Oui, reconduire'}
+                </button>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <div style={{ fontSize: 40, marginBottom: 10 }}>{reconduireEcoles ? '🏫' : '✅'}</div>
+                <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7 }}>
+                  {reconduireEcoles
+                    ? `Les écoles ont bien été conservées pour ${annee?.libelle}.`
+                    : 'Parfait. Vous pouvez gérer vos écoles depuis le menu dédié.'}
+                </p>
+              </div>
+              <p style={{ fontSize: 13.5, color: '#182840', fontWeight: 600, marginBottom: 14 }}>
+                Voulez-vous importer les nouvelles listes de classes en PDF ?
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={onClose}
+                  style={{ flex: 1, padding: '12px', border: '1px solid #D8E1EE', borderRadius: 10, background: '#fff', color: '#566880', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+                  Plus tard
+                </button>
+                <Link to="/import-pdf" onClick={onClose}
+                  style={{ flex: 1, padding: '12px', background: '#3B82C4', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  📄 Importer des listes
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Formulaire ajout année ──────────────────────────────────────────────────
+function FormAjoutAnnee({ onSave, onCancel, saving }) {
+  const [libelle, setLibelle]       = useState('');
+  const [dateDebut, setDateDebut]   = useState('');
+  const [dateFin, setDateFin]       = useState('');
+  const [statut, setStatut]         = useState('a_venir');
+
+  const valid = libelle.trim().length > 0;
+
+  const handleSubmit = () => {
+    if (!valid) return;
+    onSave({ libelle: libelle.trim(), date_debut: dateDebut || null, date_fin: dateFin || null, statut, est_active: false, active: false });
+  };
+
+  // Auto-remplir libellé → dates
+  const handleLibelleChange = (val) => {
+    setLibelle(val);
+    const parts = val.split('-');
+    if (parts.length === 2 && parts[0].length === 4 && parts[1].length === 4) {
+      setDateDebut(`${parts[0]}-09-01`);
+      setDateFin(`${parts[1]}-07-04`);
+    }
+  };
+
+  return (
+    <div style={{ marginBottom: 20, padding: '18px 18px', background: '#F8FAFD', borderRadius: 14, border: '1px solid #D8E1EE' }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#182840', marginBottom: 14 }}>Nouvelle année scolaire</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div>
+          <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Libellé *</label>
+          <input autoFocus value={libelle} onChange={e => handleLibelleChange(e.target.value)}
+            placeholder="Ex : 2026-2027"
+            style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div>
+            <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Date de début</label>
+            <input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)}
+              style={{ width: '100%', padding: '9px 10px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Date de fin</label>
+            <input type="date" value={dateFin} onChange={e => setDateFin(e.target.value)}
+              style={{ width: '100%', padding: '9px 10px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+        </div>
+        <div>
+          <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Statut</label>
+          <select value={statut} onChange={e => setStatut(e.target.value)}
+            style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', background: '#fff', boxSizing: 'border-box' }}>
+            <option value="a_venir">À venir</option>
+            <option value="en_cours">En cours</option>
+            <option value="archivee">Archivée</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+          <button onClick={onCancel}
+            style={{ padding: '9px 16px', background: 'transparent', color: '#566880', border: '1px solid #D8E1EE', borderRadius: 8, cursor: 'pointer', fontSize: 13 }}>
+            Annuler
+          </button>
+          <button onClick={handleSubmit} disabled={saving || !valid}
+            style={{ padding: '9px 18px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13, opacity: !valid || saving ? .5 : 1 }}>
+            {saving ? 'Création…' : '+ Créer'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Page principale ─────────────────────────────────────────────────────────
 export default function Parametres() {
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
   const [annees, setAnnees]     = useState([]);
   const [fiches, setFiches]     = useState([]);
   const [diags, setDiags]       = useState([]);
   const [elevesR, setElevesR]   = useState([]);
+  const [ecoles, setEcoles]     = useState([]);
   const [loading, setLoading]   = useState(true);
   const [showAdd, setShowAdd]   = useState(false);
-  const [newLibelle, setNewLibelle] = useState('');
   const [saving, setSaving]     = useState(false);
-  const [selected, setSelected] = useState(null); // id de l'année consultée
+  const [selected, setSelected] = useState(null);
+  const [assistantAnnee, setAssistantAnnee] = useState(null); // annee activée → ouvre assistant
 
   const load = async () => {
-    const [ans, f, d, el] = await Promise.all([
+    const [ans, f, d, el, ec] = await Promise.all([
       base44.entities.AnneeScolaire.list('libelle', 50).catch(() => []),
       base44.entities.FicheEleve.list('-created_date', 500).catch(() => []),
       base44.entities.HistoriqueEDA.list('-date', 1000).catch(() => []),
       base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
+      base44.entities.EcoleRased.list('-created_date', 100).catch(() => []),
     ]);
     setAnnees(ans);
     setFiches(f);
     setDiags(d);
     setElevesR(el);
-    // Sélection par défaut = année active
-    const active = ans.find(a => a.active);
+    setEcoles(ec);
+    const active = ans.find(a => a.est_active || a.active);
     if (active && !selected) setSelected(active.id);
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
-  const handleAdd = async () => {
-    if (!newLibelle.trim()) return;
+  const handleAdd = async (data) => {
     setSaving(true);
-    await base44.entities.AnneeScolaire.create({ libelle: newLibelle.trim(), statut: 'future', active: false });
-    setNewLibelle(''); setShowAdd(false); setSaving(false);
+    await base44.entities.AnneeScolaire.create(data);
+    setShowAdd(false);
+    setSaving(false);
     load();
   };
 
   const handleSetActive = async (annee) => {
     setSaving(true);
-    await Promise.all(annees.filter(a => a.id !== annee.id && a.active).map(a =>
-      base44.entities.AnneeScolaire.update(a.id, { active: false, statut: 'archivee' })
-    ));
-    await base44.entities.AnneeScolaire.update(annee.id, { active: true, statut: 'active' });
+    // Archiver toutes les autres
+    await Promise.all(
+      annees
+        .filter(a => a.id !== annee.id && (a.est_active || a.active))
+        .map(a => base44.entities.AnneeScolaire.update(a.id, { est_active: false, active: false, statut: 'archivee' }))
+    );
+    await base44.entities.AnneeScolaire.update(annee.id, { est_active: true, active: true, statut: 'en_cours' });
     setSaving(false);
+    setAssistantAnnee(annee); // ouvrir l'assistant
     load();
   };
 
-  // Stats par année
+  // Stats par année (basé sur les dates de l'année ou les champs annee_scolaire_id)
   const statsParAnnee = (annee) => {
     const debut = annee.date_debut ? new Date(annee.date_debut) : new Date(`${annee.libelle.split('-')[0]}-09-01`);
-    const fin   = annee.date_fin   ? new Date(annee.date_fin)   : new Date(`${annee.libelle.split('-')[1] || (parseInt(annee.libelle.split('-')[0]) + 1)}-08-31`);
-    const fichesAnnee = fiches.filter(f => { const d = new Date(f.created_date); return d >= debut && d <= fin; });
-    const diagsAnnee  = diags.filter(d2 => { const d = new Date(d2.date || d2.created_date); return d >= debut && d <= fin; });
-    const clotures    = elevesR.filter(e => e.statut === 'Clôturé' && e.date_derniere_action && new Date(e.date_derniere_action) >= debut && new Date(e.date_derniere_action) <= fin);
+    const fin   = annee.date_fin   ? new Date(annee.date_fin)   : new Date(`${(annee.libelle.split('-')[1] || String(parseInt(annee.libelle.split('-')[0]) + 1))}-08-31`);
+    const fichesAnnee = fiches.filter(f => {
+      if (f.annee_scolaire_id) return f.annee_scolaire_id === annee.id;
+      const d = new Date(f.created_date);
+      return d >= debut && d <= fin;
+    });
+    const diagsAnnee = diags.filter(d2 => {
+      const d = new Date(d2.date || d2.created_date);
+      return d >= debut && d <= fin;
+    });
+    const clotures = elevesR.filter(e =>
+      e.statut === 'Clôturé' && e.date_derniere_action &&
+      new Date(e.date_derniere_action) >= debut && new Date(e.date_derniere_action) <= fin
+    );
     return { eleves: fichesAnnee.length, hypotheses: diagsAnnee.length, clotures: clotures.length };
   };
 
   const anneeConsultee = annees.find(a => a.id === selected);
 
   const statutConfig = {
-    active:   { label: 'En cours',  bg: '#1A3353', color: '#fff',    badgeBg: '#4ADE80', badgeColor: '#fff' },
-    future:   { label: 'À venir',   bg: '#fff',    color: '#182840', border: '2px dashed #D8E1EE', badgeBg: '#EEE9FF', badgeColor: '#5B3FA6' },
-    archivee: { label: 'Archivée',  bg: '#F0F3F8', color: '#94A3B8', badgeBg: '#E2E8F0', badgeColor: '#64748B' },
+    en_cours: { label: 'En cours',  badgeBg: '#4ADE80', badgeColor: '#fff' },
+    a_venir:  { label: 'À venir',   badgeBg: '#EEE9FF', badgeColor: '#5B3FA6' },
+    archivee: { label: 'Archivée',  badgeBg: '#E2E8F0', badgeColor: '#64748B' },
+    // compat anciens statuts
+    active:   { label: 'En cours',  badgeBg: '#4ADE80', badgeColor: '#fff' },
+    future:   { label: 'À venir',   badgeBg: '#EEE9FF', badgeColor: '#5B3FA6' },
   };
+
+  const getStatut = (a) => {
+    if (a.est_active || a.active) return 'en_cours';
+    return a.statut || 'a_venir';
+  };
+
+  const isActive = (a) => a.est_active || a.active;
 
   return (
     <div style={{ minHeight: '100vh', background: '#F0F3F8', fontFamily: 'Inter, sans-serif', paddingBottom: 80 }}>
@@ -82,96 +260,98 @@ export default function Parametres() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', padding: '7px 14px', borderRadius: 20 }}>
             <Calendar size={14} style={{ color: '#fff' }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Années scolaires</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Paramètres</span>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 540, margin: '0 auto', padding: '28px 16px' }}>
+      <div style={{ maxWidth: 560, margin: '0 auto', padding: '28px 16px' }}>
 
-        {/* Titre */}
-        <div style={{ marginBottom: 24 }}>
-          <button onClick={() => navigate('/dashboard')} style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#566880', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, marginBottom: 16 }}>
-            <ArrowLeft size={14} /> Tableau de bord
-          </button>
-          <h1 style={{ fontSize: 26, fontWeight: 700, color: '#182840', margin: 0, lineHeight: 1.2 }}>Gestion des années scolaires</h1>
-          <p style={{ fontSize: 13.5, color: '#566880', marginTop: 8, lineHeight: 1.6 }}>
-            Basculez entre les années pour consulter les données historiques. Ajoutez les années à venir pour anticiper la rentrée.
-          </p>
-        </div>
+        {/* Retour */}
+        <button onClick={() => navigate('/dashboard')}
+          style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#566880', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, marginBottom: 20 }}>
+          <ArrowLeft size={14} /> Tableau de bord
+        </button>
 
-        {/* Carte sélecteur */}
-        <div style={{ background: '#fff', borderRadius: 18, padding: '24px 20px', boxShadow: '0 2px 16px rgba(0,0,0,.06)', marginBottom: 16 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#182840', margin: '0 0 6px' }}>Années scolaires</h1>
+        <p style={{ fontSize: 13, color: '#566880', margin: '0 0 28px', lineHeight: 1.6 }}>
+          Gérez vos années scolaires. Une seule peut être active à la fois. Quand vous activez une nouvelle année, l'ancienne est automatiquement archivée.
+        </p>
 
-          {/* Formulaire ajout */}
-          {showAdd && (
-            <div style={{ marginBottom: 20, padding: '14px 16px', background: '#F8FAFD', borderRadius: 12, border: '1px solid #D8E1EE', display: 'flex', gap: 10, alignItems: 'center' }}>
-              <input autoFocus value={newLibelle} onChange={e => setNewLibelle(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                placeholder="Ex : 2026-2027"
-                style={{ flex: 1, padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 14, outline: 'none' }} />
-              <button onClick={handleAdd} disabled={saving || !newLibelle.trim()}
-                style={{ padding: '9px 14px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13, opacity: !newLibelle.trim() ? .5 : 1 }}>
-                Créer
+        {/* Formulaire ajout */}
+        {showAdd && (
+          <FormAjoutAnnee onSave={handleAdd} onCancel={() => setShowAdd(false)} saving={saving} />
+        )}
+
+        {/* Carte liste des années */}
+        <div style={{ background: '#fff', borderRadius: 18, padding: '20px', boxShadow: '0 2px 16px rgba(0,0,0,.06)', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#182840' }}>Toutes les années</span>
+            {!showAdd && (
+              <button onClick={() => setShowAdd(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '8px 14px', background: '#3B82C4', color: '#fff', border: 'none', borderRadius: 10, cursor: 'pointer', fontSize: 12.5, fontWeight: 600 }}>
+                <Plus size={13} /> Ajouter une année
               </button>
-              <button onClick={() => setShowAdd(false)}
-                style={{ padding: '9px 12px', background: 'transparent', color: '#566880', border: '1px solid #D8E1EE', borderRadius: 8, cursor: 'pointer', fontSize: 13 }}>
-                ✕
-              </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: '#566880' }}>Chargement…</div>
+          ) : annees.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0', color: '#94A3B8' }}>
+              <div style={{ fontSize: 32, marginBottom: 10 }}>📅</div>
+              <p style={{ fontSize: 13 }}>Aucune année scolaire créée</p>
+            </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {/* Colonne étiquette */}
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94A3B8', width: 70, flexShrink: 0 }}>
-                ANNÉE<br />ACTIVE
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[...annees].sort((a, b) => b.libelle.localeCompare(a.libelle)).map(a => {
+                const statut = getStatut(a);
+                const cfg = statutConfig[statut] || statutConfig.a_venir;
+                const active = isActive(a);
+                const isSelected = selected === a.id;
 
-              {/* Cartes années */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {annees.map(a => {
-                  const cfg = statutConfig[a.statut] || statutConfig.future;
-                  const isActive = a.active;
-                  const isSelected = selected === a.id;
-                  return (
-                    <button key={a.id} onClick={() => setSelected(a.id)}
-                      style={{
-                        width: '100%', textAlign: 'left', cursor: 'pointer',
-                        padding: '14px 16px', borderRadius: 14,
-                        background: isActive ? '#1A3353' : isSelected ? '#EAF2FB' : (a.statut === 'archivee' ? '#F8F9FB' : '#fff'),
-                        border: isActive ? 'none' : isSelected ? '2px solid #3B82C4' : (a.statut === 'future' ? '2px dashed #D8E1EE' : '1px solid #E8EDF5'),
-                        transition: 'all .15s',
-                        outline: 'none',
-                      }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                        <span style={{ fontSize: 17, fontWeight: 700, color: isActive ? '#fff' : a.statut === 'archivee' ? '#94A3B8' : '#182840', lineHeight: 1.2 }}>
+                return (
+                  <div key={a.id}
+                    onClick={() => setSelected(a.id)}
+                    style={{
+                      padding: '14px 16px',
+                      borderRadius: 14,
+                      cursor: 'pointer',
+                      background: active ? '#1A3353' : isSelected ? '#EAF2FB' : statut === 'archivee' ? '#F8F9FB' : '#fff',
+                      border: active ? 'none' : isSelected ? '2px solid #3B82C4' : statut === 'a_venir' ? '2px dashed #D8E1EE' : '1px solid #E8EDF5',
+                      transition: 'all .15s',
+                    }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <div>
+                        <div style={{ fontSize: 17, fontWeight: 700, color: active ? '#fff' : statut === 'archivee' ? '#94A3B8' : '#182840', lineHeight: 1.2 }}>
                           {a.libelle.replace('-', '–')}
-                        </span>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 10, background: isActive ? '#4ADE80' : a.statut === 'future' ? '#EEE9FF' : '#E2E8F0', color: isActive ? '#fff' : a.statut === 'future' ? '#5B3FA6' : '#64748B' }}>
-                            {isActive ? 'En cours' : a.statut === 'future' ? 'À venir' : 'Archivée'}
-                          </span>
-                          {!isActive && a.statut !== 'archivee' && (
-                            <button onClick={e => { e.stopPropagation(); handleSetActive(a); }} disabled={saving}
-                              style={{ fontSize: 11, padding: '3px 8px', borderRadius: 8, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: saving ? .6 : 1 }}>
-                              Activer
-                            </button>
-                          )}
                         </div>
+                        {(a.date_debut || a.date_fin) && (
+                          <div style={{ fontSize: 11, color: active ? 'rgba(255,255,255,.5)' : '#94A3B8', marginTop: 3 }}>
+                            {a.date_debut && new Date(a.date_debut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            {a.date_debut && a.date_fin && ' → '}
+                            {a.date_fin && new Date(a.date_fin).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </div>
+                        )}
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Bouton nouvelle année */}
-              <button onClick={() => setShowAdd(true)}
-                style={{ flexShrink: 0, padding: '10px 14px', background: '#3B82C4', color: '#fff', border: 'none', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Plus size={14} /> Nouvelle année
-              </button>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 10, background: cfg.badgeBg, color: cfg.badgeColor, whiteSpace: 'nowrap' }}>
+                          {active ? 'En cours' : cfg.label}
+                        </span>
+                        {!active && statut !== 'archivee' && (
+                          <button onClick={e => { e.stopPropagation(); handleSetActive(a); }} disabled={saving}
+                            style={{ fontSize: 11, padding: '4px 10px', borderRadius: 8, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: saving ? .6 : 1, whiteSpace: 'nowrap' }}>
+                            Définir comme active
+                          </button>
+                        )}
+                        {active && (
+                          <Check size={14} style={{ color: '#4ADE80' }} />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -181,13 +361,9 @@ export default function Parametres() {
           <div style={{ background: '#EAF2FB', border: '1px solid #BFD9F2', borderRadius: 14, padding: '14px 18px', marginBottom: 16, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <span style={{ fontSize: 18 }}>ℹ️</span>
             <div style={{ fontSize: 13, color: '#254D7A', lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 700 }}>Vous consultez l'année </span>
-              <span style={{ fontWeight: 700, color: '#1A3353' }}>{anneeConsultee.libelle.replace('-', '–')}</span>
-              <br />
-              Toutes les données (élèves suivis, hypothèses, statistiques) correspondent à cette année scolaire.
-              {anneeConsultee.active && (
-                <> Pour préparer la rentrée suivante, sélectionnez une année à venir puis importez les nouvelles listes de classes.</>
-              )}
+              <strong>Année sélectionnée : {anneeConsultee.libelle.replace('-', '–')}</strong><br />
+              Les statistiques ci-dessous correspondent à cette période.
+              {isActive(anneeConsultee) && ' C\'est l\'année en cours.'}
             </div>
           </div>
         )}
@@ -200,42 +376,47 @@ export default function Parametres() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #F0F3F8' }}>
-                <th style={{ padding: '10px 20px', textAlign: 'left', fontSize: 10.5, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.08em' }}>Année</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center', fontSize: 10.5, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.08em' }}>Élèves<br />suivis</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center', fontSize: 10.5, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.08em' }}>Hypothèses</th>
-                <th style={{ padding: '10px 12px', textAlign: 'center', fontSize: 10.5, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.08em' }}>Clôturés</th>
+                {['Année', 'Élèves suivis', 'Hypothèses', 'Clôturés'].map(h => (
+                  <th key={h} style={{ padding: '10px 14px', textAlign: h === 'Année' ? 'left' : 'center', fontSize: 10.5, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.08em' }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {annees.map((a, i) => {
+              {[...annees].sort((a, b) => b.libelle.localeCompare(a.libelle)).map((a, i, arr) => {
                 const s = statsParAnnee(a);
-                const isActive = a.active;
+                const active = isActive(a);
                 const isSelected = selected === a.id;
                 return (
                   <tr key={a.id} onClick={() => setSelected(a.id)}
-                    style={{ borderBottom: i < annees.length - 1 ? '1px solid #F0F3F8' : 'none', cursor: 'pointer', background: isSelected ? '#F0F7FF' : 'transparent', transition: 'background .1s' }}>
-                    <td style={{ padding: '14px 20px' }}>
-                      <span style={{ fontSize: 13.5, fontWeight: isActive ? 700 : 500, color: isActive ? '#1A3353' : a.statut === 'archivee' ? '#94A3B8' : '#182840' }}>
-                        {a.libelle.replace('-', '–')}
-                      </span>
+                    style={{ borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none', cursor: 'pointer', background: isSelected ? '#F0F7FF' : 'transparent', transition: 'background .1s' }}>
+                    <td style={{ padding: '13px 14px', fontSize: 13.5, fontWeight: active ? 700 : 500, color: active ? '#1A3353' : getStatut(a) === 'archivee' ? '#94A3B8' : '#182840' }}>
+                      {a.libelle.replace('-', '–')}
                     </td>
-                    <td style={{ padding: '14px 12px', textAlign: 'center', fontSize: 15, fontWeight: isActive ? 700 : 400, color: s.eleves > 0 ? '#182840' : '#CBD5E1' }}>
-                      {s.eleves > 0 ? s.eleves : '—'}
-                    </td>
-                    <td style={{ padding: '14px 12px', textAlign: 'center', fontSize: 15, fontWeight: isActive ? 700 : 400, color: s.hypotheses > 0 ? '#182840' : '#CBD5E1' }}>
-                      {s.hypotheses > 0 ? s.hypotheses : '—'}
-                    </td>
-                    <td style={{ padding: '14px 12px', textAlign: 'center', fontSize: 15, fontWeight: isActive ? 700 : 400, color: s.clotures > 0 ? '#182840' : '#CBD5E1' }}>
-                      {s.clotures > 0 ? s.clotures : '—'}
-                    </td>
+                    {[s.eleves, s.hypotheses, s.clotures].map((v, j) => (
+                      <td key={j} style={{ padding: '13px 14px', textAlign: 'center', fontSize: 15, fontWeight: active ? 700 : 400, color: v > 0 ? '#182840' : '#CBD5E1' }}>
+                        {v > 0 ? v : '—'}
+                      </td>
+                    ))}
                   </tr>
                 );
               })}
+              {annees.length === 0 && (
+                <tr><td colSpan={4} style={{ padding: '28px', textAlign: 'center', color: '#94A3B8', fontSize: 13 }}>Aucune donnée</td></tr>
+              )}
             </tbody>
           </table>
         </div>
 
       </div>
+
+      {/* Assistant de rentrée */}
+      {assistantAnnee && (
+        <AssistantRentree
+          annee={assistantAnnee}
+          ecolesPrecedentes={ecoles}
+          onClose={() => { setAssistantAnnee(null); load(); }}
+        />
+      )}
     </div>
   );
 }

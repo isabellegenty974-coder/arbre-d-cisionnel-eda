@@ -205,11 +205,33 @@ export default function Dashboard() {
   const MS30  = 30 * 86400000;
   const startMonth = new Date(); startMonth.setDate(1); startMonth.setHours(0, 0, 0, 0);
 
-  const totalEleves    = fiches.length;
-  const alertesFiches  = fiches.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
+  // Filtrage par année scolaire sélectionnée
+  const anneeSelectionnee = annees.find(a => a.id === anneeActive);
+  const fichesFiltrees = (() => {
+    if (!anneeSelectionnee) return fiches;
+    // Si des fiches ont un annee_scolaire_id, filtrer dessus
+    const avecId = fiches.filter(f => f.annee_scolaire_id);
+    if (avecId.length > 0) {
+      return fiches.filter(f => !f.annee_scolaire_id || f.annee_scolaire_id === anneeActive);
+    }
+    // Sinon filtrer par dates
+    const debut = anneeSelectionnee.date_debut
+      ? new Date(anneeSelectionnee.date_debut)
+      : new Date(`${anneeSelectionnee.libelle.split('-')[0]}-09-01`);
+    const fin = anneeSelectionnee.date_fin
+      ? new Date(anneeSelectionnee.date_fin)
+      : new Date(`${anneeSelectionnee.libelle.split('-')[1] || String(parseInt(anneeSelectionnee.libelle.split('-')[0]) + 1)}-08-31`);
+    return fiches.filter(f => {
+      const d = new Date(f.created_date);
+      return d >= debut && d <= fin;
+    });
+  })();
+
+  const totalEleves    = fichesFiltrees.length;
+  const alertesFiches  = fichesFiltrees.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
   const elevesClotured = elevesR.filter(e => e.statut === 'Clôturé').length;
 
-  const recentActivity = [...fiches]
+  const recentActivity = [...fichesFiltrees]
     .sort((a, b) => new Date(b.updated_date || b.created_date) - new Date(a.updated_date || a.created_date))
     .slice(0, 5);
 
@@ -223,7 +245,7 @@ export default function Dashboard() {
     return { ...ec, nbEl, nbAl };
   });
 
-  const searchRes = fiches.filter(e =>
+  const searchRes = fichesFiltrees.filter(e =>
     `${e.prenom} ${e.nom}`.toLowerCase().includes(search.toLowerCase()) ||
     (e.ecole || '').toLowerCase().includes(search.toLowerCase())
   );
@@ -274,9 +296,11 @@ export default function Dashboard() {
             {/* Sélecteur d'année scolaire */}
             {annees.length > 0 && (
               <select value={anneeActive || ''} onChange={e => setAnneeActive(e.target.value)}
-                style={{ padding: '7px 12px', fontSize: 13, fontWeight: 600, border: '1px solid #D8E1EE', borderRadius: 8, background: '#F0F3F8', color: '#182840', cursor: 'pointer', outline: 'none' }}>
-                {annees.map(a => (
-                  <option key={a.id} value={a.id}>{a.libelle}{a.active ? ' ★' : ''}</option>
+                style={{ padding: '7px 12px', fontSize: 13, fontWeight: 600, border: '1px solid #3B82C4', borderRadius: 8, background: '#EAF2FB', color: '#1A3353', cursor: 'pointer', outline: 'none' }}>
+                {[...annees].sort((a, b) => b.libelle.localeCompare(a.libelle)).map(a => (
+                  <option key={a.id} value={a.id}>
+                    {a.libelle}{(a.est_active || a.active) ? ' ★ En cours' : a.statut === 'archivee' ? ' · Archivée' : ' · À venir'}
+                  </option>
                 ))}
               </select>
             )}
@@ -307,7 +331,7 @@ export default function Dashboard() {
               <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 25, color: '#fff', lineHeight: 1.25, marginBottom: 8 }}>
                 L'équipe suit{' '}
                 <em style={{ fontStyle: 'italic', color: '#7EC8F0' }}>{loading ? '…' : `${totalEleves} élève${totalEleves !== 1 ? 's' : ''}`}</em>
-                <br />cette année scolaire.
+                <br />{anneeSelectionnee ? `en ${anneeSelectionnee.libelle.replace('-', '–')}` : 'cette année scolaire'}.
               </div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)' }}>
                 {alertesFiches.length > 0

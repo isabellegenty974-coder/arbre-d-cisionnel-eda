@@ -16,20 +16,25 @@
       "format": "date",
       "description": "Date de fin"
     },
-    "active": {
-      "type": "boolean",
-      "default": false,
-      "description": "Ann\u00e9e scolaire en cours"
-    },
     "statut": {
       "type": "string",
       "enum": [
-        "active",
-        "archivee",
-        "future"
+        "en_cours",
+        "a_venir",
+        "archivee"
       ],
-      "default": "future",
+      "default": "a_venir",
       "description": "Statut de l'ann\u00e9e"
+    },
+    "est_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Ann\u00e9e scolaire en cours (une seule \u00e0 la fois)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Alias pour compatibilit\u00e9"
     }
   },
   "required": [
