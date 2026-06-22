@@ -164,6 +164,7 @@ export default function Dashboard() {
   const [search, setSearch]   = useState('');
   const [annees, setAnnees]   = useState([]);
   const [anneeActive, setAnneeActive] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   // Présence temps réel (qui est en ligne)
   const { online: membresEnLigne } = usePresence(null);
@@ -185,6 +186,13 @@ export default function Dashboard() {
       const active = an.find(a => a.active) || an[0] || null;
       setAnneeActive(active?.id || null);
       setLoading(false);
+      
+      // Afficher le message de bienvenue si on vient d'une inscription
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('welcome') === 'true') {
+        setShowWelcome(true);
+        setTimeout(() => setShowWelcome(false), 5000);
+      }
     }
     load();
 
@@ -562,6 +570,17 @@ export default function Dashboard() {
 
         </div>
       </div>
+
+      {/* MESSAGE DE BIENVENUE */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 500, background: '#1E7A52', color: '#fff', borderRadius: 12, padding: '16px 24px', boxShadow: '0 8px 24px rgba(0,0,0,.2)' }}>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>✅ Bienvenue dans l'équipe RASED de La Possession !</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.85)', marginTop: 4 }}>Votre compte a été créé avec succès.</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* MODAL HYPOTHÈSES */}
       <AnimatePresence>

@@ -8,24 +8,36 @@ import { Input } from '@/components/ui/input';
 import { Mail, Send, Check, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const PROFESSIONS = [
+  { value: 'Psy EN EDA', label: 'Psychologue de l\'EN (Psy-EN)' },
+  { value: 'MaDR', label: 'Maître de Rééducation (MaDR)' },
+  { value: 'MaDP', label: 'Maître de Prévention (MaDP)' },
+];
+
 export default function InviteUsers() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [profession, setProfession] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [invitedList, setInvitedList] = useState([]);
 
   const handleInvite = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !profession) return;
 
     setLoading(true);
     setResult(null);
     try {
-      const response = await base44.functions.invoke('inviteUsers', { email: email.trim(), role: 'user' });
-      setInvitedList([...invitedList, email.trim()]);
+      await base44.functions.invoke('inviteUsers', { 
+        email: email.trim(), 
+        role: 'user',
+        profession: profession
+      });
+      setInvitedList([...invitedList, { email: email.trim(), profession }]);
       setResult({ success: true, message: `${email} a été invité(e)` });
       setEmail('');
+      setProfession('');
     } catch (err) {
       setResult({ success: false, message: err.message || 'Erreur lors de l\'invitation' });
     } finally {
@@ -36,27 +48,44 @@ export default function InviteUsers() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <HamburgerMenu />
-      <ScreenLayout title="👥 Inviter des utilisateurs" subtitle="Invitez des collègues comme utilisateurs normaux">
-        <form onSubmit={handleInvite} className="space-y-5">
-          <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
-            <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              Adresse email
-            </label>
-            <div className="flex gap-3">
+      <ScreenLayout title="👥 Inviter des membres RASED" subtitle="Invitez des collègues de l'équipe RASED · La Possession">
+        <form onSubmit={handleInvite} className="space-y-5 max-w-lg">
+          <div className="bg-white rounded-2xl border border-border p-5 shadow-sm space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Adresse email
+              </label>
               <Input
                 type="email"
                 placeholder="nom@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="flex-1"
               />
-              <Button type="submit" disabled={loading} className="gap-2">
-                <Send className="w-4 h-4" />
-                {loading ? 'Envoi...' : 'Inviter'}
-              </Button>
             </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-3">
+                Rôle dans l'équipe RASED
+              </label>
+              <select
+                value={profession}
+                onChange={(e) => setProfession(e.target.value)}
+                required
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">Sélectionner un rôle</option>
+                {PROFESSIONS.map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <Button type="submit" disabled={loading || !email.trim() || !profession} className="w-full gap-2">
+              <Send className="w-4 h-4" />
+              {loading ? 'Envoi...' : 'Envoyer l\'invitation'}
+            </Button>
           </div>
 
           {result && (
@@ -84,32 +113,36 @@ export default function InviteUsers() {
           )}
 
           {invitedList.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-blue-50 rounded-2xl border border-blue-200 p-4"
-            >
-              <p className="text-sm font-semibold text-blue-900 mb-3">
-                ✓ {invitedList.length} utilisateur{invitedList.length > 1 ? 's' : ''} invité{invitedList.length > 1 ? 's' : ''}
-              </p>
-              <div className="space-y-2">
-                {invitedList.map((e, i) => (
-                  <div key={i} className="text-xs text-blue-800 flex items-center gap-2">
-                    <Check className="w-3 h-3" />
-                    {e}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+           <motion.div
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             className="bg-blue-50 rounded-2xl border border-blue-200 p-4 max-w-lg"
+           >
+             <p className="text-sm font-semibold text-blue-900 mb-3">
+               ✓ {invitedList.length} collègue{invitedList.length > 1 ? 's' : ''} invité{invitedList.length > 1 ? 's' : ''}
+             </p>
+             <div className="space-y-2">
+               {invitedList.map((item, i) => {
+                 const prof = PROFESSIONS.find(p => p.value === item.profession);
+                 return (
+                   <div key={i} className="text-xs text-blue-800 flex items-center gap-2">
+                     <Check className="w-3 h-3" />
+                     <span>{item.email}</span>
+                     <span className="ml-auto text-blue-600 font-semibold">{prof?.label}</span>
+                   </div>
+                 );
+               })}
+             </div>
+           </motion.div>
           )}
 
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate('/dashboard')}
-            className="w-full"
+            onClick={() => navigate('/equipe-rased')}
+            className="w-full max-w-lg"
           >
-            Retour au tableau de bord
+            Retour à l'équipe RASED
           </Button>
         </form>
       </ScreenLayout>

@@ -43,6 +43,7 @@ import MesEcoles from './pages/MesEcoles';
 import DetailEcole from './pages/DetailEcole';
 import ImportPDF from './pages/ImportPDF';
 import Parametres from './pages/Parametres';
+import Login from './pages/Login';
 
 // Pages orphelines déplacées aux bons chemins
 import ActionsAnxieteSit from './pages/ActionsAnxieteSit';
@@ -225,6 +226,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/accueil" element={<Accueil />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/resume" element={<Resume />} />
         <Route path="/fiche-eleve" element={<FicheEleve />} />
         <Route path="/dashboard" element={<Dashboard />} />

@@ -46,18 +46,23 @@ export default function Register() {
     setSaving(true);
     setError(null);
     try {
+      // Mettre à jour le profil utilisateur
       await base44.auth.updateMe({
         profession,
         full_name: `${prenom.trim()} ${nom.trim()}`,
       });
+      
       // Créer automatiquement le profil MembreEquipe
       await base44.entities.MembreEquipe.create({
         prenom: prenom.trim(),
         nom: nom.trim(),
         profession,
         email: user?.email,
+        actif: true,
       });
-      window.location.href = '/';
+      
+      // Redirection avec message de bienvenue
+      window.location.href = '/dashboard?welcome=true';
     } catch (err) {
       setError(err.message || 'Erreur lors de la sauvegarde');
     } finally {
@@ -86,7 +91,7 @@ export default function Register() {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">👤</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Bienvenue sur Suivis RASED</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Créer mon compte</h1>
             <p className="text-sm text-muted-foreground">
               Équipe RASED · Circonscription de La Possession
             </p>
@@ -144,10 +149,10 @@ export default function Register() {
                 required
                 className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="">Sélectionner une profession</option>
-                <option value="MaDP">Maître à dominante pédagogique (MaDP)</option>
-                <option value="MaDR">Maître à dominante relationnelle (MaDR)</option>
-                <option value="Psy EN EDA">Psychologue EN EDA (Psy EN EDA)</option>
+                <option value="">Sélectionner un rôle</option>
+                <option value="Psy EN EDA">Psychologue de l'EN (Psy-EN)</option>
+                <option value="MaDR">Maître de Rééducation (MaDR)</option>
+                <option value="MaDP">Maître de Prévention (MaDP)</option>
               </select>
             </div>
 
@@ -172,7 +177,7 @@ export default function Register() {
               ) : (
                 <>
                   <CheckCircle className="w-4 h-4" />
-                  Terminer l'inscription
+                  Créer mon compte
                 </>
               )}
             </Button>
