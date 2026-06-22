@@ -365,7 +365,7 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
           <div style={{ padding: '40px 20px', textAlign: 'center' }}>
             <div style={{ fontSize: 36, marginBottom: 10 }}>🔍</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#182840', marginBottom: 6 }}>Aucune hypothèse formulée</div>
-            <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 18 }}>Utilisez l'arbre décisionnel EDA pour analyser les difficultés de {fiche.prenom}.</div>
+            <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 18 }}>Utilisez l'arbre décisionnel pour analyser les difficultés de {fiche.prenom}.</div>
             <button onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 9, fontSize: 13.5, fontWeight: 700, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer' }}>
               🔍 Formuler des hypothèses de travail
