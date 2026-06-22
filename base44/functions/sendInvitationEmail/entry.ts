@@ -46,13 +46,13 @@ Ce lien est personnel et valable 7 jours.
 Ne le partagez pas.
 En cas de problème, contactez votre administrateur.`;
 
-    const result = await base44.asServiceRole.integrations.Core.SendEmail({
+    await base44.integrations.Core.SendEmail({
       to: email,
       subject: subject,
       body: message
     });
 
-    return Response.json({ success: true, result });
+    return Response.json({ success: true });
   } catch (error) {
     console.error('Error sending email:', error);
     return Response.json({ error: error.message || 'Erreur lors de l\'envoi' }, { status: 500 });
