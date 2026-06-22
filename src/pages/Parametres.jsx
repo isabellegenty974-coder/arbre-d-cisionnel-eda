@@ -85,8 +85,20 @@ function AssistantRentree({ annee, ecolesPrecedentes, onClose }) {
 }
 
 // ── Formulaire ajout année ──────────────────────────────────────────────────
-function FormAjoutAnnee({ onSave, onCancel, saving }) {
-  const [libelle, setLibelle] = useState('');
+function FormAjoutAnnee({ onSave, onCancel, saving, anneesExistantes = [] }) {
+  // Propose l'année suivante la plus haute existante, ou l'an prochain par défaut
+  const suggestLibelle = () => {
+    const now = new Date();
+    const baseYear = now.getMonth() >= 8 ? now.getFullYear() + 1 : now.getFullYear();
+    const years = anneesExistantes
+      .map(a => parseInt(a.libelle?.split('-')[0]))
+      .filter(y => !isNaN(y));
+    const maxYear = years.length > 0 ? Math.max(...years) : baseYear - 1;
+    const nextYear = maxYear + 1;
+    return `${nextYear}-${nextYear + 1}`;
+  };
+
+  const [libelle, setLibelle] = useState(suggestLibelle);
   const [statut, setStatut]   = useState('a_venir');
   const valid = libelle.trim().length > 0;
 
@@ -256,7 +268,7 @@ export default function Parametres() {
 
         {/* Formulaire ajout */}
         {showAdd && (
-          <FormAjoutAnnee onSave={handleAdd} onCancel={() => setShowAdd(false)} saving={saving} />
+          <FormAjoutAnnee onSave={handleAdd} onCancel={() => setShowAdd(false)} saving={saving} anneesExistantes={annees} />
         )}
 
         {/* Carte liste des années */}
