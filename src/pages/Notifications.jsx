@@ -245,7 +245,7 @@ export default function Notifications() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, fontSize: 11, color: '#94A3B8' }}>
                       <span>
                         {new Date(notif.created_date).toLocaleDateString('fr-FR', {
-                          day: 'short',
+                          day: 'numeric',
                           month: 'short',
                           hour: '2-digit',
                           minute: '2-digit'
