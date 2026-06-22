@@ -309,7 +309,7 @@ export default function DetailEcole() {
                                   </Button>
                                 ) : (
                                   <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white border-0"
-                                    onClick={() => navigate(`/fiche-eleve?prenom=${encodeURIComponent(eleve.prenom)}&nom=${encodeURIComponent(eleve.nom)}&eleve_rased_id=${eleve.id}`)}>
+                                    onClick={() => navigate(`/fiche-eleve?prenom=${encodeURIComponent(eleve.prenom)}&nom=${encodeURIComponent(eleve.nom)}&classe=${encodeURIComponent(activeClasseData.nom)}&ecole=${encodeURIComponent(ecole.nom)}&eleve_rased_id=${eleve.id}`)}>
                                     Créer fiche
                                   </Button>
                                 )}

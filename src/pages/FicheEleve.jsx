@@ -13,9 +13,11 @@ import PhotoEEUpload from '@/components/PhotoEEUpload';
 
 export default function FicheEleve() {
   const navigate = useNavigate();
+  const urlParams = new URLSearchParams(window.location.search);
   const [saved, setSaved] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [ecole, setEcole] = useState('');
+  const [ecole, setEcole] = useState(urlParams.get('ecole') || '');
+  const [classe, setClasse] = useState(urlParams.get('classe') || '');
   const ECOLES = ['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'];
   const [dateNaissance, setDateNaissance] = useState('');
   const [ageCalcule, setAgeCalcule] = useState(null);
@@ -63,7 +65,12 @@ export default function FicheEleve() {
   };
   const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({
     mode: 'onChange',
-    defaultValues: { prenom: '', nom: '', age: '', classe: '' },
+    defaultValues: { 
+      prenom: urlParams.get('prenom') || '', 
+      nom: urlParams.get('nom') || '', 
+      age: '', 
+      classe: classe
+    },
     resolver: undefined
   });
 
@@ -79,7 +86,7 @@ export default function FicheEleve() {
       prenom: data.prenom,
       age: ageCalcule !== null ? ageCalcule : undefined,
       date_naissance: dateNaissance || undefined,
-      classe: data.classe,
+      classe: classe || data.classe || undefined,
       ecole: ecole || undefined,
       date: new Date().toISOString().split('T')[0],
       annee_scolaire: anneeActive || undefined,
@@ -194,6 +201,8 @@ export default function FicheEleve() {
                 <Input
                   {...register('classe', eleveValidationRules.classe)}
                   placeholder="Ex: CM2"
+                  value={classe}
+                  onChange={e => setClasse(e.target.value)}
                   className={`${errors.classe ? 'border-destructive' : ''} rounded-lg`}
                 />
                 {errors.classe && (
@@ -202,6 +211,7 @@ export default function FicheEleve() {
                     {errors.classe.message}
                   </div>
                 )}
+                {classe && urlParams.get('classe') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
               </div>
             </div>
           </motion.div>
@@ -229,6 +239,7 @@ export default function FicheEleve() {
                 <option value="">-- Sélectionner une école --</option>
                 {ECOLES.map(e => <option key={e} value={e}>{e}</option>)}
               </select>
+              {ecole && urlParams.get('ecole') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
             </div>
           </motion.div>
 
