@@ -182,26 +182,45 @@ export default function Dashboard() {
           {/* Content */}
           <div id="db-scroll">
 
-            {/* HERO */}
-            <div style={{ background:'#1E3A5F', borderRadius:14, padding:'24px 28px', marginBottom:22, display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, position:'relative', overflow:'hidden', flexWrap:'wrap' }}>
-              <div style={{ position:'absolute', right:-40, top:-60, width:260, height:260, borderRadius:'50%', background:'rgba(74,144,196,.15)', pointerEvents:'none' }} />
-              <div style={{ position:'absolute', right:60, bottom:-80, width:180, height:180, borderRadius:'50%', background:'rgba(74,144,196,.08)', pointerEvents:'none' }} />
+            {/* HERO BANDEAU */}
+            <div style={{ background:'#1E3A5F', borderRadius:16, padding:'32px 36px', marginBottom:24, display:'flex', alignItems:'center', justifyContent:'space-between', gap:24, position:'relative', overflow:'hidden', flexWrap:'wrap' }}>
+              {/* Cercles déco */}
+              <div style={{ position:'absolute', right:-50, top:-70, width:300, height:300, borderRadius:'50%', background:'rgba(74,144,196,.12)', pointerEvents:'none' }} />
+              <div style={{ position:'absolute', right:80, bottom:-90, width:200, height:200, borderRadius:'50%', background:'rgba(74,144,196,.07)', pointerEvents:'none' }} />
+
+              {/* GAUCHE */}
               <div style={{ position:'relative', zIndex:1 }}>
-                <p style={{ fontSize:11, textTransform:'uppercase', letterSpacing:'0.1em', color:'rgba(255,255,255,.5)', marginBottom:6 }}>
-                  {ecoles.length > 0 ? `${ecoles.length} école${ecoles.length > 1 ? 's' : ''}` : 'RASED'}
+                <p style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.12em', color:'rgba(255,255,255,.45)', marginBottom:10 }}>RASED · Année scolaire {anneeScolaire()}</p>
+                <p style={{ fontFamily:'DM Serif Display,serif', fontSize:32, color:'#fff', lineHeight:1.15, marginBottom:14 }}>
+                  Vous suivez{' '}
+                  <span style={{ color:'#93C5E8' }}>{loading ? '…' : totalEleves} élève{totalEleves !== 1 ? 's' : ''}</span>
+                  <br />cette année scolaire.
                 </p>
-                <p style={{ fontFamily:'DM Serif Display,serif', fontSize:26, color:'#fff', lineHeight:1.2, marginBottom:8 }}>
-                  Vous suivez <em style={{ fontStyle:'italic', color:'#93C5E8' }}>{loading ? '…' : totalEleves} élève{totalEleves !== 1 ? 's' : ''}</em><br />cette année scolaire.
-                </p>
-                <p style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                   {alertesFiches.length > 0
-                    ? `${alertesFiches.length} élève${alertesFiches.length > 1 ? 's' : ''} sans mise à jour depuis plus de 30 jours.`
-                    : 'Tous les dossiers sont à jour.'}
-                </p>
+                    ? <>
+                        <span style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', width:28, height:28, borderRadius:'50%', background:'rgba(192,86,33,.25)', fontSize:14 }}>⚠️</span>
+                        <p style={{ fontSize:14, color:'rgba(255,255,255,.75)', fontWeight:500 }}>
+                          <strong style={{ color:'#FDB97D', fontWeight:700 }}>{alertesFiches.length} élève{alertesFiches.length > 1 ? 's' : ''}</strong>
+                          {' '}sans mise à jour depuis plus de 30 jours.
+                        </p>
+                      </>
+                    : <>
+                        <span style={{ fontSize:16 }}>✅</span>
+                        <p style={{ fontSize:14, color:'rgba(255,255,255,.65)' }}>Tous les dossiers sont à jour.</p>
+                      </>
+                  }
+                </div>
               </div>
-              <div style={{ display:'flex', gap:10, position:'relative', zIndex:1, flexWrap:'wrap' }}>
-                <Link to="/liste-eleves" style={{ padding:'10px 20px', borderRadius:9, fontSize:13, fontWeight:600, background:'#4A90C4', color:'#fff', textDecoration:'none' }}>Voir les alertes</Link>
-                <Link to="/mes-ecoles" style={{ padding:'10px 20px', borderRadius:9, fontSize:13, fontWeight:500, background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.85)', border:'1px solid rgba(255,255,255,.2)', textDecoration:'none' }}>Mes écoles →</Link>
+
+              {/* DROITE */}
+              <div style={{ display:'flex', flexDirection:'column', gap:12, position:'relative', zIndex:1, flexShrink:0 }}>
+                <Link to="/liste-eleves" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', padding:'12px 28px', borderRadius:10, fontSize:14, fontWeight:600, background:'#4A90C4', color:'#fff', textDecoration:'none', whiteSpace:'nowrap', boxShadow:'0 4px 14px rgba(74,144,196,.35)' }}>
+                  Voir les alertes
+                </Link>
+                <Link to="/mes-ecoles" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', padding:'12px 28px', borderRadius:10, fontSize:14, fontWeight:500, background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.85)', border:'1px solid rgba(255,255,255,.18)', textDecoration:'none', whiteSpace:'nowrap' }}>
+                  Mes écoles →
+                </Link>
               </div>
             </div>
 
