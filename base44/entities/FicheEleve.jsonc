@@ -120,6 +120,10 @@
       "format": "date",
       "description": "Date d'enregistrement de la fiche"
     },
+    "annee_scolaire": {
+      "type": "string",
+      "description": "Ann\u00e9e scolaire (ex: 2025-2026)"
+    },
     "createdByName": {
       "type": "string",
       "description": "Nom et pr\u00e9nom de la personne qui a cr\u00e9\u00e9 la fiche"
