@@ -29,39 +29,18 @@ export default function InviteUsers() {
     setLoading(true);
     setResult(null);
     try {
-      const user = await base44.auth.me();
-      const userName = user?.full_name || 'Un administrateur';
+      // Inviter l'utilisateur - Base44 gère automatiquement l'email d'invitation
+      await base44.users.inviteUser(email.trim(), 'user');
       
-      // Créer l'utilisateur
+      // Enregistrer la profession dans les données utilisateur via la fonction backend
       await base44.functions.invoke('inviteUsers', { 
         email: email.trim(), 
         role: 'user',
         profession: profession
       });
-      
-      // Envoyer l'email d'invitation
-      const registrationUrl = `${window.location.origin}/register`;
-      const emailBody = `Bonjour,
-
-Vous avez été invité(e) à rejoindre l'application Suivis RASED de la Circonscription de La Possession par ${userName}.
-
-Cliquez sur le lien ci-dessous pour créer votre compte :
-${registrationUrl}
-
-Ce lien est valable 7 jours.
-
-RASED · Circonscription de La Possession
-La Réunion`;
-
-      await base44.integrations.Core.SendEmail({
-        to: email.trim(),
-        subject: 'Invitation à rejoindre Suivis RASED · La Possession',
-        body: emailBody,
-        from_name: 'Suivis RASED'
-      });
 
       setInvitedList([...invitedList, { email: email.trim(), profession }]);
-      setResult({ success: true, message: `${email} a été invité(e) — L'email a été envoyé` });
+      setResult({ success: true, message: `${email} a été invité(e) — L'email d'invitation a été envoyé` });
       setEmail('');
       setProfession('');
     } catch (err) {
