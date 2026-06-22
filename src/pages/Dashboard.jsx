@@ -320,11 +320,11 @@ export default function Dashboard() {
             )}
             {/* Actions masquées sur mobile */}
             <div className="db-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#F0F3F8', border: '1px solid #D8E1EE', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16 }}>
+              <button onClick={() => navigate('/dashboard')} style={{ position: 'relative', width: 36, height: 36, borderRadius: 9, background: '#F0F3F8', border: '1px solid #D8E1EE', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 16, padding: 0 }}>
                 🔔
                 {notifs.length > 0 && <span style={{ position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: '50%', background: '#B85C1A', border: '1.5px solid #fff' }} />}
-              </div>
-              <Link to="/import-pdf" style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: '1px solid #D8E1EE', background: 'transparent', color: '#182840', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              </button>
+              <Link to="/import-pdf" title="Importer PDF" style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: '1px solid #D8E1EE', background: 'transparent', color: '#182840', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 📄 Importer PDF
               </Link>
               <button onClick={() => setDiagModal(true)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#3B82C4', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
