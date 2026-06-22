@@ -463,8 +463,22 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
 // ── Onglet Infos ──────────────────────────────────────────────────────────────
 function TabInfos({ fiche, ficheId, navigate, user }) {
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   const PROF_LABEL = { 'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA', 'MaDR': 'Maître à Dominante Relationnelle (MaDR)', 'MaDP': 'Maître à Dominante Pédagogique (MaDP)' };
+  
+  const handleDeleteFiche = async () => {
+    setDeleting(true);
+    try {
+      await base44.entities.FicheEleve.delete(ficheId);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Erreur suppression:', error);
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
   
   const InfoRow = ({ label, value }) => (
     <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8' }}>
@@ -508,6 +522,49 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
           ))}
         </div>
       </Card>
+
+      {/* Danger zone */}
+      <Card style={{ borderTop: '2px solid #B85C1A' }}>
+        <CardHead icon="⚠️" title="Zone de danger" />
+        <div style={{ padding: '14px 16px', background: '#FEF0E4' }}>
+          <p style={{ fontSize: 13, color: '#B85C1A', marginBottom: 12, lineHeight: 1.5 }}>
+            La suppression de cette fiche est définitive. Cette action ne peut pas être annulée.
+          </p>
+          <button onClick={() => setShowDeleteConfirm(true)}
+            style={{ fontSize: 12.5, fontWeight: 600, padding: '8px 16px', borderRadius: 8, background: '#B85C1A', color: '#fff', border: 'none', cursor: 'pointer' }}>
+            🗑️ Supprimer cette fiche
+          </button>
+        </div>
+      </Card>
+
+      {/* Modal confirmation suppression */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => !deleting && setShowDeleteConfirm(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#fff', borderRadius: 14, padding: '24px', maxWidth: 380, textAlign: 'center' }}>
+              <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
+              <p style={{ fontSize: 15, fontWeight: 600, color: '#182840', marginBottom: 8 }}>Supprimer cette fiche ?</p>
+              <p style={{ fontSize: 13, color: '#566880', marginBottom: 20, lineHeight: 1.5 }}>
+                Êtes-vous sûr ? La fiche de <strong>{fiche.prenom} {fiche.nom}</strong> sera supprimée définitivement.
+              </p>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting}
+                  style={{ padding: '9px 20px', borderRadius: 8, background: '#F0F3F8', color: '#182840', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                  Annuler
+                </button>
+                <button onClick={handleDeleteFiche} disabled={deleting}
+                  style={{ padding: '9px 20px', borderRadius: 8, background: '#B85C1A', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13, opacity: deleting ? 0.6 : 1 }}>
+                  {deleting ? '⏳ Suppression...' : '🗑️ Supprimer'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal d'export de rapport */}
       <ReportExportModal
