@@ -1,459 +1,544 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import ScreenLayout from '@/components/tree/ScreenLayout';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Loader, ArrowLeft, Search, Clock, Info, ClipboardList, Plus, Trash2, X, Download } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import PhotoEEUpload from '@/components/PhotoEEUpload';
 import RapportContent from '@/components/RapportContent';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
-import PresenceBandeau from '@/components/rased/PresenceBandeau';
 import NotesMembreSection from '@/components/rased/NotesMembreSection';
 import { usePresence } from '@/lib/usePresence';
+import { jsPDF } from 'jspdf';
 
-export default function DetailFiche() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [fiche, setFiche] = useState(null);
-  const [diagnostics, setDiagnostics] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showRapport, setShowRapport] = useState(false);
-  const [selectedRapport, setSelectedRapport] = useState(null);
-  const [selectedDiagnosticId, setSelectedDiagnosticId] = useState(null);
-  const [editingNotes, setEditingNotes] = useState(false);
-  const [notes, setNotes] = useState('');
-  const [interventions, setInterventions] = useState([]);
-  const [newIntervention, setNewIntervention] = useState({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
+const PROF_COLOR  = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
+const PROF_BG     = { 'Psy EN EDA': '#EAF2FB', 'MaDR': '#E4F4ED', 'MaDP': '#FEF0E4' };
+const PROF_TEXT   = { 'Psy EN EDA': '#254D7A', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
+const PROF_LABEL  = { 'Psy EN EDA': 'Psy-EN', 'MaDR': 'MaDR', 'MaDP': 'MaDP' };
 
-  const TYPES_INTERVENTION = [
-    'Équipe éducative',
-    'Observation en classe',
-    'Entretien élève',
-    'Entretien avec la famille',
-    'Entretien avec l\'enseignant',
-    'Bilan / évaluation',
-    'Rééducation',
-    'Autre',
-  ];
+const STATUT_CFG = {
+  'Nouveau':      { ico: '🆕', lbl: 'Nouveau',     sub: 'Demande reçue',   pill: '#EAF2FB', pillT: '#3B82C4' },
+  'Suivi actif':  { ico: '✅', lbl: 'Suivi actif',  sub: 'En cours',        pill: '#E4F4ED', pillT: '#1E7A52' },
+  'En attente':   { ico: '⏳', lbl: 'En attente',   sub: 'Action à venir',  pill: '#FEF0E4', pillT: '#B85C1A' },
+  'Clôturé':      { ico: '🏁', lbl: 'Clôturé',      sub: 'Suivi terminé',   pill: '#F0F3F8', pillT: '#566880' },
+};
+
+const TYPES_INTERVENTION = [
+  'Équipe éducative','Observation en classe','Entretien élève',
+  'Entretien avec la famille','Entretien avec l\'enseignant','Bilan / évaluation','Rééducation','Autre',
+];
+
+function initiales(prenom, nom) {
+  return `${prenom?.[0] || ''}${nom?.[0] || ''}`.toUpperCase();
+}
+
+// ── Topbar ──────────────────────────────────────────────────────────────────
+function Topbar({ fiche, ficheId, onHypotheses }) {
+  return (
+    <div style={{ background: '#1A3353', height: 52, padding: '0 16px', display: 'flex', alignItems: 'center', gap: 10, position: 'sticky', top: 0, zIndex: 30 }}>
+      <Link to="/dashboard" style={{ color: 'rgba(255,255,255,.6)', fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none', flexShrink: 0 }}>
+        <ArrowLeft size={14} /> Retour
+      </Link>
+      <span style={{ color: 'rgba(255,255,255,.2)' }}>/</span>
+      <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', display: 'flex', alignItems: 'center', gap: 5, overflow: 'hidden', flex: 1, minWidth: 0 }}>
+        {fiche.ecole && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fiche.ecole}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
+        {fiche.classe && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fiche.classe}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
+        <span style={{ color: '#fff', fontWeight: 600, whiteSpace: 'nowrap' }}>{fiche.prenom} {fiche.nom}</span>
+      </div>
+      <button onClick={onHypotheses}
+        style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 7, fontSize: 12, fontWeight: 600, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+        🔍 Hypothèses
+      </button>
+    </div>
+  );
+}
+
+// ── Hero ────────────────────────────────────────────────────────────────────
+function HeroFiche({ fiche, activeTab, setActiveTab }) {
+  const statut = fiche.statut || 'Nouveau';
+  const sc = STATUT_CFG[statut] || STATUT_CFG['Nouveau'];
+  const intervenants = fiche.intervenants || [];
+
+  return (
+    <div style={{ background: '#1A3353', padding: '20px 16px 0', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', right: -40, top: -60, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,196,.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+      {/* Identity */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, paddingBottom: 18, position: 'relative', zIndex: 1 }}>
+        <div style={{ width: 58, height: 58, borderRadius: 14, background: '#3B82C4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700, color: '#fff', flexShrink: 0, fontFamily: 'DM Serif Display, serif' }}>
+          {initiales(fiche.prenom, fiche.nom)}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: 'DM Serif Display, serif', fontSize: 24, color: '#fff', lineHeight: 1.2, marginBottom: 8 }}>
+            {fiche.prenom} {fiche.nom}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+            {fiche.date_naissance && (
+              <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>
+                🎂 {new Date(fiche.date_naissance).toLocaleDateString('fr-FR')}
+                {fiche.age ? ` · ${fiche.age} ans` : ''}
+              </span>
+            )}
+            {fiche.ecole && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>🏫 {fiche.ecole}</span>}
+            {fiche.classe && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>📚 {fiche.classe}</span>}
+            <span style={{ fontSize: 11.5, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: sc.pill, color: sc.pillT }}>
+              <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: 'currentColor', marginRight: 4, verticalAlign: 'middle' }} />
+              {sc.lbl}
+            </span>
+          </div>
+          {intervenants.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.4)' }}>Intervenants :</span>
+              {intervenants.map((iv, i) => {
+                const bg = PROF_COLOR[iv.profession] || '#3B82C4';
+                const init = `${iv.nom?.split(' ')[0]?.[0] || ''}${iv.nom?.split(' ')[1]?.[0] || ''}`.toUpperCase();
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 20, padding: '3px 8px 3px 4px' }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff' }}>{init || iv.nom?.[0]}</div>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,.75)' }}>{iv.nom}</div>
+                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,.4)' }}>{PROF_LABEL[iv.profession] || iv.profession}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 2 }}>
+        {[
+          { key: 'suivi',      label: '📋 Suivi' },
+          { key: 'hypotheses', label: '🔍 Hypothèses' },
+          { key: 'historique', label: '🕐 Historique' },
+          { key: 'infos',      label: 'ℹ️ Infos' },
+        ].map(t => (
+          <button key={t.key} onClick={() => setActiveTab(t.key)}
+            style={{ padding: '10px 14px', fontSize: 12.5, fontWeight: activeTab === t.key ? 600 : 400, color: activeTab === t.key ? '#fff' : 'rgba(255,255,255,.5)', cursor: 'pointer', background: 'none', border: 'none', borderBottom: activeTab === t.key ? '2px solid #3B82C4' : '2px solid transparent', whiteSpace: 'nowrap', transition: 'all .14s' }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Card wrapper ─────────────────────────────────────────────────────────────
+function Card({ children, style }) {
+  return (
+    <div style={{ background: '#fff', border: '1px solid #D8E1EE', borderRadius: 12, overflow: 'hidden', ...style }}>
+      {children}
+    </div>
+  );
+}
+
+function CardHead({ icon, title, action, onAction }) {
+  return (
+    <div style={{ padding: '13px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #D8E1EE' }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#182840', display: 'flex', alignItems: 'center', gap: 7 }}>
+        <span style={{ fontSize: 15 }}>{icon}</span> {title}
+      </div>
+      {action && (
+        <button onClick={onAction} style={{ fontSize: 12, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
+          {action}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Onglet Suivi ──────────────────────────────────────────────────────────────
+function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions }) {
+  const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
+  const [savingStatut, setSavingStatut] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
+  const [newIntervention, setNewIntervention] = useState({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
+  const [showRapport, setShowRapport] = useState(false);
 
-  const ficheId = searchParams.get('id');
-  const { onFiche } = usePresence(ficheId);
-
-  useEffect(() => {
-    if (!ficheId) {
-      setLoading(false);
-      return;
-    }
-
-    Promise.all([
-      base44.entities.FicheEleve.get(ficheId),
-      base44.entities.Diagnostic.list('-created_date', 200)
-    ])
-      .then(([ficheData, allDiagnostics]) => {
-        setFiche(ficheData);
-        if (ficheData?.interventions && Array.isArray(ficheData.interventions)) {
-          setInterventions(ficheData.interventions);
-        } else {
-          setInterventions([]);
-        }
-        if (ficheData && allDiagnostics) {
-          const related = allDiagnostics.filter(
-            d => d.eleve_nom?.toLowerCase() === ficheData.nom?.toLowerCase() &&
-                 d.eleve_prenom?.toLowerCase() === ficheData.prenom?.toLowerCase()
-          );
-          setDiagnostics(related);
-        }
-      })
-      .catch(() => setFiche(null))
-      .finally(() => setLoading(false));
-  }, [ficheId]);
-
-  // Refresh la fiche toutes les 2 secondes pour détecter les mises à jour du rapport
-  useEffect(() => {
-    if (!ficheId) return;
-    const interval = setInterval(() => {
-      base44.entities.FicheEleve.get(ficheId).then(setFiche);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [ficheId]);
-
-  const handleNotesChange = async () => {
-    if (!fiche) return;
-    await base44.entities.FicheEleve.update(fiche.id, { notes });
-    setFiche({ ...fiche, notes });
-    setEditingNotes(false);
+  const handleSaveStatut = async () => {
+    setSavingStatut(true);
+    await base44.entities.FicheEleve.update(ficheId, { statut });
+    setFiche(f => ({ ...f, statut }));
+    setSavingStatut(false);
   };
 
   const addIntervention = async () => {
-    if (!fiche || !newIntervention.date) return;
+    if (!newIntervention.date) return;
     const updated = [...interventions, newIntervention];
-    await base44.entities.FicheEleve.update(fiche.id, { interventions: updated });
-    setFiche({ ...fiche, interventions: updated });
+    await base44.entities.FicheEleve.update(ficheId, { interventions: updated });
+    setFiche(f => ({ ...f, interventions: updated }));
     setInterventions(updated);
     setNewIntervention({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
     setAddingIntervention(false);
   };
 
-  const deleteIntervention = async (index) => {
-    if (!fiche) return;
-    const updated = interventions.filter((_, i) => i !== index);
-    await base44.entities.FicheEleve.update(fiche.id, { interventions: updated });
-    setFiche({ ...fiche, interventions: updated });
+  const deleteIntervention = async (idx) => {
+    const updated = interventions.filter((_, i) => i !== idx);
+    await base44.entities.FicheEleve.update(ficheId, { interventions: updated });
+    setFiche(f => ({ ...f, interventions: updated }));
     setInterventions(updated);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
-  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-  if (!fiche) {
-    return (
-      <div className="min-h-screen bg-background">
-        <ScreenLayout title="Fiche non trouvée">
-          <p className="text-center text-muted-foreground">Cette fiche n'existe pas.</p>
-        </ScreenLayout>
-      </div>
-    );
-  }
+      {/* Statut */}
+      <Card>
+        <CardHead icon="🔖" title="Statut du suivi" action={savingStatut ? 'Enregistrement…' : 'Enregistrer'} onAction={handleSaveStatut} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
+          {Object.entries(STATUT_CFG).map(([key, cfg]) => (
+            <div key={key} onClick={() => setStatut(key)}
+              style={{ padding: '12px', borderRadius: 10, border: `1.5px solid ${statut === key ? '#3B82C4' : '#D8E1EE'}`, background: statut === key ? '#EAF2FB' : '#fff', cursor: 'pointer', textAlign: 'center', transition: 'all .14s' }}>
+              <div style={{ fontSize: 22, marginBottom: 4 }}>{cfg.ico}</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{cfg.lbl}</div>
+              <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{cfg.sub}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Motif */}
+      {fiche.observations && (
+        <Card>
+          <CardHead icon="📌" title="Motif du signalement" />
+          <div style={{ padding: '14px 16px', fontSize: 13.5, lineHeight: 1.65, color: '#182840', background: '#FAFBFD', borderLeft: '3px solid #3B82C4' }}>
+            {fiche.observations}
+          </div>
+        </Card>
+      )}
+
+      {/* Photo EE */}
+      <Card>
+        <CardHead icon="📸" title="Synthèse EE (photo)" />
+        <div style={{ padding: 14 }}>
+          <PhotoEEUpload ficheId={ficheId} />
+          {fiche.photo_ee_url && (
+            <img src={fiche.photo_ee_url} alt="Photo EE" style={{ width: '100%', borderRadius: 8, marginTop: 10, maxHeight: 300, objectFit: 'cover' }} />
+          )}
+        </div>
+      </Card>
+
+      {/* Notes équipe */}
+      <Card>
+        <CardHead icon="💬" title="Notes de l'équipe" />
+        <div style={{ padding: 14 }}>
+          <NotesMembreSection ficheId={ficheId} />
+        </div>
+      </Card>
+
+      {/* Intervenants */}
+      <Card>
+        <CardHead icon="👥" title="Intervenants RASED" />
+        <div style={{ padding: 14 }}>
+          <IntervenantsSection ficheId={ficheId} fichePrenomNom={`${fiche.prenom} ${fiche.nom}`} />
+        </div>
+      </Card>
+
+      {/* Interventions */}
+      <Card>
+        <CardHead icon="📋" title="Interventions"
+          action={addingIntervention ? undefined : '+ Ajouter'}
+          onAction={() => setAddingIntervention(true)} />
+        <div style={{ padding: 14 }}>
+          {addingIntervention && (
+            <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { label: 'Date', content: <input type="date" value={newIntervention.date} onChange={e => setNewIntervention({...newIntervention, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
+                { label: 'Type', content: <select value={newIntervention.type} onChange={e => setNewIntervention({...newIntervention, type: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', background: '#fff' }}>{TYPES_INTERVENTION.map(t => <option key={t}>{t}</option>)}</select> },
+                { label: 'Profession', content: <select value={newIntervention.profession} onChange={e => setNewIntervention({...newIntervention, profession: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', background: '#fff' }}><option>Psy EN EDA</option><option>MaDR</option><option>MaDP</option></select> },
+                { label: 'Description', content: <textarea value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} placeholder="Décrivez l'intervention…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+              ].map(({ label, content }) => (
+                <div key={label}>
+                  <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
+                  {content}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => setAddingIntervention(false)} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
+                <button onClick={addIntervention} disabled={!newIntervention.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newIntervention.date ? 0.5 : 1 }}>Ajouter</button>
+              </div>
+            </div>
+          )}
+          {interventions.length === 0 && !addingIntervention && (
+            <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Aucune intervention enregistrée</p>
+          )}
+          {interventions.map((iv, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: idx < interventions.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 600, color: '#566880' }}>{new Date(iv.date).toLocaleDateString('fr-FR')}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '1px 7px', borderRadius: 8, background: PROF_BG[iv.profession] || '#F0F3F8', color: PROF_TEXT[iv.profession] || '#566880' }}>{PROF_LABEL[iv.profession] || iv.profession}</span>
+                  {iv.type && <span style={{ fontSize: 10.5, padding: '1px 7px', borderRadius: 8, background: '#FEF0E4', color: '#B85C1A' }}>{iv.type}</span>}
+                </div>
+                {iv.description && <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, margin: 0 }}>{iv.description}</p>}
+              </div>
+              <button onClick={() => deleteIntervention(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Rapport */}
+      {fiche.rapport && (
+        <Card>
+          <CardHead icon="📄" title="Rapport généré" action="Voir →" onAction={() => setShowRapport(true)} />
+          <div style={{ padding: '10px 16px 14px' }}>
+            <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+              {fiche.rapport.substring(0, 200)}…
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {/* Modal Rapport */}
+      <AnimatePresence>
+        {showRapport && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+            onClick={() => setShowRapport(false)}>
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 640, maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid #F0F3F8' }}>
+                <span style={{ fontWeight: 700, fontSize: 14, color: '#182840' }}>📋 Rapport — {fiche.prenom} {fiche.nom}</span>
+                <button onClick={() => setShowRapport(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
+                <RapportContent text={fiche.rapport} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Onglet Hypothèses ─────────────────────────────────────────────────────────
+function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
+  const DOMAINE_ICO = { apprentissages: '📖', comportement: '🧠', developpement: '🌱', contexte: '🏠' };
+  const DOMAINE_BG  = { apprentissages: '#EAF2FB', comportement: '#EEE9FF', developpement: '#E4F4ED', contexte: '#FEF0E4' };
 
   return (
-    <div className="min-h-screen bg-background pb-16">
-      <ScreenLayout title={`${fiche.prenom} ${fiche.nom}`} subtitle={fiche.classe ? `Classe: ${fiche.classe}` : ''}>
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-2xl mx-auto space-y-6"
-        >
-          <PresenceBandeau onFiche={onFiche} />
-          {/* Âge */}
-          {fiche.age && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="p-3 rounded-lg bg-secondary/50 border border-border"
-            >
-              <p className="text-sm text-muted-foreground mb-1">Âge</p>
-              <p className="font-semibold text-foreground">{fiche.age} ans</p>
-            </motion.div>
-          )}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <Card>
+        <CardHead icon="🔍" title="Hypothèses EDA formulées"
+          action="+ Nouvelles hypothèses"
+          onAction={() => navigate(`/hypotheses-eleve?id=${ficheId}`)} />
 
-          {/* Observations */}
-          {fiche.observations && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="space-y-2"
-            >
-              <h2 className="font-semibold text-foreground">Observations</h2>
-              <p className="text-sm text-foreground bg-card border border-border rounded-lg p-3">
-                {fiche.observations}
-              </p>
-            </motion.div>
-          )}
-
-          {/* Rapport de la fiche */}
-          {fiche.rapport && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15 }}
-            className="flex items-center justify-between gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg"
-          >
-            <div>
-              <h2 className="font-semibold text-foreground">Rapport généré</h2>
-              <p className="text-xs text-muted-foreground mt-1">{new Date(fiche.updated_date).toLocaleDateString('fr-FR')}</p>
-            </div>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setSelectedRapport(fiche);
-                setSelectedDiagnosticId(null);
-                setShowRapport(true);
-              }}
-            >
-              Voir
-            </Button>
-          </motion.div>
-          )}
-
-          {/* Synthèse EE avec Photo Upload */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-3"
-          >
-            <h2 className="font-semibold text-foreground">Synthèse EE</h2>
-            <PhotoEEUpload ficheId={ficheId} />
-            {fiche.photo_ee_url && (
-              <div className="rounded-lg overflow-hidden border-2 border-primary/20 bg-secondary/30">
-                <img
-                  src={fiche.photo_ee_url}
-                  alt="Photo EE"
-                  className="w-full h-auto max-h-96 object-cover"
-                />
+        {historiqueEDA.length === 0 ? (
+          <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>🔍</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#182840', marginBottom: 6 }}>Aucune hypothèse formulée</div>
+            <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 18 }}>Utilisez l'arbre décisionnel EDA pour analyser les difficultés de {fiche.prenom}.</div>
+            <button onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 9, fontSize: 13.5, fontWeight: 700, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer' }}>
+              🔍 Formuler des hypothèses EDA
+            </button>
+          </div>
+        ) : (
+          historiqueEDA.map((h, i) => (
+            <div key={h.id} style={{ padding: '16px', borderBottom: i < historiqueEDA.length - 1 ? '1px solid #F0F3F8' : 'none', display: 'flex', gap: 14 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 11, background: DOMAINE_BG[h.domaine] || '#F0F3F8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                {DOMAINE_ICO[h.domaine] || '🔍'}
               </div>
-            )}
-          </motion.div>
-
-          {/* Intervenants (partage dossier) */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.22 }}
-            className="p-4 rounded-xl border border-border bg-card">
-            <IntervenantsSection
-              ficheId={ficheId}
-              fichePrenomNom={`${fiche.prenom} ${fiche.nom}`}
-            />
-          </motion.div>
-
-          {/* Notes par membre */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.23 }}
-            className="p-4 rounded-xl border border-border bg-card">
-            <NotesMembreSection ficheId={ficheId} />
-          </motion.div>
-
-          {/* Tableau Interventions */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.24 }}
-            className="space-y-3"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-foreground">Interventions</h2>
-              {!addingIntervention && (
-                <button
-                  onClick={() => setAddingIntervention(true)}
-                  className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  + Ajouter
-                </button>
-              )}
-            </div>
-
-            {addingIntervention && (
-              <div className="p-4 rounded-lg bg-secondary/30 border border-border space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-foreground block mb-2">Date</label>
-                  <input
-                    type="date"
-                    value={newIntervention.date}
-                    onChange={(e) => setNewIntervention({ ...newIntervention, date: e.target.value })}
-                    className="w-full h-9 px-3 rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#182840', marginBottom: 2, textTransform: 'capitalize' }}>
+                  {h.domaine} {h.sous_domaine ? `— ${h.sous_domaine}` : ''}
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground block mb-2">Type d'intervention</label>
-                  <select
-                    value={newIntervention.type}
-                    onChange={(e) => setNewIntervention({ ...newIntervention, type: e.target.value })}
-                    className="w-full h-9 px-3 rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {TYPES_INTERVENTION.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground block mb-2">Profession</label>
-                  <select
-                    value={newIntervention.profession}
-                    onChange={(e) => setNewIntervention({ ...newIntervention, profession: e.target.value })}
-                    className="w-full h-9 px-3 rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option>Psy EN EDA</option>
-                    <option>MaDR</option>
-                    <option>MaDP</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground block mb-2">Description</label>
-                  <textarea
-                    value={newIntervention.description}
-                    onChange={(e) => setNewIntervention({ ...newIntervention, description: e.target.value })}
-                    placeholder="Décrivez l'intervention..."
-                    className="w-full min-h-32 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <button
-                    onClick={() => {
-                      setNewIntervention({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
-                      setAddingIntervention(false);
-                    }}
-                    className="px-4 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition-colors text-sm font-medium"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={addIntervention}
-                    disabled={!newIntervention.date}
-                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium disabled:opacity-50"
-                  >
-                    Ajouter
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {interventions.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Date</th>
-                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Type</th>
-                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Profession</th>
-                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Description</th>
-                      <th className="text-right py-2 px-3 font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {interventions.map((inter, idx) => (
-                      <tr key={idx} className="border-b border-border hover:bg-secondary/30 transition-colors">
-                        <td className="py-2 px-3 text-foreground">{new Date(inter.date).toLocaleDateString('fr-FR')}</td>
-                         <td className="py-2 px-3"><span className="text-xs bg-amber-100 text-amber-800 rounded px-2 py-0.5">{inter.type || '—'}</span></td>
-                         <td className="py-2 px-3 text-foreground text-xs bg-secondary/30 rounded px-2 w-fit">{inter.profession}</td>
-                        <td className="py-2 px-3 text-foreground truncate max-w-xs">{inter.description}</td>
-                        <td className="py-2 px-3 text-right">
-                          <button
-                            onClick={() => deleteIntervention(idx)}
-                            className="text-xs text-destructive hover:text-destructive/80 transition-colors"
-                          >
-                            Supprimer
-                          </button>
-                        </td>
-                      </tr>
+                {h.hypotheses?.length > 0 && (
+                  <div style={{ background: '#F0F3F8', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 700, marginBottom: 6 }}>Hypothèses retenues</div>
+                    {h.hypotheses.map((hyp, j) => (
+                      <div key={j} style={{ fontSize: 12.5, color: '#182840', padding: '3px 0', display: 'flex', gap: 6 }}>
+                        <span style={{ color: '#3B82C4', fontWeight: 700, flexShrink: 0 }}>·</span>
+                        {hyp}
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground italic py-4">Aucune intervention enregistrée</p>
-            )}
-          </motion.div>
-
-
-
-          {/* Notes Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="p-6 rounded-xl bg-gradient-to-br from-amber-50 to-amber-50/50 dark:from-amber-950/20 dark:to-amber-950/10 border border-amber-200/30 dark:border-amber-800/30"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                📝 Notes libres
-              </h3>
-              {!editingNotes && (
-                <button
-                  onClick={() => {
-                    setNotes(fiche?.notes || '');
-                    setEditingNotes(true);
-                  }}
-                  className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  Éditer
-                </button>
-              )}
-            </div>
-            {editingNotes ? (
-              <div className="space-y-3">
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Inscrivez vos observations rapides lors des entretiens..."
-                  className="w-full min-h-32 p-3 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground resize-vertical focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <div className="flex gap-2 justify-end">
-                  <button
-                    onClick={() => setEditingNotes(false)}
-                    className="px-4 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition-colors text-sm font-medium"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={handleNotesChange}
-                    className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
-                  >
-                    Enregistrer
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="min-h-32 p-4 rounded-lg bg-white/50 dark:bg-foreground/5 border border-amber-200/20 dark:border-amber-800/20">
-                {fiche?.notes ? (
-                  <p className="text-foreground whitespace-pre-wrap text-sm leading-relaxed">{fiche.notes}</p>
-                ) : (
-                  <p className="text-muted-foreground text-sm italic">Aucune note pour le moment</p>
+                  </div>
                 )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, color: '#566880' }}>📅 {new Date(h.date || h.created_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
               </div>
+            </div>
+          ))
+        )}
+      </Card>
+
+      {/* Explorer autres domaines */}
+      <Card>
+        <CardHead icon="🌐" title="Explorer un autre domaine" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
+          {[
+            { ico: '📖', lbl: 'Apprentissages', sub: 'Lecture, écriture, maths', to: '/apprentissage' },
+            { ico: '🧠', lbl: 'Comportement',   sub: 'Anxiété, impulsivité',     to: '/comportement' },
+            { ico: '🌱', lbl: 'Développement',  sub: 'Attention, langage',       to: '/developpement' },
+            { ico: '🏠', lbl: 'Contexte',       sub: 'Famille, classe',          to: '/contexte' },
+          ].map(d => (
+            <Link key={d.to} to={`${d.to}?ficheId=${ficheId}&prenom=${fiche.prenom}`}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', textDecoration: 'none', transition: 'all .14s', background: '#fff' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#D8E1EE'; e.currentTarget.style.background = '#fff'; }}>
+              <span style={{ fontSize: 22 }}>{d.ico}</span>
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{d.lbl}</div>
+                <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{d.sub}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ── Onglet Historique ─────────────────────────────────────────────────────────
+function TabHistorique({ fiche, interventions, historiqueEDA }) {
+  const events = [
+    ...interventions.map(iv => ({ date: new Date(iv.date), ico: '💬', type: 'note', title: `Intervention : ${iv.type || 'Action'}`, meta: iv.description })),
+    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: `Hypothèses formulées — ${h.domaine}`, meta: `${h.hypotheses?.length || 0} hypothèse(s) retenue(s)` })),
+    { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: `${fiche.ecole || ''}${fiche.classe ? ' · ' + fiche.classe : ''}` },
+  ].sort((a, b) => b.date - a.date);
+
+  const DOT_BG = { note: '#E4F4ED', hyp: '#EAF2FB', stat: '#FEF0E4', imp: '#EEE9FF' };
+
+  return (
+    <Card>
+      <CardHead icon="🕐" title="Fil chronologique" />
+      <div style={{ padding: '10px 16px 16px' }}>
+        {events.map((ev, i) => (
+          <div key={i} style={{ display: 'flex', gap: 14, padding: '10px 0', position: 'relative' }}>
+            {i < events.length - 1 && <div style={{ position: 'absolute', left: 15, top: 34, bottom: -6, width: 1, background: '#D8E1EE' }} />}
+            <div style={{ width: 30, height: 30, borderRadius: '50%', background: DOT_BG[ev.type] || '#F0F3F8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0, position: 'relative', zIndex: 1, border: '2px solid #fff' }}>
+              {ev.ico}
+            </div>
+            <div style={{ flex: 1, paddingTop: 4 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#182840', marginBottom: 2 }}>{ev.title}</div>
+              {ev.meta && <div style={{ fontSize: 11.5, color: '#566880' }}>{ev.meta}</div>}
+              <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>{ev.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// ── Onglet Infos ──────────────────────────────────────────────────────────────
+function TabInfos({ fiche, ficheId, navigate }) {
+  const InfoRow = ({ label, value }) => (
+    <div style={{ padding: '12px 16px', borderBottom: '1px solid #F0F3F8' }}>
+      <div style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 600, marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 13.5, fontWeight: 500, color: value ? '#182840' : '#94A3B8', fontStyle: value ? 'normal' : 'italic' }}>{value || 'Non renseigné'}</div>
+    </div>
+  );
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <Card>
+        <CardHead icon="👤" title="Informations sur l'élève" action="✏️ Modifier" onAction={() => navigate(`/edit-eleve?id=${ficheId}`)} />
+        <InfoRow label="Nom" value={fiche.nom?.toUpperCase()} />
+        <InfoRow label="Prénom" value={fiche.prenom} />
+        <InfoRow label="Date de naissance" value={fiche.date_naissance ? new Date(fiche.date_naissance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
+        <InfoRow label="Âge" value={fiche.age ? `${fiche.age} ans` : null} />
+        <InfoRow label="École" value={fiche.ecole} />
+        <InfoRow label="Classe" value={fiche.classe} />
+        <InfoRow label="Créé par" value={fiche.createdByName} />
+        <InfoRow label="Profession" value={fiche.createdByProfession} />
+      </Card>
+
+      <Card>
+        <CardHead icon="📤" title="Exporter" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
+          {[
+            { ico: '📄', lbl: 'Synthèse de suivi', sub: 'Notes et hypothèses en PDF', action: () => navigate(`/synthese-eleve?id=${ficheId}`) },
+            { ico: '📝', lbl: 'Hypothèses EDA',    sub: 'Lancer l\'arbre décisionnel', action: () => navigate(`/hypotheses-eleve?id=${ficheId}`) },
+          ].map((opt, i) => (
+            <div key={i} onClick={opt.action} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', transition: 'all .14s', background: '#fff' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#D8E1EE'; e.currentTarget.style.background = '#fff'; }}>
+              <span style={{ fontSize: 22 }}>{opt.ico}</span>
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{opt.lbl}</div>
+                <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{opt.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ── Page principale ───────────────────────────────────────────────────────────
+export default function DetailFiche() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [fiche, setFiche] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('suivi');
+  const [interventions, setInterventions] = useState([]);
+  const [historiqueEDA, setHistoriqueEDA] = useState([]);
+
+  const ficheId = searchParams.get('id');
+  const { onFiche } = usePresence(ficheId);
+
+  useEffect(() => {
+    if (!ficheId) { setLoading(false); return; }
+    Promise.all([
+      base44.entities.FicheEleve.get(ficheId),
+      base44.entities.HistoriqueEDA.filter({ eleve_id: ficheId }).catch(() => []),
+    ]).then(([ficheData, histo]) => {
+      setFiche(ficheData);
+      setInterventions(ficheData?.interventions || []);
+      setHistoriqueEDA(histo.sort((a, b) => new Date(b.date || b.created_date) - new Date(a.date || a.created_date)));
+    }).catch(() => setFiche(null)).finally(() => setLoading(false));
+  }, [ficheId]);
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F0F3F8' }}>
+      <Loader style={{ animation: 'spin 1s linear infinite', color: '#3B82C4' }} size={28} />
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+
+  if (!fiche) return (
+    <div style={{ minHeight: '100vh', background: '#F0F3F8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+      <span style={{ fontSize: 36 }}>😕</span>
+      <p style={{ fontSize: 15, color: '#566880' }}>Cette fiche n'existe pas.</p>
+      <button onClick={() => navigate('/dashboard')} style={{ padding: '9px 20px', borderRadius: 9, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Retour au tableau de bord</button>
+    </div>
+  );
+
+  return (
+    <div style={{ fontFamily: 'Inter, sans-serif', background: '#F0F3F8', minHeight: '100vh', paddingBottom: 80 }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');`}</style>
+
+      <Topbar fiche={fiche} ficheId={ficheId} onHypotheses={() => navigate(`/hypotheses-eleve?id=${ficheId}`)} />
+      <HeroFiche fiche={fiche} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '16px 14px 80px' }}>
+        <AnimatePresence mode="wait">
+          <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+            {activeTab === 'suivi' && (
+              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} />
+            )}
+            {activeTab === 'hypotheses' && (
+              <TabHypotheses fiche={fiche} ficheId={ficheId} navigate={navigate} historiqueEDA={historiqueEDA} />
+            )}
+            {activeTab === 'historique' && (
+              <TabHistorique fiche={fiche} interventions={interventions} historiqueEDA={historiqueEDA} />
+            )}
+            {activeTab === 'infos' && (
+              <TabInfos fiche={fiche} ficheId={ficheId} navigate={navigate} />
             )}
           </motion.div>
-
-          {/* Actions */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="flex gap-2 flex-wrap"
-          >
-            <Button
-              variant="outline"
-              onClick={() => navigate('/dashboard')}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Retour
-            </Button>
-            <Button
-              onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
-              className="gap-2"
-            >
-              Hypothèses EDA
-            </Button>
-          </motion.div>
-
-          {/* Modal Rapport */}
-          {showRapport && selectedRapport && (
-            <div
-              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-              onClick={() => setShowRapport(false)}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 border border-border"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h2 className="font-semibold text-foreground mb-2">
-                  {selectedDiagnosticId ? 'Rapport - Hypothèses' : 'Rapport - Fiche élève'}
-                </h2>
-                <p className="text-xs text-muted-foreground mb-4">
-                  {new Date(selectedRapport.created_date).toLocaleDateString('fr-FR')}
-                </p>
-                <div className="mb-4">
-                  <RapportContent text={selectedRapport.rapport} />
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowRapport(false)}
-                  className="w-full"
-                >
-                  Fermer
-                </Button>
-              </motion.div>
-            </div>
-          )}
-        </motion.div>
-      </ScreenLayout>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
