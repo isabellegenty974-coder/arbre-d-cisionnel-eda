@@ -4,11 +4,16 @@ export default function InterventionItem({ iv, idx, onDelete }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0' }}>
       <div style={{ flex: 1 }}>
-        {iv.nom && (
-          <span style={{ fontSize: 11.5, fontWeight: 600, color: '#3B82C4', display: 'block', marginBottom: 3 }}>
-            {iv.nom}
-          </span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
+          {iv.date && (
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: '#566880' }}>
+              {new Date(iv.date).toLocaleDateString('fr-FR')}
+            </span>
+          )}
+          {iv.nom && (
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: '#3B82C4' }}>{iv.nom}</span>
+          )}
+        </div>
         {iv.description && (
           <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, margin: 0 }}>
             {iv.description}
