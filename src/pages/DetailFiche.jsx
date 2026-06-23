@@ -733,9 +733,17 @@ export default function DetailFiche() {
   const [interventions, setInterventions] = useState([]);
   const [historiqueEDA, setHistoriqueEDA] = useState([]);
   const [user, setUser] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(searchParams.get('success') === 'true');
 
   const ficheId = searchParams.get('id');
   const { onFiche } = usePresence(ficheId);
+
+  useEffect(() => {
+    if (showSuccess) {
+      const timer = setTimeout(() => setShowSuccess(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccess]);
 
   useEffect(() => {
     if (!ficheId) { setLoading(false); return; }
@@ -772,6 +780,20 @@ export default function DetailFiche() {
 
       <Topbar fiche={fiche} ficheId={ficheId} onHypotheses={() => navigate(`/hypotheses-eleve?id=${ficheId}`)} />
       <HeroFiche fiche={fiche} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          style={{ maxWidth: 680, margin: '12px auto 0', padding: '0 14px' }}
+        >
+          <div style={{ padding: '12px 16px', borderRadius: 12, background: '#E4F4ED', border: '1px solid #1E7A52', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>✅</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#1E7A52' }}>Fiche de {fiche.prenom} {fiche.nom} créée avec succès</span>
+          </div>
+        </motion.div>
+      )}
 
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '16px 14px 80px' }}>
         <AnimatePresence mode="wait">

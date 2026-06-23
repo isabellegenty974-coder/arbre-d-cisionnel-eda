@@ -23,11 +23,23 @@ export default function FicheEleve() {
   const [classe, setClasse] = useState(urlParams.get('classe') || '');
   const [enseignant, setEnseignant] = useState(urlParams.get('enseignant') || '');
   const [dateNaissance, setDateNaissance] = useState(urlParams.get('date_naissance') || '');
+  const [motif, setMotif] = useState('');
   const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [anneeActive, setAnneeActive] = useState(null);
   const [errors, setErrors] = useState({});
+
+  // Déterminer l'année scolaire active au montage si pas déjà chargée
+  useEffect(() => {
+    if (!anneeActive) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const computed = month >= 7 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+      setAnneeActive(computed);
+    }
+  }, [anneeActive]);
 
   const [jourNaissance, setJourNaissance] = useState('');
   const [moisNaissance, setMoisNaissance] = useState('');
@@ -83,12 +95,15 @@ export default function FicheEleve() {
     return new Date(Number(annee), Number(mois), 0).getDate();
   };
 
+  const canSubmit = prenom.trim() && nom.trim() && ecole.trim();
+
   const validate = () => {
     const errs = {};
     if (!prenom.trim()) errs.prenom = 'Le prénom est obligatoire';
     else if (prenom.trim().length < 2) errs.prenom = 'Au minimum 2 caractères';
     if (!nom.trim()) errs.nom = 'Le nom est obligatoire';
     else if (nom.trim().length < 2) errs.nom = 'Au minimum 2 caractères';
+    if (!ecole.trim()) errs.ecole = "L'école est obligatoire";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -130,6 +145,7 @@ export default function FicheEleve() {
         date_naissance: dateNaissance || undefined,
         classe: classe || undefined,
         ecole: ecole || undefined,
+        observations: motif.trim() || undefined,
         notes: enseignant ? `Enseignant·e : ${enseignant}` : undefined,
         date: new Date().toISOString().split('T')[0],
         annee_scolaire: anneeActive || undefined,
@@ -149,6 +165,10 @@ export default function FicheEleve() {
       }
 
       setSaved(true);
+      // Rediriger vers la fiche détaillée après un court délai pour afficher le message de succès
+      setTimeout(() => {
+        navigate(`/detail-fiche?id=${created.id}&success=true`);
+      }, 1500);
     } catch (error) {
       setErrorMsg(error?.message || "Une erreur est survenue lors de la création de la fiche.");
     } finally {
@@ -298,18 +318,70 @@ export default function FicheEleve() {
               </div>
               <h2 className="font-bold text-lg text-[#0F172A]">Contexte scolaire</h2>
             </div>
-            <div>
-              <label className="text-sm font-semibold text-[#0F172A] block mb-2">École</label>
-              <select
-                value={ecole}
-                onChange={e => setEcole(e.target.value)}
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                <option value="">-- Sélectionner une école --</option>
-                {['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'].map(e => <option key={e} value={e}>{e}</option>)}
-              </select>
-              {ecole && urlParams.get('ecole') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">
+                  École <span className="text-xs text-gray-400">🔒 verrouillé</span>
+                </label>
+                {ecole ? (
+                  <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm text-gray-700 font-medium">
+                    {ecole}
+                  </div>
+                ) : (
+                  <select
+                    value={ecole}
+                    onChange={e => setEcole(e.target.value)}
+                    className={`w-full h-10 rounded-lg border ${errors.ecole ? 'border-destructive ring-1 ring-destructive' : 'border-input'} bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring`}
+                  >
+                    <option value="">-- Sélectionner une école --</option>
+                    {['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'].map(e => <option key={e} value={e}>{e}</option>)}
+                  </select>
+                )}
+                {errors.ecole && (
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    {errors.ecole}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">
+                  Classe <span className="text-xs text-gray-400">🔒 verrouillé</span>
+                </label>
+                <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm text-gray-700 font-medium">
+                  {classe || '—'}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">
+                  Année scolaire <span className="text-xs text-gray-400">🔒 verrouillé</span>
+                </label>
+                <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm text-gray-700 font-medium">
+                  {anneeActive || '—'}
+                </div>
+              </div>
             </div>
+          </motion.div>
+
+          {/* Section Motif du signalement */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6 p-6 rounded-2xl bg-white border border-[#D4A574]/20 shadow-soft"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-lg bg-[#D4A574]/10 flex items-center justify-center">
+                <span className="text-lg">📌</span>
+              </div>
+              <h2 className="font-bold text-lg text-[#0F172A]">Motif du signalement</h2>
+            </div>
+            <textarea
+              value={motif}
+              onChange={e => setMotif(e.target.value)}
+              placeholder="Décrivez le motif de signalement (difficultés observées, demandes de l'enseignant·e, contexte familial...)"
+              className="w-full min-h-[100px] p-3 rounded-lg border border-input bg-background text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring resize-y"
+            />
           </motion.div>
 
           {/* Message d'erreur */}
@@ -337,7 +409,7 @@ export default function FicheEleve() {
             >
               <Button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || !canSubmit}
                 className="w-full gap-2 h-11 bg-[#D4A574] hover:bg-[#C49464] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-soft"
               >
                 {submitting ? (
