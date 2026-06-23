@@ -108,6 +108,17 @@ export default function FicheEleve() {
       createdByProfession: profession,
     });
     setSavedId(created.id);
+
+    // Mettre à jour l'élève RASED importé : lier la fiche + passer en "Suivi actif"
+    const eleveRasedId = urlParams.get('eleve_rased_id');
+    if (eleveRasedId) {
+      await base44.entities.EleveRased.update(eleveRasedId, {
+        fiche_eleve_id: created.id,
+        statut: 'Suivi actif',
+        date_derniere_action: new Date().toISOString().split('T')[0],
+      }).catch(() => {});
+    }
+
     setSaved(true);
   };
 
