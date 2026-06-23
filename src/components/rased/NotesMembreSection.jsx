@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
+const PROF_LABELS = {
+  'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA',
+  'MaDR': 'Maître à Dominante Relationnelle (MaDR)',
+  'MaDP': 'Maître à Dominante Pédagogique (MaDP)',
+};
+
 const PROF_COLOR = {
   'Psy EN EDA': { bg: '#EAF2FB', color: '#254D7A', border: '#BFD9F2', text: '#3B82C4' },
   'MaDR':       { bg: '#E4F4ED', color: '#1E7A52', border: '#B2DFCC', text: '#1E7A52' },
@@ -161,7 +167,7 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#182840' }}>{note.membre_nom}</div>
-                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: c.bg, color: c.text }}>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: c.bg, color: c.text }} title={PROF_LABELS[note.membre_profession] || note.membre_profession}>
                       {note.membre_profession === 'Psy EN EDA' ? 'Psy-EN EDA' : note.membre_profession}
                     </span>
                     {note.updated_at && (
