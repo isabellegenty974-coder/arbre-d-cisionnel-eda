@@ -23,10 +23,7 @@ const STATUT_CFG = {
   'Clôturé':      { ico: '🏁', lbl: 'Clôturé',      sub: 'Suivi terminé',   pill: '#F0F3F8', pillT: '#566880' },
 };
 
-const TYPES_INTERVENTION = [
-  'Équipe éducative','Observation en classe','Entretien élève',
-  'Entretien avec la famille','Entretien avec l\'enseignant','Bilan / évaluation','Rééducation','Autre',
-];
+
 
 function initiales(prenom, nom) {
   return `${prenom?.[0] || ''}${nom?.[0] || ''}`.toUpperCase();
@@ -154,7 +151,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
-  const [newIntervention, setNewIntervention] = useState({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
+  const [newIntervention, setNewIntervention] = useState({ date: '', nom: '', description: '' });
   const [showRapport, setShowRapport] = useState(false);
   const [addingSynthese, setAddingSynthese] = useState(false);
   const [newSynthese, setNewSynthese] = useState({ date: '', membres: '', decisions: '', fichier_url: '' });
@@ -173,7 +170,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
     await base44.entities.FicheEleve.update(ficheId, { interventions: updated });
     setFiche(f => ({ ...f, interventions: updated }));
     setInterventions(updated);
-    setNewIntervention({ date: '', type: 'Équipe éducative', profession: 'Psy EN EDA', description: '' });
+    setNewIntervention({ date: '', nom: '', description: '' });
     setAddingIntervention(false);
   };
 
@@ -305,9 +302,8 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
             <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { label: 'Date', content: <input type="date" value={newIntervention.date} onChange={e => setNewIntervention({...newIntervention, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
-                { label: 'Type', content: <select value={newIntervention.type} onChange={e => setNewIntervention({...newIntervention, type: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', background: '#fff' }}>{TYPES_INTERVENTION.map(t => <option key={t}>{t}</option>)}</select> },
-                { label: 'Profession', content: <select value={newIntervention.profession} onChange={e => setNewIntervention({...newIntervention, profession: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', background: '#fff' }}><option>Psy EN EDA</option><option>MaDR</option><option>MaDP</option></select> },
-                { label: 'Description', content: <textarea value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} placeholder="Décrivez la séance ou intervention…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+                { label: 'Nom du professionnel', content: <input type="text" value={newIntervention.nom} onChange={e => setNewIntervention({...newIntervention, nom: e.target.value})} placeholder="Ex : Mme Durand, Psy EN EDA" style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
+                { label: 'Acte accompli', content: <textarea value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} placeholder="Décrivez l'acte accompli…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
               ].map(({ label, content }) => (
                 <div key={label}>
                   <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
@@ -328,8 +324,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 11.5, fontWeight: 600, color: '#566880' }}>{new Date(iv.date).toLocaleDateString('fr-FR')}</span>
-                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '1px 7px', borderRadius: 8, background: PROF_BG[iv.profession] || '#F0F3F8', color: PROF_TEXT[iv.profession] || '#566880' }}>{PROF_LABEL[iv.profession] || iv.profession}</span>
-                  {iv.type && <span style={{ fontSize: 10.5, padding: '1px 7px', borderRadius: 8, background: '#FEF0E4', color: '#B85C1A' }}>{iv.type}</span>}
+                  {iv.nom && <span style={{ fontSize: 11.5, fontWeight: 600, color: '#3B82C4' }}>{iv.nom}</span>}
                 </div>
                 {iv.description && <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, margin: 0 }}>{iv.description}</p>}
               </div>
