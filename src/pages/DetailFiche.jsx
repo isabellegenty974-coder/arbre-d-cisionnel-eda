@@ -304,7 +304,35 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
               {[
                 { label: 'Date', content: <input type="date" value={newIntervention.date} onChange={e => setNewIntervention({...newIntervention, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
                 { label: 'Nom du professionnel', content: <input type="text" value={newIntervention.nom} onChange={e => setNewIntervention({...newIntervention, nom: e.target.value})} placeholder="Ex : Mme Durand, Psy EN EDA" style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
-                { label: 'Acte accompli', content: <textarea value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} placeholder="Décrivez l'acte accompli…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+                { label: 'Acte accompli', content: (
+                  <select value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', boxSizing: 'border-box', height: 36 }}>
+                    <option value="">— Sélectionner un acte —</option>
+                    <optgroup label="Actes Psy-EN EDA">
+                      <option>Entretien avec l'élève (Psy-EN)</option>
+                      <option>Passation psychométrique (Psy-EN)</option>
+                      <option>Analyse de situation (Psy-EN)</option>
+                      <option>Observation en classe (Psy-EN)</option>
+                      <option>Entretien avec la famille</option>
+                      <option>Participation à une ESS/EE</option>
+                      <option>Liaison avec l'enseignant·e</option>
+                    </optgroup>
+                    <optgroup label="Actes MaDR">
+                      <option>Séance de rééducation (MaDR)</option>
+                      <option>Observation en classe (MaDR)</option>
+                      <option>Liaison avec l'enseignant·e (MaDR)</option>
+                    </optgroup>
+                    <optgroup label="Actes MaDP">
+                      <option>Séance d'aide pédagogique (MaDP)</option>
+                      <option>Observation en classe (MaDP)</option>
+                      <option>Liaison avec l'enseignant·e (MaDP)</option>
+                    </optgroup>
+                    <optgroup label="Commun">
+                      <option>Participation à une ESS/EE</option>
+                      <option>Réunion d'équipe RASED</option>
+                      <option>Autre</option>
+                    </optgroup>
+                  </select>
+                ) },
               ].map(({ label, content }) => (
                 <div key={label}>
                   <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
