@@ -373,7 +373,7 @@ export default function Dashboard() {
         </div>
 
         {/* CONTENT */}
-        <div className="db-content" style={{ padding: '24px 26px 60px' }}>
+        <div className="db-content" style={{ padding: '24px 26px 140px', flex: 1, overflowY: 'auto' }}>
 
           {/* HERO */}
           <div className="db-hero" style={{ background: '#1A3353', borderRadius: 14, padding: '18px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, overflow: 'hidden', position: 'relative', boxSizing: 'border-box', width: '100%' }}>
