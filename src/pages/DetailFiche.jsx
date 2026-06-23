@@ -503,19 +503,49 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
 
 // ── Onglet Historique ─────────────────────────────────────────────────────────
 function TabHistorique({ fiche, interventions, historiqueEDA }) {
+  const PROF_LABEL_SHORT = { 'Psy EN EDA': 'Psy-EN EDA', 'MaDR': 'MaDR', 'MaDP': 'MaDP' };
+
+  const formatNomMembre = (iv) => {
+    if (iv.nom) return `${iv.nom}${iv.profession && iv.profession !== 'RASED' ? ` · ${PROF_LABEL_SHORT[iv.profession] || iv.profession}` : ''}`;
+    if (iv.profession && iv.profession !== 'RASED') return PROF_LABEL_SHORT[iv.profession] || iv.profession;
+    return fiche.createdByName ? `${fiche.createdByName}${fiche.createdByProfession ? ` · ${PROF_LABEL_SHORT[fiche.createdByProfession] || fiche.createdByProfession}` : ''}` : 'RASED';
+  };
+
+  const isRapport = (desc) => {
+    if (!desc) return false;
+    return /RAPPORT|CLINIQUE|#\s/.test(desc);
+  };
+
+  const rapportType = (desc) => {
+    const m = desc.match(/\[([^\]]+)\]/);
+    return m ? m[1] : 'observation';
+  };
+
+  const cleanObservation = (desc) => {
+    if (!desc) return '';
+    let cleaned = desc
+      .replace(/\[.*?\]/g, '')
+      .replace(/^#+\s.*$/gm, '')
+      .replace(/\*\*/g, '')
+      .replace(/---/g, '')
+      .replace(/#\s*/g, '')
+      .trim();
+    const firstLine = cleaned.split('\n').find(l => l.trim().length > 0) || '';
+    return firstLine.length > 120 ? firstLine.substring(0, 120) + '…' : firstLine;
+  };
+
   const events = [
     ...interventions.map(iv => {
-      const cleanDesc = (iv.description || '')
-        .replace(/\[.*?\]/g, '').replace(/^#+\s.*$/gm, '').replace(/\*\*/g, '').replace(/---/g, '').trim();
-      const firstLine = cleanDesc.split('\n').find(l => l.trim().length > 0) || '';
-      const observation = firstLine.length > 120 ? firstLine.substring(0, 120) + '…' : firstLine;
-      return { date: new Date(iv.date), ico: '💬', type: 'note', title: iv.nom || iv.profession || 'Observation', meta: observation };
+      if (isRapport(iv.description)) {
+        return { date: new Date(iv.date), ico: '📄', type: 'rapport', title: `Rapport généré · ${rapportType(iv.description)}`, meta: formatNomMembre(iv) };
+      }
+      return { date: new Date(iv.date), ico: '💬', type: 'note', title: iv.description || 'Observation', meta: formatNomMembre(iv) };
     }),
-    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: `Hypothèses de travail — ${h.domaine}`, meta: `${h.hypotheses?.length || 0} hypothèse(s) retenue(s)` })),
+    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: 'Hypothèses de travail formulées', meta: `${h.hypotheses?.length || 0} hypothèse${(h.hypotheses?.length || 0) > 1 ? 's' : ''} retenue${(h.hypotheses?.length || 0) > 1 ? 's' : ''}` })),
     { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: `${fiche.ecole || ''}${fiche.classe ? ' · ' + fiche.classe : ''}` },
   ].sort((a, b) => b.date - a.date);
 
-  const DOT_BG = { note: '#E4F4ED', hyp: '#EAF2FB', stat: '#FEF0E4', imp: '#EEE9FF' };
+  const DOT_BG = { note: '#E4F4ED', hyp: '#EAF2FB', stat: '#FEF0E4', imp: '#EEE9FF', rapport: '#F0F3F8' };
 
   return (
     <Card>
