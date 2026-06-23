@@ -15,6 +15,18 @@ const PROF_COLORS = {
   'MaDP': { color: '#B85C1A', bg: '#FEF0E4' },
 };
 
+const PROF_LABEL = {
+  'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA',
+  'MaDR': 'Maître à Dominante Relationnelle (MaDR)',
+  'MaDP': 'Maître à Dominante Pédagogique (MaDP)',
+};
+
+const PROF_BADGE = {
+  'Psy EN EDA': 'Psy-EN EDA',
+  'MaDR': 'MaDR',
+  'MaDP': 'MaDP',
+};
+
 export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom, createdByName, createdByProfession }) {
   const [membres, setMembres] = useState([]);
   const [intervenants, setIntervenants] = useState([]);
@@ -152,9 +164,7 @@ export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom,
       ) : (
        <div className="space-y-2">
           {intervenants.map(({ membre_id, nom, profession, acces }) => {
-            const accessConf = ACCESS_LEVELS.find(a => a.value === acces) || ACCESS_LEVELS[0];
             const profConf = PROF_COLORS[profession] || { color: '#6b7280', bg: '#f3f4f6' };
-            const AccessIcon = accessConf.icon;
             const isCreator = membre_id === 'creator';
             return (
               <div key={membre_id} className="flex items-center gap-3 p-2.5 rounded-xl bg-secondary/20 border border-border">
@@ -162,12 +172,11 @@ export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom,
                   {nom?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{nom} {isCreator && '(Créateur)'}</p>
-                  <p className="text-xs text-muted-foreground">{profession}</p>
+                  <p className="text-sm font-semibold text-foreground">{nom} {isCreator && '(Créateur)'}</p>
+                  <p className="text-xs text-muted-foreground">{PROF_LABEL[profession] || profession}</p>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0" style={{ background: accessConf.bg, color: accessConf.color }}>
-                  <AccessIcon className="w-3 h-3" />
-                  {accessConf.label}
+                <div className="flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shrink-0" style={{ background: profConf.bg, color: profConf.color }}>
+                  {PROF_BADGE[profession] || profession}
                 </div>
                 {!isCreator && (
                   <button onClick={() => handleRemove(membre_id)} className="text-gray-300 hover:text-red-400 transition-colors shrink-0">

@@ -505,10 +505,19 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
 function TabHistorique({ fiche, interventions, historiqueEDA }) {
   const PROF_LABEL_SHORT = { 'Psy EN EDA': 'Psy-EN EDA', 'MaDR': 'MaDR', 'MaDP': 'MaDP' };
 
+  const inferProfession = (desc) => {
+    if (!desc) return '';
+    if (desc.includes('Psychologue') || desc.includes('Psy-EN') || desc.includes('Psy EN')) return 'Psy EN EDA';
+    if (desc.includes('MaDR') || desc.includes('Relationnelle')) return 'MaDR';
+    if (desc.includes('MaDP') || desc.includes('Pédagogique')) return 'MaDP';
+    return '';
+  };
+
   const formatNomMembre = (iv) => {
-    if (iv.nom) return `${iv.nom}${iv.profession && iv.profession !== 'RASED' ? ` · ${PROF_LABEL_SHORT[iv.profession] || iv.profession}` : ''}`;
-    if (iv.profession && iv.profession !== 'RASED') return PROF_LABEL_SHORT[iv.profession] || iv.profession;
-    return fiche.createdByName ? `${fiche.createdByName}${fiche.createdByProfession ? ` · ${PROF_LABEL_SHORT[fiche.createdByProfession] || fiche.createdByProfession}` : ''}` : 'RASED';
+    const prof = (iv.profession && iv.profession !== 'RASED') ? iv.profession : inferProfession(iv.description);
+    if (iv.nom) return `${iv.nom}${prof ? ` · ${PROF_LABEL_SHORT[prof] || prof}` : ''}`;
+    if (prof) return PROF_LABEL_SHORT[prof] || prof;
+    return fiche.createdByName ? `${fiche.createdByName}${fiche.createdByProfession ? ` · ${PROF_LABEL_SHORT[fiche.createdByProfession] || fiche.createdByProfession}` : ''}` : '';
   };
 
   const isRapport = (desc) => {
@@ -542,7 +551,7 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
       return { date: new Date(iv.date), ico: '💬', type: 'note', title: iv.description || 'Observation', meta: formatNomMembre(iv) };
     }),
     ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: 'Hypothèses de travail formulées', meta: `${h.hypotheses?.length || 0} hypothèse${(h.hypotheses?.length || 0) > 1 ? 's' : ''} retenue${(h.hypotheses?.length || 0) > 1 ? 's' : ''}` })),
-    { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: `${fiche.ecole || ''}${fiche.classe ? ' · ' + fiche.classe : ''}` },
+    { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: [fiche.createdByName, fiche.createdByProfession && (PROF_LABEL_SHORT[fiche.createdByProfession] || fiche.createdByProfession), fiche.ecole, fiche.classe].filter(Boolean).join(' · ') },
   ].sort((a, b) => b.date - a.date);
 
   const DOT_BG = { note: '#E4F4ED', hyp: '#EAF2FB', stat: '#FEF0E4', imp: '#EEE9FF', rapport: '#F0F3F8' };
