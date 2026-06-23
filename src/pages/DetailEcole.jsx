@@ -155,7 +155,7 @@ export default function DetailEcole() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-6 pb-28 space-y-6">
+      <div className="max-w-5xl mx-auto px-6 py-6 pb-32 space-y-6">
         {/* Fiche école récapitulative */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-200 p-5">
           <div className="flex items-center justify-between mb-4">
