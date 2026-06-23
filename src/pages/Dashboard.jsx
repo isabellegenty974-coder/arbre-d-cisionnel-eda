@@ -606,18 +606,24 @@ export default function Dashboard() {
                 </div>
                 {elevesR.filter(e => e.statut === 'Suivi actif').slice(0, 4).map((e, i, arr) => {
                   const fiche = fiches.find(f => f.id === e.fiche_eleve_id);
-                  const prof = fiche?.createdByProfession;
+                  const ecole = ecoles.find(ec => ec.id === e.ecole_id);
+                  const prof = fiche?.createdByProfession || 'Psy EN EDA';
                   const bg = PROF_COLOR[prof] || '#3B82C4';
                   const init = `${e.prenom?.[0] || ''}${e.nom?.[0] || ''}`;
                   const pillMap = { 'Suivi actif': { bg: '#E4F4ED', c: '#1E7A52', lbl: 'Suivi actif' }, 'En attente': { bg: '#FEF0E4', c: '#B85C1A', lbl: 'En attente' }, 'Nouveau': { bg: '#EAF2FB', c: '#3B82C4', lbl: 'Hypothèses' } };
                   const pill = pillMap[e.statut] || { bg: '#EEE9FF', c: '#5B3FA6', lbl: e.statut };
+                  const shortProf = prof === 'Psy EN EDA' ? 'Psy-EN EDA' : prof;
+                  const ecoleName = ecole ? (ecole.nom.charAt(0).toUpperCase() + ecole.nom.slice(1).toLowerCase()) : '';
                   return (
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}
-                      onClick={() => navigate(`/detail-eleve?id=${e.id}`)}>
+                      onClick={() => navigate(`/detail-fiche?id=${e.fiche_eleve_id}`)}>
                       <div style={{ width: 30, height: 30, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{init}</div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
-                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[e.classe, e.ecole_id].filter(Boolean).join(' · ')}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                          <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
+                          <span style={{ fontSize: 8.5, fontWeight: 700, padding: '1px 5px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: PROF_BG[prof], color: PROF_TEXT[prof] }}>{shortProf}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[e.classe, ecoleName].filter(Boolean).join(' · ') || '—'}</div>
                       </div>
                       <div style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10, flexShrink: 0, background: pill.bg, color: pill.c }}>{pill.lbl}</div>
                     </div>
