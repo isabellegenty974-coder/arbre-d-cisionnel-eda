@@ -15,7 +15,7 @@ import NotificationsBadge from '@/components/rased/NotificationsBadge';
 const NAV_ITEMS = [
   { id: 'ecoles', label: 'Mes écoles', icon: School },
   { id: 'eleves', label: 'Élèves suivis', icon: Users },
-  { id: 'diagnostics', label: 'Diagnostics EDA', icon: FileText },
+  { id: 'diagnostics', label: 'Hypothèses de travail', icon: FileText },
   { id: 'membres', label: 'Membres RASED', icon: Users },
   { id: 'stats', label: 'Statistiques', icon: BarChart2 },
   { id: 'export', label: 'Export annuel', icon: FileText },
