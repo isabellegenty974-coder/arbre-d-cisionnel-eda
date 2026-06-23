@@ -160,9 +160,23 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
 
   const handleSaveStatut = async () => {
     setSavingStatut(true);
-    await base44.entities.FicheEleve.update(ficheId, { statut });
-    setFiche(f => ({ ...f, statut }));
-    setSavingStatut(false);
+    try {
+      // Sauvegarder le statut sur FicheEleve
+      await base44.entities.FicheEleve.update(ficheId, { statut });
+      // Mettre à jour le statut et la date de dernière action sur l'EleveRased lié
+      const elevesRased = await base44.entities.EleveRased.filter({ fiche_eleve_id: ficheId }).catch(() => []);
+      if (elevesRased.length > 0) {
+        await base44.entities.EleveRased.update(elevesRased[0].id, {
+          statut,
+          date_derniere_action: new Date().toISOString().split('T')[0],
+        });
+      }
+      setFiche(f => ({ ...f, statut }));
+    } catch (e) {
+      console.error('Erreur sauvegarde statut:', e);
+    } finally {
+      setSavingStatut(false);
+    }
   };
 
   const addIntervention = async () => {
