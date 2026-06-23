@@ -145,17 +145,24 @@ export default function FicheEleve() {
       }
 
       const fullName = user?.full_name || '';
-      const membres = user?.email
-        ? await base44.entities.MembreEquipe.filter({ email: user.email }).catch(() => [])
-        : [];
-      const profession = membres.length > 0 ? membres[0].profession : '';
+      let profession = '';
+      try {
+        if (user?.email) {
+          const membres = await base44.entities.MembreEquipe.filter({ email: user.email });
+          profession = membres.length > 0 ? membres[0].profession : '';
+        }
+      } catch {}
 
       // S'assurer que l'école existe dans la base
       if (ecole) {
-        await ensureEcoleExists(ecole.trim());
+        try {
+          await ensureEcoleExists(ecole.trim());
+        } catch (e) {
+          console.warn('ensureEcoleExists failed:', e);
+        }
       }
 
-      const doCreate = () => base44.entities.FicheEleve.create({
+      const created = await base44.entities.FicheEleve.create({
         nom: nom.trim(),
         prenom: prenom.trim(),
         age: ageCalcule !== null ? ageCalcule : undefined,
@@ -169,8 +176,6 @@ export default function FicheEleve() {
         createdByName: fullName,
         createdByProfession: profession,
       });
-
-      const created = await doCreate();
       setSavedId(created.id);
 
       // Mettre à jour l'élève RASED importé : lier la fiche + passer en "Suivi actif"
@@ -189,8 +194,14 @@ export default function FicheEleve() {
         navigate(`/detail-fiche?id=${created.id}&success=true`);
       }, 1500);
     } catch (error) {
-      const msg = error?.message || '';
-      setErrorMsg(msg || "Une erreur est survenue lors de la création de la fiche.");
+      console.error('Erreur création fiche:', error);
+      const msg = error?.response?.data?.detail || error?.message || error?.data?.detail || '';
+      if (msg.includes('auth') || msg.includes('token') || msg.includes('401') || error?.status === 401) {
+        setErrorMsg("Votre session a expiré. Vous allez être redirigé vers la page de connexion.");
+        setTimeout(() => base44.auth.redirectToLogin(window.location.href), 2000);
+      } else {
+        setErrorMsg(msg || "Une erreur est survenue lors de la création de la fiche.");
+      }
     } finally {
       setSubmitting(false);
     }
