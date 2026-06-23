@@ -8,14 +8,14 @@ import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 
 const PROFESSION_CONFIG = {
-  'Psy EN EDA': { label: 'Psychologue EN EDA', color: '#2563eb', bg: '#dbeafe', shortLabel: 'Psy-EN' },
+  'Psy EN EDA': { label: 'Psychologue de l\'Éducation Nationale · Spécialité EDA', color: '#2563eb', bg: '#dbeafe', shortLabel: 'Psy-EN' },
   'MaDR': { label: 'Maître à dominante relationnelle', color: '#16a34a', bg: '#dcfce7', shortLabel: 'Maître E' },
   'MaDP': { label: 'Maître à dominante pédagogique', color: '#d97706', bg: '#fef3c7', shortLabel: 'Maître G' },
 };
 const PROFESSION_LABELS = {
   'MaDP': 'Maître à dominante pédagogique (MaDP)',
   'MaDR': 'Maître à dominante relationnelle (MaDR)',
-  'Psy EN EDA': 'Psychologue EN EDA',
+  'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA',
 };
 
 export default function EquipeRased() {
@@ -102,10 +102,19 @@ export default function EquipeRased() {
   };
 
   const handleInvite = async () => {
-    if (!inviteEmail.trim()) return;
+    const email = inviteEmail.trim();
+    if (!email) return;
+
+    // Validation d'email basique
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setInviteStatus('error');
+      return;
+    }
+
     setInviteStatus('loading');
     try {
-      await base44.users.inviteUser(inviteEmail.trim(), 'user');
+      await base44.users.inviteUser(email, 'user');
       setInviteStatus('success');
       setInviteEmail('');
       setTimeout(() => { setInviteStatus(null); setShowInviteForm(false); }, 3000);
@@ -117,7 +126,7 @@ export default function EquipeRased() {
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-16">
       <HamburgerMenu />
-      <ScreenLayout title="👥 Équipe RASED" subtitle="Membres de l'équipe et leurs professions">
+      <ScreenLayout title="👥 Équipe RASED" subtitle="Équipe RASED · Circonscription de La Possession">
         <div className="space-y-4 max-w-lg mx-auto">
           {loading ? (
             <div className="text-center py-10 text-[#0F172A]/50">Chargement...</div>
@@ -287,7 +296,7 @@ export default function EquipeRased() {
                   <option value="">Sélectionner une profession</option>
                   <option value="MaDP">Maître à dominante pédagogique (MaDP)</option>
                   <option value="MaDR">Maître à dominante relationnelle (MaDR)</option>
-                  <option value="Psy EN EDA">Psychologue EN EDA</option>
+                  <option value="Psy EN EDA">Psychologue de l'Éducation Nationale · Spécialité EDA</option>
                 </select>
               </div>
             </div>
