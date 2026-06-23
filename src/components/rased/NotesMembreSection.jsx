@@ -23,6 +23,7 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
   const [selectedTags, setSelectedTags] = useState([]);
   const [editing, setEditing]     = useState(null);
   const [saving, setSaving]       = useState(false);
+  const [error, setError]         = useState(null);
 
   const load = async () => {
     const [u, all] = await Promise.all([
@@ -42,8 +43,16 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
   }, [ficheId]);
 
   const handlePublish = async () => {
-    if (!user || !draft.trim()) return;
+    if (!user) {
+      setError('Vous devez être connecté pour ajouter une note.');
+      return;
+    }
+    if (!draft.trim()) {
+      setError('La note ne peut pas être vide.');
+      return;
+    }
     setSaving(true);
+    setError(null);
     try {
       const profession = user.profession || 'Psy EN EDA';
       const noteData = {
@@ -78,6 +87,7 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
       await load();
     } catch (e) {
       console.error('Erreur publication note:', e);
+      setError('Erreur lors de l\'enregistrement. Réessayez ou contactez l\'administratrice.');
     } finally {
       setSaving(false);
     }
@@ -111,10 +121,18 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
         )}
       </div>
 
+      {/* Message d'erreur */}
+      {error && (
+        <div style={{ background: '#FEF0E4', border: '1px solid #B85C1A', borderRadius: 10, padding: '12px 14px', marginBottom: 14, fontSize: 12.5, color: '#B85C1A', fontWeight: 500, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          <span style={{ fontSize: 14 }}>⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Zone d'ajout/modification */}
       {(adding || editing) && (
         <div style={{ background: '#F8FAFD', border: '1px solid #D8E1EE', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
-          <textarea value={draft} onChange={e => setDraft(e.target.value)}
+          <textarea value={draft} onChange={e => { setDraft(e.target.value); setError(null); }}
             placeholder="Partagez vos observations, actions, discussions…"
             style={{ width: '100%', minHeight: 100, padding: '10px 12px', fontSize: 13, border: '1px solid #D8E1EE', borderRadius: 8, outline: 'none', resize: 'vertical', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', marginBottom: 10 }}
           />
@@ -136,12 +154,13 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button onClick={() => { setAdding(false); setEditing(null); setDraft(''); setSelectedTags([]); }}
+            <button onClick={() => { setAdding(false); setEditing(null); setDraft(''); setSelectedTags([]); setError(null); }}
               style={{ padding: '8px 16px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880', fontWeight: 600 }}>
               Annuler
             </button>
-            <button onClick={handlePublish} disabled={saving || !draft.trim()}
-              style={{ padding: '8px 16px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: (saving || !draft.trim()) ? 0.6 : 1 }}>
+            <button onClick={handlePublish} disabled={saving || !draft.trim() || !user}
+              title={!user ? 'Vous devez être connecté' : !draft.trim() ? 'Veuillez saisir du texte' : ''}
+              style={{ padding: '8px 16px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: (!user || saving || !draft.trim()) ? 'not-allowed' : 'pointer', fontWeight: 600, opacity: (!user || saving || !draft.trim()) ? 0.5 : 1 }}>
               {saving ? 'Enregistrement…' : editing ? 'Mettre à jour' : 'Publier la note'}
             </button>
           </div>
