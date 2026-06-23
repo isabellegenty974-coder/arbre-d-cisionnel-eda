@@ -5,10 +5,11 @@ import { motion } from 'framer-motion';
 import {
   School, Users, BarChart2, FileText, Bell,
   ChevronRight, Plus, AlertTriangle, CheckCircle,
-  Home, Search, Phone, Mail, User
+  Home, Search, Phone, Mail, User, Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEcoleModal from '@/components/rased/AddEcoleModal';
+import DeleteEcoleModal from '@/components/rased/DeleteEcoleModal';
 import NotificationsBadge from '@/components/rased/NotificationsBadge';
 
 const NAV_ITEMS = [
@@ -36,16 +37,22 @@ export default function MesEcoles() {
   const [showAddEcole, setShowAddEcole] = useState(false);
   const [search, setSearch] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [ecoleToDelete, setEcoleToDelete] = useState(null);
+
+  const canDelete = currentUser?.profession === 'Psy EN EDA' || currentUser?.role === 'admin';
 
   const load = async () => {
-    const [e, el, m] = await Promise.all([
+    const [e, el, m, u] = await Promise.all([
       base44.entities.EcoleRased.list('-created_date', 200).catch(() => []),
       base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
       base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
+      base44.auth.me().catch(() => null),
     ]);
     setEcoles(e);
     setEleves(el);
     setMembres(m);
+    setCurrentUser(u);
     setLoading(false);
   };
 
@@ -199,12 +206,22 @@ export default function MesEcoles() {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+                    className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col relative"
                   >
+                    {/* Bouton suppression — réservé Psy-EN EDA */}
+                    {canDelete && (
+                      <button
+                        onClick={() => setEcoleToDelete(ecole)}
+                        title="Supprimer cette école"
+                        className="absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center bg-white/80 border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                     {/* Header */}
                     <div className="p-4 border-b border-gray-100">
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 pr-8">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-bold text-[#0F172A] truncate">{ecole.nom}</h3>
                             {stale && (
@@ -302,6 +319,18 @@ export default function MesEcoles() {
         membres={membres}
         onSaved={() => { setShowAddEcole(false); load(); }}
       />
+
+      {ecoleToDelete && (
+        <DeleteEcoleModal
+          ecole={ecoleToDelete}
+          eleveCount={getEcoleStats(ecoleToDelete.id).total}
+          onClose={() => setEcoleToDelete(null)}
+          onDeleted={() => {
+            setEcoleToDelete(null);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }
