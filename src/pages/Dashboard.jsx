@@ -246,8 +246,25 @@ export default function Dashboard() {
   const alertesFiches  = fichesFiltrees.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
   const elevesClotured = elevesR.filter(e => e.statut === 'Clôturé').length;
 
+  // Critères pour alertes : fiche, notes ou interventions non mise à jour depuis 30j
+  // Filtrer sur statut "Suivi actif" ou "En attente" seulement
+  const alertesFichesRefined = fichesFiltrees.filter(f => {
+    const eleveLinked = elevesR.find(e => e.fiche_eleve_id === f.id);
+    if (!eleveLinked || !['Suivi actif', 'En attente'].includes(eleveLinked.statut)) return false;
+
+    const lastUpdate = new Date(f.updated_date || f.created_date).getTime();
+    const lastIntervention = f.interventions?.length > 0 ? new Date(Math.max(...f.interventions.map(i => new Date(i.date).getTime()))).getTime() : 0;
+    const lastNote = f.notes ? lastUpdate : 0;
+
+    const mostRecentActivity = Math.max(lastUpdate, lastIntervention, lastNote);
+    return (now - mostRecentActivity) > MS30;
+  });
+
   // Détecter fiches incomplètes
   const fichesIncompletes = fichesFiltrees.filter(f => {
+    const eleveLinked = elevesR.find(e => e.fiche_eleve_id === f.id);
+    if (!eleveLinked || !['Suivi actif', 'En attente'].includes(eleveLinked.statut)) return false;
+
     const missing = [];
     if (!f.motif_signalement && !f.observations) missing.push('Motif');
     if (!f.intervenants || f.intervenants.length === 0) missing.push('Intervenant');
@@ -263,13 +280,13 @@ export default function Dashboard() {
     return { ...f, missing };
   });
 
-  const totalAlertes = alertesFiches.length + fichesIncompletes.length;
+  const totalAlertes = alertesFichesRefined.length + fichesIncompletes.length;
 
   const recentActivity = [...fichesFiltrees]
     .sort((a, b) => new Date(b.updated_date || b.created_date) - new Date(a.updated_date || a.created_date))
     .slice(0, 5);
 
-  const alertes5 = [...alertesFiches]
+  const alertes5 = [...alertesFichesRefined]
     .sort((a, b) => new Date(a.updated_date || a.created_date) - new Date(b.updated_date || b.created_date))
     .slice(0, 5);
 
@@ -455,10 +472,13 @@ export default function Dashboard() {
             {/* Section 1 : Sans mise à jour +30j */}
             <div style={{ padding: '14px 0', borderBottom: '1px solid #F0F3F8' }}>
               <div style={{ padding: '0 18px 12px', fontSize: 12.5, fontWeight: 600, color: '#182840' }}>⏰ Sans mise à jour +30j</div>
-              {alertesFiches.length === 0
+              {alertesFichesRefined.length === 0
                 ? <p style={{ padding: '14px 18px', fontSize: 13, color: '#1E7A52', background: '#E4F4ED', marginLeft: 10, marginRight: 10, borderRadius: 10 }}>✅ Tous les dossiers sont à jour</p>
-                : alertesFiches.slice(0, 5).map((e, i) => {
-                  const days = Math.floor((now - new Date(e.updated_date || e.created_date).getTime()) / 86400000);
+                : alertesFichesRefined.slice(0, 5).map((e, i) => {
+                  const lastUpdate = new Date(e.updated_date || e.created_date).getTime();
+                  const lastIntervention = e.interventions?.length > 0 ? Math.max(...e.interventions.map(i => new Date(i.date).getTime())) : 0;
+                  const mostRecentActivity = Math.max(lastUpdate, lastIntervention);
+                  const days = Math.floor((now - mostRecentActivity) / 86400000);
                   return (
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < Math.min(5, alertesFiches.length) - 1 ? '1px solid #F0F3F8' : 'none' }}>
                       <div style={{ flex: 1 }}>
@@ -474,9 +494,9 @@ export default function Dashboard() {
                     </div>
                   );
                 })}
-              {alertesFiches.length > 5 && (
+              {alertesFichesRefined.length > 5 && (
                 <div style={{ padding: '8px 18px', textAlign: 'right' }}>
-                  <Link to="/liste-eleves" style={{ fontSize: 11.5, color: '#3B82C4', cursor: 'pointer', fontWeight: 500, textDecoration: 'none' }}>Voir tous les {alertesFiches.length} →</Link>
+                  <Link to="/liste-eleves" style={{ fontSize: 11.5, color: '#3B82C4', cursor: 'pointer', fontWeight: 500, textDecoration: 'none' }}>Voir tous les {alertesFichesRefined.length} →</Link>
                 </div>
               )}
             </div>
