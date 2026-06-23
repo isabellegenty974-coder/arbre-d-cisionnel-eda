@@ -65,6 +65,21 @@ export default function FicheEleve() {
       const age = Math.floor((new Date() - d) / 31536000000);
       setAgeCalcule(age >= 0 ? age : null);
     }
+
+    // Récupérer le nom de l'enseignant·e depuis les données de la classe (import PDF)
+    const eleveRasedId = urlParams.get('eleve_rased_id');
+    if (eleveRasedId) {
+      base44.entities.EleveRased.get(eleveRasedId).then(eleve => {
+        if (eleve?.classe_id) {
+          return base44.entities.ClasseEcole.get(eleve.classe_id);
+        }
+        return null;
+      }).then(classeRec => {
+        if (classeRec?.enseignant) {
+          setEnseignant(classeRec.enseignant);
+        }
+      }).catch(() => {});
+    }
   }, []);
 
   const handleDateNaissance = (jour, mois, annee) => {
