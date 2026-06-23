@@ -139,6 +139,17 @@
     "rapport": {
       "type": "string",
       "description": "Rapport g\u00e9n\u00e9r\u00e9 via le diagnostic"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "Nouveau",
+        "Suivi actif",
+        "En attente",
+        "Cl\u00f4tur\u00e9"
+      ],
+      "default": "Nouveau",
+      "description": "Statut du suivi RASED"
     }
   },
   "required": [
