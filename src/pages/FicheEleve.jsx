@@ -77,8 +77,18 @@ export default function FicheEleve() {
         if (classeRec?.enseignant) {
           setEnseignant(classeRec.enseignant);
         }
-      }).catch(() => {});
+      }).catch((e) => console.warn('Récupération enseignant via eleve_rased_id échouée:', e));
     }
+  }, []);
+
+  // Debug: afficher les paramètres URL au montage
+  useEffect(() => {
+    console.log('[FicheEleve] URL params:', {
+      enseignant: urlParams.get('enseignant'),
+      eleve_rased_id: urlParams.get('eleve_rased_id'),
+      classe: urlParams.get('classe'),
+      ecole: urlParams.get('ecole'),
+    });
   }, []);
 
   const handleDateNaissance = (jour, mois, annee) => {
