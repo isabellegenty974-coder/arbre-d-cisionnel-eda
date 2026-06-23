@@ -150,6 +150,31 @@
       ],
       "default": "Nouveau",
       "description": "Statut du suivi RASED"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string"
+          },
+          "uploadedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Documents import\u00e9s et stock\u00e9s de fa\u00e7on permanente, li\u00e9s \u00e0 la fiche \u00e9l\u00e8ve"
     }
   },
   "required": [

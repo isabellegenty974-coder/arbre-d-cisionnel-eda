@@ -12,8 +12,8 @@ export default function DocumentsSection({ ficheId }) {
 
   const loadDocuments = async () => {
     try {
-      const docs = await base44.asServiceRole.entities.FicheEleve.get(ficheId);
-      setDocuments(docs.documents || []);
+      const fiche = await base44.entities.FicheEleve.get(ficheId);
+      setDocuments(fiche.documents || []);
     } catch (e) {
       console.error('Erreur chargement documents:', e);
     }
