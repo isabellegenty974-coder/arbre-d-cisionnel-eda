@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Plus, Download, AlertTriangle, Loader, FileText,
-  Phone, Mail, User, MapPin, Pencil, School
+  Phone, Mail, User, MapPin, Pencil, School, Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEleveModal from '@/components/rased/AddEleveModal';
@@ -39,6 +39,8 @@ export default function DetailEcole() {
   const [activeClasse, setActiveClasse] = useState(null);
   const [showAddEleve, setShowAddEleve] = useState(false);
   const [showEditEcole, setShowEditEcole] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     if (!ecoleId) { setLoading(false); return; }
@@ -71,6 +73,20 @@ export default function DetailEcole() {
   };
 
   useEffect(() => { load(); }, [ecoleId]);
+
+  const handleDeleteEcole = async () => {
+    setDeleting(true);
+    try {
+      await base44.entities.EleveRased.deleteMany({ ecole_id: ecoleId }).catch(() => {});
+      await base44.entities.ClasseEcole.deleteMany({ ecole_id: ecoleId }).catch(() => {});
+      await base44.entities.EcoleRased.delete(ecoleId);
+      navigate('/mes-ecoles');
+    } catch (error) {
+      console.error('Erreur suppression école:', error);
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   const elevesDeClasse = (classeId) => eleves.filter(e => e.classe_id === classeId);
   const activeClasseData = classes.find(c => c.id === activeClasse);
@@ -149,9 +165,14 @@ export default function DetailEcole() {
               </div>
               <h2 className="font-bold text-[#0F172A]">Fiche école</h2>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setShowEditEcole(true)} className="gap-1.5">
-              <Pencil className="w-3.5 h-3.5" /> Modifier
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowEditEcole(true)} className="gap-1.5">
+                <Pencil className="w-3.5 h-3.5" /> Modifier
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(true)} className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50">
+                <Trash2 className="w-3.5 h-3.5" /> Supprimer
+              </Button>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
@@ -355,6 +376,36 @@ export default function DetailEcole() {
         ecole={ecole}
         onSaved={() => { setShowEditEcole(false); load(); }}
       />
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !deleting && setShowDeleteConfirm(false)}>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+            onClick={e => e.stopPropagation()}
+            className="bg-white rounded-2xl p-6 max-w-sm w-full text-center"
+          >
+            <div className="w-12 h-12 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Supprimer cette école ?</h3>
+            <p className="text-sm text-gray-500 mb-1">
+              <strong>{ecole.nom}</strong> sera supprimée définitivement.
+            </p>
+            <p className="text-xs text-gray-400 mb-6">
+              Les {classes.length} classe{classes.length > 1 ? 's' : ''} et {eleves.length} élève{eleves.length > 1 ? 's' : ''} associé{eleves.length > 1 ? 's' : ''} seront également supprimés.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+                Annuler
+              </Button>
+              <Button onClick={handleDeleteEcole} disabled={deleting} className="bg-red-600 hover:bg-red-700 text-white border-0 gap-1.5">
+                {deleting ? <Loader className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? 'Suppression…' : 'Supprimer'}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
