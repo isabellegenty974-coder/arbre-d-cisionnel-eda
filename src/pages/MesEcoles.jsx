@@ -72,6 +72,7 @@ export default function MesEcoles() {
     const el = eleves.filter(e => e.ecole_id === ecoleId);
     return {
       total: el.length,
+      nouveau: el.filter(e => e.statut === 'Nouveau').length,
       actif: el.filter(e => e.statut === 'Suivi actif').length,
       attente: el.filter(e => e.statut === 'En attente').length,
       cloture: el.filter(e => e.statut === 'Clôturé').length,
@@ -276,6 +277,10 @@ export default function MesEcoles() {
                     {/* Stats */}
                     <div className="px-4 py-3 flex items-center justify-between gap-3">
                       <div className="flex gap-3">
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-blue-600">{stats.nouveau}</p>
+                          <p className="text-[10px] text-gray-500">Nouveaux</p>
+                        </div>
                         <div className="text-center">
                           <p className="text-lg font-bold text-green-600">{stats.actif}</p>
                           <p className="text-[10px] text-gray-500">Actifs</p>
