@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Loader, ArrowLeft, Search, Clock, Info, ClipboardList, Plus, Trash2, X, Download } from 'lucide-react';
@@ -151,12 +151,23 @@ function CardHead({ icon, title, action, onAction }) {
 function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
+  const [motif, setMotif] = useState(fiche.observations || '');
+  const [editingMotif, setEditingMotif] = useState(!fiche.observations);
+  const [savingMotif, setSavingMotif] = useState(false);
+  const [showMotifSuccess, setShowMotifSuccess] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
   const [newIntervention, setNewIntervention] = useState({ date: '', nom: '', description: '' });
   const [showRapport, setShowRapport] = useState(false);
   const [addingSynthese, setAddingSynthese] = useState(false);
   const [newSynthese, setNewSynthese] = useState({ date: '', membres: '', decisions: '', fichier_url: '' });
   const [syntheses, setSyntheses] = useState(fiche.syntheses_ee || []);
+  const motifInputRef = useRef(null);
+
+  useEffect(() => {
+    if (highlightField === 'motif' && motifInputRef.current) {
+      motifInputRef.current.focus();
+    }
+  }, [highlightField]);
 
   const handleSaveStatut = async () => {
     setSavingStatut(true);
@@ -176,6 +187,22 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
       console.error('Erreur sauvegarde statut:', e);
     } finally {
       setSavingStatut(false);
+    }
+  };
+
+  const handleSaveMotif = async () => {
+    if (!motif.trim()) return;
+    setSavingMotif(true);
+    try {
+      await base44.entities.FicheEleve.update(ficheId, { observations: motif.trim() });
+      setFiche(f => ({ ...f, observations: motif.trim() }));
+      setEditingMotif(false);
+      setShowMotifSuccess(true);
+      setTimeout(() => setShowMotifSuccess(false), 3000);
+    } catch (e) {
+      console.error('Erreur sauvegarde motif:', e);
+    } finally {
+      setSavingMotif(false);
     }
   };
 
@@ -221,6 +248,78 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
+      {/* Message de succès motif */}
+      {showMotifSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          style={{ padding: '10px 14px', borderRadius: 10, background: '#E4F4ED', border: '1px solid #1E7A52', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 16 }}>✅</span>
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1E7A52' }}>Motif enregistré</span>
+        </motion.div>
+      )}
+
+      {/* Motif de la demande */}
+      <Card style={{ borderTop: highlightField === 'motif' ? '3px solid #B85C1A' : 'none', boxShadow: highlightField === 'motif' ? '0 0 0 3px rgba(184, 92, 26, 0.15)' : 'none' }}>
+        <CardHead icon="📌" title="Motif de la demande" />
+        {!editingMotif && motif ? (
+          <div style={{ padding: '14px 16px' }}>
+            <div style={{ background: '#FAFBFD', borderLeft: '3px solid #3B82C4', padding: '14px 16px', borderRadius: 8, marginBottom: 12, fontSize: 13.5, lineHeight: 1.65, color: '#182840' }}>
+              {motif}
+            </div>
+            <button
+              onClick={() => setEditingMotif(true)}
+              style={{ fontSize: 12.5, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+              ✏️ Modifier
+            </button>
+          </div>
+        ) : (
+          <div style={{ padding: '14px 16px' }}>
+            {highlightField === 'motif' && (
+              <div style={{ background: '#FEF0E4', border: '1px solid #B85C1A', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#B85C1A', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>⚠️</span>
+                <span>Ce champ est requis pour compléter la fiche</span>
+              </div>
+            )}
+            <textarea
+              ref={motifInputRef}
+              value={motif}
+              onChange={e => setMotif(e.target.value)}
+              placeholder="Décrivez le motif de la demande (difficultés observées, demande de l'enseignant·e, contexte...)"
+              style={{
+                width: '100%',
+                minHeight: 100,
+                padding: '10px 12px',
+                borderRadius: 8,
+                border: `1.5px solid ${highlightField === 'motif' ? '#B85C1A' : '#D8E1EE'}`,
+                fontSize: 13,
+                outline: 'none',
+                resize: 'vertical',
+                fontFamily: 'Inter, sans-serif',
+                boxSizing: 'border-box',
+                background: highlightField === 'motif' ? '#FFFAF5' : '#fff',
+                transition: 'all 0.3s ease'
+              }} />
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
+              {fiche.observations && (
+                <button
+                  onClick={() => { setMotif(fiche.observations); setEditingMotif(false); }}
+                  style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>
+                  Annuler
+                </button>
+              )}
+              <button
+                onClick={handleSaveMotif}
+                disabled={!motif.trim() || savingMotif}
+                style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: (!motif.trim() || savingMotif) ? 0.5 : 1 }}>
+                {savingMotif ? 'Enregistrement…' : 'Enregistrer'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Card>
+
       {/* Statut */}
       <Card>
         <CardHead icon="🔖" title="Statut du suivi" action={savingStatut ? 'Enregistrement…' : 'Enregistrer'} onAction={handleSaveStatut} />
@@ -236,25 +335,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </div>
       </Card>
 
-      {/* Motif */}
-      {fiche.observations && (
-        <Card>
-          <CardHead icon="📌" title="Motif du signalement" />
-          <div style={{ 
-            padding: '14px 16px', 
-            fontSize: 13.5, 
-            lineHeight: 1.65, 
-            color: '#182840', 
-            background: highlightField === 'motif' ? '#FEF0E4' : '#FAFBFD', 
-            borderLeft: `3px solid ${highlightField === 'motif' ? '#B85C1A' : '#3B82C4'}`,
-            borderRadius: highlightField === 'motif' ? '8px' : '0px',
-            transition: 'all 0.3s ease',
-            boxShadow: highlightField === 'motif' ? '0 0 0 3px rgba(184, 92, 26, 0.15)' : 'none'
-          }}>
-            {fiche.observations}
-          </div>
-        </Card>
-      )}
+
 
       {/* Synthèse Équipe Éducative */}
       <Card>
