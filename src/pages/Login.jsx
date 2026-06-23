@@ -23,9 +23,9 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      // La plateforme gère l'authentification via base44.auth.login()
-      // Pour maintenant, nous utilisons le mécanisme standard de la plateforme
-      await base44.auth.redirectToLogin(`/dashboard`);
+      // Rediriger vers la dernière page visitée si disponible, sinon le dashboard
+      const lastPage = localStorage.getItem('base44_last_page') || '/dashboard';
+      await base44.auth.redirectToLogin(lastPage);
     } catch (err) {
       setError(err.message || 'Erreur de connexion');
       setLoading(false);
@@ -45,9 +45,9 @@ export default function Login() {
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">🔐</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Se connecter</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Bienvenue sur Suivis RASED</h1>
             <p className="text-sm text-muted-foreground">
-              Équipe RASED · Circonscription de La Possession
+              Connectez-vous pour continuer
             </p>
           </div>
 
@@ -55,7 +55,7 @@ export default function Login() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Email
+                Adresse email
               </label>
               <Input
                 type="email"

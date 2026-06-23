@@ -12,6 +12,7 @@ import { DiagnosticProvider } from '@/lib/DiagnosticContext';
 import ResumeButton from '@/components/tree/ResumeButton';
 import BottomBar from '@/components/Navigation/BottomBar';
 import WelcomeModal from '@/components/WelcomeModal';
+import SessionManager from '@/components/SessionManager';
 
 // Pages
 import Accueil from './pages/Accueil';
@@ -273,6 +274,7 @@ const AuthenticatedApp = () => {
   return (
     <>
       {showWelcome && <WelcomeModal onClose={handleWelcomeClose} />}
+      <SessionManager />
       <ResumeButton />
       <BottomBar />
       <Routes>

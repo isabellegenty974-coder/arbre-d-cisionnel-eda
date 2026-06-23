@@ -128,8 +128,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
-    base44.auth.redirectToLogin(window.location.href);
+    // Sauvegarder la page courante pour restauration après reconnexion
+    const currentUrl = window.location.pathname + window.location.search;
+    if (!currentUrl.startsWith('/login') && !currentUrl.startsWith('/register')) {
+      localStorage.setItem('base44_last_page', currentUrl);
+    }
+    base44.auth.redirectToLogin(currentUrl);
   };
 
   return (
