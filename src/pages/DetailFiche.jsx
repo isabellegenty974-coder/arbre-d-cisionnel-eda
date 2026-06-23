@@ -148,7 +148,7 @@ function CardHead({ icon, title, action, onAction }) {
 }
 
 // ── Onglet Suivi ──────────────────────────────────────────────────────────────
-function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user }) {
+function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
@@ -240,7 +240,17 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
       {fiche.observations && (
         <Card>
           <CardHead icon="📌" title="Motif du signalement" />
-          <div style={{ padding: '14px 16px', fontSize: 13.5, lineHeight: 1.65, color: '#182840', background: '#FAFBFD', borderLeft: '3px solid #3B82C4' }}>
+          <div style={{ 
+            padding: '14px 16px', 
+            fontSize: 13.5, 
+            lineHeight: 1.65, 
+            color: '#182840', 
+            background: highlightField === 'motif' ? '#FEF0E4' : '#FAFBFD', 
+            borderLeft: `3px solid ${highlightField === 'motif' ? '#B85C1A' : '#3B82C4'}`,
+            borderRadius: highlightField === 'motif' ? '8px' : '0px',
+            transition: 'all 0.3s ease',
+            boxShadow: highlightField === 'motif' ? '0 0 0 3px rgba(184, 92, 26, 0.15)' : 'none'
+          }}>
             {fiche.observations}
           </div>
         </Card>
@@ -743,11 +753,12 @@ export default function DetailFiche() {
   const navigate = useNavigate();
   const [fiche, setFiche] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('suivi');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'suivi');
   const [interventions, setInterventions] = useState([]);
   const [historiqueEDA, setHistoriqueEDA] = useState([]);
   const [user, setUser] = useState(null);
   const [showSuccess, setShowSuccess] = useState(searchParams.get('success') === 'true');
+  const [highlightField, setHighlightField] = useState(searchParams.get('highlight') || null);
 
   const ficheId = searchParams.get('id');
   const { onFiche } = usePresence(ficheId);
@@ -758,6 +769,13 @@ export default function DetailFiche() {
       return () => clearTimeout(timer);
     }
   }, [showSuccess]);
+
+  useEffect(() => {
+    if (highlightField) {
+      const timer = setTimeout(() => setHighlightField(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightField]);
 
   useEffect(() => {
     if (!ficheId) { setLoading(false); return; }
@@ -813,7 +831,7 @@ export default function DetailFiche() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
             {activeTab === 'suivi' && (
-              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} />
+              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} />
             )}
             {activeTab === 'hypotheses' && (
               <TabHypotheses fiche={fiche} ficheId={ficheId} navigate={navigate} historiqueEDA={historiqueEDA} />

@@ -268,14 +268,12 @@ export default function Dashboard() {
     const missing = [];
     if (!f.motif_signalement && !f.observations) missing.push('Motif');
     if (!f.intervenants || f.intervenants.length === 0) missing.push('Intervenant');
-    if (!f.notes) missing.push('Notes');
     if (!f.date_naissance) missing.push('Date naiss.');
     return missing.length > 0;
   }).map(f => {
     const missing = [];
     if (!f.motif_signalement && !f.observations) missing.push('Motif');
     if (!f.intervenants || f.intervenants.length === 0) missing.push('Intervenant');
-    if (!f.notes) missing.push('Notes');
     if (!f.date_naissance) missing.push('Date naiss.');
     return { ...f, missing };
   });
@@ -518,7 +516,7 @@ export default function Dashboard() {
                         ))}
                       </div>
                     </div>
-                    <button onClick={() => navigate(`/detail-fiche?id=${e.id}`)} style={{ fontSize: 10.5, fontWeight: 700, color: '#3B82C4', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+                    <button onClick={() => navigate(`/detail-fiche?id=${e.id}&tab=suivi&highlight=motif`)} style={{ fontSize: 10.5, fontWeight: 700, color: '#3B82C4', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
                       Compléter →
                     </button>
                   </div>
