@@ -26,8 +26,8 @@ export default function InterventionItem({ iv, idx, onDelete }) {
               {new Date(iv.date).toLocaleDateString('fr-FR')}
             </span>
           )}
-          {iv.nom && (
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: '#3B82C4' }}>{iv.nom}</span>
+          {(iv.nom || iv.profession) && (
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: '#3B82C4' }}>{iv.nom || iv.profession}</span>
           )}
         </div>
         {iv.description && (
