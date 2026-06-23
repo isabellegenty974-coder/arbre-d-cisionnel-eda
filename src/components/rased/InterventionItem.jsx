@@ -1,6 +1,22 @@
 import { Trash2 } from 'lucide-react';
 
 export default function InterventionItem({ iv, idx, onDelete }) {
+  // Si la description contient un rapport complet, on n'en garde qu'un court résumé
+  const cleanDescription = (desc) => {
+    if (!desc) return '';
+    // Supprimer les marqueurs markdown et titres de rapport
+    let cleaned = desc
+      .replace(/\[.*?\]/g, '')
+      .replace(/^#+\s.*$/gm, '')
+      .replace(/\*\*/g, '')
+      .replace(/---/g, '')
+      .trim();
+    // Prendre uniquement la première phrase/ligne pertinente
+    const firstLine = cleaned.split('\n').find(l => l.trim().length > 0) || '';
+    // Tronquer à 120 caractères
+    return firstLine.length > 120 ? firstLine.substring(0, 120) + '…' : firstLine;
+  };
+
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0' }}>
       <div style={{ flex: 1 }}>
@@ -16,7 +32,7 @@ export default function InterventionItem({ iv, idx, onDelete }) {
         </div>
         {iv.description && (
           <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, margin: 0 }}>
-            {iv.description}
+            {cleanDescription(iv.description)}
           </p>
         )}
       </div>
