@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
 const PROF_COLOR = {
-  'Psy EN EDA': { bg: '#EAF2FB', color: '#254D7A', border: '#BFD9F2' },
-  'MaDR':       { bg: '#E4F4ED', color: '#1E7A52', border: '#B2DFCC' },
-  'MaDP':       { bg: '#FEF0E4', color: '#B85C1A', border: '#F5CFA5' },
+  'Psy EN EDA': { bg: '#EAF2FB', color: '#254D7A', border: '#BFD9F2', text: '#3B82C4' },
+  'MaDR':       { bg: '#E4F4ED', color: '#1E7A52', border: '#B2DFCC', text: '#1E7A52' },
+  'MaDP':       { bg: '#FEF0E4', color: '#B85C1A', border: '#F5CFA5', text: '#B85C1A' },
 };
 
-export default function NotesMembreSection({ ficheId }) {
+const TAGS = ['Observation', 'Entretien famille', 'Liaison enseignant·e', 'Réunion équipe', 'Autre'];
+
+export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
   const [user, setUser]           = useState(null);
   const [notesEquipe, setNotesEquipe] = useState([]);
-  const [myNotes, setMyNotes]     = useState(null);
-  const [editing, setEditing]     = useState(false);
+  const [adding, setAdding]       = useState(false);
   const [draft, setDraft]         = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [editing, setEditing]     = useState(null);
   const [saving, setSaving]       = useState(false);
 
   const load = async () => {
@@ -21,12 +24,7 @@ export default function NotesMembreSection({ ficheId }) {
       base44.entities.NotesMembre.filter({ fiche_id: ficheId }).catch(() => []),
     ]);
     setUser(u);
-    setNotesEquipe(all);
-    if (u) {
-      const mine = all.find(n => n.membre_id === u.id);
-      setMyNotes(mine || null);
-      setDraft(mine?.contenu || '');
-    }
+    setNotesEquipe((all || []).sort((a, b) => new Date(b.updated_at || b.created_date) - new Date(a.updated_at || a.created_date)));
   };
 
   useEffect(() => { load(); }, [ficheId]);
@@ -37,41 +35,53 @@ export default function NotesMembreSection({ ficheId }) {
     return unsub;
   }, [ficheId]);
 
-  const handleSave = async () => {
+  const handlePublish = async () => {
     if (!user || !draft.trim()) return;
     setSaving(true);
     try {
       const profession = user.profession || 'Psy EN EDA';
-      if (myNotes) {
-        await base44.entities.NotesMembre.update(myNotes.id, {
-          contenu: draft,
-          updated_at: new Date().toISOString(),
-        });
+      const noteData = {
+        fiche_id: ficheId,
+        membre_id: user.id,
+        membre_nom: user.full_name,
+        membre_profession: profession,
+        contenu: draft,
+        tags: selectedTags.length > 0 ? selectedTags : null,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (editing) {
+        await base44.entities.NotesMembre.update(editing.id, noteData);
       } else {
-        await base44.entities.NotesMembre.create({
+        await base44.entities.NotesMembre.create(noteData);
+        // Créer une notification pour les autres membres
+        await base44.entities.Notification.create({
+          type: 'note_member',
+          titre: `${user.full_name} a ajouté une note`,
+          message: `Note ajoutée sur ${fichePrenomNom}`,
           fiche_id: ficheId,
-          membre_id: user.id,
-          membre_nom: user.full_name,
-          membre_profession: profession,
-          contenu: draft,
-          updated_at: new Date().toISOString(),
-        });
+          expediteur_nom: user.full_name,
+          lu: false,
+        }).catch(() => {});
       }
-      setEditing(false);
+      
+      setAdding(false);
+      setEditing(null);
       setDraft('');
+      setSelectedTags([]);
       await load();
     } catch (e) {
-      console.error('Erreur sauvegarde note:', e);
+      console.error('Erreur publication note:', e);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!myNotes || !confirm('Supprimer cette note ?')) return;
+  const handleDelete = async (noteId) => {
+    if (!confirm('Supprimer cette note ?')) return;
     setSaving(true);
     try {
-      await base44.entities.NotesMembre.delete(myNotes.id);
+      await base44.entities.NotesMembre.delete(noteId);
       await load();
     } catch (e) {
       console.error('Erreur suppression note:', e);
@@ -80,97 +90,118 @@ export default function NotesMembreSection({ ficheId }) {
     }
   };
 
-  const autresMembres = notesEquipe.filter(n => n.membre_id !== user?.id && n.contenu?.trim());
+  const canEditDelete = (note) => user && (note.membre_id === user.id || user.role === 'admin');
   const cfg = PROF_COLOR[user?.profession] || { bg: '#F0F3F8', color: '#566880', border: '#D8E1EE' };
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif' }}>
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: '#182840', marginBottom: 12 }}>📝 Notes de l'équipe</h3>
-
-      {/* Mes notes */}
-      <div style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: cfg.color }}>
-            Mes notes {user?.full_name ? `(${user.full_name})` : ''}
-          </span>
-          {!editing && (
-            <button onClick={() => setEditing(true)}
-              style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-              {myNotes?.contenu ? 'Modifier' : '+ Ajouter'}
-            </button>
-          )}
-        </div>
-
-        {editing ? (
-          <div>
-            <textarea value={draft} onChange={e => setDraft(e.target.value)}
-              placeholder="Mes observations, actions en cours…"
-              style={{ width: '100%', minHeight: 100, padding: '10px 12px', fontSize: 13, border: '1px solid #D8E1EE', borderRadius: 8, outline: 'none', resize: 'vertical', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box' }}
-            />
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-              <button onClick={() => { setEditing(false); setDraft(myNotes?.contenu || ''); }}
-                style={{ padding: '6px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>
-                Annuler
-              </button>
-              <button onClick={handleSave} disabled={saving || !draft.trim()}
-                style={{ padding: '6px 14px', fontSize: 12.5, borderRadius: 7, background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: (saving || !draft.trim()) ? 0.6 : 1 }}>
-                {saving ? 'Enregistrement…' : 'Enregistrer'}
-              </button>
-            </div>
-          </div>
-        ) : myNotes?.contenu ? (
-          <div>
-            <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.6, margin: '0 0 10px 0', whiteSpace: 'pre-wrap' }}>
-              {myNotes.contenu}
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#94A3B8', marginBottom: 8 }}>
-              {myNotes.updated_at && (
-                <span>
-                  {new Date(myNotes.updated_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                </span>
-              )}
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setEditing(true)}
-                style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: `1px solid ${cfg.color}`, color: cfg.color, cursor: 'pointer', fontWeight: 600 }}>
-                ✏️ Modifier
-              </button>
-              <button onClick={handleDelete} disabled={saving}
-                style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', cursor: 'pointer', fontWeight: 600, opacity: saving ? 0.6 : 1 }}>
-                🗑️ Supprimer
-              </button>
-            </div>
-          </div>
-        ) : (
-          <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
-            Aucune note personnelle pour le moment.
-          </p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: '#182840', margin: 0 }}>💬 Notes de l'équipe</h3>
+        {!adding && !editing && (
+          <button onClick={() => setAdding(true)}
+            style={{ fontSize: 11.5, padding: '6px 14px', borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            + Ajouter une note
+          </button>
         )}
       </div>
 
-      {/* Notes des collègues */}
-      {autresMembres.map(n => {
-        const c = PROF_COLOR[n.membre_profession] || { bg: '#F0F3F8', color: '#566880', border: '#D8E1EE' };
-        return (
-          <div key={n.id} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: 12, padding: '14px 16px', marginBottom: 10, opacity: 0.85 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <div style={{ width: 26, height: 26, borderRadius: '50%', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-                {n.membre_nom?.split(' ').map(x => x[0]).join('').slice(0, 2)}
+      {/* Zone d'ajout/modification */}
+      {(adding || editing) && (
+        <div style={{ background: '#F8FAFD', border: '1px solid #D8E1EE', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
+          <textarea value={draft} onChange={e => setDraft(e.target.value)}
+            placeholder="Partagez vos observations, actions, discussions…"
+            style={{ width: '100%', minHeight: 100, padding: '10px 12px', fontSize: 13, border: '1px solid #D8E1EE', borderRadius: 8, outline: 'none', resize: 'vertical', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', marginBottom: 10 }}
+          />
+          <div style={{ marginBottom: 12 }}>
+            <p style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', marginBottom: 8 }}>Tags (optionnel)</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {TAGS.map(tag => (
+                <label key={tag} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, color: '#182840', fontWeight: 500 }}>
+                  <input type="checkbox" checked={selectedTags.includes(tag)} onChange={e => {
+                    if (e.target.checked) {
+                      setSelectedTags([...selectedTags, tag]);
+                    } else {
+                      setSelectedTags(selectedTags.filter(t => t !== tag));
+                    }
+                  }} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                  {tag}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button onClick={() => { setAdding(false); setEditing(null); setDraft(''); setSelectedTags([]); }}
+              style={{ padding: '8px 16px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880', fontWeight: 600 }}>
+              Annuler
+            </button>
+            <button onClick={handlePublish} disabled={saving || !draft.trim()}
+              style={{ padding: '8px 16px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: (saving || !draft.trim()) ? 0.6 : 1 }}>
+              {saving ? 'Enregistrement…' : editing ? 'Mettre à jour' : 'Publier la note'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Affichage des notes */}
+      {notesEquipe.length === 0 ? (
+        <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>
+          Aucune note pour le moment. Soyez le premier·e à partager une observation.
+        </p>
+      ) : (
+        notesEquipe.map(note => {
+          const c = PROF_COLOR[note.membre_profession] || { bg: '#F0F3F8', color: '#566880', border: '#D8E1EE', text: '#566880' };
+          const isAuthor = user && note.membre_id === user.id;
+          const isAdmin = user && user.role === 'admin';
+          return (
+            <div key={note.id} style={{ background: '#fff', border: `1px solid ${c.border}`, borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+                  {note.membre_nom?.split(' ').map(x => x[0]).join('').slice(0, 2) || '?'}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#182840' }}>{note.membre_nom}</div>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: c.bg, color: c.text }}>
+                      {note.membre_profession === 'Psy EN EDA' ? 'Psy-EN EDA' : note.membre_profession}
+                    </span>
+                    {note.updated_at && (
+                      <span style={{ fontSize: 11, color: '#94A3B8', marginLeft: 'auto' }}>
+                        {new Date(note.updated_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 700, color: c.color }}>{n.membre_nom}</div>
-                <div style={{ fontSize: 11, color: '#566880' }}>{n.membre_profession}</div>
-              </div>
-              {n.updated_at && (
-                <span style={{ marginLeft: 'auto', fontSize: 10.5, color: '#94A3B8' }}>
-                  {new Date(n.updated_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                </span>
+              <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.6, margin: '0 0 8px 0', whiteSpace: 'pre-wrap' }}>
+                {note.contenu}
+              </p>
+              {note.tags && note.tags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                  {note.tags.map((tag, i) => (
+                    <span key={i} style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: '#F0F3F8', color: '#566880' }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {(isAuthor || isAdmin) && (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {isAuthor && (
+                    <button onClick={() => { setEditing(note); setDraft(note.contenu); setSelectedTags(note.tags || []); setAdding(false); }}
+                      style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: `1px solid ${c.text}`, color: c.text, cursor: 'pointer', fontWeight: 600 }}>
+                      ✏️ Modifier
+                    </button>
+                  )}
+                  <button onClick={() => handleDelete(note.id)} disabled={saving}
+                    style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', cursor: 'pointer', fontWeight: 600, opacity: saving ? 0.6 : 1 }}>
+                    🗑️ Supprimer
+                  </button>
+                </div>
               )}
             </div>
-            <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>{n.contenu}</p>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
     </div>
   );
 }
