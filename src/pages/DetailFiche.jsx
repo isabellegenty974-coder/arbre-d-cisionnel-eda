@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Loader, ArrowLeft, Search, Clock, Info, ClipboardList, Plus, Trash2, X, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RapportContent from '@/components/RapportContent';
+import InterventionItem from '@/components/rased/InterventionItem';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import NotesMembreSection from '@/components/rased/NotesMembreSection';
 import ReportExportModal from '@/components/rased/ReportExportModal';
@@ -320,17 +321,8 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
             <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Aucune séance enregistrée — cliquez sur + Ajouter pour enregistrer une séance ou intervention</p>
           )}
           {interventions.map((iv, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: idx < interventions.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 600, color: '#566880' }}>{new Date(iv.date).toLocaleDateString('fr-FR')}</span>
-                  {iv.nom && <span style={{ fontSize: 11.5, fontWeight: 600, color: '#3B82C4' }}>{iv.nom}</span>}
-                </div>
-                {iv.description && <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, margin: 0 }}>{iv.description}</p>}
-              </div>
-              <button onClick={() => deleteIntervention(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}>
-                <Trash2 size={14} />
-              </button>
+            <div key={idx} style={{ borderBottom: idx < interventions.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
+              <InterventionItem iv={iv} idx={idx} onDelete={deleteIntervention} />
             </div>
           ))}
         </div>
