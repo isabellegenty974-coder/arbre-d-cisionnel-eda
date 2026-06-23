@@ -148,7 +148,7 @@ function CardHead({ icon, title, action, onAction }) {
 }
 
 // ── Onglet Suivi ──────────────────────────────────────────────────────────────
-function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField, membres }) {
+function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField, membres, showCommentModal, setShowCommentModal }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [motif, setMotif] = useState(fiche.observations || '');
@@ -156,7 +156,8 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   const [savingMotif, setSavingMotif] = useState(false);
   const [showMotifSuccess, setShowMotifSuccess] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
-  const [newIntervention, setNewIntervention] = useState({ date: '', nom: '', description: '', profession: '' });
+  const [editingInterventionId, setEditingInterventionId] = useState(null);
+  const [newIntervention, setNewIntervention] = useState({ date: '', nom: '', description: '', profession: '', commentaire: '' });
   const [showRapport, setShowRapport] = useState(false);
   const [addingSynthese, setAddingSynthese] = useState(false);
   const [newSynthese, setNewSynthese] = useState({ date: '', membres: '', decisions: '', fichier_url: '' });
@@ -172,6 +173,15 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
       }
     }
   }, [addingIntervention, membres, user]);
+
+  const truncateComment = (text, lines = 2) => {
+    if (!text) return '';
+    const textLines = text.split('\n');
+    if (textLines.length > lines) {
+      return textLines.slice(0, lines).join('\n') + '…';
+    }
+    return text;
+  };
 
   useEffect(() => {
     if (highlightField === 'motif' && motifInputRef.current) {
@@ -218,19 +228,32 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
 
   const addIntervention = async () => {
     if (!newIntervention.date) return;
-    const updated = [...interventions, newIntervention];
+    let updated;
+    if (editingInterventionId !== null) {
+      updated = interventions.map((iv, idx) => idx === editingInterventionId ? newIntervention : iv);
+    } else {
+      updated = [...interventions, { ...newIntervention, created_by: user?.full_name || 'Inconnu', created_by_id: user?.id }];
+    }
     await base44.entities.FicheEleve.update(ficheId, { interventions: updated });
     setFiche(f => ({ ...f, interventions: updated }));
     setInterventions(updated);
-    setNewIntervention({ date: '', nom: '', description: '' });
+    setNewIntervention({ date: '', nom: '', description: '', profession: '', commentaire: '' });
     setAddingIntervention(false);
+    setEditingInterventionId(null);
   };
 
   const deleteIntervention = async (idx) => {
+    if (!confirm('Supprimer cette intervention ?')) return;
     const updated = interventions.filter((_, i) => i !== idx);
     await base44.entities.FicheEleve.update(ficheId, { interventions: updated });
     setFiche(f => ({ ...f, interventions: updated }));
     setInterventions(updated);
+  };
+
+  const editIntervention = (idx) => {
+    setEditingInterventionId(idx);
+    setNewIntervention(interventions[idx]);
+    setAddingIntervention(true);
   };
 
   const addSynthese = async () => {
@@ -412,7 +435,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
       <Card>
         <CardHead icon="📋" title="Séances et interventions"
           action={addingIntervention ? undefined : '+ Ajouter'}
-          onAction={() => setAddingIntervention(true)} />
+          onAction={() => { setAddingIntervention(true); setEditingInterventionId(null); setNewIntervention({ date: '', nom: '', description: '', profession: '', commentaire: '' }); }} />
         <div style={{ padding: 14 }}>
           {addingIntervention && (
             <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -459,6 +482,9 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                     </optgroup>
                   </select>
                 ) },
+                { label: 'Commentaire (optionnel)', content: (
+                  <textarea value={newIntervention.commentaire || ''} onChange={e => setNewIntervention({...newIntervention, commentaire: e.target.value})} placeholder="Décrivez le déroulement de la séance, les observations, les points importants…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box' }} />
+                ) },
               ].map(({ label, content }) => (
                 <div key={label}>
                   <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
@@ -466,19 +492,79 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                 </div>
               ))}
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setAddingIntervention(false)} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
-                <button onClick={addIntervention} disabled={!newIntervention.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newIntervention.date ? 0.5 : 1 }}>Ajouter</button>
+                <button onClick={() => { setAddingIntervention(false); setEditingInterventionId(null); setNewIntervention({ date: '', nom: '', description: '', profession: '', commentaire: '' }); }} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
+                <button onClick={addIntervention} disabled={!newIntervention.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newIntervention.date ? 0.5 : 1 }}>{editingInterventionId !== null ? 'Mettre à jour' : 'Ajouter'}</button>
               </div>
             </div>
           )}
           {interventions.length === 0 && !addingIntervention && (
             <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Aucune séance enregistrée — cliquez sur + Ajouter pour enregistrer une séance ou intervention</p>
           )}
-          {interventions.map((iv, idx) => (
-            <div key={idx} style={{ borderBottom: idx < interventions.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
-              <InterventionItem iv={iv} idx={idx} onDelete={deleteIntervention} />
-            </div>
-          ))}
+          {interventions.map((iv, idx) => {
+            const canEdit = user && (iv.created_by_id === user.id || user.role === 'admin');
+            const hasComment = iv.commentaire && iv.commentaire.trim();
+            const commentLines = hasComment ? iv.commentaire.split('\n') : [];
+            const needsExpand = commentLines.length > 2;
+            return (
+              <div key={idx} style={{ padding: '12px 0', borderBottom: idx < interventions.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', marginBottom: 2 }}>
+                      📅 {new Date(iv.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#182840', marginBottom: 6 }}>
+                      <span style={{ fontWeight: 600 }}>{iv.nom}</span>
+                      {iv.profession && <span style={{ fontSize: 11, color: '#566880', marginLeft: 6 }}>· {iv.profession === 'Psy EN EDA' ? 'Psy-EN EDA' : iv.profession}</span>}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 8, paddingLeft: 10, borderLeft: '3px solid #3B82C4' }}>
+                      {iv.description}
+                    </div>
+                    {hasComment && (
+                      <div style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, marginBottom: 10, padding: '10px', background: '#F8FAFD', borderRadius: 8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                        {truncateComment(iv.commentaire, 2)}
+                        {needsExpand && (
+                          <button onClick={() => setShowCommentModal(idx)} style={{ fontSize: 11.5, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, marginTop: 6, display: 'block' }}>
+                            Voir plus →
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {canEdit && (
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => editIntervention(idx)} style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #3B82C4', color: '#3B82C4', cursor: 'pointer', fontWeight: 600 }}>
+                          ✏️ Modifier
+                        </button>
+                        <button onClick={() => deleteIntervention(idx)} style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', cursor: 'pointer', fontWeight: 600 }}>
+                          🗑️ Supprimer
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Modale commentaire complet */}
+          {showCommentModal !== null && interventions[showCommentModal]?.commentaire && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+              onClick={() => setShowCommentModal(null)}>
+              <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                onClick={e => e.stopPropagation()}
+                style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 640, maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid #F0F3F8' }}>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: '#182840' }}>💬 Commentaire</span>
+                  <button onClick={() => setShowCommentModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
+                </div>
+                <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
+                  <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                    {interventions[showCommentModal].commentaire}
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
         </div>
       </Card>
 
@@ -862,6 +948,7 @@ export default function DetailFiche() {
   const [showSuccess, setShowSuccess] = useState(searchParams.get('success') === 'true');
   const [highlightField, setHighlightField] = useState(searchParams.get('highlight') || null);
   const [membres, setMembres] = useState([]);
+  const [showCommentModal, setShowCommentModal] = useState(null);
 
   const ficheId = searchParams.get('id');
   const { onFiche } = usePresence(ficheId);
@@ -936,7 +1023,7 @@ export default function DetailFiche() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
             {activeTab === 'suivi' && (
-              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} membres={membres} />
+              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} membres={membres} showCommentModal={showCommentModal} setShowCommentModal={setShowCommentModal} />
             )}
             {activeTab === 'hypotheses' && (
               <TabHypotheses fiche={fiche} ficheId={ficheId} navigate={navigate} historiqueEDA={historiqueEDA} />
