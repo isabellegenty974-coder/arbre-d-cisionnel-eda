@@ -272,12 +272,17 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", background: '#F0F3F8', minHeight: '100vh', display: 'flex' }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", background: '#F0F3F8', height: '100vh', display: 'flex', overflow: 'hidden' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
         .db-row:hover { background: #F8FAFD !important; }
         .db-ec:hover  { background: #F0F3F8 !important; }
         .db-nav:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .db-content {
+          height: calc(100vh - 54px) !important;
+          overflow-y: auto !important;
+          padding-bottom: 60px !important;
+        }
         @media (max-width: 900px) {
           .db-sidebar    { display: none !important; }
           .db-main       { margin-left: 0 !important; }
@@ -288,7 +293,7 @@ export default function Dashboard() {
           .db-topbar-year { max-width: 130px !important; font-size: 11px !important; padding: 5px 8px !important; }
           .db-hero       { flex-direction: column !important; align-items: flex-start !important; }
           .db-hero-btns  { flex-direction: row !important; width: 100% !important; }
-          .db-content    { padding: 12px 12px 100px !important; }
+          .db-content    { padding: 12px 12px 80px !important; }
           .db-topbar     { padding: 0 12px !important; height: auto !important; min-height: 54px !important; flex-wrap: wrap !important; gap: 6px !important; padding-top: 8px !important; padding-bottom: 8px !important; }
         }
       `}</style>
@@ -299,7 +304,7 @@ export default function Dashboard() {
       </div>
 
       {/* MAIN */}
-      <div className="db-main" style={{ marginLeft: 230, flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div className="db-main" style={{ marginLeft: 230, flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
 
         {/* TOPBAR */}
         <div className="db-topbar" style={{ background: '#fff', borderBottom: '1px solid #D8E1EE', height: 54, padding: '0 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 20 }}>
@@ -368,7 +373,7 @@ export default function Dashboard() {
         </div>
 
         {/* CONTENT */}
-        <div className="db-content" style={{ padding: '24px 26px 100px' }}>
+        <div className="db-content" style={{ padding: '24px 26px 60px' }}>
 
           {/* HERO */}
           <div className="db-hero" style={{ background: '#1A3353', borderRadius: 14, padding: '18px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, overflow: 'hidden', position: 'relative', boxSizing: 'border-box', width: '100%' }}>
