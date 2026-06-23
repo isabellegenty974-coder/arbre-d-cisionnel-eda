@@ -1,5 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +12,11 @@ import PhotoEEUpload from '@/components/PhotoEEUpload';
 
 export default function FicheEleve() {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const urlParams = new URLSearchParams(window.location.search);
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
 
   const [prenom, setPrenom] = useState(urlParams.get('prenom') || '');
   const [nom, setNom] = useState(urlParams.get('nom') || '');
@@ -29,17 +30,6 @@ export default function FicheEleve() {
   const [photoUrl, setPhotoUrl] = useState(null);
   const [anneeActive, setAnneeActive] = useState(null);
   const [errors, setErrors] = useState({});
-
-  // Récupère l'utilisateur courant
-  const getCurrentUser = async () => {
-    try {
-      const u = await base44.auth.me();
-      if (u) { setCurrentUser(u); return u; }
-      return null;
-    } catch {
-      return null;
-    }
-  };
 
   // Déterminer l'année scolaire active au montage si pas déjà chargée
   useEffect(() => {
@@ -58,9 +48,8 @@ export default function FicheEleve() {
 
   useEffect(() => {
     Promise.all([
-      getCurrentUser(),
       base44.entities.AnneeScolaire.filter({ est_active: true }).catch(() => [])
-    ]).then(([u, annees]) => {
+    ]).then(([annees]) => {
       if (annees.length > 0) setAnneeActive(annees[0].libelle);
     }).catch(() => {});
 
@@ -147,21 +136,15 @@ export default function FicheEleve() {
 
     if (!validate()) return;
 
-    // Tenter de récupérer l'utilisateur si absent
-    let user = currentUser;
-    if (!user) {
-      user = await getCurrentUser();
-    }
-
-    if (!user) {
-      setErrorMsg("Impossible de récupérer votre profil. Veuillez réessayer.");
+    if (!currentUser) {
+      setErrorMsg("Session non initialisée. Rechargez la page et réessayez.");
       return;
     }
 
     setSubmitting(true);
     try {
-      const fullName = user.full_name || '';
-      const membres = await base44.entities.MembreEquipe.filter({ email: user.email }).catch(() => []);
+      const fullName = currentUser.full_name || '';
+      const membres = await base44.entities.MembreEquipe.filter({ email: currentUser.email }).catch(() => []);
       const profession = membres.length > 0 ? membres[0].profession : '';
 
       // S'assurer que l'école existe dans la base
