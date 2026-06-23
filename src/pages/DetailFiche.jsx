@@ -476,7 +476,13 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
 // ── Onglet Historique ─────────────────────────────────────────────────────────
 function TabHistorique({ fiche, interventions, historiqueEDA }) {
   const events = [
-    ...interventions.map(iv => ({ date: new Date(iv.date), ico: '💬', type: 'note', title: `Intervention : ${iv.type || 'Action'}`, meta: iv.description })),
+    ...interventions.map(iv => {
+      const cleanDesc = (iv.description || '')
+        .replace(/\[.*?\]/g, '').replace(/^#+\s.*$/gm, '').replace(/\*\*/g, '').replace(/---/g, '').trim();
+      const firstLine = cleanDesc.split('\n').find(l => l.trim().length > 0) || '';
+      const observation = firstLine.length > 120 ? firstLine.substring(0, 120) + '…' : firstLine;
+      return { date: new Date(iv.date), ico: '💬', type: 'note', title: iv.nom || iv.profession || 'Observation', meta: observation };
+    }),
     ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: `Hypothèses de travail — ${h.domaine}`, meta: `${h.hypotheses?.length || 0} hypothèse(s) retenue(s)` })),
     { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: `${fiche.ecole || ''}${fiche.classe ? ' · ' + fiche.classe : ''}` },
   ].sort((a, b) => b.date - a.date);
