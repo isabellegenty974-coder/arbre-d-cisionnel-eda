@@ -15,7 +15,6 @@ export default function FicheEleve() {
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [sessionExpired, setSessionExpired] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
   const [prenom, setPrenom] = useState(urlParams.get('prenom') || '');
@@ -31,21 +30,13 @@ export default function FicheEleve() {
   const [anneeActive, setAnneeActive] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // Récupère l'utilisateur courant avec renouvellement automatique du token en cas d'expiration
+  // Récupère l'utilisateur courant
   const getCurrentUser = async () => {
     try {
       const u = await base44.auth.me();
-      if (u) { setCurrentUser(u); setSessionExpired(false); return u; }
+      if (u) { setCurrentUser(u); return u; }
       return null;
     } catch {
-      // Token peut être expiré — tenter une redirection silencieuse vers le login puis retour
-      try {
-        await base44.auth.isAuthenticated();
-        const u2 = await base44.auth.me();
-        if (u2) { setCurrentUser(u2); setSessionExpired(false); return u2; }
-      } catch {
-        setSessionExpired(true);
-      }
       return null;
     }
   };
@@ -156,14 +147,14 @@ export default function FicheEleve() {
 
     if (!validate()) return;
 
-    // Tenter de récupérer l'utilisateur si absent (token potentiellement expiré)
+    // Tenter de récupérer l'utilisateur si absent
     let user = currentUser;
     if (!user) {
       user = await getCurrentUser();
     }
 
     if (!user) {
-      setSessionExpired(true);
+      setErrorMsg("Impossible de récupérer votre profil. Veuillez réessayer.");
       return;
     }
 
@@ -193,18 +184,7 @@ export default function FicheEleve() {
         createdByProfession: profession,
       });
 
-      let created;
-      try {
-        created = await doCreate();
-      } catch (createErr) {
-        // Si le token a expiré pendant la saisie, tenter un renouvellement silencieux puis réessayer
-        const refreshed = await getCurrentUser();
-        if (refreshed) {
-          created = await doCreate();
-        } else {
-          throw createErr;
-        }
-      }
+      const created = await doCreate();
       setSavedId(created.id);
 
       // Mettre à jour l'élève RASED importé : lier la fiche + passer en "Suivi actif"
@@ -224,28 +204,11 @@ export default function FicheEleve() {
       }, 1500);
     } catch (error) {
       const msg = error?.message || '';
-      if (/401|unauthorized|token|auth|session/i.test(msg)) {
-        setSessionExpired(true);
-      } else {
-        setErrorMsg(msg || "Une erreur est survenue lors de la création de la fiche.");
-      }
+      setErrorMsg(msg || "Une erreur est survenue lors de la création de la fiche.");
     } finally {
       setSubmitting(false);
     }
   };
-
-  const handleReconnect = () => {
-    const currentUrl = window.location.pathname + window.location.search;
-    base44.auth.redirectToLogin(currentUrl);
-  };
-
-  // Rafraîchit périodiquement l'utilisateur pour garder la session active
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getCurrentUser().catch(() => {});
-    }, 10 * 60 * 1000); // toutes les 10 minutes
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -454,32 +417,6 @@ export default function FicheEleve() {
               className="w-full min-h-[100px] p-3 rounded-lg border border-input bg-background text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring resize-y"
             />
           </motion.div>
-
-          {/* Session expirée — message clair avec bouton de reconnexion */}
-          {sessionExpired && !saved && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-300"
-            >
-              <div className="flex items-start gap-2.5">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-800">Votre session a expiré</p>
-                  <p className="text-xs text-amber-700 mt-0.5 mb-3">
-                    Cliquez ci-dessous pour vous reconnecter. Vos données saisies seront conservées.
-                  </p>
-                  <Button
-                    type="button"
-                    onClick={handleReconnect}
-                    className="gap-2 h-9 bg-amber-600 hover:bg-amber-700 text-white text-sm"
-                  >
-                    Se reconnecter
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          )}
 
           {/* Message d'erreur */}
           {errorMsg && (

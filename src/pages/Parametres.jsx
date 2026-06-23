@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Calendar, Check, X } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, Check, X, LogOut } from 'lucide-react';
 
 // ── Assistant de rentrée ────────────────────────────────────────────────────
 function AssistantRentree({ annee, ecolesPrecedentes, onClose }) {
@@ -443,6 +443,26 @@ export default function Parametres() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Déconnexion manuelle */}
+        <div style={{ background: '#fff', borderRadius: 16, padding: '20px', marginBottom: 16, boxShadow: '0 2px 12px rgba(0,0,0,.05)', textAlign: 'center' }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: '#182840', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+            <LogOut size={16} /> Déconnexion
+          </h3>
+          <p style={{ fontSize: 13, color: '#566880', margin: '0 0 14px', lineHeight: 1.6 }}>
+            Vous restez connecté·e tant que vous ne cliquez pas ici. La déconnexion est uniquement manuelle.
+          </p>
+          <button
+            onClick={() => base44.auth.logout('/login')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 24px', background: '#B85C1A', color: '#fff',
+              borderRadius: 10, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+            }}
+          >
+            <LogOut size={15} /> Se déconnecter
+          </button>
         </div>
 
         {/* RGPD & PROTECTION DES DONNÉES */}

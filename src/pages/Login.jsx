@@ -23,9 +23,7 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      // Rediriger vers la dernière page visitée si disponible, sinon le dashboard
-      const lastPage = localStorage.getItem('base44_last_page') || '/dashboard';
-      await base44.auth.redirectToLogin(lastPage);
+      await base44.auth.redirectToLogin('/dashboard');
     } catch (err) {
       setError(err.message || 'Erreur de connexion');
       setLoading(false);

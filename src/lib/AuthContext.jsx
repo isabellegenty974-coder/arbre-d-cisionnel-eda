@@ -128,12 +128,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
-    // Sauvegarder la page courante pour restauration après reconnexion
-    const currentUrl = window.location.pathname + window.location.search;
-    if (!currentUrl.startsWith('/login') && !currentUrl.startsWith('/register')) {
-      localStorage.setItem('base44_last_page', currentUrl);
-    }
-    base44.auth.redirectToLogin(currentUrl);
+    base44.auth.redirectToLogin();
   };
 
   return (
