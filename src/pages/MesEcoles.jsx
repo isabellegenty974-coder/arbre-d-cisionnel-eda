@@ -190,10 +190,15 @@ export default function MesEcoles() {
             <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
               <School className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 font-medium">Aucune école ajoutée</p>
-              <p className="text-gray-400 text-sm mt-1">Cliquez sur "+ Ajouter une école" pour commencer</p>
-              <Button onClick={() => setShowAddEcole(true)} className="mt-4 gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white">
-                <Plus className="w-4 h-4" /> Ajouter une école
-              </Button>
+              <p className="text-gray-400 text-sm mt-1 mb-6">Ajoutez une école manuellement ou importez-la depuis un PDF</p>
+              <div className="flex justify-center gap-3 flex-wrap">
+                <Button onClick={() => setShowAddEcole(true)} className="gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white">
+                  <Plus className="w-4 h-4" /> Ajouter une école manuellement
+                </Button>
+                <Button onClick={() => navigate('/import-pdf')} variant="outline" className="gap-2 border-blue-300 text-blue-600 hover:bg-blue-50">
+                  <FileText className="w-4 h-4" /> 📄 Importer depuis un PDF
+                </Button>
+              </div>
             </div>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
