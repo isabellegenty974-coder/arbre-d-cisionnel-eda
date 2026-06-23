@@ -3,28 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, ClipboardList, Users, AlertCircle, Camera } from 'lucide-react';
+import { Plus, ClipboardList, Users, AlertCircle, Camera, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
-import { useForm } from 'react-hook-form';
-import { eleveValidationRules } from '@/lib/formValidation';
 import PhotoEEUpload from '@/components/PhotoEEUpload';
 
 export default function FicheEleve() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const [saved, setSaved] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
+
+  const [prenom, setPrenom] = useState(urlParams.get('prenom') || '');
+  const [nom, setNom] = useState(urlParams.get('nom') || '');
   const [ecole, setEcole] = useState(urlParams.get('ecole') || '');
   const [classe, setClasse] = useState(urlParams.get('classe') || '');
   const [enseignant, setEnseignant] = useState(urlParams.get('enseignant') || '');
-  const ECOLES = ['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'];
   const [dateNaissance, setDateNaissance] = useState(urlParams.get('date_naissance') || '');
   const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [anneeActive, setAnneeActive] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  const [jourNaissance, setJourNaissance] = useState('');
+  const [moisNaissance, setMoisNaissance] = useState('');
+  const [anneeNaissance, setAnneeNaissance] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -34,7 +41,7 @@ export default function FicheEleve() {
       setCurrentUser(u);
       if (annees.length > 0) setAnneeActive(annees[0].libelle);
     }).catch(() => {});
-    
+
     // Pré-remplir la date de naissance si elle est passée en paramètre
     const dnParam = urlParams.get('date_naissance');
     if (dnParam) {
@@ -48,11 +55,10 @@ export default function FicheEleve() {
     }
   }, []);
 
-  const [jourNaissance, setJourNaissance] = useState('');
-  const [moisNaissance, setMoisNaissance] = useState('');
-  const [anneeNaissance, setAnneeNaissance] = useState('');
-
   const handleDateNaissance = (jour, mois, annee) => {
+    setJourNaissance(jour);
+    setMoisNaissance(mois);
+    setAnneeNaissance(annee);
     if (!jour || !mois || !annee) { setDateNaissance(''); setAgeCalcule(null); return; }
     const isoDate = `${annee}-${mois.padStart(2,'0')}-${jour.padStart(2,'0')}`;
     setDateNaissance(isoDate);
@@ -76,50 +82,78 @@ export default function FicheEleve() {
     if (!mois || !annee) return 31;
     return new Date(Number(annee), Number(mois), 0).getDate();
   };
-  const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({
-    mode: 'onChange',
-    defaultValues: { 
-      prenom: urlParams.get('prenom') || '', 
-      nom: urlParams.get('nom') || '', 
-      age: '', 
-      classe: classe
-    },
-    resolver: undefined
-  });
 
-  const onSubmit = async (data) => {
-    if (!currentUser) return;
-    
-    const fullName = currentUser.full_name || '';
-    const membres = await base44.entities.MembreEquipe.filter({ email: currentUser.email }).catch(() => []);
-    const profession = membres.length > 0 ? membres[0].profession : '';
-    
-    const created = await base44.entities.FicheEleve.create({
-      nom: data.nom,
-      prenom: data.prenom,
-      age: ageCalcule !== null ? ageCalcule : undefined,
-      date_naissance: dateNaissance || undefined,
-      classe: classe || data.classe || undefined,
-      ecole: ecole || undefined,
-      notes: enseignant ? `Enseignant·e : ${enseignant}` : undefined,
-      date: new Date().toISOString().split('T')[0],
-      annee_scolaire: anneeActive || undefined,
-      createdByName: fullName,
-      createdByProfession: profession,
-    });
-    setSavedId(created.id);
+  const validate = () => {
+    const errs = {};
+    if (!prenom.trim()) errs.prenom = 'Le prénom est obligatoire';
+    else if (prenom.trim().length < 2) errs.prenom = 'Au minimum 2 caractères';
+    if (!nom.trim()) errs.nom = 'Le nom est obligatoire';
+    else if (nom.trim().length < 2) errs.nom = 'Au minimum 2 caractères';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
-    // Mettre à jour l'élève RASED importé : lier la fiche + passer en "Suivi actif"
-    const eleveRasedId = urlParams.get('eleve_rased_id');
-    if (eleveRasedId) {
-      await base44.entities.EleveRased.update(eleveRasedId, {
-        fiche_eleve_id: created.id,
-        statut: 'Suivi actif',
-        date_derniere_action: new Date().toISOString().split('T')[0],
-      }).catch(() => {});
+  const ensureEcoleExists = async (ecoleNom) => {
+    if (!ecoleNom) return null;
+    const existing = await base44.entities.EcoleRased.filter({ nom: ecoleNom }).catch(() => []);
+    if (existing.length > 0) return existing[0].id;
+    const created = await base44.entities.EcoleRased.create({ nom: ecoleNom });
+    return created.id;
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (!validate()) return;
+
+    if (!currentUser) {
+      setErrorMsg("Impossible de vérifier votre identité. Veuillez recharger la page et réessayer.");
+      return;
     }
 
-    setSaved(true);
+    setSubmitting(true);
+    try {
+      const fullName = currentUser.full_name || '';
+      const membres = await base44.entities.MembreEquipe.filter({ email: currentUser.email }).catch(() => []);
+      const profession = membres.length > 0 ? membres[0].profession : '';
+
+      // S'assurer que l'école existe dans la base
+      if (ecole) {
+        await ensureEcoleExists(ecole.trim());
+      }
+
+      const created = await base44.entities.FicheEleve.create({
+        nom: nom.trim(),
+        prenom: prenom.trim(),
+        age: ageCalcule !== null ? ageCalcule : undefined,
+        date_naissance: dateNaissance || undefined,
+        classe: classe || undefined,
+        ecole: ecole || undefined,
+        notes: enseignant ? `Enseignant·e : ${enseignant}` : undefined,
+        date: new Date().toISOString().split('T')[0],
+        annee_scolaire: anneeActive || undefined,
+        createdByName: fullName,
+        createdByProfession: profession,
+      });
+      setSavedId(created.id);
+
+      // Mettre à jour l'élève RASED importé : lier la fiche + passer en "Suivi actif"
+      const eleveRasedId = urlParams.get('eleve_rased_id');
+      if (eleveRasedId) {
+        await base44.entities.EleveRased.update(eleveRasedId, {
+          fiche_eleve_id: created.id,
+          statut: 'Suivi actif',
+          date_derniere_action: new Date().toISOString().split('T')[0],
+        }).catch(() => {});
+      }
+
+      setSaved(true);
+    } catch (error) {
+      setErrorMsg(error?.message || "Une erreur est survenue lors de la création de la fiche.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -134,11 +168,13 @@ export default function FicheEleve() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const inputCls = (field) => `rounded-lg ${errors[field] ? 'border-destructive ring-1 ring-destructive' : ''}`;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAFAF8] to-[#F5F0E8]">
       <HamburgerMenu />
       <ScreenLayout title="📋 Nouvelle observation" subtitle="Complétez les informations de l'élève">
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto">
+        <form onSubmit={onSubmit} className="max-w-2xl mx-auto">
           {/* Section Identité */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -156,28 +192,30 @@ export default function FicheEleve() {
               <div>
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">Prénom *</label>
                 <Input
-                  {...register('prenom', eleveValidationRules.prenom)}
+                  value={prenom}
+                  onChange={e => setPrenom(e.target.value)}
                   placeholder="Prénom"
-                  className={`${errors.prenom ? 'border-destructive' : ''} rounded-lg`}
+                  className={inputCls('prenom')}
                 />
                 {errors.prenom && (
                   <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
                     <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.prenom.message}
+                    {errors.prenom}
                   </div>
                 )}
               </div>
               <div>
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">Nom *</label>
                 <Input
-                  {...register('nom', eleveValidationRules.nom)}
+                  value={nom}
+                  onChange={e => setNom(e.target.value)}
                   placeholder="Nom"
-                  className={`${errors.nom ? 'border-destructive' : ''} rounded-lg`}
+                  className={inputCls('nom')}
                 />
                 {errors.nom && (
                   <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
                     <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.nom.message}
+                    {errors.nom}
                   </div>
                 )}
               </div>
@@ -189,7 +227,7 @@ export default function FicheEleve() {
                   <div className="grid grid-cols-3 gap-2 flex-1">
                     <select
                       value={jourNaissance}
-                      onChange={e => { setJourNaissance(e.target.value); handleDateNaissance(e.target.value, moisNaissance, anneeNaissance); }}
+                      onChange={e => handleDateNaissance(e.target.value, moisNaissance, anneeNaissance)}
                       className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <option value="">Jour</option>
@@ -199,7 +237,7 @@ export default function FicheEleve() {
                     </select>
                     <select
                       value={moisNaissance}
-                      onChange={e => { setMoisNaissance(e.target.value); handleDateNaissance(jourNaissance, e.target.value, anneeNaissance); }}
+                      onChange={e => handleDateNaissance(jourNaissance, e.target.value, anneeNaissance)}
                       className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <option value="">Mois</option>
@@ -207,7 +245,7 @@ export default function FicheEleve() {
                     </select>
                     <select
                       value={anneeNaissance}
-                      onChange={e => { setAnneeNaissance(e.target.value); handleDateNaissance(jourNaissance, moisNaissance, e.target.value); }}
+                      onChange={e => handleDateNaissance(jourNaissance, moisNaissance, e.target.value)}
                       className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <option value="">Année</option>
@@ -219,24 +257,17 @@ export default function FicheEleve() {
                   ) : (
                     <span className="text-sm text-[#0F172A]/30 whitespace-nowrap">— ans</span>
                   )}
-                  </div>
-                  {dateNaissance && urlParams.get('date_naissance') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
-                  </div>
+                </div>
+                {dateNaissance && urlParams.get('date_naissance') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+              </div>
               <div>
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">Classe</label>
                 <Input
-                  {...register('classe', eleveValidationRules.classe)}
-                  placeholder="Ex: CM2"
                   value={classe}
                   onChange={e => setClasse(e.target.value)}
-                  className={`${errors.classe ? 'border-destructive' : ''} rounded-lg`}
+                  placeholder="Ex: CM2"
+                  className="rounded-lg"
                 />
-                {errors.classe && (
-                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    {errors.classe.message}
-                  </div>
-                )}
                 {classe && urlParams.get('classe') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
               </div>
 
@@ -244,9 +275,9 @@ export default function FicheEleve() {
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">Enseignant·e</label>
                 <Input
                   type="text"
-                  placeholder="Nom de l'enseignant·e"
                   value={enseignant}
                   onChange={e => setEnseignant(e.target.value)}
+                  placeholder="Nom de l'enseignant·e"
                   className="rounded-lg"
                 />
                 {enseignant && urlParams.get('enseignant') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
@@ -269,19 +300,34 @@ export default function FicheEleve() {
             </div>
             <div>
               <label className="text-sm font-semibold text-[#0F172A] block mb-2">École</label>
-              <div>
-                <select
-                  value={ecole}
-                  onChange={e => setEcole(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="">-- Sélectionner une école --</option>
-                  {ECOLES.map(e => <option key={e} value={e}>{e}</option>)}
-                </select>
-                {ecole && urlParams.get('ecole') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
-              </div>
+              <select
+                value={ecole}
+                onChange={e => setEcole(e.target.value)}
+                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">-- Sélectionner une école --</option>
+                {['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'].map(e => <option key={e} value={e}>{e}</option>)}
+              </select>
+              {ecole && urlParams.get('ecole') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
             </div>
           </motion.div>
+
+          {/* Message d'erreur */}
+          {errorMsg && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-4 rounded-2xl bg-destructive/5 border border-destructive/30"
+            >
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-destructive">Erreur lors de la création</p>
+                  <p className="text-xs text-destructive/80 mt-0.5">{errorMsg}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Actions */}
           {!saved ? (
@@ -291,10 +337,14 @@ export default function FicheEleve() {
             >
               <Button
                 type="submit"
+                disabled={submitting}
                 className="w-full gap-2 h-11 bg-[#D4A574] hover:bg-[#C49464] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-soft"
               >
-                <Plus className="w-5 h-5" />
-                Créer la fiche
+                {submitting ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Création en cours…</>
+                ) : (
+                  <><Plus className="w-5 h-5" /> Créer la fiche</>
+                )}
               </Button>
               <p className="text-xs text-center text-muted-foreground mt-3">Ctrl+S pour enregistrer rapidement</p>
             </motion.div>
@@ -306,8 +356,8 @@ export default function FicheEleve() {
             >
               <div className="p-4 rounded-2xl bg-gradient-to-r from-chart-2/10 to-chart-2/5 border border-chart-2/30">
                 <p className="text-center text-sm font-semibold text-chart-2 flex items-center justify-center gap-2">
-                  <span className="text-lg">✓</span>
-                  Fiche créée avec succès !
+                  <span className="text-lg">✅</span>
+                  Fiche de {prenom} {nom} créée avec succès !
                 </p>
               </div>
               
