@@ -136,15 +136,18 @@ export default function FicheEleve() {
 
     if (!validate()) return;
 
-    if (!currentUser) {
-      setErrorMsg("Session non initialisée. Rechargez la page et réessayez.");
-      return;
-    }
-
     setSubmitting(true);
     try {
-      const fullName = currentUser.full_name || '';
-      const membres = await base44.entities.MembreEquipe.filter({ email: currentUser.email }).catch(() => []);
+      // Utiliser l'utilisateur du contexte, sinon tenter une récupération à la volée
+      let user = currentUser;
+      if (!user) {
+        try { user = await base44.auth.me(); } catch { user = null; }
+      }
+
+      const fullName = user?.full_name || '';
+      const membres = user?.email
+        ? await base44.entities.MembreEquipe.filter({ email: user.email }).catch(() => [])
+        : [];
       const profession = membres.length > 0 ? membres[0].profession : '';
 
       // S'assurer que l'école existe dans la base
