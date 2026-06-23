@@ -144,10 +144,10 @@ export default function DetailEcole() {
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Button onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)} variant="outline" className="gap-2 border-white/20 text-white/80 hover:bg-white/10 bg-transparent">
-                <FileText className="w-4 h-4" /> Importer liste PDF
+              <Button onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)} className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0">
+                <FileText className="w-4 h-4" /> 📄 Importer une liste de classe
               </Button>
-              <Button onClick={() => setShowAddEleve(true)} className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0">
+              <Button onClick={() => setShowAddEleve(true)} variant="outline" className="gap-2 border-white/20 text-white/80 hover:bg-white/10 bg-transparent">
                 <Plus className="w-4 h-4" /> Ajouter un élève
               </Button>
             </div>
@@ -259,6 +259,12 @@ export default function DetailEcole() {
                   <span className="ml-2 opacity-60 text-xs">({elevesDeClasse(cls.id).length})</span>
                 </button>
               ))}
+              <button
+                onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-blue-50 text-blue-600 border border-blue-200 hover:border-blue-400 hover:bg-blue-100 flex items-center gap-1.5"
+              >
+                <FileText className="w-4 h-4" /> Importer une nouvelle classe
+              </button>
             </div>
 
             {activeClasseData && (
@@ -347,13 +353,16 @@ export default function DetailEcole() {
           </>
         ) : (
           <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
-            <p className="text-gray-500 font-medium">Aucune classe dans cette école</p>
-            <p className="text-gray-400 text-sm mt-1">Importez une liste PDF ou ajoutez un élève manuellement</p>
-            <div className="flex justify-center gap-3 mt-4 flex-wrap">
-              <Button onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)} variant="outline" className="gap-2 border-blue-300 text-blue-600 hover:bg-blue-50">
-                <FileText className="w-4 h-4" /> Importer liste PDF
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+              <FileText className="w-7 h-7 text-blue-500" />
+            </div>
+            <p className="text-gray-700 font-semibold text-base">Aucune classe importée pour cette école</p>
+            <p className="text-gray-400 text-sm mt-1 mb-5">📄 Importez une liste de classe PDF pour ajouter les élèves.</p>
+            <div className="flex justify-center gap-3 flex-wrap">
+              <Button onClick={() => navigate(`/import-pdf?ecoleId=${ecoleId}`)} className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0">
+                <FileText className="w-4 h-4" /> Importer maintenant
               </Button>
-              <Button onClick={() => setShowAddEleve(true)} className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0">
+              <Button onClick={() => setShowAddEleve(true)} variant="outline" className="gap-2">
                 <Plus className="w-4 h-4" /> Ajouter un élève
               </Button>
             </div>
