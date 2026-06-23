@@ -59,7 +59,7 @@ const NAV = [
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 
-function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [] }) {
+function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [], loading = false, totalAlertes = 0 }) {
   const location = window.location.pathname;
 
   return (
@@ -82,28 +82,34 @@ function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [] }) {
       <nav style={{ padding: '12px 10px', flex: 1, overflowY: 'auto' }}>
         {NAV.map((item, i) => {
           if (item.section) {
-            return (
-              <div key={i} style={{ fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,.28)', padding: '14px 8px 4px' }}>
-                {item.section}
-              </div>
-            );
-          }
-          const isActive = location === item.to;
-          const handleClick = item.diag ? onDiagClick : undefined;
-          const inner = (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 9,
-              padding: '8px 10px', borderRadius: 7, fontSize: 13, marginBottom: 1, cursor: 'pointer',
-              background: isActive ? '#3B82C4' : 'transparent',
-              color: isActive ? '#fff' : 'rgba(255,255,255,.62)',
-              fontWeight: isActive ? 600 : 400,
-              transition: 'all .14s',
+             return (
+               <div key={i} style={{ fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,.28)', padding: '14px 8px 4px' }}>
+                 {item.section}
+               </div>
+             );
+           }
+           const isActive = location === item.to;
+           const handleClick = item.diag ? onDiagClick : undefined;
+           const alertCount = item.label === 'Tableau de bord' ? (loading ? 0 : totalAlertes) : 0;
+           const inner = (
+             <div style={{
+               display: 'flex', alignItems: 'center', gap: 9,
+               padding: '8px 10px', borderRadius: 7, fontSize: 13, marginBottom: 1, cursor: 'pointer',
+               background: isActive ? '#3B82C4' : 'transparent',
+               color: isActive ? '#fff' : 'rgba(255,255,255,.62)',
+               fontWeight: isActive ? 600 : 400,
+               transition: 'all .14s',
             }}
               onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,.07)'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = isActive ? '#fff' : 'rgba(255,255,255,.62)'; }}
             >
               <span style={{ fontSize: 15, width: 20, textAlign: 'center', flexShrink: 0 }}>{item.ico}</span>
               <span style={{ flex: 1 }}>{item.label}</span>
+              {alertCount > 0 && (
+                <span style={{ background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 10 }}>
+                  🔴 {alertCount}
+                </span>
+              )}
               {item.badge && notifications > 0 && (
                 <span style={{ background: '#B85C1A', color: '#fff', fontSize: 10, fontWeight: 700, padding: '1px 7px', borderRadius: 10 }}>
                   {notifications}
@@ -240,6 +246,25 @@ export default function Dashboard() {
   const alertesFiches  = fichesFiltrees.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
   const elevesClotured = elevesR.filter(e => e.statut === 'Clôturé').length;
 
+  // Détecter fiches incomplètes
+  const fichesIncompletes = fichesFiltrees.filter(f => {
+    const missing = [];
+    if (!f.motif_signalement && !f.observations) missing.push('Motif');
+    if (!f.intervenants || f.intervenants.length === 0) missing.push('Intervenant');
+    if (!f.notes) missing.push('Notes');
+    if (!f.date_naissance) missing.push('Date naiss.');
+    return missing.length > 0;
+  }).map(f => {
+    const missing = [];
+    if (!f.motif_signalement && !f.observations) missing.push('Motif');
+    if (!f.intervenants || f.intervenants.length === 0) missing.push('Intervenant');
+    if (!f.notes) missing.push('Notes');
+    if (!f.date_naissance) missing.push('Date naiss.');
+    return { ...f, missing };
+  });
+
+  const totalAlertes = alertesFiches.length + fichesIncompletes.length;
+
   const recentActivity = [...fichesFiltrees]
     .sort((a, b) => new Date(b.updated_date || b.created_date) - new Date(a.updated_date || a.created_date))
     .slice(0, 5);
@@ -300,7 +325,7 @@ export default function Dashboard() {
 
       {/* SIDEBAR */}
       <div className="db-sidebar">
-        <Sidebar membres={membres} notifications={notifs.length} onDiagClick={() => setDiagModal(true)} membresEnLigne={membresEnLigne} />
+        <Sidebar membres={membres} notifications={notifs.length} onDiagClick={() => setDiagModal(true)} membresEnLigne={membresEnLigne} loading={loading} totalAlertes={totalAlertes} />
       </div>
 
       {/* MAIN */}
@@ -389,15 +414,12 @@ export default function Dashboard() {
                 <br />{anneeSelectionnee ? `en ${anneeSelectionnee.libelle.replace('-', '–')}` : 'cette année scolaire'}.
               </div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)' }}>
-                {alertesFiches.length > 0
-                  ? `${alertesFiches.length} élève${alertesFiches.length > 1 ? 's' : ''} sans mise à jour depuis plus de 30 jours · ${membres.length} membre${membres.length !== 1 ? 's' : ''} actif${membres.length !== 1 ? 's' : ''}`
-                  : `✅ Tous les dossiers sont à jour · ${membres.length} membre${membres.length !== 1 ? 's' : ''} actif${membres.length !== 1 ? 's' : ''}`}
+                {totalAlertes > 0
+                  ? `⚠️ ${totalAlertes} élève${totalAlertes > 1 ? 's' : ''} nécessitent votre attention`
+                  : `✅ Tous les dossiers sont à jour`}
               </div>
             </div>
             <div className="db-hero-btns" style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', zIndex: 1, flexShrink: 0 }}>
-              <Link to="/liste-eleves" style={{ padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 600, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', textAlign: 'center' }}>
-                ⚠️ Alertes
-              </Link>
               <Link to="/mes-ecoles" style={{ padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500, background: 'rgba(255,255,255,.1)', color: 'rgba(255,255,255,.8)', border: '1px solid rgba(255,255,255,.18)', cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', textAlign: 'center' }}>
                 Mes écoles →
               </Link>
@@ -424,8 +446,73 @@ export default function Dashboard() {
             ))}
           </div>
 
+          {/* ALERTES CARD */}
+          <div style={{ ...S.card, marginBottom: 20 }}>
+            <div style={S.cardHead}>
+              <span style={S.cardTitle}>⚠️ Alertes et suivi</span>
+            </div>
+
+            {/* Section 1 : Sans mise à jour +30j */}
+            <div style={{ padding: '14px 0', borderBottom: '1px solid #F0F3F8' }}>
+              <div style={{ padding: '0 18px 12px', fontSize: 12.5, fontWeight: 600, color: '#182840' }}>⏰ Sans mise à jour +30j</div>
+              {alertesFiches.length === 0
+                ? <p style={{ padding: '14px 18px', fontSize: 13, color: '#1E7A52', background: '#E4F4ED', marginLeft: 10, marginRight: 10, borderRadius: 10 }}>✅ Tous les dossiers sont à jour</p>
+                : alertesFiches.slice(0, 5).map((e, i) => {
+                  const days = Math.floor((now - new Date(e.updated_date || e.created_date).getTime()) / 86400000);
+                  return (
+                    <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < Math.min(5, alertesFiches.length) - 1 ? '1px solid #F0F3F8' : 'none' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
+                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[e.classe, e.ecole].filter(Boolean).join(' · ') || '—'}</div>
+                      </div>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#B85C1A', background: '#FEF0E4', padding: '2px 8px', borderRadius: 10, flexShrink: 0, marginRight: 8 }}>
+                        +{days}j
+                      </span>
+                      <button onClick={() => navigate(`/detail-fiche?id=${e.id}`)} style={{ fontSize: 10.5, fontWeight: 700, color: '#3B82C4', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                        Voir →
+                      </button>
+                    </div>
+                  );
+                })}
+              {alertesFiches.length > 5 && (
+                <div style={{ padding: '8px 18px', textAlign: 'right' }}>
+                  <Link to="/liste-eleves" style={{ fontSize: 11.5, color: '#3B82C4', cursor: 'pointer', fontWeight: 500, textDecoration: 'none' }}>Voir tous les {alertesFiches.length} →</Link>
+                </div>
+              )}
+            </div>
+
+            {/* Section 2 : Fiches incomplètes */}
+            <div style={{ padding: '14px 0' }}>
+              <div style={{ padding: '0 18px 12px', fontSize: 12.5, fontWeight: 600, color: '#182840' }}>📋 Fiches incomplètes</div>
+              {fichesIncompletes.length === 0
+                ? <p style={{ padding: '14px 18px', fontSize: 13, color: '#1E7A52', background: '#E4F4ED', marginLeft: 10, marginRight: 10, borderRadius: 10 }}>✅ Toutes les fiches sont complètes</p>
+                : fichesIncompletes.slice(0, 5).map((e, i) => (
+                  <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < Math.min(5, fichesIncompletes.length) - 1 ? '1px solid #F0F3F8' : 'none' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 5 }}>
+                        {e.missing.map((m, j) => (
+                          <span key={j} style={{ fontSize: 9.5, fontWeight: 700, color: '#fff', background: '#EF4444', padding: '1px 6px', borderRadius: 8 }}>
+                            {m} manquant
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={() => navigate(`/detail-fiche?id=${e.id}`)} style={{ fontSize: 10.5, fontWeight: 700, color: '#3B82C4', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+                      Compléter →
+                    </button>
+                  </div>
+                ))}
+              {fichesIncompletes.length > 5 && (
+                <div style={{ padding: '8px 18px', textAlign: 'right' }}>
+                  <a href="javascript:void(0)" onClick={() => window.location.href = '/liste-eleves'} style={{ fontSize: 11.5, color: '#3B82C4', cursor: 'pointer', fontWeight: 500, textDecoration: 'none' }}>Voir tous les {fichesIncompletes.length} →</a>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* RACCOURCIS */}
-          <div className="db-raccourcis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+           <div className="db-raccourcis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
             {[
               { ico: '🔍', ibg: '#EEE9FF', lbl: 'Nouvelles hypothèses',   sub: 'Démarrer une analyse de situation',         action: () => setDiagModal(true) },
               { ico: '📄', ibg: '#EAF2FB', lbl: 'Importer une liste PDF',  sub: 'Créer des fiches depuis Onde', to: '/import-pdf' },
@@ -526,29 +613,6 @@ export default function Dashboard() {
 
             {/* Col droite */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-              {/* ALERTES */}
-              <div style={S.card}>
-                <div style={S.cardHead}>
-                  <span style={S.cardTitle}>⚠️ À relancer</span>
-                  <Link to="/liste-eleves" style={S.cardLink}>Voir tous →</Link>
-                </div>
-                {alertes5.length === 0
-                  ? <p style={{ textAlign: 'center', padding: '28px 0', fontSize: 13, color: '#566880' }}>✅ Aucune alerte</p>
-                  : alertes5.map((e, i) => (
-                    <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < alertes5.length - 1 ? '1px solid #F0F3F8' : 'none' }}
-                      onClick={() => navigate(`/detail-fiche?id=${e.id}`)}>
-                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#B85C1A', flexShrink: 0 }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
-                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[e.classe, e.ecole].filter(Boolean).join(' · ') || '—'}</div>
-                      </div>
-                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#B85C1A', background: '#FEF0E4', padding: '2px 8px', borderRadius: 10, flexShrink: 0 }}>
-                        +{daysSince(e.updated_date || e.created_date)}j
-                      </span>
-                    </div>
-                  ))}
-              </div>
 
               {/* ÉCOLES */}
               <div style={S.card}>
