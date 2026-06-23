@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import RapportContent from '@/components/RapportContent';
 import InterventionItem from '@/components/rased/InterventionItem';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
-import NotesMembreSection from '@/components/rased/NotesMembreSection';
 import ReportExportModal from '@/components/rased/ReportExportModal';
 import { usePresence } from '@/lib/usePresence';
 import { generateReport, downloadReport } from '@/lib/reportGenerator';
@@ -370,62 +369,49 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
 
 
 
-      {/* Synthèse Équipe Éducative & Notes de l'équipe */}
+      {/* Synthèse Équipe Éducative */}
       <Card>
-        <CardHead icon="📋" title="Synthèse d'Équipe Éducative (ESS/EE) & Notes de l'équipe" />
+        <CardHead icon="📋" title="Synthèse d'Équipe Éducative (ESS/EE)" />
         <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Section Synthèse EE */}
-          <div>
-            <h4 style={{ fontSize: 13, fontWeight: 700, color: '#182840', margin: '0 0 12px 0' }}>Synthèses d'EE/ESS</h4>
-            {addingSynthese && (
-              <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  { label: 'Date de la réunion EE ou ESS', content: <input type="date" value={newSynthese.date} onChange={e => setNewSynthese({...newSynthese, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
-                  { label: 'Membres présents', content: <textarea value={newSynthese.membres} onChange={e => setNewSynthese({...newSynthese, membres: e.target.value})} placeholder="Énumérez les participants…" style={{ width: '100%', minHeight: 60, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
-                  { label: 'Décisions prises', content: <textarea value={newSynthese.decisions} onChange={e => setNewSynthese({...newSynthese, decisions: e.target.value})} placeholder="Résumez les décisions et actions…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
-                ].map(({ label, content }) => (
-                  <div key={label}>
-                    <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
-                    {content}
-                  </div>
-                ))}
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                  <button onClick={() => setAddingSynthese(false)} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
-                  <button onClick={addSynthese} disabled={!newSynthese.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newSynthese.date ? 0.5 : 1 }}>Ajouter</button>
+          {addingSynthese && (
+            <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { label: 'Date de la réunion EE ou ESS', content: <input type="date" value={newSynthese.date} onChange={e => setNewSynthese({...newSynthese, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
+                { label: 'Membres présents', content: <textarea value={newSynthese.membres} onChange={e => setNewSynthese({...newSynthese, membres: e.target.value})} placeholder="Énumérez les participants…" style={{ width: '100%', minHeight: 60, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+                { label: 'Décisions prises', content: <textarea value={newSynthese.decisions} onChange={e => setNewSynthese({...newSynthese, decisions: e.target.value})} placeholder="Résumez les décisions et actions…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+              ].map(({ label, content }) => (
+                <div key={label}>
+                  <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
+                  {content}
                 </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => setAddingSynthese(false)} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
+                <button onClick={addSynthese} disabled={!newSynthese.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newSynthese.date ? 0.5 : 1 }}>Ajouter</button>
               </div>
-            )}
-            {syntheses.length === 0 && !addingSynthese && (
-              <p style={{ fontSize: 12, color: '#94A3B8', fontStyle: 'italic' }}>Aucune synthèse EE enregistrée</p>
-            )}
-            {syntheses.map((syn, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: idx < syntheses.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#182840' }}>📅 {new Date(syn.date).toLocaleDateString('fr-FR')}</span>
-                    <span style={{ fontSize: 10.5, color: '#566880', padding: '2px 8px', background: '#F0F3F8', borderRadius: 4 }}>par {syn.created_by_name}</span>
-                  </div>
-                  {syn.membres && <div style={{ fontSize: 12, color: '#182840', marginBottom: 4, padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #3B82C4' }}><strong>Présents:</strong> {syn.membres}</div>}
-                  {syn.decisions && <div style={{ fontSize: 12, color: '#182840', padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #1E7A52' }}><strong>Décisions:</strong> {syn.decisions}</div>}
+            </div>
+          )}
+          {syntheses.length === 0 && !addingSynthese && (
+            <p style={{ fontSize: 12, color: '#94A3B8', fontStyle: 'italic' }}>Aucune synthèse EE enregistrée</p>
+          )}
+          {syntheses.map((syn, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: idx < syntheses.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#182840' }}>📅 {new Date(syn.date).toLocaleDateString('fr-FR')}</span>
+                  <span style={{ fontSize: 10.5, color: '#566880', padding: '2px 8px', background: '#F0F3F8', borderRadius: 4 }}>par {syn.created_by_name}</span>
                 </div>
-                <button onClick={() => deleteSynthese(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}>
-                  <Trash2 size={14} />
-                </button>
+                {syn.membres && <div style={{ fontSize: 12, color: '#182840', marginBottom: 4, padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #3B82C4' }}><strong>Présents:</strong> {syn.membres}</div>}
+                {syn.decisions && <div style={{ fontSize: 12, color: '#182840', padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #1E7A52' }}><strong>Décisions:</strong> {syn.decisions}</div>}
               </div>
-            ))}
-            {!addingSynthese && (
-              <button onClick={() => setAddingSynthese(true)} style={{ fontSize: 11.5, padding: '6px 14px', borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, marginTop: 8 }}>+ Ajouter une synthèse</button>
-            )}
-          </div>
-
-          {/* Séparateur */}
-          <div style={{ height: '1px', background: '#D8E1EE' }} />
-
-          {/* Section Notes */}
-          <div>
-            <h4 style={{ fontSize: 13, fontWeight: 700, color: '#182840', margin: '0 0 12px 0' }}>Notes de l'équipe</h4>
-            <NotesMembreSection ficheId={ficheId} />
-          </div>
+              <button onClick={() => deleteSynthese(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          {!addingSynthese && (
+            <button onClick={() => setAddingSynthese(true)} style={{ fontSize: 11.5, padding: '6px 14px', borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, marginTop: 8 }}>+ Ajouter une synthèse</button>
+          )}
         </div>
       </Card>
 
