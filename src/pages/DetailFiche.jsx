@@ -148,7 +148,7 @@ function CardHead({ icon, title, action, onAction }) {
 }
 
 // ── Onglet Suivi ──────────────────────────────────────────────────────────────
-function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField }) {
+function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField, membres }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [motif, setMotif] = useState(fiche.observations || '');
@@ -156,12 +156,22 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   const [savingMotif, setSavingMotif] = useState(false);
   const [showMotifSuccess, setShowMotifSuccess] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
-  const [newIntervention, setNewIntervention] = useState({ date: '', nom: '', description: '' });
+  const [newIntervention, setNewIntervention] = useState({ date: '', nom: '', description: '', profession: '' });
   const [showRapport, setShowRapport] = useState(false);
   const [addingSynthese, setAddingSynthese] = useState(false);
   const [newSynthese, setNewSynthese] = useState({ date: '', membres: '', decisions: '', fichier_url: '' });
   const [syntheses, setSyntheses] = useState(fiche.syntheses_ee || []);
   const motifInputRef = useRef(null);
+
+  // Pré-sélectionner le membre connecté
+  useEffect(() => {
+    if (membres.length > 0 && user && addingIntervention && !newIntervention.nom) {
+      const membreUser = membres.find(m => m.prenom === user.full_name?.split(' ')[0]);
+      if (membreUser) {
+        setNewIntervention(prev => ({ ...prev, nom: `${membreUser.prenom} ${membreUser.nom}`, profession: membreUser.profession }));
+      }
+    }
+  }, [addingIntervention, membres, user]);
 
   useEffect(() => {
     if (highlightField === 'motif' && motifInputRef.current) {
@@ -408,7 +418,18 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
             <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { label: 'Date', content: <input type="date" value={newIntervention.date} onChange={e => setNewIntervention({...newIntervention, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
-                { label: 'Nom du professionnel', content: <input type="text" value={newIntervention.nom} onChange={e => setNewIntervention({...newIntervention, nom: e.target.value})} placeholder="Ex : Mme Durand, Psy EN EDA" style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
+                { label: 'Professionnel de l\'équipe RASED', content: (
+                  <select value={newIntervention.nom} onChange={e => {
+                    const membreId = e.target.value;
+                    const membre = membres.find(m => m.id === membreId);
+                    setNewIntervention({...newIntervention, nom: membre ? `${membre.prenom} ${membre.nom}` : '', profession: membre?.profession || ''});
+                  }} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', boxSizing: 'border-box', height: 36 }}>
+                    <option value="">— Sélectionner un professionnel —</option>
+                    {membres.map(m => (
+                      <option key={m.id} value={m.id}>{m.prenom} {m.nom} · {m.profession === 'Psy EN EDA' ? 'Psy-EN EDA' : m.profession}</option>
+                    ))}
+                  </select>
+                ) },
                 { label: 'Acte accompli', content: (
                   <select value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', boxSizing: 'border-box', height: 36 }}>
                     <option value="">— Sélectionner un acte —</option>
@@ -840,6 +861,7 @@ export default function DetailFiche() {
   const [user, setUser] = useState(null);
   const [showSuccess, setShowSuccess] = useState(searchParams.get('success') === 'true');
   const [highlightField, setHighlightField] = useState(searchParams.get('highlight') || null);
+  const [membres, setMembres] = useState([]);
 
   const ficheId = searchParams.get('id');
   const { onFiche } = usePresence(ficheId);
@@ -864,11 +886,13 @@ export default function DetailFiche() {
       base44.entities.FicheEleve.get(ficheId),
       base44.entities.HistoriqueEDA.filter({ eleve_id: ficheId }).catch(() => []),
       base44.auth.me().catch(() => null),
-    ]).then(([ficheData, histo, userData]) => {
+      base44.entities.MembreEquipe.list().catch(() => []),
+    ]).then(([ficheData, histo, userData, membresData]) => {
       setFiche(ficheData);
       setInterventions(ficheData?.interventions || []);
       setHistoriqueEDA(histo.sort((a, b) => new Date(b.date || b.created_date) - new Date(a.date || a.created_date)));
       setUser(userData);
+      setMembres(membresData);
     }).catch(() => setFiche(null)).finally(() => setLoading(false));
   }, [ficheId]);
 
@@ -912,7 +936,7 @@ export default function DetailFiche() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
             {activeTab === 'suivi' && (
-              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} />
+              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} membres={membres} />
             )}
             {activeTab === 'hypotheses' && (
               <TabHypotheses fiche={fiche} ficheId={ficheId} navigate={navigate} historiqueEDA={historiqueEDA} />
