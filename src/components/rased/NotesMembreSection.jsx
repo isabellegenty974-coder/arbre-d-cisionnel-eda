@@ -38,27 +38,46 @@ export default function NotesMembreSection({ ficheId }) {
   }, [ficheId]);
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || !draft.trim()) return;
     setSaving(true);
-    const profession = user.profession || 'Psy EN EDA';
-    if (myNotes) {
-      await base44.entities.NotesMembre.update(myNotes.id, {
-        contenu: draft,
-        updated_at: new Date().toISOString(),
-      });
-    } else {
-      await base44.entities.NotesMembre.create({
-        fiche_id: ficheId,
-        membre_id: user.id,
-        membre_nom: user.full_name,
-        membre_profession: profession,
-        contenu: draft,
-        updated_at: new Date().toISOString(),
-      });
+    try {
+      const profession = user.profession || 'Psy EN EDA';
+      if (myNotes) {
+        await base44.entities.NotesMembre.update(myNotes.id, {
+          contenu: draft,
+          updated_at: new Date().toISOString(),
+        });
+      } else {
+        await base44.entities.NotesMembre.create({
+          fiche_id: ficheId,
+          membre_id: user.id,
+          membre_nom: user.full_name,
+          membre_profession: profession,
+          contenu: draft,
+          updated_at: new Date().toISOString(),
+        });
+      }
+      setEditing(false);
+      setDraft('');
+      await load();
+    } catch (e) {
+      console.error('Erreur sauvegarde note:', e);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setEditing(false);
-    load();
+  };
+
+  const handleDelete = async () => {
+    if (!myNotes || !confirm('Supprimer cette note ?')) return;
+    setSaving(true);
+    try {
+      await base44.entities.NotesMembre.delete(myNotes.id);
+      await load();
+    } catch (e) {
+      console.error('Erreur suppression note:', e);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const autresMembres = notesEquipe.filter(n => n.membre_id !== user?.id && n.contenu?.trim());
@@ -93,15 +112,38 @@ export default function NotesMembreSection({ ficheId }) {
                 style={{ padding: '6px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>
                 Annuler
               </button>
-              <button onClick={handleSave} disabled={saving}
-                style={{ padding: '6px 14px', fontSize: 12.5, borderRadius: 7, background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: saving ? 0.6 : 1 }}>
+              <button onClick={handleSave} disabled={saving || !draft.trim()}
+                style={{ padding: '6px 14px', fontSize: 12.5, borderRadius: 7, background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: (saving || !draft.trim()) ? 0.6 : 1 }}>
                 {saving ? 'Enregistrement…' : 'Enregistrer'}
               </button>
             </div>
           </div>
+        ) : myNotes?.contenu ? (
+          <div>
+            <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.6, margin: '0 0 10px 0', whiteSpace: 'pre-wrap' }}>
+              {myNotes.contenu}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#94A3B8', marginBottom: 8 }}>
+              {myNotes.updated_at && (
+                <span>
+                  {new Date(myNotes.updated_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setEditing(true)}
+                style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: `1px solid ${cfg.color}`, color: cfg.color, cursor: 'pointer', fontWeight: 600 }}>
+                ✏️ Modifier
+              </button>
+              <button onClick={handleDelete} disabled={saving}
+                style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', cursor: 'pointer', fontWeight: 600, opacity: saving ? 0.6 : 1 }}>
+                🗑️ Supprimer
+              </button>
+            </div>
+          </div>
         ) : (
-          <p style={{ fontSize: 13, color: myNotes?.contenu ? '#182840' : '#94A3B8', fontStyle: myNotes?.contenu ? 'normal' : 'italic', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>
-            {myNotes?.contenu || 'Aucune note personnelle pour le moment.'}
+          <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+            Aucune note personnelle pour le moment.
           </p>
         )}
       </div>
