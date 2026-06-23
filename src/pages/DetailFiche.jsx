@@ -561,6 +561,14 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </div>
       </Card>
 
+      {/* Documents */}
+      <Card>
+        <CardHead icon="📎" title="Documents" />
+        <div style={{ padding: 14 }}>
+          <DocumentsSection ficheId={ficheId} />
+        </div>
+      </Card>
+
       {/* Rapport */}
       {fiche.rapport && (
         <Card>
@@ -851,13 +859,6 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <InfoRow label="Créé par" value={fiche.createdByName ? `${fiche.createdByName} · ${PROF_LABEL[fiche.createdByProfession] || fiche.createdByProfession}` : null} />
         <InfoRow label="Date de création" value={fiche.created_date ? new Date(fiche.created_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
         <InfoRow label="Dernière modification" value={fiche.updated_date ? new Date(fiche.updated_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
-      </Card>
-
-      <Card>
-        <CardHead icon="📎" title="Documents" />
-        <div style={{ padding: 14 }}>
-          <DocumentsSection ficheId={ficheId} />
-        </div>
       </Card>
 
       <Card>
