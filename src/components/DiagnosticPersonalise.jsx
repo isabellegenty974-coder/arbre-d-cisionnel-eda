@@ -24,7 +24,7 @@ export default function DiagnosticPersonalise() {
         animate={{ opacity: 1, y: 0 }}
         className="p-6 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20"
       >
-        <h2 className="text-xl font-bold text-foreground mb-2">🎯 Hypothèses diagnostiques</h2>
+        <h2 className="text-xl font-bold text-foreground mb-2">🎯 Hypothèses de travail</h2>
         {eleve?.prenom && (
           <p className="text-sm text-muted-foreground mb-4">
             Basé sur {synthesis.problemCount} sélection(s) pour <span className="font-semibold text-foreground">{eleve.prenom} {eleve.nom}</span>
