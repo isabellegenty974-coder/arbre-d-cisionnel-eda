@@ -36,8 +36,8 @@ export default function BottomBar() {
           >
             <Icon className={`w-5 h-5 transition-transform ${active ? 'scale-110' : ''}`} />
             <span className="text-[10px] font-medium">{label}</span>
-            {isSettings && user && isOnline && (
-              <span className="absolute top-2.5 right-2 w-2 h-2 rounded-full bg-green-500"></span>
+            {isSettings && user && (
+              <span className={`absolute top-2.5 right-2 w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></span>
             )}
           </Link>
         );
