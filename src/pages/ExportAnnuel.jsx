@@ -10,7 +10,9 @@ import { exportAnnuelPDF } from "@/lib/pdfExport";
 
 function stripMarkdown(text) {
   return (text || "")
+    .replace(/^>\s?/gm, "")
     .replace(/^#{1,6}\s*/gm, "")
+    .replace(/^[*-]\s+/gm, "")
     .replace(/\*\*/g, "")
     .replace(/\*/g, "")
     .replace(/__/g, "")
