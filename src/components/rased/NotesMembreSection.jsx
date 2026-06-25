@@ -174,9 +174,10 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
         </p>
       ) : (
         notesEquipe.map(note => {
-          const c = PROF_COLOR[note.membre_profession] || { bg: '#F0F3F8', color: '#566880', border: '#D8E1EE', text: '#566880' };
           const isAuthor = user && note.membre_id === user.id;
           const isAdmin = user && user.role === 'admin';
+          const displayedProfession = (isAuthor && user.profession) ? user.profession : note.membre_profession;
+          const c = PROF_COLOR[displayedProfession] || { bg: '#F0F3F8', color: '#566880', border: '#D8E1EE', text: '#566880' };
           return (
             <div key={note.id} style={{ background: '#fff', border: `1px solid ${c.border}`, borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
@@ -186,8 +187,8 @@ export default function NotesMembreSection({ ficheId, fichePrenomNom = '' }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#182840' }}>{note.membre_nom}</div>
-                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: c.bg, color: c.text }} title={PROF_LABELS[note.membre_profession] || note.membre_profession}>
-                      {note.membre_profession === 'Psy EN EDA' ? 'Psy-EN EDA' : note.membre_profession}
+                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: c.bg, color: c.text }} title={PROF_LABELS[displayedProfession] || displayedProfession}>
+                      {displayedProfession === 'Psy EN EDA' ? 'Psy-EN EDA' : displayedProfession}
                     </span>
                     {note.updated_at && (
                       <span style={{ fontSize: 11, color: '#94A3B8', marginLeft: 'auto' }}>

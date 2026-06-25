@@ -155,13 +155,7 @@ export default function FicheEleve() {
       }
 
       const fullName = user?.full_name || '';
-      let profession = '';
-      try {
-        if (user?.email) {
-          const membres = await base44.entities.MembreEquipe.filter({ email: user.email });
-          profession = membres.length > 0 ? membres[0].profession : '';
-        }
-      } catch {}
+      const profession = user?.profession || '';
 
       // S'assurer que l'école existe dans la base
       if (ecole) {

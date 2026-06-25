@@ -285,18 +285,18 @@ export default function Parametres() {
                 <div style={{ fontSize: 11, fontWeight: 600, color: '#566880', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 4 }}>Rôle dans l'équipe</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ fontSize: 14, fontWeight: 500, color: '#182840' }}>
-                    {userMembre.profession === 'Psy EN EDA' 
+                    {user.profession === 'Psy EN EDA'
                       ? 'Psychologue de l\'Éducation Nationale · Spécialité EDA'
-                      : userMembre.profession === 'MaDR'
+                      : user.profession === 'MaDR'
                       ? 'Maître à Dominante Relationnelle (MaDR)'
-                      : userMembre.profession === 'MaDP'
+                      : user.profession === 'MaDP'
                       ? 'Maître à Dominante Pédagogique (MaDP)'
-                      : userMembre.profession}
+                      : user.profession}
                   </div>
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: 
-                    userMembre.profession === 'Psy EN EDA' ? '#3B82C4' :
-                    userMembre.profession === 'MaDR' ? '#1E7A52' :
-                    userMembre.profession === 'MaDP' ? '#B85C1A' : '#D8E1EE'
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background:
+                    user.profession === 'Psy EN EDA' ? '#3B82C4' :
+                    user.profession === 'MaDR' ? '#1E7A52' :
+                    user.profession === 'MaDP' ? '#B85C1A' : '#D8E1EE'
                   }} />
                 </div>
               </div>

@@ -32,64 +32,14 @@ export default function RapportAnnuel() {
 
     try {
       const annee = annees.find(a => a.id === anneeActive);
-      const [fiches, membres, ecoles] = await Promise.all([
-        base44.entities.FicheEleve.list('-created_date', 500),
-        base44.entities.MembreEquipe.filter({ actif: true }),
+      const [fiches, historique, eleves, ecoles] = await Promise.all([
+        base44.entities.FicheEleve.list('-created_date', 1000),
+        base44.entities.HistoriqueEDA.list('-date', 2000),
+        base44.entities.EleveRased.list('-created_date', 1000),
         base44.entities.EcoleRased.list('-created_date', 100),
       ]);
 
-      // Filtrer par année scolaire
-      const fichesFiltrees = fiches.filter(f => f.annee_scolaire === annee.libelle);
-
-      // Calculer les stats
-      const stats = {
-        totalEleves: fichesFiltrees.length,
-        totalEcoles: [...new Set(fichesFiltrees.map(f => f.ecole))].length,
-        nouvellesdemandes: fichesFiltrees.filter(f => f.statut === 'Nouveau').length,
-        suivisClotures: fichesFiltrees.filter(f => f.statut === 'Clôturé').length,
-        analysesRealisees: fichesFiltrees.filter(f => f.hypotheses?.length > 0).length,
-        entretiensConjoint: fichesFiltrees.reduce((s, f) => s + (f.interventions?.length || 0), 0),
-        participationsESS: 0, // À compléter selon données réelles
-        orientationsExt: 0,   // À compléter selon données réelles
-        psy: {
-          entretiensEleves: 0,
-          observationsClasse: 0,
-          bilansPsycho: 0,
-          analysesED: 0,
-          comptesrendus: 0,
-          entretiensConjoint: 0,
-          participationsESS: 0,
-          orientationsMDPH: 0,
-        },
-        madr: {
-          elevesEnCharge: 0,
-          seancesReeducation: 0,
-          suivisIndividuels: 0,
-          suivisGroupe: 0,
-          clotureees: 0,
-          entretiensConjoint: 0,
-          liaisonsEnseignants: 0,
-          orientations: 0,
-        },
-        madp: {
-          elevesAccompagnes: 0,
-          seancesAide: 0,
-          suivisIndividuels: 0,
-          suivisGroupe: 0,
-          clotureees: 0,
-          liaisonsEnseignants: 0,
-          entretiensConjoint: 0,
-          orientations: 0,
-        },
-      };
-
-      const reportData = {
-        annee_scolaire: annee.libelle,
-        membres: membres,
-        stats: stats,
-      };
-
-      const doc = await generateRapportAnnuel(reportData);
+      const doc = await generateRapportAnnuel({ anneeScolaire: annee, fiches, historique, eleves, ecoles });
       doc.save(`rapport_annuel_RASED_${annee.libelle.replace('-', '_')}.pdf`);
     } catch (error) {
       console.error('Erreur génération rapport:', error);
