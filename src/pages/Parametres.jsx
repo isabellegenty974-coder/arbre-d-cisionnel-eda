@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Calendar, Check, X, LogOut } from 'lucide-react';
 
@@ -145,6 +146,7 @@ function FormAjoutAnnee({ onSave, onCancel, saving, anneesExistantes = [] }) {
 // ── Page principale ─────────────────────────────────────────────────────────
 export default function Parametres() {
   const navigate    = useNavigate();
+  const { logout }  = useAuth();
   const [annees, setAnnees]     = useState([]);
   const [fiches, setFiches]     = useState([]);
   const [diags, setDiags]       = useState([]);
@@ -454,7 +456,7 @@ export default function Parametres() {
             Vous restez connecté·e tant que vous ne cliquez pas ici. La déconnexion est uniquement manuelle.
           </p>
           <button
-            onClick={() => base44.auth.logout('/login')}
+            onClick={logout}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '10px 24px', background: '#B85C1A', color: '#fff',

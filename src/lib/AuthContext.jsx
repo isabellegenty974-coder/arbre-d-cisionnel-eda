@@ -5,6 +5,24 @@ import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
 
+const TOKEN_STORAGE_KEY = 'base44_access_token';
+
+function getStoredToken() {
+  try {
+    return localStorage.getItem(TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function clearStoredToken() {
+  try {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,7 +40,9 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
-      
+
+      const hasToken = Boolean(appParams.token || getStoredToken());
+
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
       const appClient = createAxiosClient({
@@ -30,16 +50,16 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'X-App-Id': appParams.appId
         },
-        token: appParams.token, // Include token if available
+        token: appParams.token || getStoredToken(), // Include token if available
         interceptResponses: true
       });
-      
+
       try {
         const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
         setAppPublicSettings(publicSettings);
-        
-        // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
+
+        // Un token présent en localStorage est vérifié avant toute redirection vers la connexion
+        if (hasToken) {
           await checkUserAuth();
         } else {
           setIsLoadingAuth(false);
@@ -49,26 +69,22 @@ export const AuthProvider = ({ children }) => {
         setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
-        
+
         // Handle app-level errors
         if (appError.status === 403 && appError.data?.extra_data?.reason) {
           const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
+          if (reason === 'user_not_registered') {
             setAuthError({
               type: 'user_not_registered',
               message: 'User not registered for this app'
             });
-          } else {
+          } else if (reason !== 'auth_required') {
             setAuthError({
               type: reason,
               message: appError.message
             });
           }
+          // 'auth_required' est ignoré : la session ne doit jamais expirer automatiquement
         } else {
           setAuthError({
             type: 'unknown',
@@ -77,15 +93,13 @@ export const AuthProvider = ({ children }) => {
         }
         setIsLoadingPublicSettings(false);
         setIsLoadingAuth(false);
+        setAuthChecked(true);
       }
     } catch (error) {
       console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
+      setAuthChecked(true);
     }
   };
 
@@ -99,32 +113,27 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(false);
       setAuthChecked(true);
     } catch (error) {
+      // La session persiste indéfiniment : un échec de vérification (réseau, jeton
+      // momentanément refusé côté serveur) ne déconnecte jamais l'utilisateur.
+      // Seul un appel explicite à logout() peut le faire.
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
-      setIsAuthenticated(false);
       setAuthChecked(true);
-      
-      // If user auth fails, it might be an expired token
-      if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
-      }
     }
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = () => {
+    try {
+      // Laisse le SDK nettoyer son propre état, sans suivre sa redirection
+      base44.auth.logout();
+    } catch (err) {
+      console.error('SDK logout failed:', err);
+    }
+    clearStoredToken();
     setUser(null);
     setIsAuthenticated(false);
-    
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
-    }
+    setAuthChecked(true);
+    window.location.href = '/login';
   };
 
   const navigateToLogin = () => {

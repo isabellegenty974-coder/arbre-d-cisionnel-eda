@@ -8,6 +8,19 @@ import { FileDown, ArrowLeft, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { exportAnnuelPDF } from "@/lib/pdfExport";
 
+function stripMarkdown(text) {
+  return (text || "")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/\*\*/g, "")
+    .replace(/\*/g, "")
+    .replace(/__/g, "")
+    .replace(/_/g, "")
+    .replace(/\|/g, " ")
+    .replace(/^\s*-{3,}\s*$/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function ExportAnnuel() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -72,7 +85,7 @@ export default function ExportAnnuel() {
                   .slice(0, 3)
                   .map(([h, count]) => (
                     <p key={h} className="text-xs text-muted-foreground">
-                      • {h} ({count})
+                      • {stripMarkdown(h)} ({count})
                     </p>
                   ))}
               </div>

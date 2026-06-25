@@ -202,7 +202,7 @@ function AutoRegister() {
 }
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, user } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
 
@@ -261,13 +261,8 @@ const AuthenticatedApp = () => {
   const publicPages = ['/register', '/login'];
   const isPublicPage = publicPages.some(page => location.pathname.startsWith(page));
 
-  if (authError && !isPublicPage) {
-    if (authError.type === 'user_not_registered') {
-      return <AutoRegister />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
-    }
+  if (authError && !isPublicPage && authError.type === 'user_not_registered') {
+    return <AutoRegister />;
   }
 
   return (
