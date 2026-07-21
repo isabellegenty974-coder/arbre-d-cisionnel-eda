@@ -32,6 +32,21 @@ function initiales(prenom, nom) {
   return `${prenom?.[0] || ''}${nom?.[0] || ''}`.toUpperCase();
 }
 
+function cleanClassName(c) {
+  return c ? c.replace(/\s*Salle\s+\S+/gi, '').trim() : '';
+}
+
+function stripMarkdown(text) {
+  return text
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+    .replace(/^[-*]\s+/gm, '')
+    .replace(/^---+$/gm, '')
+    .trim();
+}
+
 // ── Topbar ──────────────────────────────────────────────────────────────────
 function Topbar({ fiche, ficheId, onHypotheses }) {
   return (
@@ -42,7 +57,7 @@ function Topbar({ fiche, ficheId, onHypotheses }) {
       <span style={{ color: 'rgba(255,255,255,.2)' }}>/</span>
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', display: 'flex', alignItems: 'center', gap: 5, overflow: 'hidden', flex: 1, minWidth: 0 }}>
         {fiche.ecole && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fiche.ecole}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
-        {fiche.classe && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fiche.classe}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
+        {fiche.classe && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cleanClassName(fiche.classe)}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
         <span style={{ color: '#fff', fontWeight: 600, whiteSpace: 'nowrap' }}>{fiche.prenom} {fiche.nom}</span>
       </div>
     </div>
@@ -53,7 +68,6 @@ function Topbar({ fiche, ficheId, onHypotheses }) {
 function HeroFiche({ fiche, activeTab, setActiveTab }) {
   const statut = fiche.statut || 'Nouveau';
   const sc = STATUT_CFG[statut] || STATUT_CFG['Nouveau'];
-  const intervenants = fiche.intervenants || [];
 
   return (
     <div style={{ background: '#1A3353', padding: '20px 16px 0', position: 'relative', overflow: 'hidden' }}>
@@ -76,30 +90,12 @@ function HeroFiche({ fiche, activeTab, setActiveTab }) {
               </span>
             )}
             {fiche.ecole && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>🏫 {fiche.ecole}</span>}
-            {fiche.classe && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>📚 {fiche.classe}</span>}
+            {fiche.classe && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>📚 {cleanClassName(fiche.classe)}</span>}
             <span style={{ fontSize: 11.5, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: sc.pill, color: sc.pillT }}>
               <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: 'currentColor', marginRight: 4, verticalAlign: 'middle' }} />
               {sc.lbl}
             </span>
           </div>
-          {intervenants.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,.4)' }}>Intervenants :</span>
-              {intervenants.map((iv, i) => {
-                const bg = PROF_COLOR[iv.profession] || '#3B82C4';
-                const init = `${iv.nom?.split(' ')[0]?.[0] || ''}${iv.nom?.split(' ')[1]?.[0] || ''}`.toUpperCase();
-                return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 20, padding: '3px 8px 3px 4px' }}>
-                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff' }}>{init || iv.nom?.[0]}</div>
-                    <div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,.75)' }}>{iv.nom}</div>
-                      <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,.4)' }}>{PROF_LABEL[iv.profession] || iv.profession}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       </div>
 
@@ -287,43 +283,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </motion.div>
       )}
 
-      {/* Motif de la demande + Problématiques */}
-      <Card style={{ borderTop: highlightField === 'motif' ? '3px solid #B85C1A' : 'none', boxShadow: highlightField === 'motif' ? '0 0 0 3px rgba(184, 92, 26, 0.15)' : 'none' }}>
-        <CardHead icon="📌" title="Motif de la demande" />
-        <div style={{ padding: '14px 16px' }}>
-          {highlightField === 'motif' && (
-            <div style={{ background: '#FEF0E4', border: '1px solid #B85C1A', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#B85C1A', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>⚠️</span>
-              <span>Ce champ est requis pour compléter la fiche</span>
-            </div>
-          )}
-
-          {/* Texte libre */}
-          <textarea
-            ref={motifInputRef}
-            value={motif}
-            onChange={e => setMotif(e.target.value)}
-            placeholder="Décrivez le motif de la demande..."
-            style={{
-              width: '100%', minHeight: 90, padding: '10px 12px', borderRadius: 8,
-              border: `1.5px solid ${highlightField === 'motif' ? '#B85C1A' : '#D8E1EE'}`,
-              fontSize: 13, outline: 'none', resize: 'vertical',
-              fontFamily: 'Inter, sans-serif', boxSizing: 'border-box',
-              background: highlightField === 'motif' ? '#FFFAF5' : '#fff',
-              transition: 'all 0.3s ease',
-            }}
-          />
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-            <button
-              onClick={handleSaveMotif}
-              disabled={savingMotif}
-              style={{ padding: '7px 16px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: savingMotif ? 0.5 : 1 }}>
-              {savingMotif ? 'Enregistrement…' : 'Enregistrer'}
-            </button>
-          </div>
-        </div>
-      </Card>
+      {/* ── BLOC 1 : IDENTITÉ ET STATUT ─────────────────────────────────────── */}
 
       {/* Statut */}
       <Card>
@@ -340,12 +300,52 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </div>
       </Card>
 
-
-
-      {/* Problématiques identifiées */}
+      {/* Intervenants RASED */}
       <Card>
-        <CardHead icon="🎯" title="Problématiques identifiées" />
+        <CardHead icon="👥" title="Intervenants RASED" />
         <div style={{ padding: 14 }}>
+          <IntervenantsSection ficheId={ficheId} fichePrenomNom={`${fiche.prenom} ${fiche.nom}`} createdByName={fiche.createdByName} createdByProfession={fiche.createdByProfession} />
+        </div>
+      </Card>
+
+      {/* ── BLOC 2 : MOTIF ET PROBLÉMATIQUES ──────────────────────────────────── */}
+
+      <Card style={{ borderTop: highlightField === 'motif' ? '3px solid #B85C1A' : 'none', boxShadow: highlightField === 'motif' ? '0 0 0 3px rgba(184, 92, 26, 0.15)' : 'none' }}>
+        <CardHead icon="📌" title="Motif de la demande" />
+        <div style={{ padding: '14px 16px' }}>
+          {highlightField === 'motif' && (
+            <div style={{ background: '#FEF0E4', border: '1px solid #B85C1A', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#B85C1A', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>⚠️</span>
+              <span>Ce champ est requis pour compléter la fiche</span>
+            </div>
+          )}
+          <textarea
+            ref={motifInputRef}
+            value={motif}
+            onChange={e => setMotif(e.target.value)}
+            placeholder="Décrivez le motif de la demande..."
+            style={{
+              width: '100%', minHeight: 90, padding: '10px 12px', borderRadius: 8,
+              border: `1.5px solid ${highlightField === 'motif' ? '#B85C1A' : '#D8E1EE'}`,
+              fontSize: 13, outline: 'none', resize: 'vertical',
+              fontFamily: 'Inter, sans-serif', boxSizing: 'border-box',
+              background: highlightField === 'motif' ? '#FFFAF5' : '#fff',
+              transition: 'all 0.3s ease',
+            }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+            <button
+              onClick={handleSaveMotif}
+              disabled={savingMotif}
+              style={{ padding: '7px 16px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: savingMotif ? 0.5 : 1 }}>
+              {savingMotif ? 'Enregistrement…' : 'Enregistrer'}
+            </button>
+          </div>
+
+          <div style={{ borderTop: '1px solid #D8E1EE', margin: '18px 0 14px' }} />
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#566880', marginBottom: 14 }}>
+            Problématiques identifiées
+          </div>
           <ProblematiquesSection
             ficheId={ficheId}
             problematiques={fiche.problematiques}
@@ -354,59 +354,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </div>
       </Card>
 
-      {/* Synthèse Équipe Éducative */}
-      <Card>
-        <CardHead icon="📋" title="Synthèse d'Équipe Éducative (ESS/EE)" />
-        <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {addingSynthese && (
-            <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { label: 'Date de la réunion EE ou ESS', content: <input type="date" value={newSynthese.date} onChange={e => setNewSynthese({...newSynthese, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
-                { label: 'Membres présents', content: <textarea value={newSynthese.membres} onChange={e => setNewSynthese({...newSynthese, membres: e.target.value})} placeholder="Énumérez les participants…" style={{ width: '100%', minHeight: 60, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
-                { label: 'Décisions prises', content: <textarea value={newSynthese.decisions} onChange={e => setNewSynthese({...newSynthese, decisions: e.target.value})} placeholder="Résumez les décisions et actions…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
-              ].map(({ label, content }) => (
-                <div key={label}>
-                  <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
-                  {content}
-                </div>
-              ))}
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setAddingSynthese(false)} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
-                <button onClick={addSynthese} disabled={!newSynthese.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newSynthese.date ? 0.5 : 1 }}>Ajouter</button>
-              </div>
-            </div>
-          )}
-          {syntheses.length === 0 && !addingSynthese && (
-            <p style={{ fontSize: 12, color: '#94A3B8', fontStyle: 'italic' }}>Aucune synthèse EE enregistrée</p>
-          )}
-          {syntheses.map((syn, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: idx < syntheses.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#182840' }}>📅 {new Date(syn.date).toLocaleDateString('fr-FR')}</span>
-                  <span style={{ fontSize: 10.5, color: '#566880', padding: '2px 8px', background: '#F0F3F8', borderRadius: 4 }}>par {syn.created_by_name}</span>
-                </div>
-                {syn.membres && <div style={{ fontSize: 12, color: '#182840', marginBottom: 4, padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #3B82C4' }}><strong>Présents:</strong> {syn.membres}</div>}
-                {syn.decisions && <div style={{ fontSize: 12, color: '#182840', padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #1E7A52' }}><strong>Décisions:</strong> {syn.decisions}</div>}
-              </div>
-              <button onClick={() => deleteSynthese(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}>
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
-          {!addingSynthese && (
-            <button onClick={() => setAddingSynthese(true)} style={{ fontSize: 11.5, padding: '6px 14px', borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, marginTop: 8 }}>+ Ajouter une synthèse</button>
-          )}
-        </div>
-      </Card>
-
-      {/* Intervenants RASED */}
-      <Card>
-        <CardHead icon="👥" title="Intervenants RASED" />
-        <div style={{ padding: 14 }}>
-          <IntervenantsSection ficheId={ficheId} fichePrenomNom={`${fiche.prenom} ${fiche.nom}`} createdByName={fiche.createdByName} createdByProfession={fiche.createdByProfession} />
-        </div>
-      </Card>
+      {/* ── BLOC 3 : SUIVI ──────────────────────────────────────────────────── */}
 
       {/* Séances et interventions */}
       <Card>
@@ -480,53 +428,57 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
               </div>
             </div>
           )}
-          {interventions.length === 0 && !addingIntervention && (
+          {interventions.filter(iv => !iv.commentaire?.startsWith('[hypothèses de travail]')).length === 0 && !addingIntervention && (
             <p style={{ fontSize: 13, color: '#94A3B8', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Aucune séance enregistrée — cliquez sur + Ajouter pour enregistrer une séance ou intervention</p>
           )}
-          {interventions.map((iv, idx) => {
-            const canEdit = user && (iv.created_by_id === user.id || user.role === 'admin');
-            const hasComment = iv.commentaire && iv.commentaire.trim();
-            const commentLines = hasComment ? iv.commentaire.split('\n') : [];
-            const needsExpand = commentLines.length > 2;
-            return (
-              <div key={idx} style={{ padding: '12px 0', borderBottom: idx < interventions.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', marginBottom: 2 }}>
-                      📅 {new Date(iv.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </div>
-                    <div style={{ fontSize: 13, color: '#182840', marginBottom: 6 }}>
-                      <span style={{ fontWeight: 600 }}>{iv.nom}</span>
-                      {iv.profession && <span style={{ fontSize: 11, color: '#566880', marginLeft: 6 }}>· {iv.profession === 'Psy EN EDA' ? 'Psy-EN EDA' : iv.profession}</span>}
-                    </div>
-                    <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 8, paddingLeft: 10, borderLeft: '3px solid #3B82C4' }}>
-                      {iv.description}
-                    </div>
-                    {hasComment && (
-                      <div style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, marginBottom: 10, padding: '10px', background: '#F8FAFD', borderRadius: 8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                        {truncateComment(iv.commentaire, 2)}
-                        {needsExpand && (
-                          <button onClick={() => setShowCommentModal(idx)} style={{ fontSize: 11.5, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, marginTop: 6, display: 'block' }}>
-                            Voir plus →
+          {interventions
+            .filter(iv => !iv.commentaire?.startsWith('[hypothèses de travail]'))
+            .map((iv, idx, arr) => {
+              const canEdit = user && (iv.created_by_id === user.id || user.role === 'admin');
+              const rawComment = iv.commentaire && iv.commentaire.trim() ? stripMarkdown(iv.commentaire) : '';
+              const hasComment = rawComment.length > 0;
+              const commentLines = hasComment ? rawComment.split('\n') : [];
+              const needsExpand = commentLines.length > 2;
+              const originalIdx = interventions.indexOf(iv);
+              return (
+                <div key={originalIdx} style={{ padding: '12px 0', borderBottom: idx < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', marginBottom: 2 }}>
+                        📅 {new Date(iv.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </div>
+                      <div style={{ fontSize: 13, color: '#182840', marginBottom: 6 }}>
+                        <span style={{ fontWeight: 600 }}>{iv.nom}</span>
+                        {iv.profession && <span style={{ fontSize: 11, color: '#566880', marginLeft: 6 }}>· {iv.profession === 'Psy EN EDA' ? 'Psy-EN EDA' : iv.profession}</span>}
+                      </div>
+                      <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 8, paddingLeft: 10, borderLeft: '3px solid #3B82C4' }}>
+                        {iv.description}
+                      </div>
+                      {hasComment && (
+                        <div style={{ fontSize: 13, color: '#182840', lineHeight: 1.5, marginBottom: 10, padding: '10px', background: '#F8FAFD', borderRadius: 8, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                          {truncateComment(rawComment, 2)}
+                          {needsExpand && (
+                            <button onClick={() => setShowCommentModal(originalIdx)} style={{ fontSize: 11.5, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, marginTop: 6, display: 'block' }}>
+                              Voir plus →
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {canEdit && (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => editIntervention(originalIdx)} style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #3B82C4', color: '#3B82C4', cursor: 'pointer', fontWeight: 600 }}>
+                            ✏️ Modifier
                           </button>
-                        )}
-                      </div>
-                    )}
-                    {canEdit && (
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button onClick={() => editIntervention(idx)} style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #3B82C4', color: '#3B82C4', cursor: 'pointer', fontWeight: 600 }}>
-                          ✏️ Modifier
-                        </button>
-                        <button onClick={() => deleteIntervention(idx)} style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', cursor: 'pointer', fontWeight: 600 }}>
-                          🗑️ Supprimer
-                        </button>
-                      </div>
-                    )}
+                          <button onClick={() => deleteIntervention(originalIdx)} style={{ fontSize: 11.5, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', cursor: 'pointer', fontWeight: 600 }}>
+                            🗑️ Supprimer
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
           {/* Modale commentaire complet */}
           {showCommentModal !== null && interventions[showCommentModal]?.commentaire && (
@@ -542,7 +494,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                 </div>
                 <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
                   <p style={{ fontSize: 13, color: '#182840', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
-                    {interventions[showCommentModal].commentaire}
+                    {stripMarkdown(interventions[showCommentModal].commentaire)}
                   </p>
                 </div>
               </motion.div>
@@ -551,7 +503,54 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </div>
       </Card>
 
-      {/* Documents */}
+      {/* Synthèse Équipe Éducative */}
+      <Card>
+        <CardHead icon="📋" title="Synthèse d'Équipe Éducative (ESS/EE)" />
+        <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {addingSynthese && (
+            <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { label: 'Date de la réunion EE ou ESS', content: <input type="date" value={newSynthese.date} onChange={e => setNewSynthese({...newSynthese, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
+                { label: 'Membres présents', content: <textarea value={newSynthese.membres} onChange={e => setNewSynthese({...newSynthese, membres: e.target.value})} placeholder="Énumérez les participants…" style={{ width: '100%', minHeight: 60, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+                { label: 'Décisions prises', content: <textarea value={newSynthese.decisions} onChange={e => setNewSynthese({...newSynthese, decisions: e.target.value})} placeholder="Résumez les décisions et actions…" style={{ width: '100%', minHeight: 80, padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Inter,sans-serif', boxSizing: 'border-box' }} /> },
+              ].map(({ label, content }) => (
+                <div key={label}>
+                  <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>{label}</label>
+                  {content}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => setAddingSynthese(false)} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
+                <button onClick={addSynthese} disabled={!newSynthese.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newSynthese.date ? 0.5 : 1 }}>Ajouter</button>
+              </div>
+            </div>
+          )}
+          {syntheses.length === 0 && !addingSynthese && (
+            <p style={{ fontSize: 12, color: '#94A3B8', fontStyle: 'italic' }}>Aucune synthèse EE enregistrée</p>
+          )}
+          {syntheses.map((syn, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: idx < syntheses.length - 1 ? '1px solid #F0F3F8' : 'none' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#182840' }}>📅 {new Date(syn.date).toLocaleDateString('fr-FR')}</span>
+                  <span style={{ fontSize: 10.5, color: '#566880', padding: '2px 8px', background: '#F0F3F8', borderRadius: 4 }}>par {syn.created_by_name}</span>
+                </div>
+                {syn.membres && <div style={{ fontSize: 12, color: '#182840', marginBottom: 4, padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #3B82C4' }}><strong>Présents:</strong> {syn.membres}</div>}
+                {syn.decisions && <div style={{ fontSize: 12, color: '#182840', padding: '6px', background: '#F8FAFD', borderRadius: 6, borderLeft: '3px solid #1E7A52' }}><strong>Décisions:</strong> {syn.decisions}</div>}
+              </div>
+              <button onClick={() => deleteSynthese(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: 4, flexShrink: 0 }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          {!addingSynthese && (
+            <button onClick={() => setAddingSynthese(true)} style={{ fontSize: 11.5, padding: '6px 14px', borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, marginTop: 8 }}>+ Ajouter une synthèse</button>
+          )}
+        </div>
+      </Card>
+
+      {/* ── BLOC 4 : DOCUMENTS ──────────────────────────────────────────────── */}
+
       <Card>
         <CardHead icon="📎" title="Documents" />
         <div style={{ padding: 14 }}>
@@ -559,7 +558,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </div>
       </Card>
 
-      {/* Rapport */}
+      {/* Rapport généré (conditionnel) */}
       {fiche.rapport && (
         <Card>
           <CardHead icon="📄" title="Rapport généré" />
