@@ -83,7 +83,7 @@ export default function ListeEleves() {
                       {eleve.prenom} {eleve.nom}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Classe : {eleve.classe || "—"}
+                      Classe : {eleve.classe ? eleve.classe.replace(/\s*Salle\s+\S+/gi, "").trim() || "—" : "—"}
                     </p>
                   </div>
                 </motion.button>
