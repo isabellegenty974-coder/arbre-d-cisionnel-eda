@@ -144,12 +144,34 @@ function CardHead({ icon, title, action, onAction }) {
   );
 }
 
+const PROBLEMATIQUES = [
+  { groupe: 'APPRENTISSAGES', color: '#3B82C4', items: [
+    'Lecture / Décodage', 'Écriture / Graphisme', 'Mathématiques / Numération',
+    'Production écrite', 'Compréhension', 'Méthodes de travail',
+  ]},
+  { groupe: 'COMPORTEMENT', color: '#EC6B8A', items: [
+    'Anxiété / Inhibition', 'Agitation / Impulsivité', 'Opposition / Refus',
+    'Difficultés relationnelles', 'Repli sur soi',
+  ]},
+  { groupe: 'DÉVELOPPEMENT', color: '#34C48A', items: [
+    'Attention / Concentration', 'Langage oral', 'Motricité fine',
+    'Motricité globale', 'Interactions sociales',
+  ]},
+  { groupe: 'CONTEXTE', color: '#F59E0B', items: [
+    'Difficultés familiales', 'Absentéisme', 'Changements récents', 'Climat de classe',
+  ]},
+  { groupe: 'AUTRE', color: '#94A3B8', items: [
+    'Situation de handicap', 'Autre',
+  ]},
+];
+
 // ── Onglet Suivi ──────────────────────────────────────────────────────────────
 function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField, membres, showCommentModal, setShowCommentModal }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [motif, setMotif] = useState(fiche.observations || '');
-  const [editingMotif, setEditingMotif] = useState(!fiche.observations);
+  const [problematiques, setProblematiques] = useState(fiche.problematiques || []);
+  const [autreProblematique, setAutreProblematique] = useState(fiche.autre_problematique || '');
   const [savingMotif, setSavingMotif] = useState(false);
   const [showMotifSuccess, setShowMotifSuccess] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
@@ -208,12 +230,15 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   };
 
   const handleSaveMotif = async () => {
-    if (!motif.trim()) return;
     setSavingMotif(true);
     try {
-      await base44.entities.FicheEleve.update(ficheId, { observations: motif.trim() });
-      setFiche(f => ({ ...f, observations: motif.trim() }));
-      setEditingMotif(false);
+      const payload = {
+        observations: motif.trim(),
+        problematiques,
+        autre_problematique: autreProblematique.trim(),
+      };
+      await base44.entities.FicheEleve.update(ficheId, payload);
+      setFiche(f => ({ ...f, ...payload }));
       setShowMotifSuccess(true);
       setTimeout(() => setShowMotifSuccess(false), 3000);
     } catch (e) {
@@ -290,64 +315,94 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
         </motion.div>
       )}
 
-      {/* Motif de la demande */}
+      {/* Motif de la demande + Problématiques */}
       <Card style={{ borderTop: highlightField === 'motif' ? '3px solid #B85C1A' : 'none', boxShadow: highlightField === 'motif' ? '0 0 0 3px rgba(184, 92, 26, 0.15)' : 'none' }}>
         <CardHead icon="📌" title="Motif de la demande" />
-        {!editingMotif && motif ? (
-          <div style={{ padding: '14px 16px' }}>
-            <div style={{ background: '#FAFBFD', borderLeft: '3px solid #3B82C4', padding: '14px 16px', borderRadius: 8, marginBottom: 12, fontSize: 13.5, lineHeight: 1.65, color: '#182840' }}>
-              {motif}
+        <div style={{ padding: '14px 16px' }}>
+          {highlightField === 'motif' && (
+            <div style={{ background: '#FEF0E4', border: '1px solid #B85C1A', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#B85C1A', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>⚠️</span>
+              <span>Ce champ est requis pour compléter la fiche</span>
             </div>
+          )}
+
+          {/* Texte libre */}
+          <textarea
+            ref={motifInputRef}
+            value={motif}
+            onChange={e => setMotif(e.target.value)}
+            placeholder="Décrivez le motif de la demande..."
+            style={{
+              width: '100%', minHeight: 90, padding: '10px 12px', borderRadius: 8,
+              border: `1.5px solid ${highlightField === 'motif' ? '#B85C1A' : '#D8E1EE'}`,
+              fontSize: 13, outline: 'none', resize: 'vertical',
+              fontFamily: 'Inter, sans-serif', boxSizing: 'border-box',
+              background: highlightField === 'motif' ? '#FFFAF5' : '#fff',
+              transition: 'all 0.3s ease',
+            }}
+          />
+
+          {/* Cases à cocher par groupe */}
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#566880', marginBottom: 12 }}>
+              Problématiques identifiées
+            </div>
+            {PROBLEMATIQUES.map(({ groupe, color, items }) => (
+              <div key={groupe} style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color, marginBottom: 7 }}>
+                  {groupe}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {items.map(item => {
+                    const checked = problematiques.includes(item);
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => {
+                          if (item === 'Autre' && checked) {
+                            setProblematiques(p => p.filter(x => x !== item));
+                            setAutreProblematique('');
+                          } else {
+                            setProblematiques(p => checked ? p.filter(x => x !== item) : [...p, item]);
+                          }
+                        }}
+                        style={{
+                          padding: '4px 11px', borderRadius: 20,
+                          border: `1.5px solid ${checked ? color : '#D8E1EE'}`,
+                          background: checked ? `${color}18` : '#F8FAFD',
+                          color: checked ? color : '#566880',
+                          fontSize: 11.5, fontWeight: checked ? 600 : 400,
+                          cursor: 'pointer', transition: 'all .14s',
+                        }}
+                      >
+                        {checked ? '✓ ' : ''}{item}
+                      </button>
+                    );
+                  })}
+                </div>
+                {groupe === 'AUTRE' && problematiques.includes('Autre') && (
+                  <input
+                    type="text"
+                    value={autreProblematique}
+                    onChange={e => setAutreProblematique(e.target.value)}
+                    placeholder="Précisez…"
+                    style={{ marginTop: 8, width: '100%', padding: '7px 10px', borderRadius: 7, border: '1.5px solid #D8E1EE', fontSize: 12.5, outline: 'none', boxSizing: 'border-box' }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
             <button
-              onClick={() => setEditingMotif(true)}
-              style={{ fontSize: 12.5, color: '#3B82C4', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-              ✏️ Modifier
+              onClick={handleSaveMotif}
+              disabled={savingMotif}
+              style={{ padding: '7px 16px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: savingMotif ? 0.5 : 1 }}>
+              {savingMotif ? 'Enregistrement…' : 'Enregistrer'}
             </button>
           </div>
-        ) : (
-          <div style={{ padding: '14px 16px' }}>
-            {highlightField === 'motif' && (
-              <div style={{ background: '#FEF0E4', border: '1px solid #B85C1A', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#B85C1A', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span>⚠️</span>
-                <span>Ce champ est requis pour compléter la fiche</span>
-              </div>
-            )}
-            <textarea
-              ref={motifInputRef}
-              value={motif}
-              onChange={e => setMotif(e.target.value)}
-              placeholder="Décrivez le motif de la demande (difficultés observées, demande de l'enseignant·e, contexte...)"
-              style={{
-                width: '100%',
-                minHeight: 100,
-                padding: '10px 12px',
-                borderRadius: 8,
-                border: `1.5px solid ${highlightField === 'motif' ? '#B85C1A' : '#D8E1EE'}`,
-                fontSize: 13,
-                outline: 'none',
-                resize: 'vertical',
-                fontFamily: 'Inter, sans-serif',
-                boxSizing: 'border-box',
-                background: highlightField === 'motif' ? '#FFFAF5' : '#fff',
-                transition: 'all 0.3s ease'
-              }} />
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
-              {fiche.observations && (
-                <button
-                  onClick={() => { setMotif(fiche.observations); setEditingMotif(false); }}
-                  style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>
-                  Annuler
-                </button>
-              )}
-              <button
-                onClick={handleSaveMotif}
-                disabled={!motif.trim() || savingMotif}
-                style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: (!motif.trim() || savingMotif) ? 0.5 : 1 }}>
-                {savingMotif ? 'Enregistrement…' : 'Enregistrer'}
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </Card>
 
       {/* Statut */}

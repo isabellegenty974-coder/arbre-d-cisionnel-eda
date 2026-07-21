@@ -151,6 +151,15 @@
       "default": "Nouveau",
       "description": "Statut du suivi RASED"
     },
+    "problematiques": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Problématiques identifiées (cases cochées dans le motif de la demande)"
+    },
+    "autre_problematique": {
+      "type": "string",
+      "description": "Précision libre pour la problématique 'Autre'"
+    },
     "documents": {
       "type": "array",
       "items": {
