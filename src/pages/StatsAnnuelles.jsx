@@ -402,33 +402,24 @@ export default function StatsAnnuelles() {
           </motion.div>
         )}
 
-        {/* KPIs */}
+        {/* KPIs — Élèves suivis */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="grid grid-cols-2 gap-3"
         >
-          {[
-            { label: "Élèves suivis", value: nbEleves, icon: Users, color: "#4A90E2", light: "#E8F0FB" },
-            { label: "Bilantés par Psy EN EDA", value: nbElevesParProf('Psy EN EDA'), icon: Brain, color: "#8B5CF6", light: "#F0EBFD" },
-            { label: "Bilantés par MaDP", value: nbElevesParProf('MaDP'), icon: BookOpen, color: "#4A90E2", light: "#E8F0FB" },
-            { label: "Bilantés par MaDR", value: nbElevesParProf('MaDR'), icon: Heart, color: "#EC6B8A", light: "#FCE8EE" },
-          ].map(({ label, value, icon: Icon, color, light }, i) => (
-            <motion.div
-              key={label}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.07 + i * 0.04 }}
-              className="bg-white rounded-2xl border-2 border-[#E8DCC8] p-4 flex flex-col gap-2"
-            >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: light }}>
-                <Icon className="w-5 h-5" style={{ color }} />
-              </div>
-              <p className="text-2xl font-bold text-[#0F172A]">{value}</p>
-              <p className="text-xs text-[#0F172A]/60 font-medium leading-tight">{label}</p>
-            </motion.div>
-          ))}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.07 }}
+            className="bg-white rounded-2xl border-2 border-[#E8DCC8] p-4 flex flex-col gap-2"
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#E8F0FB" }}>
+              <Users className="w-5 h-5" style={{ color: "#4A90E2" }} />
+            </div>
+            <p className="text-2xl font-bold text-[#0F172A]">{nbEleves}</p>
+            <p className="text-xs text-[#0F172A]/60 font-medium leading-tight">Élèves suivis</p>
+          </motion.div>
         </motion.div>
 
         {/* Élèves par problématique */}
