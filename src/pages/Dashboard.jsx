@@ -46,7 +46,7 @@ const NAV = [
   { label: 'Tableau de bord', ico: '🏠', to: '/dashboard' },
   { label: 'Mes écoles',      ico: '🏫', to: '/mes-ecoles' },
   { label: 'Élèves suivis',   ico: '👤', to: '/liste-eleves' },
-  { label: 'Hypothèses de travail',  ico: '🔍', to: '/hypotheses-eleve', diag: true },
+  { label: 'Analyses de situation',  ico: '🔍', to: '/hypotheses-eleve', diag: true },
   { section: 'Gestion' },
   { label: 'Importer PDF',    ico: '📄', to: '/import-pdf' },
   { label: 'Équipe RASED',    ico: '👥', to: '/equipe-rased' },
@@ -374,7 +374,7 @@ export default function Dashboard() {
                 📄 Importer PDF
               </Link>
               <button onClick={() => setDiagModal(true)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#3B82C4', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                + Nouvelles hypothèses de travail
+                + Nouvelle analyse de situation
               </button>
             </div>
           </div>
@@ -532,7 +532,7 @@ export default function Dashboard() {
           {/* RACCOURCIS */}
            <div className="db-raccourcis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
             {[
-              { ico: '🔍', ibg: '#EEE9FF', lbl: 'Nouvelles hypothèses',   sub: 'Démarrer une analyse de situation',         action: () => setDiagModal(true) },
+              { ico: '🔍', ibg: '#EEE9FF', lbl: 'Nouvelle analyse',   sub: 'Démarrer une analyse de situation',         action: () => setDiagModal(true) },
               { ico: '📄', ibg: '#EAF2FB', lbl: 'Importer une liste PDF',  sub: 'Créer des fiches depuis Onde', to: '/import-pdf' },
               { ico: '👤', ibg: '#E4F4ED', lbl: 'Créer une fiche élève',   sub: 'Saisie manuelle',             to: '/fiche-eleve' },
               { ico: '📊', ibg: '#FEF0E4', lbl: 'Export annuel',           sub: 'Rapport pour l\'IEN',          to: '/export-annuel' },
@@ -708,7 +708,7 @@ export default function Dashboard() {
               style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 640, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 -8px 40px rgba(0,0,0,.15)' }}>
               <div style={{ width: 36, height: 4, background: '#D8E1EE', borderRadius: 2, margin: '12px auto 0' }} />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 10px', borderBottom: '1px solid #F0F3F8' }}>
-                <p style={{ fontWeight: 600, fontSize: 15, color: '#182840' }}>🔍 Nouvelles hypothèses de travail — Choisir un élève</p>
+                <p style={{ fontWeight: 600, fontSize: 15, color: '#182840' }}>🔍 Nouvelle analyse de situation — Choisir un élève</p>
                 <button onClick={() => setDiagModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><X className="w-4 h-4" /></button>
               </div>
               <div style={{ padding: '10px 14px 6px' }}>

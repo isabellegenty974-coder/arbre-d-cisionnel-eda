@@ -45,7 +45,7 @@ function Topbar({ fiche, ficheId, onHypotheses }) {
       </div>
       <button onClick={onHypotheses}
         style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 7, fontSize: 12, fontWeight: 600, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-        🔍 Hypothèses
+        🔍 Analyses
       </button>
     </div>
   );
@@ -109,7 +109,7 @@ function HeroFiche({ fiche, activeTab, setActiveTab }) {
       <div style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 2 }}>
         {[
           { key: 'suivi',      label: '📋 Suivi' },
-          { key: 'hypotheses', label: '🔍 Hypothèses' },
+          { key: 'hypotheses', label: '🔍 Analyses' },
           { key: 'historique', label: '🕐 Historique' },
           { key: 'infos',      label: 'ℹ️ Infos' },
         ].map(t => (
@@ -643,18 +643,18 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <Card>
-        <CardHead icon="🔍" title="Hypothèses de travail formulées"
-          action="+ Nouvelles hypothèses"
+        <CardHead icon="🔍" title="Analyses de situation"
+          action="+ Nouvelle analyse"
           onAction={() => navigate(`/hypotheses-eleve?id=${ficheId}`)} />
 
         {historiqueEDA.length === 0 ? (
           <div style={{ padding: '40px 20px', textAlign: 'center' }}>
             <div style={{ fontSize: 36, marginBottom: 10 }}>🔍</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#182840', marginBottom: 6 }}>Aucune hypothèse formulée</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#182840', marginBottom: 6 }}>Aucune analyse de situation</div>
             <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 18 }}>Utilisez l'arbre décisionnel pour analyser les difficultés de {fiche.prenom}.</div>
             <button onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 9, fontSize: 13.5, fontWeight: 700, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer' }}>
-              🔍 Formuler des hypothèses de travail
+              🔍 Analyser la situation
             </button>
           </div>
         ) : (
@@ -669,7 +669,7 @@ function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
                 </div>
                 {h.hypotheses?.length > 0 && (
                   <div style={{ background: '#F0F3F8', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 700, marginBottom: 6 }}>Hypothèses retenues</div>
+                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 700, marginBottom: 6 }}>Analyses retenues</div>
                     {h.hypotheses.map((hyp, j) => (
                       <div key={j} style={{ fontSize: 12.5, color: '#182840', padding: '3px 0', display: 'flex', gap: 6 }}>
                         <span style={{ color: '#3B82C4', fontWeight: 700, flexShrink: 0 }}>·</span>
@@ -763,7 +763,7 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
       }
       return { date: new Date(iv.date), ico: '💬', type: 'note', title: iv.description || 'Observation', meta: formatNomMembre(iv) };
     }),
-    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: 'Hypothèses de travail formulées', meta: `${h.hypotheses?.length || 0} hypothèse${(h.hypotheses?.length || 0) > 1 ? 's' : ''} retenue${(h.hypotheses?.length || 0) > 1 ? 's' : ''}` })),
+    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: 'Analyse de situation', meta: `${h.hypotheses?.length || 0} analyse${(h.hypotheses?.length || 0) > 1 ? 's' : ''} retenue${(h.hypotheses?.length || 0) > 1 ? 's' : ''}` })),
     { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: [fiche.createdByName, fiche.createdByProfession && (PROF_LABEL_SHORT[fiche.createdByProfession] || fiche.createdByProfession), fiche.ecole, fiche.classe].filter(Boolean).join(' · ') },
   ].sort((a, b) => b.date - a.date);
 
@@ -866,7 +866,7 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
           {[
             { ico: '📄', lbl: 'Rapport de suivi', sub: 'Générer un PDF officiel', action: () => setShowReportModal(true) },
-            { ico: '📝', lbl: 'Hypothèses de travail',    sub: 'Lancer l\'analyse de situation', action: () => navigate(`/hypotheses-eleve?id=${ficheId}`) },
+            { ico: '📝', lbl: 'Analyses de situation',    sub: 'Lancer l\'analyse de situation', action: () => navigate(`/hypotheses-eleve?id=${ficheId}`) },
           ].map((opt, i) => (
             <div key={i} onClick={opt.action} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', transition: 'all .14s', background: '#fff' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; }}
