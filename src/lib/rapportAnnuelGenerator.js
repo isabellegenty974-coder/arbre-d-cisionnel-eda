@@ -158,10 +158,9 @@ function computeStats({ fiches, historique, eleves, libelle }) {
     passationsPsycho: compte(actesPsy, 'passation psychométrique'),
     observationsClasse: compte(actesPsy, 'observation en classe'),
     analysesSituation: histPsy.length,
-    comptesRendus: fichesPsy.filter(f => (f.hypotheses || []).length > 0).length,
+    comptesRendus: actesPsy.filter(a => a.commentaire && a.commentaire.trim()).length,
     entretiensFamilles: compte(actesPsy, 'entretien avec la famille'),
-    participationsESS: compteRegex(actesPsy, /\bess\b/i),
-    participationsEE: compteRegex(actesPsy, /\bee\b/i),
+    participationsESSEE: compte(actesPsy, 'ess'),
     orientationsExternes: compteTexteFiches(fichesPsy, 'orientation'),
     dossiersMDPH: compteTexteFiches(fichesPsy, 'mdph'),
     liaisonsEnseignants: compte(actesPsy, "liaison avec l'enseignant"),
@@ -246,9 +245,23 @@ function computeStats({ fiches, historique, eleves, libelle }) {
     });
   });
 
+  // Répartition par école et par classe
+  const parEcoleClasse = {};
+  fichesAnnee.forEach(f => {
+    if (!f.ecole) return;
+    if (!parEcoleClasse[f.ecole]) parEcoleClasse[f.ecole] = {};
+    const cl = f.classe || 'Non renseignée';
+    parEcoleClasse[f.ecole][cl] = (parEcoleClasse[f.ecole][cl] || 0) + 1;
+  });
+  const nbEcolesCouvertes = Object.keys(parEcoleClasse).length;
+  const nbClotures = fichesAnnee.filter(f => f.statut === 'Clôturé').length;
+  const nbNouvelles = fichesAnnee.filter(f => f.statut === 'Nouveau').length;
+  const totalSeances = fichesAnnee.reduce((acc, f) => acc + (f.interventions || []).length, 0);
+
   return {
     libelle, effectifSecteur, totalDemandes, parCategorie, matrice,
     psy, madr, madp, evolution, moisLabels: mois.map(m => m.label),
+    parEcoleClasse, nbEcolesCouvertes, nbClotures, nbNouvelles, totalSeances,
   };
 }
 
@@ -579,10 +592,11 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   doc.setFontSize(9); setText(doc, '#C8D2E2');
   [
     "1. Vue d'ensemble du dispositif RASED",
-    "2. Psychologue de l'Éducation Nationale · EDA",
-    '3. Maître à Dominante Relationnelle (MaDR)',
-    '4. Maître à Dominante Pédagogique (MaDP)',
-    '5. Synthèse comparative et signatures',
+    "2. Répartition par école et par classe",
+    "3. Psychologue de l'Éducation Nationale · EDA",
+    '4. Maître à Dominante Relationnelle (MaDR)',
+    '5. Maître à Dominante Pédagogique (MaDP)',
+    '6. Synthèse comparative et signatures',
   ].forEach((t, i) => doc.text(t, margin, 183 + i * 6));
 
   doc.setFontSize(10); setText(doc, '#C8D2E2');
@@ -594,12 +608,14 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 1, title: "VUE D'ENSEMBLE DU DISPOSITIF RASED", color: '#1A3353' });
 
   let y = kpiGrid(doc, {
-    x: margin, y: 40, width: contentWidth, color: '#1A3353', perRow: 4,
+    x: margin, y: 40, width: contentWidth, color: '#1A3353', perRow: 3,
     items: [
-      { label: "Demandes d'aide", value: s.totalDemandes },
-      { label: 'Élèves du secteur', value: s.effectifSecteur },
+      { label: "Demandes d'aide (total)", value: s.totalDemandes },
+      { label: 'Nouvelles demandes', value: s.nbNouvelles },
+      { label: 'Suivis clôturés', value: s.nbClotures },
+      { label: 'Séances & interventions', value: s.totalSeances },
+      { label: 'Écoles couvertes', value: s.nbEcolesCouvertes },
       { label: '% effectif concerné', value: `${pct(s.totalDemandes, s.effectifSecteur)} %` },
-      { label: 'Écoles du secteur', value: (ecoles || []).length },
     ],
   });
   y += 6;
@@ -653,9 +669,49 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   addFooter(doc, pageWidth, pageHeight, margin, 3, 0);
 
-  // ───────────────────────── SECTION 2 — PSY-EN (pages 4-5) ────────────────
+  // ───────────────────────── SECTION 2 — PAR ÉCOLE ET PAR CLASSE ──────────
   doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 2, title: 'PSY-EN EDA · MME GENTY ISABELLE', color: COLORS['Psy EN EDA'] });
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 2, title: 'RÉPARTITION PAR ÉCOLE ET PAR CLASSE', color: '#1A3353' });
+  let yEcole = 40;
+
+  const ecoleEntries = Object.entries(s.parEcoleClasse).sort((a, b) => {
+    const totA = Object.values(a[1]).reduce((sum, v) => sum + v, 0);
+    const totB = Object.values(b[1]).reduce((sum, v) => sum + v, 0);
+    return totB - totA;
+  });
+
+  if (ecoleEntries.length === 0) {
+    setText(doc, '#566880'); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.text("Aucune école renseignée dans les fiches de l'année.", margin, yEcole);
+  } else {
+    ecoleEntries.forEach(([ecole, classes]) => {
+      const total = Object.values(classes).reduce((sum, v) => sum + v, 0);
+      const classEntries = Object.entries(classes).sort((a, b) => b[1] - a[1]);
+      const blockH = 9 + classEntries.length * 7 + 6;
+      if (yEcole + blockH > pageHeight - 18) {
+        addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
+        doc.addPage();
+        addHeader(doc, pageWidth, margin, libelle);
+        yEcole = 26;
+      }
+      setFill(doc, '#3B82C4'); setText(doc, '#FFFFFF');
+      doc.rect(margin, yEcole, contentWidth, 8, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5);
+      doc.text(`${ecole}  ·  ${total} élève${total > 1 ? 's' : ''}`, margin + 3, yEcole + 5.5);
+      yEcole += 8;
+      yEcole = drawTable(doc, {
+        x: margin, y: yEcole, colWidths: [contentWidth - 50, 50],
+        headers: ['Classe', 'Élèves'], headerColor: '#566880', fontSize: 8,
+        rows: classEntries.map(([cl, nb]) => [cl, nb]),
+      });
+      yEcole += 6;
+    });
+  }
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
+
+  // ───────────────────────── SECTION 3 — PSY-EN (pages suivantes) ──────────
+  doc.addPage();
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 3, title: 'PSY-EN EDA · MME GENTY ISABELLE', color: COLORS['Psy EN EDA'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['Psy EN EDA'], perRow: 4,
     items: [
@@ -663,10 +719,9 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
       { label: 'Passations psychométriques', value: s.psy.passationsPsycho },
       { label: 'Observations en classe', value: s.psy.observationsClasse },
       { label: 'Analyses de situation (arbre EDA)', value: s.psy.analysesSituation },
-      { label: "Comptes-rendus d'analyses de situation", value: s.psy.comptesRendus },
+      { label: 'Entretiens avec notes', value: s.psy.comptesRendus },
       { label: 'Entretiens familles', value: s.psy.entretiensFamilles },
-      { label: 'Participations ESS', value: s.psy.participationsESS },
-      { label: 'Participations EE', value: s.psy.participationsEE },
+      { label: 'Participations ESS/EE', value: s.psy.participationsESSEE },
       { label: 'Orientations externes', value: s.psy.orientationsExternes },
       { label: 'Dossiers MDPH instruits', value: s.psy.dossiersMDPH },
       { label: 'Liaisons enseignant·es', value: s.psy.liaisonsEnseignants },
@@ -697,9 +752,9 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   addFooter(doc, pageWidth, pageHeight, margin, 5, 0);
 
-  // ───────────────────────── SECTION 3 — MaDR (pages 6-7) ───────────────────
+  // ───────────────────────── SECTION 4 — MaDR ───────────────────────────────
   doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 3, title: 'MADR · MME PETIT LAURENCE', color: COLORS['MaDR'] });
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 4, title: 'MADR · MME PETIT LAURENCE', color: COLORS['MaDR'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDR'], perRow: 4,
     items: [
@@ -742,9 +797,9 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   addFooter(doc, pageWidth, pageHeight, margin, 7, 0);
 
-  // ───────────────────────── SECTION 4 — MaDP (pages 8-9) ───────────────────
+  // ───────────────────────── SECTION 5 — MaDP ───────────────────────────────
   doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 4, title: 'MADP · MME CARO VÉRONIQUE', color: COLORS['MaDP'] });
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 5, title: 'MADP · MME CARO VÉRONIQUE', color: COLORS['MaDP'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDP'], perRow: 4,
     items: [
@@ -789,16 +844,16 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   addFooter(doc, pageWidth, pageHeight, margin, 9, 0);
 
-  // ───────────────────────── SECTION 5 — SYNTHÈSE (pages 10-12) ────────────
+  // ───────────────────────── SECTION 6 — SYNTHÈSE ──────────────────────────
   doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 5, title: 'SYNTHÈSE COMPARATIVE', color: '#1A3353' });
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 6, title: 'SYNTHÈSE COMPARATIVE', color: '#1A3353' });
 
   const comparatif = [
     ['Élèves suivis', s.psy.total, s.madr.elevesEnCharge, s.madp.elevesAccompagnes],
     ['Actes / entretiens réalisés', s.psy.entretiensEleves + s.psy.observationsClasse + s.psy.passationsPsycho, s.madr.actesTotal, s.madp.actesTotal],
     ['Entretiens familles', s.psy.entretiensFamilles, s.madr.entretiensFamilles, s.madp.entretiensFamilles],
     ['Liaisons enseignant·es', s.psy.liaisonsEnseignants, s.madr.liaisonsEnseignants, s.madp.liaisonsEnseignants],
-    ['Participations ESS/EE', s.psy.participationsESS + s.psy.participationsEE, s.madr.participationsEE, s.madp.participationsEE],
+    ['Participations ESS/EE', s.psy.participationsESSEE, s.madr.participationsEE, s.madp.participationsEE],
     ['Prises en charge clôturées', s.psy.clotures, s.madr.clotureees, s.madp.clotureees],
   ];
   y = drawTable(doc, {
