@@ -329,19 +329,6 @@ export default function StatsAnnuelles() {
     };
   })();
 
-  // Élèves par problématique
-  const problematiquesBreakdown = (() => {
-    const counts = {};
-    fiches.forEach(f => {
-      (f.problematiques || []).forEach(p => {
-        counts[p] = (counts[p] || 0) + 1;
-      });
-    });
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, value]) => ({ name, value }));
-  })();
-
   // Répartition classes (filtrée par école)
   const classeBreakdown = (() => {
     const counts = {};
@@ -901,30 +888,6 @@ export default function StatsAnnuelles() {
                   </div>
                 );
               })}
-            </div>
-          </SectionCard>
-        )}
-
-        {/* Élèves par problématique */}
-        {problematiquesBreakdown.length > 0 && (
-          <SectionCard title="Élèves par problématique" subtitle="Problématiques identifiées au moment de la demande" icon={ClipboardList} accentColor="#D4A574" delay={0.34}>
-            <div className="space-y-2">
-              {(() => {
-                const maxV = Math.max(...problematiquesBreakdown.map(r => r.value), 1);
-                return problematiquesBreakdown.map(({ name, value }) => {
-                  const pct = Math.round((value / maxV) * 100);
-                  return (
-                    <div key={name} className="flex items-center gap-3">
-                      <span className="text-[11px] text-[#0F172A]/70 shrink-0" style={{ width: 170 }}>{name}</span>
-                      <div className="flex-1 h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6 }}
-                          className="h-full rounded-full" style={{ background: '#D4A574' }} />
-                      </div>
-                      <span className="text-[11px] font-bold shrink-0 w-6 text-right" style={{ color: '#D4A574' }}>{value}</span>
-                    </div>
-                  );
-                });
-              })()}
             </div>
           </SectionCard>
         )}

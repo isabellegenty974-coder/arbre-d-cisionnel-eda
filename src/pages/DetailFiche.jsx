@@ -144,34 +144,11 @@ function CardHead({ icon, title, action, onAction }) {
   );
 }
 
-const PROBLEMATIQUES = [
-  { groupe: 'APPRENTISSAGES', color: '#3B82C4', items: [
-    'Lecture / Décodage', 'Écriture / Graphisme', 'Mathématiques / Numération',
-    'Production écrite', 'Compréhension', 'Méthodes de travail',
-  ]},
-  { groupe: 'COMPORTEMENT', color: '#EC6B8A', items: [
-    'Anxiété / Inhibition', 'Agitation / Impulsivité', 'Opposition / Refus',
-    'Difficultés relationnelles', 'Repli sur soi',
-  ]},
-  { groupe: 'DÉVELOPPEMENT', color: '#34C48A', items: [
-    'Attention / Concentration', 'Langage oral', 'Motricité fine',
-    'Motricité globale', 'Interactions sociales',
-  ]},
-  { groupe: 'CONTEXTE', color: '#F59E0B', items: [
-    'Difficultés familiales', 'Absentéisme', 'Changements récents', 'Climat de classe',
-  ]},
-  { groupe: 'AUTRE', color: '#94A3B8', items: [
-    'Situation de handicap', 'Autre',
-  ]},
-];
-
 // ── Onglet Suivi ──────────────────────────────────────────────────────────────
 function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField, membres, showCommentModal, setShowCommentModal }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [motif, setMotif] = useState(fiche.observations || '');
-  const [problematiques, setProblematiques] = useState(fiche.problematiques || []);
-  const [autreProblematique, setAutreProblematique] = useState(fiche.autre_problematique || '');
   const [savingMotif, setSavingMotif] = useState(false);
   const [showMotifSuccess, setShowMotifSuccess] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
@@ -232,13 +209,8 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   const handleSaveMotif = async () => {
     setSavingMotif(true);
     try {
-      const payload = {
-        observations: motif.trim(),
-        problematiques,
-        autre_problematique: autreProblematique.trim(),
-      };
-      await base44.entities.FicheEleve.update(ficheId, payload);
-      setFiche(f => ({ ...f, ...payload }));
+      await base44.entities.FicheEleve.update(ficheId, { observations: motif.trim() });
+      setFiche(f => ({ ...f, observations: motif.trim() }));
       setShowMotifSuccess(true);
       setTimeout(() => setShowMotifSuccess(false), 3000);
     } catch (e) {
@@ -341,58 +313,6 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
               transition: 'all 0.3s ease',
             }}
           />
-
-          {/* Cases à cocher par groupe */}
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#566880', marginBottom: 12 }}>
-              Problématiques identifiées
-            </div>
-            {PROBLEMATIQUES.map(({ groupe, color, items }) => (
-              <div key={groupe} style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color, marginBottom: 7 }}>
-                  {groupe}
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {items.map(item => {
-                    const checked = problematiques.includes(item);
-                    return (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => {
-                          if (item === 'Autre' && checked) {
-                            setProblematiques(p => p.filter(x => x !== item));
-                            setAutreProblematique('');
-                          } else {
-                            setProblematiques(p => checked ? p.filter(x => x !== item) : [...p, item]);
-                          }
-                        }}
-                        style={{
-                          padding: '4px 11px', borderRadius: 20,
-                          border: `1.5px solid ${checked ? color : '#D8E1EE'}`,
-                          background: checked ? `${color}18` : '#F8FAFD',
-                          color: checked ? color : '#566880',
-                          fontSize: 11.5, fontWeight: checked ? 600 : 400,
-                          cursor: 'pointer', transition: 'all .14s',
-                        }}
-                      >
-                        {checked ? '✓ ' : ''}{item}
-                      </button>
-                    );
-                  })}
-                </div>
-                {groupe === 'AUTRE' && problematiques.includes('Autre') && (
-                  <input
-                    type="text"
-                    value={autreProblematique}
-                    onChange={e => setAutreProblematique(e.target.value)}
-                    placeholder="Précisez…"
-                    style={{ marginTop: 8, width: '100%', padding: '7px 10px', borderRadius: 7, border: '1.5px solid #D8E1EE', fontSize: 12.5, outline: 'none', boxSizing: 'border-box' }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
             <button
