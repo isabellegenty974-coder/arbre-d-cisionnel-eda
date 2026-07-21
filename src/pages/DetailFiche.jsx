@@ -7,6 +7,7 @@ import RapportContent from '@/components/RapportContent';
 import InterventionItem from '@/components/rased/InterventionItem';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import DocumentsSection from '@/components/rased/DocumentsSection';
+import ProblematiquesSection from '@/components/rased/ProblematiquesSection';
 import ReportExportModal from '@/components/rased/ReportExportModal';
 import { usePresence } from '@/lib/usePresence';
 import { generateReport, downloadReport } from '@/lib/reportGenerator';
@@ -364,6 +365,18 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
       </Card>
 
 
+
+      {/* Problématiques identifiées */}
+      <Card>
+        <CardHead icon="🎯" title="Problématiques identifiées" />
+        <div style={{ padding: 14 }}>
+          <ProblematiquesSection
+            ficheId={ficheId}
+            problematiques={fiche.problematiques}
+            onUpdate={(updated) => setFiche(f => ({ ...f, problematiques: updated }))}
+          />
+        </div>
+      </Card>
 
       {/* Synthèse Équipe Éducative */}
       <Card>

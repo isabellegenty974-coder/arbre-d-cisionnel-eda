@@ -136,6 +136,36 @@ export default function StatsAnnuelles() {
     })).filter(d => d.value > 0);
   })();
 
+  // Problématiques identifiées (depuis les fiches élèves)
+  const problematiquesStats = (() => {
+    const CATS = {
+      apprentissages: { label: 'Apprentissages', color: '#4A90E2', icon: BookOpen, light: '#E8F0FB' },
+      comportement:   { label: 'Comportement',   color: '#EC6B8A', icon: Heart,    light: '#FCE8EE' },
+      developpement:  { label: 'Développement',  color: '#34C48A', icon: Brain,    light: '#E4F8F0' },
+      contexte:       { label: 'Contexte',       color: '#F59E0B', icon: TreePine, light: '#FEF3DC' },
+      autre:           { label: 'Autre',          color: '#8B5CF6', icon: ClipboardList, light: '#F0EAFB' },
+    };
+    const counts = {}; // { catKey: { itemLabel: nbEleves } }
+    Object.keys(CATS).forEach(k => counts[k] = {});
+
+    filteredFiches.forEach(f => {
+      const p = f.problematiques || {};
+      Object.keys(CATS).forEach(catKey => {
+        (p[catKey] || []).forEach(item => {
+          counts[catKey][item] = (counts[catKey][item] || 0) + 1;
+        });
+      });
+    });
+
+    return Object.entries(CATS).map(([catKey, conf]) => {
+      const items = Object.entries(counts[catKey])
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+      const total = items.reduce((s, i) => s + i.value, 0);
+      return { catKey, ...conf, items, total };
+    }).filter(c => c.total > 0);
+  })();
+
   // Domaines (items)
   const domaines = (() => {
     const counts = { Apprentissages: 0, Comportement: 0, Développement: 0, Contexte: 0 };
@@ -457,6 +487,49 @@ export default function StatsAnnuelles() {
             </div>
           )}
         </SectionCard>
+
+        {/* Problématiques identifiées (fiches élèves) */}
+        {problematiquesStats.length > 0 && (
+          <SectionCard title="Problématiques identifiées" subtitle="Élèves concernés par problématique, calculé depuis les fiches élèves" icon={ClipboardList} accentColor="#8B5CF6" delay={0.095}>
+            <div className="space-y-5">
+              {problematiquesStats.map(cat => {
+                const CatIcon = cat.icon || ClipboardList;
+                const maxItem = Math.max(...cat.items.map(i => i.value), 1);
+                return (
+                  <div key={cat.catKey}>
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: cat.light }}>
+                        <CatIcon className="w-4 h-4" style={{ color: cat.color }} />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-wide" style={{ color: cat.color }}>{cat.label}</span>
+                      <span className="text-[10px] font-semibold text-[#0F172A]/40 ml-auto">{cat.items.length} problématique{cat.items.length > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="space-y-1.5 ml-1">
+                      {cat.items.map(({ name, value }) => {
+                        const pct = Math.round((value / maxItem) * 100);
+                        return (
+                          <div key={name} className="flex items-center gap-2">
+                            <span className="text-[11px] text-[#0F172A]/70 flex-1 truncate pr-1">{name}</span>
+                            <div className="w-24 sm:w-32 h-1.5 rounded-full bg-[#F5F0E8] overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${pct}%` }}
+                                transition={{ duration: 0.6, delay: 0.15 }}
+                                className="h-full rounded-full"
+                                style={{ background: cat.color }}
+                              />
+                            </div>
+                            <span className="text-[11px] font-bold shrink-0 w-7 text-right" style={{ color: cat.color }}>{value}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
 
         {/* Domaines — observations */}
         <SectionCard title="Observations par domaine" subtitle="Nombre d'items sélectionnés" icon={Brain} delay={0.1}>

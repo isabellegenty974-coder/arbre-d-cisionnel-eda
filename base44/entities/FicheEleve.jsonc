@@ -175,6 +175,51 @@
         }
       },
       "description": "Documents import\u00e9s et stock\u00e9s de fa\u00e7on permanente, li\u00e9s \u00e0 la fiche \u00e9l\u00e8ve"
+    },
+    "problematiques": {
+      "type": "object",
+      "description": "Probl\u00e9matiques identifi\u00e9es (cases coch\u00e9es par cat\u00e9gorie)",
+      "properties": {
+        "apprentissages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Probl\u00e9matiques apprentissages coch\u00e9es"
+        },
+        "comportement": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Probl\u00e9matiques comportement coch\u00e9es"
+        },
+        "developpement": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Probl\u00e9matiques d\u00e9veloppement coch\u00e9es"
+        },
+        "contexte": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Probl\u00e9matiques contexte coch\u00e9es"
+        },
+        "autre": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Probl\u00e9matiques autre coch\u00e9es"
+        },
+        "autre_detail": {
+          "type": "string",
+          "description": "Champ texte libre pour pr\u00e9ciser 'Autre'"
+        }
+      }
     }
   },
   "required": [
