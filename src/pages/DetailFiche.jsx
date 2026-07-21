@@ -43,10 +43,6 @@ function Topbar({ fiche, ficheId, onHypotheses }) {
         {fiche.classe && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fiche.classe}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
         <span style={{ color: '#fff', fontWeight: 600, whiteSpace: 'nowrap' }}>{fiche.prenom} {fiche.nom}</span>
       </div>
-      <button onClick={onHypotheses}
-        style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 7, fontSize: 12, fontWeight: 600, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-        🔍 Analyses
-      </button>
     </div>
   );
 }
@@ -109,7 +105,6 @@ function HeroFiche({ fiche, activeTab, setActiveTab }) {
       <div style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,.08)', marginTop: 2 }}>
         {[
           { key: 'suivi',      label: '📋 Suivi' },
-          { key: 'hypotheses', label: '🔍 Analyses' },
           { key: 'historique', label: '🕐 Historique' },
           { key: 'infos',      label: 'ℹ️ Infos' },
         ].map(t => (
@@ -769,7 +764,6 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
       }
       return { date: new Date(iv.date), ico: '💬', type: 'note', title: iv.description || 'Observation', meta: formatNomMembre(iv) };
     }),
-    ...historiqueEDA.map(h => ({ date: new Date(h.date || h.created_date), ico: '🔍', type: 'hyp', title: 'Analyse de situation', meta: `${h.hypotheses?.length || 0} analyse${(h.hypotheses?.length || 0) > 1 ? 's' : ''} retenue${(h.hypotheses?.length || 0) > 1 ? 's' : ''}` })),
     { date: new Date(fiche.created_date), ico: '📄', type: 'imp', title: 'Fiche créée', meta: [fiche.createdByName, fiche.createdByProfession && (PROF_LABEL_SHORT[fiche.createdByProfession] || fiche.createdByProfession), fiche.ecole, fiche.classe].filter(Boolean).join(' · ') },
   ].sort((a, b) => b.date - a.date);
 
@@ -872,7 +866,6 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
           {[
             { ico: '📄', lbl: 'Rapport de suivi', sub: 'Générer un PDF officiel', action: () => setShowReportModal(true) },
-            { ico: '📝', lbl: 'Analyses de situation',    sub: 'Lancer l\'analyse de situation', action: () => navigate(`/hypotheses-eleve?id=${ficheId}`) },
           ].map((opt, i) => (
             <div key={i} onClick={opt.action} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', transition: 'all .14s', background: '#fff' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; }}
@@ -1031,9 +1024,6 @@ export default function DetailFiche() {
           <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
             {activeTab === 'suivi' && (
               <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} membres={membres} showCommentModal={showCommentModal} setShowCommentModal={setShowCommentModal} />
-            )}
-            {activeTab === 'hypotheses' && (
-              <TabHypotheses fiche={fiche} ficheId={ficheId} navigate={navigate} historiqueEDA={historiqueEDA} />
             )}
             {activeTab === 'historique' && (
               <TabHistorique fiche={fiche} interventions={interventions} historiqueEDA={historiqueEDA} />

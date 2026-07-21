@@ -1,13 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Home, Users, TreePine, BarChart2, Settings } from 'lucide-react';
+import { Home, Users, BarChart2, Settings } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useOfflineSync } from '@/lib/useOfflineSync';
 
 const NAV_ITEMS = [
   { icon: Home,      label: 'Accueil',    to: '/dashboard' },
   { icon: Users,     label: 'Élèves',     to: '/liste-eleves' },
-  { icon: TreePine,  label: 'Arbre',      to: '/evaluation-domains' },
   { icon: BarChart2, label: 'Stats',      to: '/stats-annuelles' },
   { icon: Settings,  label: 'Paramètres', to: '/parametres' },
 ];

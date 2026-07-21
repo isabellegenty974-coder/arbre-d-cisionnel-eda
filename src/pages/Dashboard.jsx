@@ -46,7 +46,6 @@ const NAV = [
   { label: 'Tableau de bord', ico: '🏠', to: '/dashboard' },
   { label: 'Mes écoles',      ico: '🏫', to: '/mes-ecoles' },
   { label: 'Élèves suivis',   ico: '👤', to: '/liste-eleves' },
-  { label: 'Analyses de situation',  ico: '🔍', to: '/hypotheses-eleve', diag: true },
   { section: 'Gestion' },
   { label: 'Importer PDF',    ico: '📄', to: '/import-pdf' },
   { label: 'Équipe RASED',    ico: '👥', to: '/equipe-rased' },
@@ -59,7 +58,7 @@ const NAV = [
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 
-function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [], loading = false, totalAlertes = 0 }) {
+function Sidebar({ membres, notifications, membresEnLigne = [], loading = false, totalAlertes = 0 }) {
   const location = window.location.pathname;
 
   return (
@@ -89,7 +88,6 @@ function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [], loa
              );
            }
            const isActive = location === item.to;
-           const handleClick = item.diag ? onDiagClick : undefined;
            const alertCount = item.label === 'Tableau de bord' ? (loading ? 0 : totalAlertes) : 0;
            const inner = (
              <div style={{
@@ -117,7 +115,6 @@ function Sidebar({ membres, notifications, onDiagClick, membresEnLigne = [], loa
               )}
             </div>
           );
-          if (handleClick) return <div key={i} onClick={handleClick}>{inner}</div>;
           if (!item.to) return <div key={i}>{inner}</div>;
           return <Link key={i} to={item.to} style={{ textDecoration: 'none' }}>{inner}</Link>;
         })}
@@ -174,8 +171,6 @@ export default function Dashboard() {
   const [membres, setMembres] = useState([]);
   const [notifs, setNotifs]   = useState([]);
   const [loading, setLoading] = useState(true);
-  const [diagModal, setDiagModal] = useState(false);
-  const [search, setSearch]   = useState('');
   const [annees, setAnnees]   = useState([]);
   const [anneeActive, setAnneeActive] = useState(null);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -294,11 +289,6 @@ export default function Dashboard() {
     return { ...ec, nbEl, nbAl };
   });
 
-  const searchRes = fichesFiltrees.filter(e =>
-    `${e.prenom} ${e.nom}`.toLowerCase().includes(search.toLowerCase()) ||
-    (e.ecole || '').toLowerCase().includes(search.toLowerCase())
-  );
-
   const prenom = user?.full_name?.split(' ')[0] || 'vous';
 
   // ── Styles inline partagés ──────────────────────────────────────────────
@@ -340,7 +330,7 @@ export default function Dashboard() {
 
       {/* SIDEBAR */}
       <div className="db-sidebar">
-        <Sidebar membres={membres} notifications={notifs.length} onDiagClick={() => setDiagModal(true)} membresEnLigne={membresEnLigne} loading={loading} totalAlertes={totalAlertes} />
+        <Sidebar membres={membres} notifications={notifs.length} membresEnLigne={membresEnLigne} loading={loading} totalAlertes={totalAlertes} />
       </div>
 
       {/* MAIN */}
@@ -373,9 +363,6 @@ export default function Dashboard() {
               <Link to="/import-pdf" title="Importer PDF" style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: '1px solid #D8E1EE', background: 'transparent', color: '#182840', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 📄 Importer PDF
               </Link>
-              <button onClick={() => setDiagModal(true)} style={{ padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: 'none', background: '#3B82C4', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                + Nouvelle analyse de situation
-              </button>
             </div>
           </div>
 
@@ -530,9 +517,8 @@ export default function Dashboard() {
           </div>
 
           {/* RACCOURCIS */}
-           <div className="db-raccourcis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+           <div className="db-raccourcis" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
             {[
-              { ico: '🔍', ibg: '#EEE9FF', lbl: 'Nouvelle analyse',   sub: 'Démarrer une analyse de situation',         action: () => setDiagModal(true) },
               { ico: '📄', ibg: '#EAF2FB', lbl: 'Importer une liste PDF',  sub: 'Créer des fiches depuis Onde', to: '/import-pdf' },
               { ico: '👤', ibg: '#E4F4ED', lbl: 'Créer une fiche élève',   sub: 'Saisie manuelle',             to: '/fiche-eleve' },
               { ico: '📊', ibg: '#FEF0E4', lbl: 'Export annuel',           sub: 'Rapport pour l\'IEN',          to: '/export-annuel' },
@@ -697,49 +683,6 @@ export default function Dashboard() {
 
 
 
-      {/* MODAL HYPOTHÈSES */}
-      <AnimatePresence>
-        {diagModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-            onClick={() => setDiagModal(false)}>
-            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              onClick={e => e.stopPropagation()}
-              style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 640, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 -8px 40px rgba(0,0,0,.15)' }}>
-              <div style={{ width: 36, height: 4, background: '#D8E1EE', borderRadius: 2, margin: '12px auto 0' }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 10px', borderBottom: '1px solid #F0F3F8' }}>
-                <p style={{ fontWeight: 600, fontSize: 15, color: '#182840' }}>🔍 Nouvelle analyse de situation — Choisir un élève</p>
-                <button onClick={() => setDiagModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><X className="w-4 h-4" /></button>
-              </div>
-              <div style={{ padding: '10px 14px 6px' }}>
-                <div style={{ position: 'relative' }}>
-                  <Search style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: '#94A3B8' }} />
-                  <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un élève..."
-                    style={{ width: '100%', paddingLeft: 36, paddingRight: 12, paddingTop: 10, paddingBottom: 10, fontSize: 14, border: '1px solid #D8E1EE', borderRadius: 12, outline: 'none', fontFamily: 'Inter, sans-serif', boxSizing: 'border-box' }} />
-                </div>
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 20px' }}>
-                {searchRes.length === 0
-                  ? <p style={{ textAlign: 'center', padding: '32px 0', fontSize: 13, color: '#566880' }}>Aucun élève trouvé</p>
-                  : searchRes.slice(0, 20).map(e => (
-                    <button key={e.id} onClick={() => { setDiagModal(false); navigate(`/hypotheses-eleve?id=${e.id}`); }}
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 12, background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-                      onMouseEnter={ev => ev.currentTarget.style.background = '#F8FAFD'}
-                      onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}>
-                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#3B82C4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-                        {e.prenom?.[0]}{e.nom?.[0]}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: '#182840', margin: 0 }}>{e.prenom} {e.nom}</p>
-                        <p style={{ fontSize: 12, color: '#566880', margin: 0 }}>{e.classe || ''}{e.ecole ? ` · ${e.ecole}` : ''}</p>
-                      </div>
-                    </button>
-                  ))}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
