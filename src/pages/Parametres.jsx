@@ -241,15 +241,15 @@ export default function Parametres() {
 
   const computeStatut = (a) => {
     const today = new Date();
-    const debut = a.date_debut
-      ? new Date(a.date_debut)
-      : new Date(`${a.libelle.split('-')[0]}-08-01`);
-    const fin = a.date_fin
-      ? new Date(a.date_fin)
-      : new Date(`${a.libelle.split('-')[1] || String(parseInt(a.libelle.split('-')[0]) + 1)}-07-31`);
-    if (today >= debut && today <= fin) return 'en_cours';
-    if (today > fin) return 'passee';
-    return 'a_venir';
+    const month = today.getMonth(); // 0 = jan, 7 = août
+    const year  = today.getFullYear();
+    const anneeScolaireActive = month >= 7
+      ? `${year}-${year + 1}`
+      : `${year - 1}-${year}`;
+    if (a.libelle === anneeScolaireActive) return 'en_cours';
+    const startYear       = parseInt(a.libelle.split('-')[0]);
+    const activeStartYear = parseInt(anneeScolaireActive.split('-')[0]);
+    return startYear < activeStartYear ? 'passee' : 'a_venir';
   };
 
   const isActive = (a) => computeStatut(a) === 'en_cours';
