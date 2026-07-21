@@ -233,13 +233,13 @@ export default function StatsAnnuelles() {
     });
   })();
 
-  // Équipes éducatives : uniquement les interventions de type 'Équipe éducative'
+  // Équipes éducatives par professionnel et par école
   const equipesEduParProf = (() => {
     const profMap = {};
     fiches.forEach(f => {
       const ecole = f.ecole || 'École non renseignée';
       (f.interventions || [])
-        .filter(interv => interv.type === 'Équipe éducative')
+        .filter(interv => interv.description?.includes('ESS/EE'))
         .forEach(interv => {
           const p = interv.profession || 'Autre';
           if (!profMap[p]) profMap[p] = {};
@@ -253,22 +253,50 @@ export default function StatsAnnuelles() {
     }).filter(p => p.total > 0);
   })();
 
-  // Types d'intervention par profession
-  const typeParProf = (() => {
-    const result = {};
+  // Actes par corps de métier
+  const actesParProf = (() => {
+    const byProf = {};
     fiches.forEach(f => {
-      (f.interventions || []).forEach(interv => {
-        const p = interv.profession || 'Autre';
-        const t = interv.type || 'Non renseigné';
-        if (!result[p]) result[p] = {};
-        result[p][t] = (result[p][t] || 0) + 1;
+      (f.interventions || []).forEach(iv => {
+        const p = iv.profession || 'Autre';
+        const d = iv.description || '';
+        if (!byProf[p]) byProf[p] = [];
+        byProf[p].push(d);
       });
     });
-    return ['MaDP', 'MaDR', 'Psy EN EDA'].map(prof => ({
-      prof,
-      types: Object.entries(result[prof] || {}).sort((a, b) => b[1] - a[1]).map(([type, nb]) => ({ type, nb })),
-      total: Object.values(result[prof] || {}).reduce((s, v) => s + v, 0)
-    })).filter(p => p.total > 0);
+    const count = (acts, keyword) => acts.filter(d => d.includes(keyword)).length;
+    const psy  = byProf['Psy EN EDA'] || [];
+    const madr = byProf['MaDR'] || [];
+    const madp = byProf['MaDP'] || [];
+    return {
+      psy: [
+        { label: 'Entretiens élèves',          n: count(psy, "Entretien avec l'élève") },
+        { label: 'Passations psychométriques',  n: count(psy, 'Passation psychométrique') },
+        { label: 'Analyses de situation',       n: count(psy, 'Analyse de situation') },
+        { label: 'Observations en classe',      n: count(psy, 'Observation en classe (Psy') },
+        { label: 'Entretiens familles',         n: count(psy, 'Entretien avec la famille') },
+        { label: 'Participations ESS/EE',       n: count(psy, 'ESS/EE') },
+        { label: 'Liaisons enseignants',        n: count(psy, "Liaison avec l'enseignant") },
+        { label: 'Orientations externes',       n: count(psy, 'Orientation externe') },
+        { label: 'Dossiers MDPH',              n: count(psy, 'Dossier MDPH') },
+      ].filter(r => r.n > 0),
+      madr: [
+        { label: 'Séances de rééducation',     n: count(madr, 'Séance de rééducation') },
+        { label: 'Suivis individuels',          n: count(madr, 'Suivi individuel') },
+        { label: 'Suivis en groupe',            n: count(madr, 'Suivi en groupe') },
+        { label: 'Observations en classe',      n: count(madr, 'Observation en classe') },
+        { label: 'Liaisons enseignants',        n: count(madr, 'Liaison') },
+        { label: 'Participations ESS/EE',       n: count(madr, 'ESS/EE') },
+      ].filter(r => r.n > 0),
+      madp: [
+        { label: "Séances d'aide pédagogique", n: count(madp, "Séance d'aide") },
+        { label: 'Suivis individuels',          n: count(madp, 'Suivi individuel') },
+        { label: 'Suivis en groupe',            n: count(madp, 'Suivi en groupe') },
+        { label: 'Observations en classe',      n: count(madp, 'Observation en classe') },
+        { label: 'Liaisons enseignants',        n: count(madp, 'Liaison') },
+        { label: 'Participations ESS/EE',       n: count(madp, 'ESS/EE') },
+      ].filter(r => r.n > 0),
+    };
   })();
 
   // Répartition classes (filtrée par école)
@@ -734,40 +762,65 @@ export default function StatsAnnuelles() {
           </SectionCard>
         )}
 
-        {/* Types d'intervention par profession */}
-        {typeParProf.length > 0 && (
-          <SectionCard title="Types d'intervention par professionnel" subtitle="Répartition des activités de chaque membre RASED" icon={ClipboardList} accentColor="#8B5CF6" delay={0.29}>
-            <div className="space-y-5">
-              {typeParProf.map(({ prof, types, total }) => {
-                const color = PROF_COLORS[prof] || '#8B5CF6';
-                const maxNb = Math.max(...types.map(t => t.nb), 1);
+        {/* Psy-EN EDA — Actes réalisés */}
+        {actesParProf.psy.length > 0 && (
+          <SectionCard title="Psy-EN EDA — Actes réalisés" subtitle="Ventilation des interventions de la psychologue scolaire" icon={Brain} accentColor="#34C48A" delay={0.29}>
+            <div className="space-y-2">
+              {actesParProf.psy.map(({ label, n }) => {
+                const maxN = Math.max(...actesParProf.psy.map(r => r.n), 1);
+                const pct = Math.round((n / maxN) * 100);
                 return (
-                  <div key={prof} className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: `${color}40` }}>
-                    <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${color}12` }}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}25` }}>
-                          <Users className="w-3.5 h-3.5" style={{ color }} />
-                        </div>
-                        <span className="font-bold text-sm text-[#0F172A]">{prof}</span>
-                      </div>
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: `${color}20`, color }}>
-                        {total} intervention{total > 1 ? 's' : ''}
-                      </span>
+                  <div key={label} className="flex items-center gap-3">
+                    <span className="text-[11px] text-[#0F172A]/70 w-44 shrink-0">{label}</span>
+                    <div className="flex-1 h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6 }}
+                        className="h-full rounded-full" style={{ background: '#34C48A' }} />
                     </div>
-                    <div className="px-4 py-3 space-y-2">
-                      {types.map(({ type, nb }) => {
-                        const pct = Math.round((nb / maxNb) * 100);
-                        return (
-                          <div key={type} className="flex items-center gap-3">
-                            <span className="text-[10px] text-[#0F172A]/70 w-36 shrink-0 truncate">{type}</span>
-                            <div className="flex-1 h-1.5 rounded-full bg-[#F5F0E8] overflow-hidden">
-                              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
-                            </div>
-                            <span className="text-[10px] font-bold shrink-0 w-6 text-right" style={{ color }}>{nb}×</span>
-                          </div>
-                        );
-                      })}
+                    <span className="text-[11px] font-bold shrink-0 w-6 text-right" style={{ color: '#34C48A' }}>{n}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* MaDR — Actes réalisés */}
+        {actesParProf.madr.length > 0 && (
+          <SectionCard title="MaDR — Actes réalisés" subtitle="Ventilation des interventions du maître à dominante relationnelle" icon={Heart} accentColor="#EC6B8A" delay={0.31}>
+            <div className="space-y-2">
+              {actesParProf.madr.map(({ label, n }) => {
+                const maxN = Math.max(...actesParProf.madr.map(r => r.n), 1);
+                const pct = Math.round((n / maxN) * 100);
+                return (
+                  <div key={label} className="flex items-center gap-3">
+                    <span className="text-[11px] text-[#0F172A]/70 w-44 shrink-0">{label}</span>
+                    <div className="flex-1 h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6 }}
+                        className="h-full rounded-full" style={{ background: '#EC6B8A' }} />
                     </div>
+                    <span className="text-[11px] font-bold shrink-0 w-6 text-right" style={{ color: '#EC6B8A' }}>{n}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* MaDP — Actes réalisés */}
+        {actesParProf.madp.length > 0 && (
+          <SectionCard title="MaDP — Actes réalisés" subtitle="Ventilation des interventions du maître à dominante pédagogique" icon={BookOpen} accentColor="#4A90E2" delay={0.33}>
+            <div className="space-y-2">
+              {actesParProf.madp.map(({ label, n }) => {
+                const maxN = Math.max(...actesParProf.madp.map(r => r.n), 1);
+                const pct = Math.round((n / maxN) * 100);
+                return (
+                  <div key={label} className="flex items-center gap-3">
+                    <span className="text-[11px] text-[#0F172A]/70 w-44 shrink-0">{label}</span>
+                    <div className="flex-1 h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6 }}
+                        className="h-full rounded-full" style={{ background: '#4A90E2' }} />
+                    </div>
+                    <span className="text-[11px] font-bold shrink-0 w-6 text-right" style={{ color: '#4A90E2' }}>{n}</span>
                   </div>
                 );
               })}

@@ -457,14 +457,20 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                       <option>Entretien avec la famille</option>
                       <option>Participation à une ESS/EE</option>
                       <option>Liaison avec l'enseignant·e</option>
+                      <option>Orientation externe (Psy-EN)</option>
+                      <option>Dossier MDPH (Psy-EN)</option>
                     </optgroup>
                     <optgroup label="Actes MaDR">
                       <option>Séance de rééducation (MaDR)</option>
+                      <option>Suivi individuel (MaDR)</option>
+                      <option>Suivi en groupe (MaDR)</option>
                       <option>Observation en classe (MaDR)</option>
                       <option>Liaison avec l'enseignant·e (MaDR)</option>
                     </optgroup>
                     <optgroup label="Actes MaDP">
                       <option>Séance d'aide pédagogique (MaDP)</option>
+                      <option>Suivi individuel (MaDP)</option>
+                      <option>Suivi en groupe (MaDP)</option>
                       <option>Observation en classe (MaDP)</option>
                       <option>Liaison avec l'enseignant·e (MaDP)</option>
                     </optgroup>
