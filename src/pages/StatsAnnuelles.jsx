@@ -72,9 +72,19 @@ function EmptyState({ text = "Aucune donnée disponible" }) {
   );
 }
 
+function getClasseCycle(classe) {
+  const c = (classe || '').replace(/\s*Salle\s+\S+/gi, '').trim().toUpperCase();
+  if (/\b(TPS|PS|MS|GS)\b/.test(c))                    return 'Cycle 1';
+  if (/\b(CP|CE1|CE2)\b/.test(c))                       return 'Cycle 2';
+  if (/\b(CM1|CM2|6[EÈ]ME|6EME|6E)\b/.test(c))         return 'Cycle 3';
+  return 'Non classé';
+}
+
 export default function StatsAnnuelles() {
   const [diagnostics, setDiagnostics] = useState([]);
   const [fiches, setFiches] = useState([]);
+  const [anneesScolaires, setAnneesScolaires] = useState([]);
+  const [selectedAnnee, setSelectedAnnee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedProfession, setSelectedProfession] = useState(null);
   const [selectedEcole, setSelectedEcole] = useState(null);
@@ -84,27 +94,45 @@ export default function StatsAnnuelles() {
     Promise.all([
       base44.entities.Diagnostic.list("-created_date", 500),
       base44.entities.FicheEleve.list("-created_date", 500),
-    ]).then(([diags, fich]) => {
+      base44.entities.AnneeScolaire.list(),
+    ]).then(([diags, fich, annees]) => {
       setDiagnostics(diags);
       setFiches(fich);
+      setAnneesScolaires(annees);
+      const active = annees.find(a => a.est_active) || annees.find(a => a.statut === 'en_cours');
+      if (active) setSelectedAnnee(active.libelle);
     }).finally(() => setLoading(false));
   }, []);
 
-  // Filtre par profession
-  const filteredByProf = selectedProfession
-    ? diagnostics.filter(d => d.createdByProfession === selectedProfession)
+  // ── Filtre par année scolaire ─────────────────────────────────────────────
+  const anneeObj = anneesScolaires.find(a => a.libelle === selectedAnnee);
+  const fichesAnnee = selectedAnnee
+    ? fiches.filter(f => f.annee_scolaire === selectedAnnee)
+    : fiches;
+
+  const diagsAnnee = (selectedAnnee && anneeObj?.date_debut && anneeObj?.date_fin)
+    ? diagnostics.filter(d => {
+        const dt = new Date(d.created_date);
+        return dt >= new Date(anneeObj.date_debut) && dt <= new Date(anneeObj.date_fin);
+      })
     : diagnostics;
 
-  // Filtre par école (jointure via les fiches)
-  const ecoleMap = new Map(fiches.map(f => [`${f.prenom}|${f.nom}`.toLowerCase(), f.ecole || '']));
-  const ecoles = [...new Set(fiches.map(f => f.ecole).filter(Boolean))].sort();
+  // ── Filtre par profession ─────────────────────────────────────────────────
+  const filteredByProf = selectedProfession
+    ? diagsAnnee.filter(d => d.createdByProfession === selectedProfession)
+    : diagsAnnee;
+
+  // ── Filtre par école ──────────────────────────────────────────────────────
+  const ecoleMap = new Map(fichesAnnee.map(f => [`${f.prenom}|${f.nom}`.toLowerCase(), f.ecole || '']));
+  const ecoles = [...new Set(fichesAnnee.map(f => f.ecole).filter(Boolean))].sort();
   const filteredDiagnostics = selectedEcole
     ? filteredByProf.filter(d => ecoleMap.get(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase()) === selectedEcole)
     : filteredByProf;
-  const filteredFiches = selectedEcole ? fiches.filter(f => f.ecole === selectedEcole) : fiches;
+  const filteredFiches = selectedEcole ? fichesAnnee.filter(f => f.ecole === selectedEcole) : fichesAnnee;
 
-  // KPIs
-  const nbEleves = new Set(filteredDiagnostics.map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size;
+  // ── KPI : élèves suivis (non clôturés, pour l'année sélectionnée) ─────────
+  const nbEleves = filteredFiches.filter(f => f.statut !== 'Clôturé').length;
+
   const nbDiagnostics = filteredDiagnostics.length;
   const nbItems = filteredDiagnostics.reduce((acc, d) => {
     ['apprentissages','comportement','developpement','contexte'].forEach(cat => {
@@ -116,7 +144,7 @@ export default function StatsAnnuelles() {
 
   // Élèves par profession
   const nbElevesParProf = (prof) =>
-    new Set(diagnostics.filter(d => d.createdByProfession === prof).map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size;
+    new Set(diagsAnnee.filter(d => d.createdByProfession === prof).map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size;
 
   // Élèves par domaine
   const elevesParDomaine = (() => {
@@ -214,33 +242,33 @@ export default function StatsAnnuelles() {
       .map(([, v]) => v);
   })();
 
-  // Répartition par profession
+  // Répartition par profession (sur l'année sélectionnée)
   const profBreakdown = (() => {
     const counts = {};
-    diagnostics.forEach(d => {
+    diagsAnnee.forEach(d => {
       const p = d.createdByProfession || 'Non renseigné';
       counts[p] = (counts[p] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   })();
 
-  // Répartition par école
+  // Répartition par école (sur l'année sélectionnée)
   const ecoleBreakdown = (() => {
     const counts = {};
-    fiches.forEach(f => {
+    fichesAnnee.forEach(f => {
       const e = f.ecole || 'Non renseignée';
       counts[e] = (counts[e] || 0) + 1;
     });
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
   })();
 
-  // Statistiques détaillées par école
+  // Statistiques détaillées par école (sur l'année sélectionnée)
   const parEcoleStats = (() => {
-    const schools = [...new Set(fiches.map(f => f.ecole).filter(Boolean))].sort();
+    const schools = [...new Set(fichesAnnee.map(f => f.ecole).filter(Boolean))].sort();
     return schools.map(ecole => {
-      const fichesDEcole = fiches.filter(f => f.ecole === ecole);
+      const fichesDEcole = fichesAnnee.filter(f => f.ecole === ecole);
       const studentKeys = new Set(fichesDEcole.map(f => `${f.prenom}|${f.nom}`.toLowerCase()));
-      const diagsDEcole = diagnostics.filter(d => studentKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase()));
+      const diagsDEcole = diagsAnnee.filter(d => studentKeys.has(`${d.eleve_prenom}|${d.eleve_nom}`.toLowerCase()));
       const nbElevesEcole = studentKeys.size;
       const domainKeys = [
         { name: 'Apprentissages', key: 'apprentissages' },
@@ -263,10 +291,10 @@ export default function StatsAnnuelles() {
     });
   })();
 
-  // Équipes éducatives par professionnel et par école
+  // Équipes éducatives par professionnel et par école (filtrées par année + école)
   const equipesEduParProf = (() => {
     const profMap = {};
-    fiches.forEach(f => {
+    filteredFiches.forEach(f => {
       const ecole = f.ecole || 'École non renseignée';
       (f.interventions || [])
         .filter(interv => interv.description?.includes('ESS/EE'))
@@ -283,10 +311,11 @@ export default function StatsAnnuelles() {
     }).filter(p => p.total > 0);
   })();
 
-  // Actes par corps de métier
+  // Actes par corps de métier — lit FicheEleve.interventions[].description
+  // filtrés par année scolaire (via filteredFiches) et par école
   const actesParProf = (() => {
     const byProf = {};
-    fiches.forEach(f => {
+    filteredFiches.forEach(f => {
       (f.interventions || []).forEach(iv => {
         const p = iv.profession || 'Autre';
         const d = iv.description || '';
@@ -329,17 +358,31 @@ export default function StatsAnnuelles() {
     };
   })();
 
-  // Répartition classes (filtrée par école)
+  // Répartition par classe (filtrée par année + école)
   const classeBreakdown = (() => {
     const counts = {};
     filteredFiches.forEach(f => {
-      const c = f.classe || 'Non renseignée';
+      const c = (f.classe || 'Non renseignée').replace(/\s*Salle\s+\S+/gi, '').trim() || 'Non renseignée';
       counts[c] = (counts[c] || 0) + 1;
     });
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
       .map(([name, value]) => ({ name, value }));
+  })();
+
+  // Répartition par cycle (déduite depuis la classe)
+  const cycleBreakdown = (() => {
+    const ORDER = ['Cycle 1', 'Cycle 2', 'Cycle 3', 'Non classé'];
+    const counts = {};
+    filteredFiches.forEach(f => {
+      const cycle = getClasseCycle(f.classe);
+      counts[cycle] = (counts[cycle] || 0) + 1;
+    });
+    const CYCLE_COLORS = { 'Cycle 1': '#34C48A', 'Cycle 2': '#4A90E2', 'Cycle 3': '#D4A574', 'Non classé': '#94A3B8' };
+    return ORDER
+      .filter(c => counts[c] > 0)
+      .map(name => ({ name, value: counts[name], color: CYCLE_COLORS[name] }));
   })();
 
   if (loading) {
@@ -382,6 +425,38 @@ export default function StatsAnnuelles() {
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
 
+        {/* Filtre année scolaire */}
+        {anneesScolaires.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-[#0F172A]/60">Année :</span>
+            <div className="flex gap-1.5 flex-wrap">
+              <button
+                onClick={() => setSelectedAnnee(null)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  selectedAnnee === null
+                    ? 'bg-[#0F172A] text-white shadow'
+                    : 'bg-white text-[#0F172A] border border-[#E8DCC8] hover:border-[#D4A574]'
+                }`}
+              >
+                Toutes
+              </button>
+              {[...anneesScolaires].sort((a, b) => b.libelle.localeCompare(a.libelle)).map(a => (
+                <button
+                  key={a.libelle}
+                  onClick={() => setSelectedAnnee(a.libelle)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    selectedAnnee === a.libelle
+                      ? 'bg-[#D4A574] text-[#0F172A] shadow'
+                      : 'bg-white text-[#0F172A] border border-[#E8DCC8] hover:border-[#D4A574]'
+                  }`}
+                >
+                  {a.libelle}{a.est_active && <span className="ml-1 opacity-60">·</span>}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* Filtre profession */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 flex-wrap">
           <button
@@ -392,10 +467,10 @@ export default function StatsAnnuelles() {
                 : 'bg-white text-[#0F172A] border border-[#E8DCC8] hover:border-[#D4A574]'
             }`}
           >
-            Toute l'équipe <span className="opacity-60">({diagnostics.length})</span>
+            Toute l'équipe <span className="opacity-60">({diagsAnnee.length})</span>
           </button>
           {professions.map(prof => {
-            const count = diagnostics.filter(d => d.createdByProfession === prof).length;
+            const count = diagsAnnee.filter(d => d.createdByProfession === prof).length;
             if (count === 0) return null;
             return (
               <button
@@ -657,7 +732,7 @@ export default function StatsAnnuelles() {
           <SectionCard title="Hypothèses par profession" subtitle="Activité de chaque membre de l'équipe" icon={Users} accentColor="#D4A574" delay={0.22}>
             <div className="space-y-3">
               {[...profBreakdown].sort((a,b) => b.value - a.value).map(({ name, value }) => {
-                const total = diagnostics.length;
+                const total = diagsAnnee.length;
                 const pct = total > 0 ? Math.round((value / total) * 100) : 0;
                 const color = PROF_COLORS[name] || '#D4A574';
                 return (
@@ -885,6 +960,40 @@ export default function StatsAnnuelles() {
                         className="h-full rounded-full" style={{ background: '#4A90E2' }} />
                     </div>
                     <span className="text-[11px] font-bold shrink-0 w-6 text-right" style={{ color: '#4A90E2' }}>{n}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* Répartition par cycle */}
+        {cycleBreakdown.length > 0 && (
+          <SectionCard title="Répartition par cycle" subtitle="Élèves par cycle scolaire déduit de la classe" icon={BookOpen} accentColor="#34C48A" delay={0.24}>
+            <div className="space-y-3">
+              {cycleBreakdown.map(({ name, value, color }) => {
+                const total = cycleBreakdown.reduce((s, c) => s + c.value, 0);
+                const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                return (
+                  <div key={name} className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold" style={{ background: `${color}20`, color }}>
+                      {name.replace('Cycle ', 'C')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-[#0F172A]">{name}</span>
+                        <span className="text-xs font-bold" style={{ color }}>{value} élève{value > 1 ? 's' : ''} · {pct}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.7, delay: 0.2 }}
+                          className="h-full rounded-full"
+                          style={{ background: color }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 );
               })}
