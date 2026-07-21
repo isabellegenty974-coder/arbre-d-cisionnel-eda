@@ -8,6 +8,7 @@ import InterventionItem from '@/components/rased/InterventionItem';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import DocumentsSection from '@/components/rased/DocumentsSection';
 import ProblematiquesSection from '@/components/rased/ProblematiquesSection';
+import ResponsablesSection from '@/components/rased/ResponsablesSection';
 import ReportExportModal from '@/components/rased/ReportExportModal';
 import { usePresence } from '@/lib/usePresence';
 import { generateReport, downloadReport } from '@/lib/reportGenerator';
@@ -805,7 +806,7 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
 }
 
 // ── Onglet Infos ──────────────────────────────────────────────────────────────
-function TabInfos({ fiche, ficheId, navigate, user }) {
+function TabInfos({ fiche, ficheId, navigate, user, setFiche }) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -872,6 +873,21 @@ function TabInfos({ fiche, ficheId, navigate, user }) {
         <InfoRow label="Créé par" value={fiche.createdByName ? `${fiche.createdByName} · ${PROF_LABEL[fiche.createdByProfession] || fiche.createdByProfession}` : null} />
         <InfoRow label="Date de création" value={fiche.created_date ? new Date(fiche.created_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
         <InfoRow label="Dernière modification" value={fiche.updated_date ? new Date(fiche.updated_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null} />
+      </Card>
+
+      <Card>
+        <CardHead icon="👨‍👩‍👧" title="Coordonnées des parents / responsables légaux" />
+        <div style={{ padding: 14 }}>
+          <ResponsablesSection
+            ficheId={ficheId}
+            responsable1={fiche.responsable1}
+            responsable2={fiche.responsable2}
+            langueMaison={fiche.langue_maison}
+            autorisationParentale={fiche.autorisation_parentale}
+            dateAutorisation={fiche.date_autorisation}
+            onUpdate={(updated) => setFiche(f => ({ ...f, ...updated }))}
+          />
+        </div>
       </Card>
 
       <Card>
@@ -1042,7 +1058,7 @@ export default function DetailFiche() {
               <TabHistorique fiche={fiche} interventions={interventions} historiqueEDA={historiqueEDA} />
             )}
             {activeTab === 'infos' && (
-              <TabInfos fiche={fiche} ficheId={ficheId} navigate={navigate} user={user} />
+              <TabInfos fiche={fiche} ficheId={ficheId} navigate={navigate} user={user} setFiche={setFiche} />
             )}
           </motion.div>
         </AnimatePresence>

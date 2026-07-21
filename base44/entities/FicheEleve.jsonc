@@ -220,6 +220,73 @@
           "description": "Champ texte libre pour pr\u00e9ciser 'Autre'"
         }
       }
+    },
+    "responsable1": {
+      "type": "object",
+      "description": "Coordonn\u00e9es du responsable l\u00e9gal 1",
+      "properties": {
+        "lien": {
+          "type": "string",
+          "enum": [
+            "P\u00e8re",
+            "M\u00e8re",
+            "Tuteur",
+            "Autre responsable l\u00e9gal"
+          ]
+        },
+        "prenom_nom": {
+          "type": "string"
+        },
+        "tel_portable": {
+          "type": "string"
+        },
+        "tel_fixe": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "responsable2": {
+      "type": "object",
+      "description": "Coordonn\u00e9es du responsable l\u00e9gal 2 (optionnel)",
+      "properties": {
+        "lien": {
+          "type": "string",
+          "enum": [
+            "P\u00e8re",
+            "M\u00e8re",
+            "Tuteur",
+            "Autre responsable l\u00e9gal"
+          ]
+        },
+        "prenom_nom": {
+          "type": "string"
+        },
+        "tel_portable": {
+          "type": "string"
+        },
+        "tel_fixe": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "langue_maison": {
+      "type": "string",
+      "description": "Langue parl\u00e9e \u00e0 la maison"
+    },
+    "autorisation_parentale": {
+      "type": "boolean",
+      "description": "Autorisation parentale obtenue pour le suivi RASED"
+    },
+    "date_autorisation": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de l'autorisation parentale"
     }
   },
   "required": [
