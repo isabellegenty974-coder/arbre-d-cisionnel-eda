@@ -4,13 +4,14 @@ import { base44 } from "@/api/base44Client";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
-import { Plus, User } from "lucide-react";
+import { Plus, User, Search } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ListeEleves() {
   const navigate = useNavigate();
   const [eleves, setEleves] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recherche, setRecherche] = useState("");
 
   useEffect(() => {
     base44.entities.FicheEleve.list("-created_date", 100)
@@ -32,15 +33,40 @@ export default function ListeEleves() {
             Nouvelle fiche élève
           </Button>
 
+          {!loading && eleves.length > 0 && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Rechercher par nom ou prénom…"
+                value={recherche}
+                onChange={e => setRecherche(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition"
+              />
+            </div>
+          )}
+
           {loading ? (
             <div className="text-center py-10 text-muted-foreground">Chargement...</div>
           ) : eleves.length === 0 ? (
             <div className="text-center py-10 rounded-xl bg-secondary/30 border border-secondary">
               <p className="text-muted-foreground text-sm">Aucun élève enregistré</p>
             </div>
-          ) : (
+          ) : (() => {
+            const q = recherche.trim().toLowerCase();
+            const filtres = q
+              ? eleves.filter(e =>
+                  (e.prenom || "").toLowerCase().includes(q) ||
+                  (e.nom || "").toLowerCase().includes(q)
+                )
+              : eleves;
+            return filtres.length === 0 ? (
+              <div className="text-center py-10 rounded-xl bg-secondary/30 border border-secondary">
+                <p className="text-muted-foreground text-sm">Aucun élève trouvé pour cette recherche</p>
+              </div>
+            ) : (
             <div className="space-y-3">
-              {eleves.map((eleve, i) => (
+              {filtres.map((eleve, i) => (
                 <motion.button
                   key={eleve.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -63,7 +89,8 @@ export default function ListeEleves() {
                 </motion.button>
               ))}
             </div>
-          )}
+            );
+          })()}
         </div>
       </ScreenLayout>
     </div>
