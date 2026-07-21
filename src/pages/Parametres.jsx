@@ -125,7 +125,7 @@ function FormAjoutAnnee({ onSave, onCancel, saving, anneesExistantes = [] }) {
             style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', background: '#fff', boxSizing: 'border-box' }}>
             <option value="a_venir">À venir</option>
             <option value="en_cours">En cours</option>
-            <option value="archivee">Archivée</option>
+            <option value="passee">Passée</option>
           </select>
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -203,7 +203,7 @@ export default function Parametres() {
     await Promise.all(
       annees
         .filter(a => a.id !== annee.id && (a.est_active || a.active))
-        .map(a => base44.entities.AnneeScolaire.update(a.id, { est_active: false, active: false, statut: 'archivee' }))
+        .map(a => base44.entities.AnneeScolaire.update(a.id, { est_active: false, active: false, statut: 'passee' }))
     );
     await base44.entities.AnneeScolaire.update(annee.id, { est_active: true, active: true, statut: 'en_cours' });
     setSaving(false);
@@ -236,18 +236,23 @@ export default function Parametres() {
   const statutConfig = {
     en_cours: { label: 'En cours',  badgeBg: '#4ADE80', badgeColor: '#fff' },
     a_venir:  { label: 'À venir',   badgeBg: '#EEE9FF', badgeColor: '#5B3FA6' },
-    archivee: { label: 'Archivée',  badgeBg: '#E2E8F0', badgeColor: '#64748B' },
-    // compat anciens statuts
-    active:   { label: 'En cours',  badgeBg: '#4ADE80', badgeColor: '#fff' },
-    future:   { label: 'À venir',   badgeBg: '#EEE9FF', badgeColor: '#5B3FA6' },
+    passee:   { label: 'Passée',    badgeBg: '#E2E8F0', badgeColor: '#64748B' },
   };
 
-  const getStatut = (a) => {
-    if (a.est_active || a.active) return 'en_cours';
-    return a.statut || 'a_venir';
+  const computeStatut = (a) => {
+    const today = new Date();
+    const debut = a.date_debut
+      ? new Date(a.date_debut)
+      : new Date(`${a.libelle.split('-')[0]}-08-01`);
+    const fin = a.date_fin
+      ? new Date(a.date_fin)
+      : new Date(`${a.libelle.split('-')[1] || String(parseInt(a.libelle.split('-')[0]) + 1)}-07-31`);
+    if (today >= debut && today <= fin) return 'en_cours';
+    if (today > fin) return 'passee';
+    return 'a_venir';
   };
 
-  const isActive = (a) => a.est_active || a.active;
+  const isActive = (a) => computeStatut(a) === 'en_cours';
 
   return (
     <div style={{ minHeight: '100vh', background: '#F0F3F8', fontFamily: 'Inter, sans-serif', paddingBottom: 80 }}>
@@ -315,7 +320,7 @@ export default function Parametres() {
 
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#182840', margin: '0 0 6px' }}>Années scolaires</h1>
         <p style={{ fontSize: 13, color: '#566880', margin: '0 0 28px', lineHeight: 1.6 }}>
-          Gérez vos années scolaires. Une seule peut être active à la fois. Quand vous activez une nouvelle année, l'ancienne est automatiquement archivée.
+          Gérez vos années scolaires. Une seule peut être active à la fois. Quand vous activez une nouvelle année, l'ancienne passe automatiquement en statut Passée.
         </p>
 
         {/* Formulaire ajout */}
@@ -345,7 +350,7 @@ export default function Parametres() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[...annees].sort((a, b) => a.libelle.localeCompare(b.libelle) * -1).map(a => {
-                const statut = getStatut(a);
+                const statut = computeStatut(a);
                 const cfg = statutConfig[statut] || statutConfig.a_venir;
                 const active = isActive(a);
                 const isSelected = selected === a.id;
@@ -357,13 +362,13 @@ export default function Parametres() {
                       padding: '14px 16px',
                       borderRadius: 14,
                       cursor: 'pointer',
-                      background: active ? '#1A3353' : isSelected ? '#EAF2FB' : statut === 'archivee' ? '#F8F9FB' : '#fff',
+                      background: active ? '#1A3353' : isSelected ? '#EAF2FB' : statut === 'passee' ? '#F8F9FB' : '#fff',
                       border: active ? 'none' : isSelected ? '2px solid #3B82C4' : statut === 'a_venir' ? '2px dashed #D8E1EE' : '1px solid #E8EDF5',
                       transition: 'all .15s',
                     }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                       <div>
-                        <div style={{ fontSize: 17, fontWeight: 700, color: active ? '#fff' : statut === 'archivee' ? '#94A3B8' : '#182840', lineHeight: 1.2 }}>
+                        <div style={{ fontSize: 17, fontWeight: 700, color: active ? '#fff' : statut === 'passee' ? '#94A3B8' : '#182840', lineHeight: 1.2 }}>
                           {a.libelle.replace('-', '–')}
                         </div>
                         {(a.date_debut || a.date_fin) && (
@@ -378,7 +383,7 @@ export default function Parametres() {
                         <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 10, background: cfg.badgeBg, color: cfg.badgeColor, whiteSpace: 'nowrap' }}>
                           {active ? 'En cours' : cfg.label}
                         </span>
-                        {!active && statut !== 'archivee' && (
+                        {!active && (
                           <button onClick={e => { e.stopPropagation(); handleSetActive(a); }} disabled={saving}
                             style={{ fontSize: 11, padding: '4px 10px', borderRadius: 8, background: '#3B82C4', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: saving ? .6 : 1, whiteSpace: 'nowrap' }}>
                             Définir comme active
@@ -429,7 +434,7 @@ export default function Parametres() {
                 return (
                   <tr key={a.id} onClick={() => setSelected(a.id)}
                     style={{ borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none', cursor: 'pointer', background: isSelected ? '#F0F7FF' : 'transparent', transition: 'background .1s' }}>
-                    <td style={{ padding: '13px 14px', fontSize: 13.5, fontWeight: active ? 700 : 500, color: active ? '#1A3353' : getStatut(a) === 'archivee' ? '#94A3B8' : '#182840' }}>
+                    <td style={{ padding: '13px 14px', fontSize: 13.5, fontWeight: active ? 700 : 500, color: active ? '#1A3353' : computeStatut(a) === 'passee' ? '#94A3B8' : '#182840' }}>
                       {a.libelle.replace('-', '–')}
                     </td>
                     {[s.eleves, s.hypotheses, s.clotures].map((v, j) => (
@@ -558,7 +563,7 @@ export default function Parametres() {
                 >
                   <option value="">-- Sélectionner une année archivée --</option>
                   {annees
-                    .filter(a => (a.statut === 'archivee' || (!a.est_active && !a.active)))
+                    .filter(a => computeStatut(a) === 'passee')
                     .map(a => <option key={a.id} value={a.id}>{a.libelle}</option>)
                   }
                 </select>
