@@ -78,7 +78,7 @@ function Sidebar({ membres, notifications, membresEnLigne = [], loading = false,
       </div>
 
       {/* Nav */}
-      <nav style={{ padding: '12px 10px', flex: 1, overflowY: 'auto' }}>
+      <nav style={{ padding: '12px 10px', flex: 1, minHeight: 0, overflowY: 'auto' }}>
         {NAV.map((item, i) => {
           if (item.section) {
              return (
