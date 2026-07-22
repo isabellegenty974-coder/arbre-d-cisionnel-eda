@@ -331,7 +331,6 @@ export default function StatsAnnuelles() {
       psy: [
         { label: 'Entretiens élèves',          n: count(psy, "Entretien avec l'élève") },
         { label: 'Passations psychométriques',  n: count(psy, 'Passation psychométrique') },
-        { label: 'Analyses de situation',       n: count(psy, 'Analyse de situation') },
         { label: 'Observations en classe',      n: count(psy, 'Observation en classe (Psy') },
         { label: 'Entretiens familles',         n: count(psy, 'Entretien avec la famille') },
         { label: 'Participations ESS/EE',       n: count(psy, 'ESS/EE') },

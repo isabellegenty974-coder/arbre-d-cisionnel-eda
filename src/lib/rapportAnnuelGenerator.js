@@ -157,7 +157,6 @@ function computeStats({ fiches, historique, eleves, libelle }) {
     entretiensEleves: compte(actesPsy, "entretien avec l'élève"),
     passationsPsycho: compte(actesPsy, 'passation psychométrique'),
     observationsClasse: compte(actesPsy, 'observation en classe'),
-    analysesSituation: histPsy.length,
     comptesRendus: actesPsy.filter(a => a.commentaire && a.commentaire.trim()).length,
     entretiensFamilles: compte(actesPsy, 'entretien avec la famille'),
     participationsESSEE: compte(actesPsy, 'ess'),
@@ -293,7 +292,7 @@ function analysePsy(s) {
   const p = s.psy;
   const cycleDom = Object.entries(p.parCycle).sort((a, b) => b[1] - a[1])[0];
   return [
-    `Mme GENTY Isabelle a réalisé ${p.entretiensEleves} entretien${p.entretiensEleves > 1 ? 's' : ''} avec des élèves, ${p.passationsPsycho} passation${p.passationsPsycho > 1 ? 's' : ''} psychométrique${p.passationsPsycho > 1 ? 's' : ''} et ${p.observationsClasse} observation${p.observationsClasse > 1 ? 's' : ''} en classe, pour un total de ${p.analysesSituation} analyse${p.analysesSituation > 1 ? 's' : ''} de situation menée${p.analysesSituation > 1 ? 's' : ''} via l'arbre décisionnel EDA.`,
+    `Mme GENTY Isabelle a réalisé ${p.entretiensEleves} entretien${p.entretiensEleves > 1 ? 's' : ''} avec des élèves, ${p.passationsPsycho} passation${p.passationsPsycho > 1 ? 's' : ''} psychométrique${p.passationsPsycho > 1 ? 's' : ''} et ${p.observationsClasse} observation${p.observationsClasse > 1 ? 's' : ''} en classe.`,
     cycleDom && cycleDom[1] > 0
       ? `Les situations suivies concernent prioritairement le ${cycleDom[0]} (${pct(cycleDom[1], p.total)} % des dossiers).`
       : `Aucune tendance de cycle significative ne se dégage sur la période.`,
@@ -335,7 +334,7 @@ function perspectivesPsy(s, anneeN1) {
   items.push(p.dossiersMDPH > 0
     ? `Poursuivre le suivi des ${p.dossiersMDPH} dossier${p.dossiersMDPH > 1 ? 's' : ''} MDPH en cours et anticiper les renouvellements.`
     : 'Maintenir la vigilance sur les situations susceptibles de nécessiter une orientation MDPH.');
-  items.push(`Poursuivre les analyses de situation via l'arbre EDA et renforcer la liaison avec les ${p.liaisonsEnseignants} enseignant·es déjà mobilisé·es.`);
+  items.push(`Poursuivre l'utilisation de l'arbre décisionnel EDA et renforcer la liaison avec les ${p.liaisonsEnseignants} enseignant·es déjà mobilisé·es.`);
   items.push(`Consolider le lien avec les familles (${p.entretiensFamilles} entretien${p.entretiensFamilles > 1 ? 's' : ''} mené${p.entretiensFamilles > 1 ? 's' : ''} cette année).`);
   return { titre: `Perspectives ${anneeN1}`, items };
 }
@@ -718,7 +717,6 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
       { label: 'Entretiens élèves', value: s.psy.entretiensEleves },
       { label: 'Passations psychométriques', value: s.psy.passationsPsycho },
       { label: 'Observations en classe', value: s.psy.observationsClasse },
-      { label: 'Analyses de situation (arbre EDA)', value: s.psy.analysesSituation },
       { label: 'Entretiens avec notes', value: s.psy.comptesRendus },
       { label: 'Entretiens familles', value: s.psy.entretiensFamilles },
       { label: 'Participations ESS/EE', value: s.psy.participationsESSEE },

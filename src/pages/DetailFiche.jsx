@@ -384,7 +384,6 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                     <optgroup label="Actes Psy-EN EDA">
                       <option>Entretien avec l'élève (Psy-EN)</option>
                       <option>Passation psychométrique (Psy-EN)</option>
-                      <option>Analyse de situation (Psy-EN)</option>
                       <option>Observation en classe (Psy-EN)</option>
                       <option>Entretien avec la famille</option>
                       <option>Participation à une ESS/EE</option>
@@ -620,85 +619,6 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  );
-}
-
-// ── Onglet Hypothèses ─────────────────────────────────────────────────────────
-function TabHypotheses({ fiche, ficheId, navigate, historiqueEDA }) {
-  const DOMAINE_ICO = { apprentissages: '📖', comportement: '🧠', developpement: '🌱', contexte: '🏠' };
-  const DOMAINE_BG  = { apprentissages: '#EAF2FB', comportement: '#EEE9FF', developpement: '#E4F4ED', contexte: '#FEF0E4' };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <Card>
-        <CardHead icon="🔍" title="Analyses de situation"
-          action="+ Nouvelle analyse"
-          onAction={() => navigate(`/hypotheses-eleve?id=${ficheId}`)} />
-
-        {historiqueEDA.length === 0 ? (
-          <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}>🔍</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#182840', marginBottom: 6 }}>Aucune analyse de situation</div>
-            <div style={{ fontSize: 12.5, color: '#566880', marginBottom: 18 }}>Utilisez l'arbre décisionnel pour analyser les difficultés de {fiche.prenom}.</div>
-            <button onClick={() => navigate(`/hypotheses-eleve?id=${ficheId}`)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 9, fontSize: 13.5, fontWeight: 700, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer' }}>
-              🔍 Analyser la situation
-            </button>
-          </div>
-        ) : (
-          historiqueEDA.map((h, i) => (
-            <div key={h.id} style={{ padding: '16px', borderBottom: i < historiqueEDA.length - 1 ? '1px solid #F0F3F8' : 'none', display: 'flex', gap: 14 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 11, background: DOMAINE_BG[h.domaine] || '#F0F3F8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-                {DOMAINE_ICO[h.domaine] || '🔍'}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#182840', marginBottom: 2, textTransform: 'capitalize' }}>
-                  {h.domaine} {h.sous_domaine ? `— ${h.sous_domaine}` : ''}
-                </div>
-                {h.hypotheses?.length > 0 && (
-                  <div style={{ background: '#F0F3F8', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
-                    <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', fontWeight: 700, marginBottom: 6 }}>Analyses retenues</div>
-                    {h.hypotheses.map((hyp, j) => (
-                      <div key={j} style={{ fontSize: 12.5, color: '#182840', padding: '3px 0', display: 'flex', gap: 6 }}>
-                        <span style={{ color: '#3B82C4', fontWeight: 700, flexShrink: 0 }}>·</span>
-                        {hyp}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 11, color: '#566880' }}>📅 {new Date(h.date || h.created_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </Card>
-
-      {/* Explorer autres domaines */}
-      <Card>
-        <CardHead icon="🌐" title="Explorer un autre domaine" />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
-          {[
-            { ico: '📖', lbl: 'Apprentissages', sub: 'Lecture, écriture, maths', to: '/apprentissage' },
-            { ico: '🧠', lbl: 'Comportement',   sub: 'Anxiété, impulsivité',     to: '/comportement' },
-            { ico: '🌱', lbl: 'Développement',  sub: 'Attention, langage',       to: '/developpement' },
-            { ico: '🏠', lbl: 'Contexte',       sub: 'Famille, classe',          to: '/contexte' },
-          ].map(d => (
-            <Link key={d.to} to={`${d.to}?ficheId=${ficheId}&prenom=${fiche.prenom}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', textDecoration: 'none', transition: 'all .14s', background: '#fff' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#D8E1EE'; e.currentTarget.style.background = '#fff'; }}>
-              <span style={{ fontSize: 22 }}>{d.ico}</span>
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{d.lbl}</div>
-                <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{d.sub}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </Card>
     </div>
   );
 }
