@@ -5,24 +5,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X, Search } from 'lucide-react';
 import { usePresence } from '@/lib/usePresence';
 import { titleCase } from '@/lib/utils';
+import { timeAgo } from '@/lib/time';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const h = Math.floor(diff / 3600000);
-  const d = Math.floor(diff / 86400000);
-  if (h < 1) return "à l'instant";
-  if (h < 24) return `il y a ${h}h`;
-  if (d === 1) return 'hier';
-  return `il y a ${d}j`;
-}
-
-function daysSince(dateStr) {
-  if (!dateStr) return 0;
-  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
-}
 
 function anneeScolaire() {
   const now = new Date();
