@@ -9,7 +9,6 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import PhotoEEUpload from '@/components/PhotoEEUpload';
-import { titleCase } from '@/lib/utils';
 
 export default function FicheEleve() {
   const navigate = useNavigate();
@@ -24,9 +23,7 @@ export default function FicheEleve() {
   const [nom, setNom] = useState(urlParams.get('nom') || '');
   const [ecole, setEcole] = useState(urlParams.get('ecole') || '');
   const [classe, setClasse] = useState(urlParams.get('classe') || '');
-  const [enseignant, setEnseignant] = useState(urlParams.get('enseignant') || '');
   const [dateNaissance, setDateNaissance] = useState(urlParams.get('date_naissance') || '');
-  const [motif, setMotif] = useState('');
   const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
@@ -67,26 +64,11 @@ export default function FicheEleve() {
       setAgeCalcule(age >= 0 ? age : null);
     }
 
-    // Récupérer le nom de l'enseignant·e depuis les données de la classe (import PDF)
-    const eleveRasedId = urlParams.get('eleve_rased_id');
-    if (eleveRasedId) {
-      base44.entities.EleveRased.get(eleveRasedId).then(eleve => {
-        if (eleve?.classe_id) {
-          return base44.entities.ClasseEcole.get(eleve.classe_id);
-        }
-        return null;
-      }).then(classeRec => {
-        if (classeRec?.enseignant) {
-          setEnseignant(classeRec.enseignant);
-        }
-      }).catch((e) => console.warn('Récupération enseignant via eleve_rased_id échouée:', e));
-    }
   }, []);
 
   // Debug: afficher les paramètres URL au montage
   useEffect(() => {
     console.log('[FicheEleve] URL params:', {
-      enseignant: urlParams.get('enseignant'),
       eleve_rased_id: urlParams.get('eleve_rased_id'),
       classe: urlParams.get('classe'),
       ecole: urlParams.get('ecole'),
@@ -246,8 +228,6 @@ export default function FicheEleve() {
           date_naissance: dateNaissance || undefined,
           classe: classe || undefined,
           ecole: ecole || undefined,
-          observations: motif.trim() || undefined,
-          notes: enseignant ? `Enseignant·e : ${enseignant}` : undefined,
           date: new Date().toISOString().split('T')[0],
           annee_scolaire: anneeActive || undefined,
           createdByName: fullName,
@@ -345,64 +325,42 @@ export default function FicheEleve() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#D4A574]/10 mt-4">
               <div>
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">Date de naissance</label>
-                <div className="flex items-center gap-2">
-                  <div className="grid grid-cols-3 gap-2 flex-1">
-                    <select
-                      value={jourNaissance}
-                      onChange={e => handleDateNaissance(e.target.value, moisNaissance, anneeNaissance)}
-                      className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <option value="">Jour</option>
-                      {Array.from({ length: daysInMonth(moisNaissance, anneeNaissance) }, (_, i) => i + 1).map(d => (
-                        <option key={d} value={String(d)}>{d}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={moisNaissance}
-                      onChange={e => handleDateNaissance(jourNaissance, e.target.value, anneeNaissance)}
-                      className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <option value="">Mois</option>
-                      {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
-                    </select>
-                    <select
-                      value={anneeNaissance}
-                      onChange={e => handleDateNaissance(jourNaissance, moisNaissance, e.target.value)}
-                      className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      <option value="">Année</option>
-                      {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
-                    </select>
-                  </div>
-                  {ageCalcule !== null ? (
-                    <span className="text-sm font-bold text-[#D4A574] whitespace-nowrap bg-[#D4A574]/10 px-3 py-2 rounded-lg">{ageCalcule} ans</span>
-                  ) : (
-                    <span className="text-sm text-[#0F172A]/30 whitespace-nowrap">— ans</span>
-                  )}
+                <div className="grid grid-cols-3 gap-2">
+                  <select
+                    value={jourNaissance}
+                    onChange={e => handleDateNaissance(e.target.value, moisNaissance, anneeNaissance)}
+                    className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="">Jour</option>
+                    {Array.from({ length: daysInMonth(moisNaissance, anneeNaissance) }, (_, i) => i + 1).map(d => (
+                      <option key={d} value={String(d)}>{d}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={moisNaissance}
+                    onChange={e => handleDateNaissance(jourNaissance, e.target.value, anneeNaissance)}
+                    className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="">Mois</option>
+                    {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
+                  </select>
+                  <select
+                    value={anneeNaissance}
+                    onChange={e => handleDateNaissance(jourNaissance, moisNaissance, e.target.value)}
+                    className="h-10 rounded-lg border border-input bg-background px-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="">Année</option>
+                    {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                  </select>
                 </div>
                 {dateNaissance && urlParams.get('date_naissance') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
               </div>
               <div>
-                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Classe</label>
-                <Input
-                  value={classe}
-                  onChange={e => setClasse(e.target.value)}
-                  placeholder="Ex: CM2"
-                  className="rounded-lg"
-                />
-                {classe && urlParams.get('classe') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Enseignant·e</label>
-                <Input
-                  type="text"
-                  value={enseignant}
-                  onChange={e => setEnseignant(e.target.value)}
-                  placeholder="Nom de l'enseignant·e"
-                  className="rounded-lg"
-                />
-                {enseignant && urlParams.get('enseignant') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Âge</label>
+                <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm font-semibold text-[#0F172A]">
+                  {ageCalcule !== null ? `${ageCalcule} ans` : '—'}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Calculé automatiquement à partir de la date de naissance</p>
               </div>
             </div>
           </motion.div>
@@ -422,23 +380,15 @@ export default function FicheEleve() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-[#0F172A] block mb-2">
-                  École <span className="text-xs text-gray-400">🔒 verrouillé</span>
-                </label>
-                {ecole ? (
-                  <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm text-gray-700 font-medium">
-                    {titleCase(ecole)}
-                  </div>
-                ) : (
-                  <select
-                    value={ecole}
-                    onChange={e => setEcole(e.target.value)}
-                    className={`w-full h-10 rounded-lg border ${errors.ecole ? 'border-destructive ring-1 ring-destructive' : 'border-input'} bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring`}
-                  >
-                    <option value="">-- Sélectionner une école --</option>
-                    {['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin'].map(e => <option key={e} value={e}>{e}</option>)}
-                  </select>
-                )}
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">École</label>
+                <select
+                  value={ecole}
+                  onChange={e => setEcole(e.target.value)}
+                  className={`w-full h-10 rounded-lg border ${errors.ecole ? 'border-destructive ring-1 ring-destructive' : 'border-input'} bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring`}
+                >
+                  <option value="">-- Sélectionner une école --</option>
+                  {[...new Set(['Célimène', 'Malraux', 'Lacaussade élémentaire', 'Lacaussade maternelle', 'Lorraine', 'Vergès', 'Julenon', 'Joron', 'Jamin', 'Langevin', ecole].filter(Boolean))].map(e => <option key={e} value={e}>{e}</option>)}
+                </select>
                 {errors.ecole && (
                   <div className="flex items-center gap-1.5 mt-1.5 text-xs text-destructive">
                     <AlertCircle className="w-3.5 h-3.5" />
@@ -447,43 +397,27 @@ export default function FicheEleve() {
                 )}
               </div>
               <div>
-                <label className="text-sm font-semibold text-[#0F172A] block mb-2">
-                  Classe <span className="text-xs text-gray-400">🔒 verrouillé</span>
-                </label>
-                <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm text-gray-700 font-medium">
-                  {classe || '—'}
-                </div>
+                <label className="text-sm font-semibold text-[#0F172A] block mb-2">Classe</label>
+                <Input
+                  value={classe}
+                  onChange={e => setClasse(e.target.value)}
+                  placeholder="Ex: CM2"
+                  className="rounded-lg"
+                />
               </div>
               <div>
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">
-                  Année scolaire <span className="text-xs text-gray-400">🔒 verrouillé</span>
+                  Année scolaire <span className="text-xs text-gray-400">🔒 immuable</span>
                 </label>
-                <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm text-gray-700 font-medium">
-                  {anneeActive || '—'}
-                </div>
+                <select
+                  value={anneeActive || ''}
+                  disabled
+                  className="w-full h-10 rounded-lg border border-input bg-gray-50 px-3 text-sm text-gray-700 font-medium cursor-not-allowed"
+                >
+                  {anneeActive && <option value={anneeActive}>{anneeActive}</option>}
+                </select>
               </div>
             </div>
-          </motion.div>
-
-          {/* Section Motif du signalement */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-6 p-6 rounded-2xl bg-white border border-[#D4A574]/20 shadow-soft"
-          >
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-lg bg-[#D4A574]/10 flex items-center justify-center">
-                <span className="text-lg">📌</span>
-              </div>
-              <h2 className="font-bold text-lg text-[#0F172A]">Motif du signalement</h2>
-            </div>
-            <textarea
-              value={motif}
-              onChange={e => setMotif(e.target.value)}
-              placeholder="Décrivez le motif de signalement (difficultés observées, demandes de l'enseignant·e, contexte familial...)"
-              className="w-full min-h-[100px] p-3 rounded-lg border border-input bg-background text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring resize-y"
-            />
           </motion.div>
 
           {/* Message d'erreur */}
