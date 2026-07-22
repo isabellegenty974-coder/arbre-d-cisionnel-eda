@@ -220,22 +220,23 @@ export default function Dashboard() {
   const anneeSelectionnee = annees.find(a => a.id === anneeActive);
   const fichesFiltrees = (() => {
     if (!anneeSelectionnee) return fiches;
-    // Si des fiches ont un annee_scolaire_id, filtrer dessus
-    const avecId = fiches.filter(f => f.annee_scolaire_id);
-    if (avecId.length > 0) {
-      return fiches.filter(f => !f.annee_scolaire_id || f.annee_scolaire_id === anneeActive);
-    }
-    // Sinon filtrer par dates
+    const libelle = anneeSelectionnee.libelle;
+    // 1. Fiches explicitement rattachées à cette année via le champ annee_scolaire
+    //    (champ de référence, ne dépend pas de la date de création)
+    const parChamp = fiches.filter(f => f.annee_scolaire === libelle);
+    // 2. Fiches sans annee_scolaire renseignée : rattachement par date de création
+    const sansChamp = fiches.filter(f => !f.annee_scolaire);
     const debut = anneeSelectionnee.date_debut
       ? new Date(anneeSelectionnee.date_debut)
-      : new Date(`${anneeSelectionnee.libelle.split('-')[0]}-08-01`);
+      : new Date(`${libelle.split('-')[0]}-08-01`);
     const fin = anneeSelectionnee.date_fin
       ? new Date(anneeSelectionnee.date_fin)
-      : new Date(`${anneeSelectionnee.libelle.split('-')[1] || String(parseInt(anneeSelectionnee.libelle.split('-')[0]) + 1)}-07-31`);
-    return fiches.filter(f => {
+      : new Date(`${libelle.split('-')[1] || String(parseInt(libelle.split('-')[0]) + 1)}-07-31`);
+    const parDate = sansChamp.filter(f => {
       const d = new Date(f.created_date);
       return d >= debut && d <= fin;
     });
+    return [...parChamp, ...parDate];
   })();
 
   // "Élèves suivis" = fiches non clôturées (Nouveau / Suivi actif / En attente) pour l'année en cours.
