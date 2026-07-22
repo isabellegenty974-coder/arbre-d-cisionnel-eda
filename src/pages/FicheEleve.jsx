@@ -177,37 +177,85 @@ export default function FicheEleve() {
         }
       }
 
-      const created = await base44.entities.FicheEleve.create({
-        nom: nom.trim(),
-        prenom: prenom.trim(),
-        age: ageCalcule !== null ? ageCalcule : undefined,
-        date_naissance: dateNaissance || undefined,
-        classe: classe || undefined,
-        ecole: ecole || undefined,
-        observations: motif.trim() || undefined,
-        notes: enseignant ? `Enseignant·e : ${enseignant}` : undefined,
-        date: new Date().toISOString().split('T')[0],
-        annee_scolaire: anneeActive || undefined,
-        createdByName: fullName,
-        createdByProfession: profession,
-      });
-      setSavedId(created.id);
+      // ── Anti-doublon : rechercher un élève existant par nom + prénom ──
+      const norm = s => (s || '').toLowerCase().trim();
+      const existing = await base44.entities.FicheEleve.list('-created_date', 1000).catch(() => []);
+      const matches = existing.filter(f => norm(f.nom) === norm(nom.trim()) && norm(f.prenom) === norm(prenom.trim()));
 
-      // Mettre à jour l'élève RASED importé : lier la fiche + passer en "Suivi actif"
-      const eleveRasedId = urlParams.get('eleve_rased_id');
-      if (eleveRasedId) {
-        await base44.entities.EleveRased.update(eleveRasedId, {
-          fiche_eleve_id: created.id,
-          statut: 'Suivi actif',
-          date_derniere_action: new Date().toISOString().split('T')[0],
-        }).catch(() => {});
+      let targetId = null;
+      let updatedExisting = false;
+
+      if (matches.length > 0) {
+        // Même nom, prénom ET date de naissance → même élève : mettre à jour sans créer
+        const sameBirth = dateNaissance
+          ? matches.find(f => f.date_naissance && f.date_naissance === dateNaissance)
+          : null;
+
+        if (sameBirth) {
+          targetId = sameBirth.id;
+          updatedExisting = true;
+        } else {
+          // Nom + prénom correspondent mais date de naissance différente/absente → homonyme possible
+          const detail = matches[0].date_naissance
+            ? ` né(e) le ${new Date(matches[0].date_naissance).toLocaleDateString('fr-FR')}`
+            : '';
+          const confirmer = window.confirm(
+            `Un élève « ${prenom.trim()} ${nom.trim()} » existe déjà${detail}.\n\nS'agit-il du même élève ?\n• OK : mettre à jour la fiche existante (classe, année).\n• Annuler : créer une nouvelle fiche (homonyme).`
+          );
+          if (confirmer) {
+            targetId = matches[0].id;
+            updatedExisting = true;
+          }
+        }
       }
 
-      setSaved(true);
-      // Rediriger vers la fiche détaillée après un court délai pour afficher le message de succès
-      setTimeout(() => {
-        navigate(`/detail-fiche?id=${created.id}&success=true`);
-      }, 1500);
+      const eleveRasedId = urlParams.get('eleve_rased_id');
+
+      if (updatedExisting && targetId) {
+        // Mettre à jour la fiche existante (classe, école, année) en conservant tout l'historique
+        await base44.entities.FicheEleve.update(targetId, {
+          classe: classe || undefined,
+          ecole: ecole || undefined,
+          annee_scolaire: anneeActive || undefined,
+          age: ageCalcule !== null ? ageCalcule : undefined,
+        });
+        setSavedId(targetId);
+        if (eleveRasedId) {
+          await base44.entities.EleveRased.update(eleveRasedId, {
+            fiche_eleve_id: targetId,
+            statut: 'Suivi actif',
+            date_derniere_action: new Date().toISOString().split('T')[0],
+          }).catch(() => {});
+        }
+        setSaved(true);
+        setTimeout(() => navigate(`/detail-fiche?id=${targetId}&success=true`), 1500);
+      } else {
+        // Aucun doublon ou homonyme confirmé différent : créer une nouvelle fiche
+        const created = await base44.entities.FicheEleve.create({
+          nom: nom.trim(),
+          prenom: prenom.trim(),
+          age: ageCalcule !== null ? ageCalcule : undefined,
+          date_naissance: dateNaissance || undefined,
+          classe: classe || undefined,
+          ecole: ecole || undefined,
+          observations: motif.trim() || undefined,
+          notes: enseignant ? `Enseignant·e : ${enseignant}` : undefined,
+          date: new Date().toISOString().split('T')[0],
+          annee_scolaire: anneeActive || undefined,
+          createdByName: fullName,
+          createdByProfession: profession,
+        });
+        setSavedId(created.id);
+        if (eleveRasedId) {
+          await base44.entities.EleveRased.update(eleveRasedId, {
+            fiche_eleve_id: created.id,
+            statut: 'Suivi actif',
+            date_derniere_action: new Date().toISOString().split('T')[0],
+          }).catch(() => {});
+        }
+        setSaved(true);
+        setTimeout(() => navigate(`/detail-fiche?id=${created.id}&success=true`), 1500);
+      }
     } catch (error) {
       console.error('Erreur création fiche:', error);
       const msg = error?.response?.data?.detail || error?.message || error?.data?.detail || '';
@@ -475,7 +523,7 @@ export default function FicheEleve() {
               <div className="p-4 rounded-2xl bg-gradient-to-r from-chart-2/10 to-chart-2/5 border border-chart-2/30">
                 <p className="text-center text-sm font-semibold text-chart-2 flex items-center justify-center gap-2">
                   <span className="text-lg">✅</span>
-                  Fiche de {prenom} {nom} créée avec succès !
+                  Fiche de {prenom} {nom} enregistrée avec succès !
                 </p>
               </div>
               
