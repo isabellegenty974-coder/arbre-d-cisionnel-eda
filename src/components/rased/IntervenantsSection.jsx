@@ -172,7 +172,7 @@ export default function IntervenantsSection({ ficheId, ficheNom, fichePrenomNom,
                   {nom?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{nom} {isCreator && '(Créateur)'}</p>
+                  <p className="text-sm font-semibold text-foreground">{nom}</p>
                   <p className="text-xs text-muted-foreground">{PROF_LABEL[profession] || profession}</p>
                 </div>
                 <div className="flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shrink-0" style={{ background: profConf.bg, color: profConf.color }}>
