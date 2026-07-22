@@ -576,7 +576,6 @@ export default function Dashboard() {
                   ? <p style={{ textAlign: 'center', padding: '32px 0', fontSize: 13, color: '#566880' }}>Aucune activité récente</p>
                   : recentActivity.map((e, i) => {
                     const isNew = !e.updated_date || e.updated_date === e.created_date;
-                    const prof = e.createdByProfession;
                     return (
                       <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < recentActivity.length - 1 ? '1px solid #F0F3F8' : 'none' }}
                         onClick={() => navigate(`/detail-fiche?id=${e.id}`)}>
@@ -584,14 +583,6 @@ export default function Dashboard() {
                           {isNew ? '👤' : '🔍'}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
-                            {prof && (
-                              <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: PROF_BG[prof] || '#EAF2FB', color: PROF_TEXT[prof] || '#254D7A' }}>
-                                {PROF_BADGE[prof] || prof}
-                              </span>
-                            )}
-                            {e.createdByName && <span style={{ fontSize: 11, color: '#566880' }}>{e.createdByName}</span>}
-                          </div>
                           <div style={{ fontSize: 12.5, fontWeight: 500, color: '#182840', marginBottom: 2 }}>
                             {isNew ? 'Fiche créée' : 'Fiche mise à jour'} — <strong style={{ color: '#254D7A', fontWeight: 600 }}>{e.prenom} {e.nom}</strong>
                           </div>
