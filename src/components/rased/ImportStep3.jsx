@@ -82,6 +82,7 @@ export default function ImportStep3({ rows, setRows, analysisResult, ecoleId, on
         classe_id: classeId || undefined,
         ecole_id: ecoleId || undefined,
         statut: 'Nouveau',
+        origine_import_pdf: true,
         date_derniere_action: new Date().toISOString().split('T')[0],
       });
       created++;

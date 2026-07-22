@@ -46,6 +46,11 @@
     "fiche_eleve_id": {
       "type": "string",
       "description": "Lien vers la FicheEleve EDA associ\u00e9e"
+    },
+    "origine_import_pdf": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vrai si l'\u00e9l\u00e8ve a \u00e9t\u00e9 import\u00e9 via un import PDF r\u00e9alis\u00e9 (les ajouts manuels ou les reconductions restent \u00e0 false)"
     }
   },
   "required": [

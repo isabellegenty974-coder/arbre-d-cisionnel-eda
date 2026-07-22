@@ -43,6 +43,7 @@ export default function AddEleveModal({ open, onClose, ecoleId, classes, onSaved
       classe_id: classeId || undefined,
       ecole_id: ecoleId,
       statut: form.statut,
+      origine_import_pdf: false,
       motif_signalement: form.motif_signalement || undefined,
       date_derniere_action: new Date().toISOString().split('T')[0],
     });
