@@ -238,9 +238,13 @@ export default function Dashboard() {
     });
   })();
 
-  const totalEleves    = fichesFiltrees.length;
+  // "Élèves suivis" = fiches non clôturées (Nouveau / Suivi actif / En attente) pour l'année en cours.
+  // "Suivis clôturés" = fiches au statut "Clôturé" pour l'année en cours.
+  // Les deux dérivent de fichesFiltrees (abonné en temps réel via FicheEleve.subscribe),
+  // donc ils se rafraîchissent automatiquement dès qu'un statut est modifié.
+  const totalEleves    = fichesFiltrees.filter(f => f.statut !== 'Clôturé').length;
   const alertesFiches  = fichesFiltrees.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
-  const elevesClotured = elevesR.filter(e => e.statut === 'Clôturé').length;
+  const elevesClotured = fichesFiltrees.filter(f => f.statut === 'Clôturé').length;
 
   // Critères pour alertes : fiche, notes ou interventions non mise à jour depuis 30j
   // Filtrer sur statut "Suivi actif" ou "En attente" seulement
