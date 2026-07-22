@@ -281,13 +281,13 @@ export default function Dashboard() {
 
     const missing = [];
     if (!f.motif_signalement && !f.observations) missing.push('Motif');
-    if (!f.intervenants || f.intervenants.length === 0) missing.push('Intervenant');
+    if ((!f.intervenants || f.intervenants.length === 0) && !f.createdByName) missing.push('Intervenant');
     if (!f.date_naissance) missing.push('Date naiss.');
     return missing.length > 0;
   }).map(f => {
     const missing = [];
     if (!f.motif_signalement && !f.observations) missing.push('Motif');
-    if (!f.intervenants || f.intervenants.length === 0) missing.push('Intervenant');
+    if ((!f.intervenants || f.intervenants.length === 0) && !f.createdByName) missing.push('Intervenant');
     if (!f.date_naissance) missing.push('Date naiss.');
     return { ...f, missing };
   });

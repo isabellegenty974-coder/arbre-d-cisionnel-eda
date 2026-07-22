@@ -155,8 +155,18 @@ export default function FicheEleve() {
         try { user = await base44.auth.me(); } catch { user = null; }
       }
 
-      const fullName = user?.full_name || '';
-      const profession = user?.profession || '';
+      let fullName = user?.full_name || '';
+      let profession = user?.profession || '';
+
+      // Récupérer le vrai prénom/nom/profession depuis le profil RASED (MembreEquipe)
+      try {
+        const membres = await base44.entities.MembreEquipe.list('-created_date', 200).catch(() => []);
+        const meMembre = membres.find(m => m.email && user?.email && m.email.toLowerCase() === user.email.toLowerCase());
+        if (meMembre) {
+          fullName = `${meMembre.prenom} ${meMembre.nom}`.trim();
+          profession = meMembre.profession || profession;
+        }
+      } catch (e) { /* fallback sur le profil utilisateur */ }
 
       // S'assurer que l'école existe dans la base
       if (ecole) {
