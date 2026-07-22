@@ -32,6 +32,7 @@ export default function MesEcoles() {
   const [activeNav, setActiveNav] = useState('ecoles');
   const [ecoles, setEcoles] = useState([]);
   const [eleves, setEleves] = useState([]);
+  const [fiches, setFiches] = useState([]);
   const [membres, setMembres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddEcole, setShowAddEcole] = useState(false);
@@ -43,14 +44,16 @@ export default function MesEcoles() {
   const canDelete = currentUser?.profession === 'Psy EN EDA' || currentUser?.role === 'admin';
 
   const load = async () => {
-    const [e, el, m, u] = await Promise.all([
+    const [e, el, f, m, u] = await Promise.all([
       base44.entities.EcoleRased.list('-created_date', 200).catch(() => []),
       base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
+      base44.entities.FicheEleve.list('-created_date', 500).catch(() => []),
       base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
       base44.auth.me().catch(() => null),
     ]);
     setEcoles(e);
     setEleves(el);
+    setFiches(f);
     setMembres(m);
     setCurrentUser(u);
     setLoading(false);
@@ -69,13 +72,23 @@ export default function MesEcoles() {
   };
 
   const getEcoleStats = (ecoleId) => {
-    const el = eleves.filter(e => e.ecole_id === ecoleId);
+    const ecole = ecoles.find(e => e.id === ecoleId);
+    const ecoleNom = (ecole?.nom || '').trim().toLowerCase();
+    // Total élèves = élèves importés (EleveRased) rattachés à cette école
+    const elevesEcole = eleves.filter(e => e.ecole_id === ecoleId);
+    // Statuts = FicheEleve.statut pour les fiches rattachées à cette école
+    // (via EleveRased.fiche_eleve_id OU par correspondance du nom d'école)
+    const fichesEcole = fiches.filter(f => {
+      if (elevesEcole.some(el => el.fiche_eleve_id === f.id)) return true;
+      const fEcole = (f.ecole || '').trim().toLowerCase();
+      return fEcole && fEcole === ecoleNom;
+    });
     return {
-      total: el.length,
-      nouveau: el.filter(e => e.statut === 'Nouveau').length,
-      actif: el.filter(e => e.statut === 'Suivi actif').length,
-      attente: el.filter(e => e.statut === 'En attente').length,
-      cloture: el.filter(e => e.statut === 'Clôturé').length,
+      total: elevesEcole.length,
+      nouveau: fichesEcole.filter(f => f.statut === 'Nouveau').length,
+      actif: fichesEcole.filter(f => f.statut === 'Suivi actif').length,
+      attente: fichesEcole.filter(f => f.statut === 'En attente').length,
+      cloture: fichesEcole.filter(f => f.statut === 'Clôturé').length,
     };
   };
 
