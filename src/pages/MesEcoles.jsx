@@ -41,29 +41,58 @@ export default function MesEcoles() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [ecoleToDelete, setEcoleToDelete] = useState(null);
+  const [annees, setAnnees] = useState([]);
+  const [anneeActiveId, setAnneeActiveId] = useState(null);
 
   const canDelete = currentUser?.profession === 'Psy EN EDA' || currentUser?.role === 'admin';
 
   const load = async () => {
-    const [e, el, f, m, u] = await Promise.all([
+    const [e, el, f, m, u, an] = await Promise.all([
       base44.entities.EcoleRased.list('-created_date', 200).catch(() => []),
       base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
       base44.entities.FicheEleve.list('-created_date', 500).catch(() => []),
       base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
       base44.auth.me().catch(() => null),
+      base44.entities.AnneeScolaire.list('-libelle', 20).catch(() => []),
     ]);
     setEcoles(e);
     setEleves(el);
     setFiches(f);
     setMembres(m);
     setCurrentUser(u);
+    setAnnees(an);
+    setAnneeActiveId(prev => prev || (an.find(a => a.est_active || a.active)?.id || an[0]?.id || null));
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
 
+  // ── Filtrage par année scolaire sélectionnée ──
+  // Les données des années passées sont figées : les compteurs ne sont calculés
+  // qu'à partir des fiches/élèves appartenant à l'année actuellement sélectionnée.
+  const anneeSelectionnee = annees.find(a => a.id === anneeActiveId);
+  const anneeLibelle = anneeSelectionnee?.libelle;
+  const debutAnnee = anneeSelectionnee?.date_debut ? new Date(anneeSelectionnee.date_debut) : null;
+  const finAnnee = anneeSelectionnee?.date_fin ? new Date(anneeSelectionnee.date_fin) : null;
+
+  const ficheDansAnnee = (f) => {
+    if (anneeLibelle && f.annee_scolaire) return f.annee_scolaire === anneeLibelle;
+    if (!debutAnnee || !finAnnee) return true;
+    const d = new Date(f.created_date);
+    return d >= debutAnnee && d <= finAnnee;
+  };
+  const eleveImporteDansAnnee = (e) => {
+    if (!e.origine_import_pdf) return false;
+    if (!debutAnnee || !finAnnee) return true;
+    const d = new Date(e.created_date);
+    return d >= debutAnnee && d <= finAnnee;
+  };
+
+  const fichesAnnee = fiches.filter(ficheDansAnnee);
+  const elevesAnnee = eleves.filter(eleveImporteDansAnnee);
+
   const isStale = (ecole) => {
-    const elevesDEcole = eleves.filter(el => el.ecole_id === ecole.id);
+    const elevesDEcole = elevesAnnee.filter(el => el.ecole_id === ecole.id);
     const last = elevesDEcole.reduce((latest, el) => {
       const d = el.date_derniere_action || el.created_date;
       return d > latest ? d : latest;
@@ -75,11 +104,10 @@ export default function MesEcoles() {
   const getEcoleStats = (ecoleId) => {
     const ecole = ecoles.find(e => e.id === ecoleId);
     const ecoleNom = (ecole?.nom || '').trim().toLowerCase();
-    // Total élèves = élèves importés (EleveRased) rattachés à cette école
-    const elevesEcole = eleves.filter(e => e.ecole_id === ecoleId);
-    // Statuts = FicheEleve.statut pour les fiches rattachées à cette école
-    // (via EleveRased.fiche_eleve_id OU par correspondance du nom d'école)
-    const fichesEcole = fiches.filter(f => {
+    // Total élèves = élèves importés (EleveRased) rattachés à cette école pour l'année sélectionnée
+    const elevesEcole = elevesAnnee.filter(e => e.ecole_id === ecoleId);
+    // Statuts = FicheEleve.statut pour les fiches de l'année sélectionnée rattachées à cette école
+    const fichesEcole = fichesAnnee.filter(f => {
       if (elevesEcole.some(el => el.fiche_eleve_id === f.id)) return true;
       const fEcole = (f.ecole || '').trim().toLowerCase();
       return fEcole && fEcole === ecoleNom;
@@ -93,9 +121,9 @@ export default function MesEcoles() {
     };
   };
 
-  const totalImportes = eleves.length;
-  const totalSuivis = fiches.filter(f => f.statut !== 'Clôturé').length;
-  const totalClotured = fiches.filter(f => f.statut === 'Clôturé').length;
+  const totalImportes = elevesAnnee.length;
+  const totalSuivis = fichesAnnee.filter(f => f.statut !== 'Clôturé').length;
+  const totalClotured = fichesAnnee.filter(f => f.statut === 'Clôturé').length;
   const totalStale = ecoles.filter(isStale).length;
 
   const filteredEcoles = ecoles.filter(e =>
@@ -160,6 +188,19 @@ export default function MesEcoles() {
           </button>
           <h1 className="font-bold text-[#0F172A] text-lg flex-1">Mes écoles</h1>
           <div className="flex items-center gap-2">
+            {annees.length > 0 && (
+              <select
+                value={anneeActiveId || ''}
+                onChange={e => setAnneeActiveId(e.target.value)}
+                className="px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {[...annees].sort((a, b) => b.libelle.localeCompare(a.libelle)).map(a => (
+                  <option key={a.id} value={a.id}>
+                    {a.libelle}{(a.est_active || a.active) ? ' ★' : ''}
+                  </option>
+                ))}
+              </select>
+            )}
             <NotificationsBadge />
             <div className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

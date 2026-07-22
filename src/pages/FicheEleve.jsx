@@ -180,9 +180,15 @@ export default function FicheEleve() {
       }
 
       // ── Anti-doublon : rechercher un élève existant par nom + prénom ──
+      // IMPORTANT : la recherche est restreinte à l'année scolaire active.
+      // Une fiche appartient de façon permanente et immuable à l'année pour laquelle
+      // elle a été créée : on ne modifie JAMAIS les fiches des années passées.
       const norm = s => (s || '').toLowerCase().trim();
       const existing = await base44.entities.FicheEleve.list('-created_date', 1000).catch(() => []);
-      const matches = existing.filter(f => norm(f.nom) === norm(nom.trim()) && norm(f.prenom) === norm(prenom.trim()));
+      const matches = existing.filter(f =>
+        f.annee_scolaire === anneeActive &&
+        norm(f.nom) === norm(nom.trim()) && norm(f.prenom) === norm(prenom.trim())
+      );
 
       let targetId = null;
       let updatedExisting = false;
@@ -202,7 +208,7 @@ export default function FicheEleve() {
             ? ` né(e) le ${new Date(matches[0].date_naissance).toLocaleDateString('fr-FR')}`
             : '';
           const confirmer = window.confirm(
-            `Un élève « ${prenom.trim()} ${nom.trim()} » existe déjà${detail}.\n\nS'agit-il du même élève ?\n• OK : mettre à jour la fiche existante (classe, année).\n• Annuler : créer une nouvelle fiche (homonyme).`
+            `Un élève « ${prenom.trim()} ${nom.trim()} » existe déjà en ${anneeActive}${detail}.\n\nS'agit-il du même élève ?\n• OK : mettre à jour la fiche de ${anneeActive} (classe, école).\n• Annuler : créer une nouvelle fiche (homonyme).`
           );
           if (confirmer) {
             targetId = matches[0].id;
@@ -214,11 +220,11 @@ export default function FicheEleve() {
       const eleveRasedId = urlParams.get('eleve_rased_id');
 
       if (updatedExisting && targetId) {
-        // Mettre à jour la fiche existante (classe, école, année) en conservant tout l'historique
+        // Mettre à jour la fiche de l'année active en conservant tout l'historique.
+        // annee_scolaire n'est JAMAIS modifié : rattachement permanent à l'année de création.
         await base44.entities.FicheEleve.update(targetId, {
           classe: classe || undefined,
           ecole: ecole || undefined,
-          annee_scolaire: anneeActive || undefined,
           age: ageCalcule !== null ? ageCalcule : undefined,
         });
         setSavedId(targetId);
