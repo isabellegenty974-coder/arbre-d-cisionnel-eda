@@ -187,6 +187,12 @@ import ActionsChangements from './pages/contexte/ActionsChangements';
 import Absenteisme from './pages/contexte/Absenteisme';
 import ActionsAbsenteisme from './pages/contexte/ActionsAbsenteisme';
 
+// Redirection préservant la query string (ex: ?id=...)
+function RedirectWithQuery({ to }) {
+  const { search } = useLocation();
+  return <Navigate to={`${to}${search}`} replace />;
+}
+
 // Inscription silencieuse : crée le profil plateforme puis redirige vers l'accueil (le popup guidera l'utilisateur)
 function AutoRegister() {
   useEffect(() => {
@@ -275,19 +281,19 @@ const AuthenticatedApp = () => {
         <Route path="/accueil" element={<Accueil />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/resume" element={<Resume />} />
+        <Route path="/resume" element={<Navigate to="/dashboard" replace />} />
         <Route path="/fiche-eleve" element={<FicheEleve />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/historique" element={<Historique />} />
         <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
         <Route path="/stats-annuelles" element={<StatsAnnuelles />} />
-        <Route path="/resultats" element={<Resultats />} />
-        <Route path="/evaluation-domains" element={<EvaluationDomains />} />
+        <Route path="/resultats" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/evaluation-domains" element={<Navigate to="/dashboard" replace />} />
         <Route path="/items-apprentissages" element={<ItemsApprentissages />} />
         <Route path="/items-comportement" element={<ItemsComportement />} />
         <Route path="/items-developpement" element={<ItemsDeveloppement />} />
         <Route path="/items-contexte" element={<ItemsContexte />} />
-        <Route path="/analyse-eda" element={<AnalyseEDA />} />
+        <Route path="/analyse-eda" element={<Navigate to="/dashboard" replace />} />
         <Route path="/liste-eleves" element={<ListeEleves />} />
         <Route path="/detail-fiche" element={<DetailFiche />} />
         <Route path="/historique-eleve" element={<HistoriqueEleve />} />
@@ -296,9 +302,6 @@ const AuthenticatedApp = () => {
         <Route path="/edit-eleve" element={<EditEleve />} />
         <Route path="/items-professionnels" element={<ItemsProfessionnels />} />
         <Route path="/hypotheses-eleve" element={<DiagnosticEleve />} />
-        <Route path="/DetailEleve" element={<Navigate to="/detail-eleve" replace />} />
-        <Route path="/AnalyseMaths" element={<Navigate to="/apprentissage/maths" replace />} />
-        <Route path="/AnalyseEcriture" element={<Navigate to="/apprentissage/ecriture" replace />} />
         <Route path="/tableau-synthese" element={<TableauSynthese />} />
         <Route path="/invite-users" element={<InviteUsers />} />
         <Route path="/equipe-rased" element={<EquipeRased />} />
@@ -308,248 +311,17 @@ const AuthenticatedApp = () => {
         <Route path="/import-pdf" element={<ImportPDF />} />
         <Route path="/parametres" element={<Parametres />} />
         <Route path="/notifications" element={<Notifications />} />
+
+        {/* Redirections des anciennes routes en doublon */}
+        <Route path="/DetailEleve" element={<RedirectWithQuery to="/detail-fiche" />} />
+        <Route path="/AnalyseMaths" element={<Navigate to="/apprentissage/maths" replace />} />
+        <Route path="/AnalyseEcriture" element={<Navigate to="/apprentissage/ecriture" replace />} />
       
-      {/* Apprentissage */}
-      <Route path="/apprentissage" element={<Apprentissage />} />
-      <Route path="/apprentissage/lecture" element={<Lecture />} />
-      <Route path="/apprentissage/lecture/recente" element={<LectureRecente />} />
-      <Route path="/apprentissage/lecture/installee" element={<LectureInstallee />} />
-      <Route path="/apprentissage/lecture/hypotheses" element={<HypoLecture />} />
-      <Route path="/apprentissage/lecture/actions" element={<ActionsLecture />} />
-      <Route path="/apprentissage/lecture/questions" element={<LectureQuestions />} />
-      <Route path="/apprentissage/lecture/questions/q1" element={<LectureQ1 />} />
-      <Route path="/apprentissage/lecture/questions/q1/a" element={<Q1A />} />
-      <Route path="/apprentissage/lecture/questions/q1/b" element={<Q1B />} />
-      <Route path="/apprentissage/lecture/questions/q1/c" element={<Q1C />} />
-      <Route path="/apprentissage/lecture/questions/q1/d" element={<Q1D />} />
-      <Route path="/apprentissage/lecture/questions/q2" element={<LectureQ2 />} />
-      <Route path="/apprentissage/lecture/questions/q2/a" element={<Q2A />} />
-      <Route path="/apprentissage/lecture/questions/q2/b" element={<Q2B />} />
-      <Route path="/apprentissage/lecture/questions/q2/c" element={<Q2C />} />
-      <Route path="/apprentissage/lecture/questions/q2/d" element={<Q2D />} />
-      <Route path="/apprentissage/lecture/questions/q3" element={<LectureQ3 />} />
-      <Route path="/apprentissage/lecture/questions/q3/a" element={<Q3A />} />
-      <Route path="/apprentissage/lecture/questions/q3/b" element={<Q3B />} />
-      <Route path="/apprentissage/lecture/questions/q3/c" element={<Q3C />} />
-      <Route path="/apprentissage/lecture/questions/q3/d" element={<Q3D />} />
-      <Route path="/apprentissage/lecture/questions/q4" element={<LectureQ4 />} />
-      <Route path="/apprentissage/lecture/questions/q4/a" element={<Q4A />} />
-      <Route path="/apprentissage/lecture/questions/q4/b" element={<Q4B />} />
-      <Route path="/apprentissage/lecture/questions/q4/c" element={<Q4C />} />
-      <Route path="/apprentissage/lecture/questions/q4/d" element={<Q4D />} />
-      <Route path="/apprentissage/lecture/questions/q5" element={<LectureQ5 />} />
-      <Route path="/apprentissage/lecture/questions/q5/a" element={<Q5A />} />
-      <Route path="/apprentissage/lecture/questions/q5/b" element={<Q5B />} />
-      <Route path="/apprentissage/lecture/questions/q5/c" element={<Q5C />} />
-      <Route path="/apprentissage/lecture/questions/q5/d" element={<Q5D />} />
-      <Route path="/apprentissage/ecriture" element={<Ecriture />} />
-      <Route path="/apprentissage/ecriture/questions" element={<EcritureQuestions />} />
-      <Route path="/apprentissage/ecriture/questions/q11" element={<EcritureQ11 />} />
-      <Route path="/apprentissage/ecriture/questions/q11/a" element={<Q11A />} />
-      <Route path="/apprentissage/ecriture/questions/q11/b" element={<Q11B />} />
-      <Route path="/apprentissage/ecriture/questions/q11/c" element={<Q11C />} />
-      <Route path="/apprentissage/ecriture/questions/q11/d" element={<Q11D />} />
-      <Route path="/apprentissage/ecriture/questions/q12" element={<EcritureQ12 />} />
-      <Route path="/apprentissage/ecriture/questions/q12/a" element={<Q12A />} />
-      <Route path="/apprentissage/ecriture/questions/q12/b" element={<Q12B />} />
-      <Route path="/apprentissage/ecriture/questions/q12/c" element={<Q12C />} />
-      <Route path="/apprentissage/ecriture/questions/q12/d" element={<Q12D />} />
-      <Route path="/apprentissage/ecriture/questions/q13" element={<EcritureQ13 />} />
-      <Route path="/apprentissage/ecriture/questions/q13/a" element={<Q13A />} />
-      <Route path="/apprentissage/ecriture/questions/q13/b" element={<Q13B />} />
-      <Route path="/apprentissage/ecriture/questions/q13/c" element={<Q13C />} />
-      <Route path="/apprentissage/ecriture/questions/q13/d" element={<Q13D />} />
-      <Route path="/apprentissage/ecriture/questions/q14" element={<EcritureQ14 />} />
-      <Route path="/apprentissage/ecriture/questions/q14/a" element={<Q14A />} />
-      <Route path="/apprentissage/ecriture/questions/q14/b" element={<Q14B />} />
-      <Route path="/apprentissage/ecriture/questions/q14/c" element={<Q14C />} />
-      <Route path="/apprentissage/ecriture/questions/q14/d" element={<Q14D />} />
-      <Route path="/apprentissage/ecriture/questions/q15" element={<EcritureQ15 />} />
-      <Route path="/apprentissage/ecriture/questions/q15/a" element={<Q15A />} />
-      <Route path="/apprentissage/ecriture/questions/q15/b" element={<Q15B />} />
-      <Route path="/apprentissage/ecriture/questions/q15/c" element={<Q15C />} />
-      <Route path="/apprentissage/ecriture/questions/q15/d" element={<Q15D />} />
-      <Route path="/apprentissage/ecriture/questions/q16" element={<EcritureQ16 />} />
-      <Route path="/apprentissage/ecriture/questions/q16/a" element={<Q16A />} />
-      <Route path="/apprentissage/ecriture/questions/q16/b" element={<Q16B />} />
-      <Route path="/apprentissage/ecriture/questions/q16/c" element={<Q16C />} />
-      <Route path="/apprentissage/ecriture/questions/q16/d" element={<Q16D />} />
-      <Route path="/apprentissage/ecriture/questions/q17" element={<EcritureQ17 />} />
-      <Route path="/apprentissage/ecriture/questions/q17/a" element={<Q17A />} />
-      <Route path="/apprentissage/ecriture/questions/q17/b" element={<Q17B />} />
-      <Route path="/apprentissage/ecriture/questions/q17/c" element={<Q17C />} />
-      <Route path="/apprentissage/ecriture/questions/q17/d" element={<Q17D />} />
-      <Route path="/apprentissage/ecriture/questions/q18" element={<EcritureQ18 />} />
-      <Route path="/apprentissage/ecriture/questions/q18/a" element={<Q18A />} />
-      <Route path="/apprentissage/ecriture/questions/q18/b" element={<Q18B />} />
-      <Route path="/apprentissage/ecriture/questions/q18/c" element={<Q18C />} />
-      <Route path="/apprentissage/ecriture/questions/q18/d" element={<Q18D />} />
-      <Route path="/apprentissage/ecriture/graphisme" element={<Graphisme />} />
-      <Route path="/apprentissage/ecriture/orthographe" element={<Orthographe />} />
-      <Route path="/apprentissage/ecriture/production" element={<ProductionEcrite />} />
-      <Route path="/apprentissage/maths" element={<Maths />} />
-      <Route path="/apprentissage/maths/questions" element={<MathsQuestions />} />
-      <Route path="/apprentissage/maths/questions/q19" element={<MathsQ19 />} />
-      <Route path="/apprentissage/maths/questions/q19/a" element={<Q19A />} />
-      <Route path="/apprentissage/maths/questions/q19/b" element={<Q19B />} />
-      <Route path="/apprentissage/maths/questions/q19/c" element={<Q19C />} />
-      <Route path="/apprentissage/maths/questions/q19/d" element={<Q19D />} />
-      <Route path="/apprentissage/maths/questions/q20" element={<MathsQ20 />} />
-      <Route path="/apprentissage/maths/questions/q20/a" element={<Q20A />} />
-      <Route path="/apprentissage/maths/questions/q20/b" element={<Q20B />} />
-      <Route path="/apprentissage/maths/questions/q20/c" element={<Q20C />} />
-      <Route path="/apprentissage/maths/questions/q20/d" element={<Q20D />} />
-      <Route path="/apprentissage/maths/questions/q21" element={<MathsQ21 />} />
-      <Route path="/apprentissage/maths/questions/q21/a" element={<Q21A />} />
-      <Route path="/apprentissage/maths/questions/q21/b" element={<Q21B />} />
-      <Route path="/apprentissage/maths/questions/q21/c" element={<Q21C />} />
-      <Route path="/apprentissage/maths/questions/q21/d" element={<Q21D />} />
-      <Route path="/apprentissage/maths/questions/q22" element={<MathsQ22 />} />
-      <Route path="/apprentissage/maths/questions/q22/a" element={<Q22A />} />
-      <Route path="/apprentissage/maths/questions/q22/b" element={<Q22B />} />
-      <Route path="/apprentissage/maths/questions/q22/c" element={<Q22C />} />
-      <Route path="/apprentissage/maths/questions/q22/d" element={<Q22D />} />
-      <Route path="/apprentissage/maths/questions/q23" element={<MathsQ23 />} />
-      <Route path="/apprentissage/maths/questions/q23/a" element={<Q23A />} />
-      <Route path="/apprentissage/maths/questions/q23/b" element={<Q23B />} />
-      <Route path="/apprentissage/maths/questions/q23/c" element={<Q23C />} />
-      <Route path="/apprentissage/maths/questions/q23/d" element={<Q23D />} />
-      <Route path="/apprentissage/maths/questions/q24" element={<MathsQ24 />} />
-      <Route path="/apprentissage/maths/questions/q24/a" element={<Q24A />} />
-      <Route path="/apprentissage/maths/questions/q24/b" element={<Q24B />} />
-      <Route path="/apprentissage/maths/questions/q24/c" element={<Q24C />} />
-      <Route path="/apprentissage/maths/questions/q24/d" element={<Q24D />} />
-      <Route path="/apprentissage/maths/questions/q25" element={<MathsQ25 />} />
-      <Route path="/apprentissage/maths/questions/q25/a" element={<Q25A />} />
-      <Route path="/apprentissage/maths/questions/q25/b" element={<Q25B />} />
-      <Route path="/apprentissage/maths/questions/q25/c" element={<Q25C />} />
-      <Route path="/apprentissage/maths/questions/q25/d" element={<Q25D />} />
-      <Route path="/apprentissage/maths/numeration" element={<Numeration />} />
-      <Route path="/apprentissage/maths/problemes" element={<Problemes />} />
-      <Route path="/apprentissage/maths/calcul" element={<Calcul />} />
-      <Route path="/apprentissage/global" element={<GlobalApprentissage />} />
-      <Route path="/apprentissage/global/actions" element={<ActionsGlobalApprentissage />} />
-      <Route path="/apprentissage/ecriture/hypotheses" element={<HypoEcriture />} />
-      <Route path="/apprentissage/maths/hypotheses" element={<HypoMaths />} />
-      
-      {/* Comportement */}
-      <Route path="/comportement" element={<Comportement />} />
-      <Route path="/comportement/questions" element={<ComportementQuestions />} />
-      <Route path="/comportement/questions/q26" element={<ComportementQ26 />} />
-      <Route path="/comportement/questions/q26/a" element={<Q26A />} />
-      <Route path="/comportement/questions/q26/b" element={<Q26B />} />
-      <Route path="/comportement/questions/q26/c" element={<Q26C />} />
-      <Route path="/comportement/questions/q26/d" element={<Q26D />} />
-      <Route path="/comportement/questions/q27" element={<ComportementQ27 />} />
-      <Route path="/comportement/questions/q27/a" element={<Q27A />} />
-      <Route path="/comportement/questions/q27/b" element={<Q27B />} />
-      <Route path="/comportement/questions/q27/c" element={<Q27C />} />
-      <Route path="/comportement/questions/q27/d" element={<Q27D />} />
-      <Route path="/comportement/questions/q28" element={<ComportementQ28 />} />
-      <Route path="/comportement/questions/q28/a" element={<Q28A />} />
-      <Route path="/comportement/questions/q28/b" element={<Q28B />} />
-      <Route path="/comportement/questions/q28/c" element={<Q28C />} />
-      <Route path="/comportement/questions/q28/d" element={<Q28D />} />
-      <Route path="/comportement/questions/q29" element={<ComportementQ29 />} />
-      <Route path="/comportement/questions/q29/a" element={<Q29A />} />
-      <Route path="/comportement/questions/q29/b" element={<Q29B />} />
-      <Route path="/comportement/questions/q29/c" element={<Q29C />} />
-      <Route path="/comportement/questions/q29/d" element={<Q29D />} />
-      <Route path="/comportement/questions/q30" element={<ComportementQ30 />} />
-      <Route path="/comportement/questions/q30/a" element={<Q30A />} />
-      <Route path="/comportement/questions/q30/b" element={<Q30B />} />
-      <Route path="/comportement/questions/q30/c" element={<Q30C />} />
-      <Route path="/comportement/questions/q30/d" element={<Q30D />} />
-      <Route path="/comportement/questions/q31" element={<ComportementQ31 />} />
-      <Route path="/comportement/questions/q31/a" element={<Q31A />} />
-      <Route path="/comportement/questions/q31/b" element={<Q31B />} />
-      <Route path="/comportement/questions/q31/c" element={<Q31C />} />
-      <Route path="/comportement/questions/q31/d" element={<Q31D />} />
-      <Route path="/comportement/questions/q32" element={<ComportementQ32 />} />
-      <Route path="/comportement/questions/q32/a" element={<Q32A />} />
-      <Route path="/comportement/questions/q32/b" element={<Q32B />} />
-      <Route path="/comportement/questions/q32/c" element={<Q32C />} />
-      <Route path="/comportement/questions/q32/d" element={<Q32D />} />
-      <Route path="/comportement/inhibition" element={<Inhibition />} />
-      <Route path="/comportement/inhibition/actions" element={<ActionsInhibition />} />
-      <Route path="/comportement/impulsivite" element={<Impulsivite />} />
-      <Route path="/comportement/impulsivite/actions" element={<ActionsImpulsivite />} />
-      <Route path="/comportement/anxiete" element={<Anxiete />} />
-      <Route path="/comportement/anxiete/situationnelle" element={<AnxieteSit />} />
-      <Route path="/comportement/anxiete/situationnelle/actions" element={<ActionsAnxieteSit />} />
-      <Route path="/comportement/anxiete/generalisee" element={<AnxieteGen />} />
-      <Route path="/comportement/anxiete/actions" element={<ActionsAnxiete />} />
-      <Route path="/comportement/opposition" element={<Opposition />} />
-      <Route path="/comportement/opposition/actions" element={<ActionsOpposition />} />
-      
-      {/* Développement */}
-      <Route path="/developpement" element={<Developpement />} />
-      <Route path="/developpement/questions" element={<DeveloppementQuestions />} />
-      <Route path="/developpement/questions/q33" element={<DeveloppementQ33 />} />
-      <Route path="/developpement/questions/q33/a" element={<Q33A />} />
-      <Route path="/developpement/questions/q33/b" element={<Q33B />} />
-      <Route path="/developpement/questions/q33/c" element={<Q33C />} />
-      <Route path="/developpement/questions/q33/d" element={<Q33D />} />
-      <Route path="/developpement/questions/q34" element={<DeveloppementQ34 />} />
-      <Route path="/developpement/questions/q34/a" element={<Q34A />} />
-      <Route path="/developpement/questions/q34/b" element={<Q34B />} />
-      <Route path="/developpement/questions/q34/c" element={<Q34C />} />
-      <Route path="/developpement/questions/q34/d" element={<Q34D />} />
-      <Route path="/developpement/questions/q35" element={<DeveloppementQ35 />} />
-      <Route path="/developpement/questions/q35/a" element={<Q35A />} />
-      <Route path="/developpement/questions/q35/b" element={<Q35B />} />
-      <Route path="/developpement/questions/q35/c" element={<Q35C />} />
-      <Route path="/developpement/questions/q35/d" element={<Q35D />} />
-      <Route path="/developpement/questions/q36" element={<DeveloppementQ36 />} />
-      <Route path="/developpement/questions/q36/a" element={<Q36A />} />
-      <Route path="/developpement/questions/q36/b" element={<Q36B />} />
-      <Route path="/developpement/questions/q36/c" element={<Q36C />} />
-      <Route path="/developpement/questions/q36/d" element={<Q36D />} />
-      <Route path="/developpement/questions/q37" element={<DeveloppementQ37 />} />
-      <Route path="/developpement/questions/q37/a" element={<Q37A />} />
-      <Route path="/developpement/questions/q37/b" element={<Q37B />} />
-      <Route path="/developpement/questions/q37/c" element={<Q37C />} />
-      <Route path="/developpement/questions/q37/d" element={<Q37D />} />
-      <Route path="/developpement/langage-oral" element={<LangageOral />} />
-      <Route path="/developpement/langage-oral/comprehension" element={<LangageCompr />} />
-      <Route path="/developpement/langage-oral/comprehension/actions" element={<ActionsLangageCompr />} />
-      <Route path="/developpement/langage-oral/expression" element={<LangageExpr />} />
-      <Route path="/developpement/langage-oral/expression/actions" element={<ActionsLangageExpr />} />
-      <Route path="/developpement/motricite" element={<Motricite />} />
-      <Route path="/developpement/motricite/actions" element={<ActionsMotricite />} />
-      <Route path="/developpement/motricite/fine" element={<MotriciteFine />} />
-      <Route path="/developpement/motricite/globale" element={<MotriciteGlobale />} />
-      <Route path="/developpement/attention" element={<Attention />} />
-      <Route path="/developpement/attention/actions" element={<ActionsAttention />} />
-      <Route path="/developpement/interactions" element={<Interactions />} />
-      <Route path="/developpement/interactions/actions" element={<ActionsInteractions />} />
-      
-      {/* Contexte */}
-      <Route path="/contexte" element={<Contexte />} />
-      <Route path="/contexte/questions" element={<ContexteQuestions />} />
-      <Route path="/contexte/questions/q38" element={<ContexteQ38 />} />
-      <Route path="/contexte/questions/q38/a" element={<Q38A />} />
-      <Route path="/contexte/questions/q38/b" element={<Q38B />} />
-      <Route path="/contexte/questions/q38/c" element={<Q38C />} />
-      <Route path="/contexte/questions/q38/d" element={<Q38D />} />
-      <Route path="/contexte/questions/q39" element={<ContexteQ39 />} />
-      <Route path="/contexte/questions/q39/a" element={<Q39A />} />
-      <Route path="/contexte/questions/q39/b" element={<Q39B />} />
-      <Route path="/contexte/questions/q39/c" element={<Q39C />} />
-      <Route path="/contexte/questions/q39/d" element={<Q39D />} />
-      <Route path="/contexte/questions/q40" element={<ContexteQ40 />} />
-      <Route path="/contexte/questions/q40/a" element={<Q40A />} />
-      <Route path="/contexte/questions/q40/b" element={<Q40B />} />
-      <Route path="/contexte/questions/q40/c" element={<Q40C />} />
-      <Route path="/contexte/questions/q40/d" element={<Q40D />} />
-      <Route path="/contexte/famille" element={<Famille />} />
-      <Route path="/contexte/famille/actions" element={<ActionsFamille />} />
-      <Route path="/contexte/climat-classe" element={<ClimatClasse />} />
-      <Route path="/contexte/climat-classe/actions" element={<ActionsClimatClasse />} />
-      <Route path="/contexte/changements" element={<Changements />} />
-      <Route path="/contexte/changements/actions" element={<ActionsChangements />} />
-      <Route path="/contexte/absenteisme" element={<Absenteisme />} />
-      <Route path="/contexte/absenteisme/actions" element={<ActionsAbsenteisme />} />
+      {/* Arbre décisionnel — redirigé vers le tableau de bord */}
+      <Route path="/apprentissage/*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/comportement/*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/developpement/*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/contexte/*" element={<Navigate to="/dashboard" replace />} />
       
       <Route path="*" element={<PageNotFound />} />
     </Routes>
