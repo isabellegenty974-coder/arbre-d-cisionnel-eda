@@ -248,7 +248,7 @@ export default function Dashboard() {
   // leur date d'import — indépendamment des fiches élèves (suivi).
   const elevesAnnee = elevesR.filter(e => {
     if (!e.origine_import_pdf) return false;
-    if (!debutAnnee || !finAnnee) return true;
+    if (!debutAnnee || !finAnnee) return false;
     const d = new Date(e.created_date);
     return d >= debutAnnee && d <= finAnnee;
   });

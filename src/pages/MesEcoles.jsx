@@ -75,15 +75,17 @@ export default function MesEcoles() {
   const debutAnnee = anneeSelectionnee?.date_debut ? new Date(anneeSelectionnee.date_debut) : null;
   const finAnnee = anneeSelectionnee?.date_fin ? new Date(anneeSelectionnee.date_fin) : null;
 
+  // Filtrage strict par année : on ne compte QUE ce qui appartient à l'année
+  // sélectionnée. Hors plage (ou année non chargée) → 0, jamais toutes les données.
   const ficheDansAnnee = (f) => {
     if (anneeLibelle && f.annee_scolaire) return f.annee_scolaire === anneeLibelle;
-    if (!debutAnnee || !finAnnee) return true;
+    if (!debutAnnee || !finAnnee) return false;
     const d = new Date(f.created_date);
     return d >= debutAnnee && d <= finAnnee;
   };
   const eleveImporteDansAnnee = (e) => {
     if (!e.origine_import_pdf) return false;
-    if (!debutAnnee || !finAnnee) return true;
+    if (!debutAnnee || !finAnnee) return false;
     const d = new Date(e.created_date);
     return d >= debutAnnee && d <= finAnnee;
   };
