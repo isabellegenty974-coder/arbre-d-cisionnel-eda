@@ -21,7 +21,7 @@ export default function WelcomeModal({ onClose }) {
             Bienvenue dans l'équipe RASED de La Possession ! 👋
           </h1>
           <p className="text-muted-foreground mb-8">
-            Vous rejoignez l'application Suivis RASED, l'outil collaboratif de l'équipe RASED de la Circonscription de La Possession (La Réunion).
+            Outil de suivi collaboratif de l&apos;équipe RASED · Circonscription de La Possession · La Réunion
           </p>
 
           {/* Features */}

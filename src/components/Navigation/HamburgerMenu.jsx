@@ -52,7 +52,7 @@ export default function HamburgerMenu() {
               {/* Header */}
               <div className="mb-8">
                 <h2 className="text-xl font-display font-semibold text-foreground">Suivis RASED</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Équipe RASED · Circonscription de La Possession</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Outil de suivi collaboratif de l&apos;équipe RASED · Circonscription de La Possession · La Réunion</p>
                 {eleve?.prenom && (
                   <p className="text-sm text-muted-foreground mt-1">{eleve.prenom} {eleve.nom}</p>
                 )}

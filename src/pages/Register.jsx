@@ -218,7 +218,7 @@ La Réunion`;
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">Créer votre compte</h1>
             <p className="text-sm text-muted-foreground">
-              Suivis RASED · La Possession
+              Outil de suivi collaboratif de l&apos;équipe RASED · Circonscription de La Possession · La Réunion
             </p>
           </div>
 
