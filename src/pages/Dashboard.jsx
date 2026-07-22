@@ -35,6 +35,12 @@ function todayLabel() {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+// Supprime les mentions de salle (" Salle X") d'un nom de classe — affichage uniquement
+function cleanClassName(c) {
+  if (!c) return '';
+  return c.replace(/\s*Salle\s+\S+/gi, '').replace(/\s+/g, ' ').trim();
+}
+
 const PROF_COLOR = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
 const PROF_LABEL = { 'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA', 'MaDR': 'Maître à Dominante Relationnelle (MaDR)', 'MaDP': 'Maître à Dominante Pédagogique (MaDP)' };
 const PROF_BG    = { 'Psy EN EDA': '#EAF2FB', 'MaDR': '#E4F4ED', 'MaDP': '#FEF0E4' };
@@ -482,7 +488,7 @@ export default function Dashboard() {
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < Math.min(5, alertesFiches.length) - 1 ? '1px solid #F0F3F8' : 'none' }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
-                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[e.classe, titleCase(e.ecole)].filter(Boolean).join(' · ') || '—'}</div>
+                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[cleanClassName(e.classe), titleCase(e.ecole)].filter(Boolean).join(' · ') || '—'}</div>
                       </div>
                       <span style={{ fontSize: 10.5, fontWeight: 700, color: '#B85C1A', background: '#FEF0E4', padding: '2px 8px', borderRadius: 10, flexShrink: 0, marginRight: 8 }}>
                         +{days}j
@@ -589,7 +595,7 @@ export default function Dashboard() {
                             {isNew ? 'Fiche créée' : 'Fiche mise à jour'} — <strong style={{ color: '#254D7A', fontWeight: 600 }}>{e.prenom} {e.nom}</strong>
                           </div>
                           <div style={{ fontSize: 11, color: '#566880', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {[e.classe, titleCase(e.ecole)].filter(Boolean).join(' · ') || 'Fiche élève'}
+                            {[cleanClassName(e.classe), titleCase(e.ecole)].filter(Boolean).join(' · ') || 'Fiche élève'}
                           </div>
                         </div>
                         <div style={{ fontSize: 10.5, color: '#566880', flexShrink: 0 }}>{timeAgo(e.updated_date || e.created_date)}</div>
@@ -612,7 +618,7 @@ export default function Dashboard() {
                   const pillMap = { 'Suivi actif': { bg: '#E4F4ED', c: '#1E7A52', lbl: 'Suivi actif' }, 'En attente': { bg: '#FEF0E4', c: '#B85C1A', lbl: 'En attente' }, 'Nouveau': { bg: '#EAF2FB', c: '#3B82C4', lbl: 'Hypothèses' } };
                   const pill = pillMap[e.statut] || { bg: '#EEE9FF', c: '#5B3FA6', lbl: e.statut };
                   const shortProf = prof === 'Psy EN EDA' ? 'Psy-EN EDA' : prof;
-                  const classe = (fiche?.classe || e.classe || '').replace(/\s*Salle\s+\S+/gi, '').trim();
+                  const classe = cleanClassName(fiche?.classe || e.classe || '');
                   const ecoleName = titleCase(fiche?.ecole || '');
                   return (
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}
