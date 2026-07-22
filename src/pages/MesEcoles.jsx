@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import {
   School, Users, BarChart2, FileText, Bell,
   ChevronRight, Plus, AlertTriangle, CheckCircle,
-  Home, Search, Phone, Mail, User, Trash2
+  Home, Search, Phone, Mail, User, Trash2, BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEcoleModal from '@/components/rased/AddEcoleModal';
@@ -16,7 +16,7 @@ import { titleCase } from '@/lib/utils';
 const NAV_ITEMS = [
   { id: 'ecoles', label: 'Mes écoles', icon: School },
   { id: 'eleves', label: 'Élèves suivis', icon: Users },
-  { id: 'diagnostics', label: 'Hypothèses de travail', icon: FileText },
+  { id: 'ressources', label: 'Ressources', icon: BookOpen },
   { id: 'membres', label: 'Membres RASED', icon: Users },
   { id: 'stats', label: 'Statistiques', icon: BarChart2 },
   { id: 'export', label: 'Export annuel', icon: FileText },
@@ -109,7 +109,7 @@ export default function MesEcoles() {
     if (id === 'stats') navigate('/stats-annuelles');
     else if (id === 'export') navigate('/export-annuel');
     else if (id === 'membres') navigate('/equipe-rased');
-    else if (id === 'diagnostics') navigate('/dashboard');
+    else if (id === 'ressources') navigate('/items-professionnels');
     else if (id === 'eleves') navigate('/dashboard');
   };
 
