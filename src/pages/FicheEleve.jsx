@@ -16,6 +16,7 @@ export default function FicheEleve() {
   const { user: currentUser } = useAuth();
   const urlParams = new URLSearchParams(window.location.search);
   const [saved, setSaved] = useState(false);
+  const [wasUpdated, setWasUpdated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -144,6 +145,7 @@ export default function FicheEleve() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setWasUpdated(false);
 
     if (!validate()) return;
 
