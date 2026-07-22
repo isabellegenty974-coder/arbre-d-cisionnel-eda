@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Search } from 'lucide-react';
 import { usePresence } from '@/lib/usePresence';
+import { titleCase } from '@/lib/utils';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -468,7 +469,7 @@ export default function Dashboard() {
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < Math.min(5, alertesFiches.length) - 1 ? '1px solid #F0F3F8' : 'none' }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
-                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[e.classe, e.ecole].filter(Boolean).join(' · ') || '—'}</div>
+                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[e.classe, titleCase(e.ecole)].filter(Boolean).join(' · ') || '—'}</div>
                       </div>
                       <span style={{ fontSize: 10.5, fontWeight: 700, color: '#B85C1A', background: '#FEF0E4', padding: '2px 8px', borderRadius: 10, flexShrink: 0, marginRight: 8 }}>
                         +{days}j
@@ -575,7 +576,7 @@ export default function Dashboard() {
                             {isNew ? 'Fiche créée' : 'Fiche mise à jour'} — <strong style={{ color: '#254D7A', fontWeight: 600 }}>{e.prenom} {e.nom}</strong>
                           </div>
                           <div style={{ fontSize: 11, color: '#566880', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {[e.classe, e.ecole].filter(Boolean).join(' · ') || 'Fiche élève'}
+                            {[e.classe, titleCase(e.ecole)].filter(Boolean).join(' · ') || 'Fiche élève'}
                           </div>
                         </div>
                         <div style={{ fontSize: 10.5, color: '#566880', flexShrink: 0 }}>{timeAgo(e.updated_date || e.created_date)}</div>
@@ -599,7 +600,7 @@ export default function Dashboard() {
                   const pill = pillMap[e.statut] || { bg: '#EEE9FF', c: '#5B3FA6', lbl: e.statut };
                   const shortProf = prof === 'Psy EN EDA' ? 'Psy-EN EDA' : prof;
                   const classe = fiche?.classe || e.classe || '';
-                  const ecoleName = fiche?.ecole || '';
+                  const ecoleName = titleCase(fiche?.ecole || '');
                   return (
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}
                       onClick={() => { if (fiche?.id) navigate(`/detail-fiche?id=${fiche.id}`); }}>
@@ -638,7 +639,7 @@ export default function Dashboard() {
                         onClick={() => navigate(`/detail-ecole?id=${ec.id}`)}>
                         <div style={{ width: 34, height: 34, borderRadius: 8, background: '#1A3353', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🏫</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ec.nom.charAt(0).toUpperCase() + ec.nom.slice(1).toLowerCase()}</div>
+                          <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleCase(ec.nom)}</div>
                           <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{ec.type || 'École'} · {ec.nbEl} élève{ec.nbEl !== 1 ? 's' : ''}</div>
                         </div>
                         <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10, flexShrink: 0, background: ec.nbAl > 0 ? '#FEF0E4' : '#E4F4ED', color: ec.nbAl > 0 ? '#B85C1A' : '#1E7A52' }}>

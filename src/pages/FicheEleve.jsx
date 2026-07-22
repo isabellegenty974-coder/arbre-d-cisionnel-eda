@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import PhotoEEUpload from '@/components/PhotoEEUpload';
+import { titleCase } from '@/lib/utils';
 
 export default function FicheEleve() {
   const navigate = useNavigate();
@@ -360,7 +361,7 @@ export default function FicheEleve() {
                 </label>
                 {ecole ? (
                   <div className="h-10 flex items-center px-3 rounded-lg border border-input bg-gray-50 text-sm text-gray-700 font-medium">
-                    {ecole}
+                    {titleCase(ecole)}
                   </div>
                 ) : (
                   <select

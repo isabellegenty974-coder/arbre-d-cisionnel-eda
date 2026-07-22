@@ -5,6 +5,7 @@ import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { FileDown, ArrowLeft, Loader2, Users, Building2, TrendingDown, Activity, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { generateRapportAnnuel } from "@/lib/rapportAnnuelGenerator";
+import { titleCase } from "@/lib/utils";
 
 function currentAnneeScolaire() {
   const now = new Date();
@@ -148,7 +149,7 @@ export default function ExportAnnuel() {
                     return (
                       <div key={ecole} style={{ borderRadius: 10, border: '1px solid #E8EDF5', overflow: 'hidden' }}>
                         <div style={{ background: '#F8FAFD', padding: '9px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: '#182840' }}>{ecole}</span>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#182840' }}>{titleCase(ecole)}</span>
                           <span style={{ fontSize: 11.5, color: '#3B82C4', fontWeight: 600 }}>{total} élève{total > 1 ? 's' : ''}</span>
                         </div>
                         {Object.entries(classes).sort((a, b) => b[1] - a[1]).map(([classe, nb]) => (

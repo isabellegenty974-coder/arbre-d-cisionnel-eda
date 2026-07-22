@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { AlertTriangle, Trash2, Loader } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
+import { titleCase } from '@/lib/utils';
 
 export default function DeleteEcoleModal({ ecole, eleveCount, onClose, onDeleted }) {
   const [step, setStep] = useState(1);
@@ -50,7 +51,7 @@ export default function DeleteEcoleModal({ ecole, eleveCount, onClose, onDeleted
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-3">Supprimer cette école ?</h3>
             <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-              Vous allez supprimer l'école <strong className="text-gray-900">{ecole?.nom}</strong>
+              Vous allez supprimer l'école <strong className="text-gray-900">{titleCase(ecole?.nom)}</strong>
               {' '}ainsi que toutes ses classes et les{' '}
               <strong className="text-red-600">{eleveCount}</strong>
               {' '}élève{eleveCount > 1 ? 's' : ''} associé{eleveCount > 1 ? 's' : ''}.
@@ -78,7 +79,7 @@ export default function DeleteEcoleModal({ ecole, eleveCount, onClose, onDeleted
               Tapez le nom de l'école pour confirmer la suppression :
             </p>
             <div className="bg-gray-50 rounded-xl px-4 py-2 mb-4 text-center">
-              <p className="text-sm font-bold text-gray-900">{ecole?.nom}</p>
+              <p className="text-sm font-bold text-gray-900">{titleCase(ecole?.nom)}</p>
             </div>
             <input
               type="text"

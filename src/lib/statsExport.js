@@ -1,3 +1,5 @@
+import { titleCase } from './utils';
+
 export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolution, selectedProfession, profBreakdown, ecoleBreakdown, parEcoleStats, equipesEduParEcole) => {
   const nbEleves = new Set(filteredDiagnostics.map(d => d.eleve_prenom + ' ' + d.eleve_nom)).size;
   const nbInterventions = filteredDiagnostics.length;
@@ -75,7 +77,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   <table>
     <tr><th>École</th><th>Élèves accompagnés</th></tr>
     ${ecoleData.length > 0
-      ? ecoleData.map(e => `<tr><td>${e.name}</td><td>${e.value}</td></tr>`).join('')
+      ? ecoleData.map(e => `<tr><td>${titleCase(e.name)}</td><td>${e.value}</td></tr>`).join('')
       : '<tr><td colspan="2" class="empty">Aucune école renseignée</td></tr>'
     }
   </table>
@@ -85,7 +87,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
   ${ecoleStats.length > 0
     ? ecoleStats.map(({ ecole, nbEleves: nb, domaines: doms, profs }) => `
       <div class="school-block">
-        <div class="school-title">📍 ${ecole} — ${nb} élève${nb > 1 ? 's' : ''} accompagné${nb > 1 ? 's' : ''}</div>
+        <div class="school-title">📍 ${titleCase(ecole)} — ${nb} élève${nb > 1 ? 's' : ''} accompagné${nb > 1 ? 's' : ''}</div>
         <table class="school-table">
           <tr><th>Domaine de difficulté</th><th>Élèves concernés</th></tr>
           ${doms.map(d => `<tr><td>${d.name}</td><td>${d.value}</td></tr>`).join('')}
@@ -107,7 +109,7 @@ export const exportStatsPDF = (filteredDiagnostics, topItems, domaines, evolutio
       <table style="margin-bottom:12px;">
         <tr><th colspan="2" style="background:#e8edf8;">${prof} — <span style="font-weight:normal;">${total} participation${total > 1 ? 's' : ''} au total</span></th></tr>
         <tr><th>École</th><th>Participations</th></tr>
-        ${ecoles.map(({ ecole, nb }) => `<tr><td>${ecole}</td><td>${nb}</td></tr>`).join('')}
+        ${ecoles.map(({ ecole, nb }) => `<tr><td>${titleCase(ecole)}</td><td>${nb}</td></tr>`).join('')}
       </table>`
     ).join('')
     : '<p class="empty">Aucune participation enregistrée</p>'

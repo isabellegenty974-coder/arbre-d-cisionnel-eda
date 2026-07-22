@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import AddEleveModal from '@/components/rased/AddEleveModal';
 import AddEcoleModal from '@/components/rased/AddEcoleModal';
+import { titleCase } from '@/lib/utils';
 
 const STATUS_CONFIG = {
   'Suivi actif': { color: '#16a34a', bg: '#dcfce7', label: 'Suivi actif' },
@@ -94,10 +95,10 @@ export default function DetailEcole() {
 
   const exportClassePDF = () => {
     const html = `
-      <html><head><title>Classe ${activeClasseData?.nom} — ${ecole?.nom}</title>
+      <html><head><title>Classe ${activeClasseData?.nom} — ${titleCase(ecole?.nom)}</title>
       <style>body{font-family:sans-serif;padding:24px}h1{font-size:18px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:8px;text-align:left;font-size:12px}th{background:#f3f4f6}</style>
       </head><body>
-      <h1>Classe ${activeClasseData?.nom} — ${ecole?.nom}</h1>
+      <h1>Classe ${activeClasseData?.nom} — ${titleCase(ecole?.nom)}</h1>
       <p style="color:#666;font-size:12px">Enseignant·e : ${activeClasseData?.enseignant || '—'} | Exporté le ${new Date().toLocaleDateString('fr-FR')}</p>
       <table><thead><tr><th>Nom Prénom</th><th>Date de naissance</th><th>Statut</th><th>Dernière action</th></tr></thead>
       <tbody>${activeEleves.map(e => `
@@ -137,7 +138,7 @@ export default function DetailEcole() {
           </button>
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-white font-bold text-2xl">{ecole.nom}</h1>
+              <h1 className="text-white font-bold text-2xl">{titleCase(ecole.nom)}</h1>
               <div className="flex items-center gap-3 mt-1 flex-wrap">
                 {ecole.type && <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300">{ecole.type}</span>}
                 {ecole.commune && <span className="text-white/60 text-sm">{ecole.commune}</span>}

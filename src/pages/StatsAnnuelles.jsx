@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportStatsPDF } from "@/lib/statsExport";
+import { titleCase } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Download, Users, ClipboardList, TrendingUp, BookOpen,
@@ -498,7 +499,7 @@ export default function StatsAnnuelles() {
               className="h-8 rounded-xl border border-[#E8DCC8] bg-white text-xs font-semibold text-[#0F172A] px-3 focus:outline-none focus:ring-1 focus:ring-[#D4A574]"
             >
               <option value="">Toutes les écoles</option>
-              {ecoles.map(e => <option key={e} value={e}>{e}</option>)}
+              {ecoles.map(e => <option key={e} value={e}>{titleCase(e)}</option>)}
             </select>
             {selectedEcole && (
               <button onClick={() => setSelectedEcole(null)} className="text-xs text-[#D4A574] hover:underline">× Effacer</button>
@@ -777,7 +778,7 @@ export default function StatsAnnuelles() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-semibold text-[#0F172A] truncate pr-2">{name}</span>
+                        <span className="text-xs font-semibold text-[#0F172A] truncate pr-2">{titleCase(name)}</span>
                         <span className="text-xs font-bold" style={{ color }}>{value} élève{value > 1 ? 's' : ''}</span>
                       </div>
                       <div className="h-2 rounded-full bg-[#F5F0E8] overflow-hidden">
@@ -812,7 +813,7 @@ export default function StatsAnnuelles() {
                         <BookOpen className="w-4 h-4" style={{ color: eColor }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-[#0F172A] text-sm truncate">{ecole}</p>
+                        <p className="font-bold text-[#0F172A] text-sm truncate">{titleCase(ecole)}</p>
                         <p className="text-xs" style={{ color: eColor }}>{nb} élève{nb > 1 ? 's' : ''}</p>
                       </div>
                     </div>

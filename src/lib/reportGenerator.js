@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { titleCase } from './utils';
 
 export async function generateReport(data, user) {
   const doc = new jsPDF({
@@ -128,7 +129,7 @@ export async function generateReport(data, user) {
   const eleve = data.eleve;
   const eleveName = `${eleve.prenom} ${eleve.nom}`;
   const eleveClass = eleve.classe || '—';
-  const eleveSchool = eleve.ecole || '—';
+  const eleveSchool = titleCase(eleve.ecole) || '—';
   const eleveBirthDate = eleve.date_naissance 
     ? new Date(eleve.date_naissance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : '—';

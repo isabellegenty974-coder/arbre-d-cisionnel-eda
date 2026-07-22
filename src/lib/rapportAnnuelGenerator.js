@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf';
+import { titleCase } from './utils';
 
 // ── Équipe RASED réelle ──────────────────────────────────────────────────────
 const EQUIPE = [
@@ -696,7 +697,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
       setFill(doc, '#3B82C4'); setText(doc, '#FFFFFF');
       doc.rect(margin, yEcole, contentWidth, 8, 'F');
       doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5);
-      doc.text(`${ecole}  ·  ${total} élève${total > 1 ? 's' : ''}`, margin + 3, yEcole + 5.5);
+      doc.text(`${titleCase(ecole)}  ·  ${total} élève${total > 1 ? 's' : ''}`, margin + 3, yEcole + 5.5);
       yEcole += 8;
       yEcole = drawTable(doc, {
         x: margin, y: yEcole, colWidths: [contentWidth - 50, 50],

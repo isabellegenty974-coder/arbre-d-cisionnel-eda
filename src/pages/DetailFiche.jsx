@@ -11,6 +11,7 @@ import ProblematiquesSection from '@/components/rased/ProblematiquesSection';
 import ResponsablesSection from '@/components/rased/ResponsablesSection';
 import ReportExportModal from '@/components/rased/ReportExportModal';
 import { usePresence } from '@/lib/usePresence';
+import { titleCase } from '@/lib/utils';
 import { generateReport, downloadReport } from '@/lib/reportGenerator';
 import { jsPDF } from 'jspdf';
 
@@ -56,7 +57,7 @@ function Topbar({ fiche, ficheId, onHypotheses }) {
       </Link>
       <span style={{ color: 'rgba(255,255,255,.2)' }}>/</span>
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', display: 'flex', alignItems: 'center', gap: 5, overflow: 'hidden', flex: 1, minWidth: 0 }}>
-        {fiche.ecole && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fiche.ecole}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
+        {fiche.ecole && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleCase(fiche.ecole)}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
         {fiche.classe && <><span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cleanClassName(fiche.classe)}</span><span style={{ color: 'rgba(255,255,255,.25)', flexShrink: 0 }}>›</span></>}
         <span style={{ color: '#fff', fontWeight: 600, whiteSpace: 'nowrap' }}>{fiche.prenom} {fiche.nom}</span>
       </div>
@@ -89,7 +90,7 @@ function HeroFiche({ fiche, activeTab, setActiveTab }) {
                 {fiche.age ? ` · ${fiche.age} ans` : ''}
               </span>
             )}
-            {fiche.ecole && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>🏫 {fiche.ecole}</span>}
+            {fiche.ecole && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>🏫 {titleCase(fiche.ecole)}</span>}
             {fiche.classe && <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.65)', background: 'rgba(255,255,255,.08)', padding: '2px 8px', borderRadius: 20 }}>📚 {cleanClassName(fiche.classe)}</span>}
             <span style={{ fontSize: 11.5, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: sc.pill, color: sc.pillT }}>
               <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: 'currentColor', marginRight: 4, verticalAlign: 'middle' }} />
