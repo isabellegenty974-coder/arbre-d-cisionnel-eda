@@ -165,7 +165,7 @@ export default function Accueil() {
         </motion.h1>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="text-white/80 text-sm text-center mb-8 leading-snug">
-          Outil d&apos;aide et de suivi de l&apos;activité
+          Outil de suivi collaboratif de l&apos;équipe RASED · Circonscription de La Possession · La Réunion
         </motion.p>
 
         {/* CTA Buttons */}
