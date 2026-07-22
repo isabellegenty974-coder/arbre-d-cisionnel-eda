@@ -284,25 +284,27 @@ const AuthenticatedApp = () => {
         <Route path="/resume" element={<Navigate to="/dashboard" replace />} />
         <Route path="/fiche-eleve" element={<FicheEleve />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/historique" element={<Historique />} />
+        <Route path="/historique" element={<Navigate to="/historique-eleve" replace />} />
         <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
         <Route path="/stats-annuelles" element={<StatsAnnuelles />} />
         <Route path="/resultats" element={<Navigate to="/dashboard" replace />} />
         <Route path="/evaluation-domains" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/items-apprentissages" element={<ItemsApprentissages />} />
-        <Route path="/items-comportement" element={<ItemsComportement />} />
-        <Route path="/items-developpement" element={<ItemsDeveloppement />} />
-        <Route path="/items-contexte" element={<ItemsContexte />} />
+        <Route path="/items-apprentissages" element={<Navigate to="/items-professionnels" replace />} />
+        <Route path="/items-comportement" element={<Navigate to="/items-professionnels" replace />} />
+        <Route path="/items-developpement" element={<Navigate to="/items-professionnels" replace />} />
+        <Route path="/items-contexte" element={<Navigate to="/items-professionnels" replace />} />
         <Route path="/analyse-eda" element={<Navigate to="/dashboard" replace />} />
         <Route path="/liste-eleves" element={<ListeEleves />} />
         <Route path="/detail-fiche" element={<DetailFiche />} />
+        <Route path="/detail-eleve" element={<DetailFiche />} />
+        <Route path="/detail-eleve" element={<DetailFiche />} />
         <Route path="/historique-eleve" element={<HistoriqueEleve />} />
         <Route path="/export-annuel" element={<ExportAnnuel />} />
         <Route path="/rapport-annuel" element={<RapportAnnuel />} />
         <Route path="/edit-eleve" element={<EditEleve />} />
         <Route path="/items-professionnels" element={<ItemsProfessionnels />} />
         <Route path="/hypotheses-eleve" element={<DiagnosticEleve />} />
-        <Route path="/tableau-synthese" element={<TableauSynthese />} />
+        <Route path="/tableau-synthese" element={<Navigate to="/synthese-eleve" replace />} />
         <Route path="/invite-users" element={<InviteUsers />} />
         <Route path="/equipe-rased" element={<EquipeRased />} />
         <Route path="/synthese-eleve" element={<SyntheseEleve />} />
@@ -313,9 +315,9 @@ const AuthenticatedApp = () => {
         <Route path="/notifications" element={<Notifications />} />
 
         {/* Redirections des anciennes routes en doublon */}
-        <Route path="/DetailEleve" element={<RedirectWithQuery to="/detail-fiche" />} />
-        <Route path="/AnalyseMaths" element={<Navigate to="/apprentissage/maths" replace />} />
-        <Route path="/AnalyseEcriture" element={<Navigate to="/apprentissage/ecriture" replace />} />
+        <Route path="/DetailEleve" element={<RedirectWithQuery to="/detail-eleve" />} />
+        <Route path="/AnalyseMaths" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/AnalyseEcriture" element={<Navigate to="/dashboard" replace />} />
       
       {/* Arbre décisionnel — redirigé vers le tableau de bord */}
       <Route path="/apprentissage/*" element={<Navigate to="/dashboard" replace />} />
