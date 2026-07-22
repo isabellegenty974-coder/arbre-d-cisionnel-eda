@@ -385,23 +385,20 @@ export default function Parametres() {
   };
 
   const computeStatut = (a) => {
+    // L'année active (définition manuelle) est toujours "En cours"
+    if (a.est_active || a.active) return 'en_cours';
+    // Statut stocké (géré lors de l'activation/désactivation d'une année)
+    if (a.statut === 'passee') return 'passee';
+    if (a.statut === 'en_cours') return 'en_cours';
+    // Fallback date-based (15/08 → 15/07) si ni flag ni statut
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    // Statut basé sur les dates réelles de l'année (calendrier La Réunion : 15/08 → 15/07)
     if (a.date_debut && a.date_fin) {
       const debut = new Date(a.date_debut);
       const fin = new Date(a.date_fin);
       if (today >= debut && today <= fin) return 'en_cours';
       if (today > fin) return 'passee';
-      return 'a_venir';
     }
-    // Fallback : 15/08 → 15/07 déduit du libellé
-    const startYear = parseInt(a.libelle.split('-')[0]);
-    if (isNaN(startYear)) return 'a_venir';
-    const debut = new Date(`${startYear}-08-15`);
-    const fin = new Date(`${startYear + 1}-07-15`);
-    if (today >= debut && today <= fin) return 'en_cours';
-    if (today > fin) return 'passee';
     return 'a_venir';
   };
 

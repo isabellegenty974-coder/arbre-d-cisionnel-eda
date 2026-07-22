@@ -236,6 +236,21 @@ export default function Dashboard() {
   // Les deux dérivent de fichesFiltrees (abonné en temps réel via FicheEleve.subscribe),
   // donc ils se rafraîchissent automatiquement dès qu'un statut est modifié.
   // "Élèves suivis" : fiches non clôturées ET complètes (école + classe renseignées)
+  // Élèves du secteur attribués à l'année sélectionnée (via la fiche liée ou la date de création)
+  const debutAnnee = anneeSelectionnee?.date_debut
+    ? new Date(anneeSelectionnee.date_debut)
+    : (anneeSelectionnee ? new Date(`${anneeSelectionnee.libelle.split('-')[0]}-08-15`) : null);
+  const finAnnee = anneeSelectionnee?.date_fin
+    ? new Date(anneeSelectionnee.date_fin)
+    : (anneeSelectionnee ? new Date(`${(anneeSelectionnee.libelle.split('-')[1] || String(parseInt(anneeSelectionnee.libelle.split('-')[0]) + 1))}-07-15`) : null);
+  const fichesFiltreesIds = new Set(fichesFiltrees.map(f => f.id));
+  const elevesAnnee = elevesR.filter(e => {
+    if (e.fiche_eleve_id) return fichesFiltreesIds.has(e.fiche_eleve_id);
+    if (!debutAnnee || !finAnnee) return true;
+    const d = new Date(e.created_date);
+    return d >= debutAnnee && d <= finAnnee;
+  });
+
   const totalEleves    = fichesFiltrees.filter(f => f.statut !== 'Clôturé' && f.ecole && f.classe).length;
   // "Qui fait quoi en ce moment" : élèves en suivi actif dont la fiche est complète (école + classe)
   const suivisActifsComplets = elevesR.filter(e => {
@@ -436,7 +451,7 @@ export default function Dashboard() {
           {/* STATS */}
           <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>
             {[
-               { val: elevesR.length,     lbl: 'Élèves du secteur',     ico: '🏫', ibg: '#EAF2FB', trend: 'imports PDF',            warn: false, to: '/mes-ecoles' },
+               { val: elevesAnnee.length, lbl: 'Élèves du secteur',     ico: '🏫', ibg: '#EAF2FB', trend: 'imports PDF',            warn: false, to: '/mes-ecoles' },
                { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#E4F4ED', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
               { val: alertesFiches.length, lbl: 'Fiches sans mise à jour depuis 30 jours', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
