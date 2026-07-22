@@ -430,9 +430,10 @@ export default function Dashboard() {
           </div>
 
           {/* STATS */}
-          <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 13, marginBottom: 20 }}>
+          <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>
             {[
-              { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#EAF2FB', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
+               { val: elevesR.length,     lbl: 'Élèves du secteur',     ico: '🏫', ibg: '#EAF2FB', trend: 'imports PDF',            warn: false, to: '/mes-ecoles' },
+               { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#E4F4ED', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
               { val: alertesFiches.length, lbl: 'Fiches sans mise à jour depuis 30 jours', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
             ].map((c, i) => (
