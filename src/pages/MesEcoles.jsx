@@ -181,7 +181,7 @@ export default function MesEcoles() {
           {/* Stat cards */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-               { label: 'Élèves importés', value: totalImportes, icon: FileText, color: '#2563eb', bg: '#dbeafe' },
+               { label: 'Élèves du secteur', value: totalImportes, icon: FileText, color: '#2563eb', bg: '#dbeafe' },
                { label: 'Élèves suivis', value: totalSuivis, icon: Users, color: '#16a34a', bg: '#dcfce7' },
                { label: 'Fiches sans mise à jour depuis 30 jours', value: totalStale, icon: AlertTriangle, color: totalStale > 0 ? '#d97706' : '#6b7280', bg: totalStale > 0 ? '#fef3c7' : '#f3f4f6' },
                { label: 'Clôturés', value: totalClotured, icon: CheckCircle, color: '#6b7280', bg: '#f3f4f6' },
