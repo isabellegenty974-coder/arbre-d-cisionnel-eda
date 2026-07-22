@@ -604,26 +604,44 @@ export default function Dashboard() {
                 </div>
                 {suivisActifsComplets.slice(0, 4).map((e, i, arr) => {
                   const fiche = fiches.find(f => f.id === e.fiche_eleve_id);
-                  const prof = fiche?.createdByProfession || 'Psy EN EDA';
-                  const bg = PROF_COLOR[prof] || '#3B82C4';
                   const init = `${e.prenom?.[0] || ''}${e.nom?.[0] || ''}`;
                   const pillMap = { 'Suivi actif': { bg: '#E4F4ED', c: '#1E7A52', lbl: 'Suivi actif' }, 'En attente': { bg: '#FEF0E4', c: '#B85C1A', lbl: 'En attente' }, 'Nouveau': { bg: '#EAF2FB', c: '#3B82C4', lbl: 'Hypothèses' } };
                   const pill = pillMap[e.statut] || { bg: '#EEE9FF', c: '#5B3FA6', lbl: e.statut };
-                  const shortProf = prof === 'Psy EN EDA' ? 'Psy-EN EDA' : prof;
                   const classe = cleanClassName(fiche?.classe || e.classe || '');
                   const ecoleName = titleCase(fiche?.ecole || '');
+                  const intervs = (() => {
+                    const list = [...(fiche?.intervenants || [])];
+                    if (fiche?.createdByName && !list.some(x => x.nom === fiche.createdByName)) {
+                      list.unshift({ membre_id: 'creator', nom: fiche.createdByName, profession: fiche.createdByProfession || '' });
+                    }
+                    return list.filter(x => x.nom);
+                  })();
                   return (
-                    <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}
+                    <div key={e.id} className="db-row" style={{ ...S.row, alignItems: 'flex-start', borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}
                       onClick={() => { if (fiche?.id) navigate(`/detail-fiche?id=${fiche.id}`); }}>
-                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{init}</div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
-                          <span style={{ fontSize: 8.5, fontWeight: 700, padding: '1px 5px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: PROF_BG[prof], color: PROF_TEXT[prof] }}>{shortProf}</span>
+                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#1A3353', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{init}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</span>
+                          <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10, background: pill.bg, color: pill.c }}>{pill.lbl}</span>
                         </div>
-                        <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[classe, ecoleName].filter(Boolean).join(' · ') || '—'}</div>
+                        <div style={{ fontSize: 11, color: '#566880', marginBottom: 6 }}>{[classe, ecoleName].filter(Boolean).join(' · ') || '—'}</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                          {intervs.map((inv, j) => {
+                            const ip = inv.profession;
+                            const ibg = PROF_COLOR[ip] || '#3B82C4';
+                            const iinit = (inv.nom || '').split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
+                            return (
+                              <span key={j} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#F8FAFD', border: `1px solid ${PROF_BG[ip] || '#EAF2FB'}`, borderRadius: 10, padding: '3px 8px 3px 4px' }}>
+                                <span style={{ width: 17, height: 17, borderRadius: '50%', background: ibg, color: '#fff', fontSize: 8, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{iinit}</span>
+                                <span style={{ fontSize: 10, fontWeight: 600, color: '#182840' }}>{inv.nom}</span>
+                                <span style={{ fontSize: 8.5, fontWeight: 700, padding: '1px 5px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: PROF_BG[ip] || '#EAF2FB', color: PROF_TEXT[ip] || '#254D7A' }}>{PROF_BADGE[ip] || ip}</span>
+                              </span>
+                            );
+                          })}
+                          {intervs.length === 0 && <span style={{ fontSize: 11, color: '#94A3B8' }}>Aucun intervenant</span>}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10, flexShrink: 0, background: pill.bg, color: pill.c }}>{pill.lbl}</div>
                     </div>
                   );
                 })}
