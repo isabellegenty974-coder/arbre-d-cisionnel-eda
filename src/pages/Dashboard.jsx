@@ -45,6 +45,7 @@ const PROF_COLOR = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1
 const PROF_LABEL = { 'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA', 'MaDR': 'Maître à Dominante Relationnelle (MaDR)', 'MaDP': 'Maître à Dominante Pédagogique (MaDP)' };
 const PROF_BG    = { 'Psy EN EDA': '#EAF2FB', 'MaDR': '#E4F4ED', 'MaDP': '#FEF0E4' };
 const PROF_TEXT  = { 'Psy EN EDA': '#254D7A', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
+const PROF_BADGE = { 'Psy EN EDA': 'Psy-EN EDA', 'MaDR': 'MaDR', 'MaDP': 'MaDP' };
 
 // ── Nav items ──────────────────────────────────────────────────────────────
 
@@ -585,8 +586,8 @@ export default function Dashboard() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
                             {prof && (
-                              <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 8, textTransform: 'uppercase', letterSpacing: '.04em', background: PROF_BG[prof] || '#EAF2FB', color: PROF_TEXT[prof] || '#254D7A' }}>
-                                {PROF_LABEL[prof] || prof}
+                              <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: '.03em', background: PROF_BG[prof] || '#EAF2FB', color: PROF_TEXT[prof] || '#254D7A' }}>
+                                {PROF_BADGE[prof] || prof}
                               </span>
                             )}
                             {e.createdByName && <span style={{ fontSize: 11, color: '#566880' }}>{e.createdByName}</span>}
