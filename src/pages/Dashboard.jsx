@@ -433,7 +433,7 @@ export default function Dashboard() {
           <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 13, marginBottom: 20 }}>
             {[
               { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#EAF2FB', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
-              { val: alertesFiches.length, lbl: 'Sans mise à jour +30j', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
+              { val: alertesFiches.length, lbl: 'Fiches sans mise à jour depuis 30 jours', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
             ].map((c, i) => (
               <Link key={i} to={c.to} style={{ textDecoration: 'none' }}>
@@ -457,7 +457,7 @@ export default function Dashboard() {
 
             {/* Section 1 : Sans mise à jour +30j */}
             <div style={{ padding: '14px 0', borderBottom: '1px solid #F0F3F8' }}>
-              <div style={{ padding: '0 18px 12px', fontSize: 12.5, fontWeight: 600, color: '#182840' }}>⏰ Sans mise à jour +30j</div>
+              <div style={{ padding: '0 18px 12px', fontSize: 12.5, fontWeight: 600, color: '#182840' }}>⏰ Fiches sans mise à jour depuis 30 jours</div>
               {alertesFichesRefined.length === 0
                 ? <p style={{ padding: '14px 18px', fontSize: 13, color: '#1E7A52', background: '#E4F4ED', marginLeft: 10, marginRight: 10, borderRadius: 10 }}>✅ Tous les dossiers sont à jour</p>
                 : alertesFichesRefined.slice(0, 5).map((e, i) => {

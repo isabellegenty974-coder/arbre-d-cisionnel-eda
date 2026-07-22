@@ -183,7 +183,7 @@ export default function MesEcoles() {
             {[
                { label: 'Élèves importés', value: totalImportes, icon: FileText, color: '#2563eb', bg: '#dbeafe' },
                { label: 'Élèves suivis', value: totalSuivis, icon: Users, color: '#16a34a', bg: '#dcfce7' },
-               { label: 'Sans MAJ +30j', value: totalStale, icon: AlertTriangle, color: totalStale > 0 ? '#d97706' : '#6b7280', bg: totalStale > 0 ? '#fef3c7' : '#f3f4f6' },
+               { label: 'Fiches sans mise à jour depuis 30 jours', value: totalStale, icon: AlertTriangle, color: totalStale > 0 ? '#d97706' : '#6b7280', bg: totalStale > 0 ? '#fef3c7' : '#f3f4f6' },
                { label: 'Clôturés', value: totalClotured, icon: CheckCircle, color: '#6b7280', bg: '#f3f4f6' },
             ].map(({ label, value, icon: Icon, color, bg }) => (
               <div key={label} className="bg-white rounded-2xl border border-gray-200 p-4 flex flex-col gap-2">
