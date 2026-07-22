@@ -277,9 +277,12 @@ export default function StatsAnnuelles() {
         { name: 'Développement',  key: 'developpement' },
         { name: 'Contexte',       key: 'contexte' },
       ];
+      // Catégories de difficultés : comptage depuis FicheEleve.problematiques
+      // (objet avec un tableau par catégorie). On compte les fiches dont le tableau
+      // de la catégorie contient au moins une valeur cochée.
       const domainesEcole = domainKeys.map(({ name, key }) => ({
         name,
-        value: new Set(diagsDEcole.filter(d => (d.selections?.[key] || []).length > 0).map(d => `${d.eleve_prenom}|${d.eleve_nom}`)).size,
+        value: fichesDEcole.filter(f => (f.problematiques?.[key] || []).length > 0).length,
       }));
       const profsMap = {};
       diagsDEcole.forEach(d => {
