@@ -5,24 +5,109 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Calendar, Check, X, LogOut } from 'lucide-react';
 
 // ── Assistant de rentrée ────────────────────────────────────────────────────
-function AssistantRentree({ annee, ecolesPrecedentes, onClose }) {
+function AssistantRentree({ annee, ecolesPrecedentes, fiches = [], elevesR = [], diags = [], annees = [], currentUserName, currentUserProfession, onClose }) {
   const [step, setStep] = useState(1);
-  const [reconduireEcoles, setReconduireEcoles] = useState(null);
+  const [reconduire, setReconduire] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [reconduitCount, setReconduitCount] = useState(0);
+
+  // Année précédente (libellé)
+  const newLibelle = annee?.libelle;
+  const prevStartYear = newLibelle ? parseInt(newLibelle.split('-')[0]) - 1 : null;
+  const prevLibelle = prevStartYear ? `${prevStartYear}-${prevStartYear + 1}` : null;
+  const prevAnnee = annees.find(a => a.libelle === prevLibelle);
+
+  // Élèves à reconduire : fiches de l'année précédente non clôturées
+  const fichesAReconduire = fiches.filter(f => {
+    if (f.statut === 'Clôturé') return false;
+    if (!prevAnnee) return false;
+    if (f.annee_scolaire) return f.annee_scolaire === prevLibelle;
+    const d = new Date(f.created_date);
+    const debut = new Date(prevAnnee.date_debut || `${prevStartYear}-08-15`);
+    const fin = new Date(prevAnnee.date_fin || `${prevStartYear + 1}-07-15`);
+    return d >= debut && d <= fin;
+  });
 
   const handleReconduire = async (oui) => {
-    setReconduireEcoles(oui);
-    if (oui && ecolesPrecedentes.length > 0) {
+    setReconduire(oui);
+    if (oui) {
       setSaving(true);
-      // Les écoles sont déjà dans la base, pas besoin de les dupliquer
-      setSaving(false);
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+
+        // 1. Copie complète des fiches élèves (statut remis à "Nouveau")
+        const newFichesData = fichesAReconduire.map(f => ({
+          nom: f.nom, prenom: f.prenom, classe: f.classe, ecole: f.ecole, age: f.age,
+          date_naissance: f.date_naissance,
+          observations: f.observations, notes: f.notes,
+          interventions: f.interventions || [],
+          intervenants: f.intervenants || [],
+          score_apprentissages: f.score_apprentissages,
+          score_comportement: f.score_comportement,
+          score_developpement: f.score_developpement,
+          score_contexte: f.score_contexte,
+          hypotheses: f.hypotheses || [],
+          recommandations: f.recommandations || [],
+          date: today,
+          annee_scolaire: newLibelle,
+          createdByName: currentUserName,
+          createdByProfession: currentUserProfession,
+          photo_ee_url: f.photo_ee_url,
+          rapport: f.rapport,
+          statut: 'Nouveau',
+          documents: f.documents || [],
+          problematiques: f.problematiques || {},
+          responsable1: f.responsable1,
+          responsable2: f.responsable2,
+          langue_maison: f.langue_maison,
+          autorisation_parentale: f.autorisation_parentale,
+          date_autorisation: f.date_autorisation,
+        }));
+        const createdFiches = newFichesData.length
+          ? await base44.entities.FicheEleve.bulkCreate(newFichesData)
+          : [];
+
+        // 2. Copie des EleveRased liés (motif conservé, statut "Nouveau")
+        const newElevesData = createdFiches.map((nf, i) => {
+          const oldFiche = fichesAReconduire[i];
+          const oldEleve = elevesR.find(e => e.fiche_eleve_id === oldFiche.id);
+          return {
+            nom: nf.nom, prenom: nf.prenom, date_naissance: nf.date_naissance,
+            classe_id: oldEleve?.classe_id,
+            ecole_id: oldEleve?.ecole_id,
+            statut: 'Nouveau',
+            fiche_eleve_id: nf.id,
+            motif_signalement: oldEleve?.motif_signalement,
+          };
+        }).filter(e => e.fiche_eleve_id);
+        if (newElevesData.length) await base44.entities.EleveRased.bulkCreate(newElevesData);
+
+        // 3. Copie de l'historique EDA (conservé et accessible dans la nouvelle année)
+        const newHistorique = [];
+        createdFiches.forEach((nf, i) => {
+          const oldFiche = fichesAReconduire[i];
+          diags.filter(d => d.eleve_id === oldFiche.id).forEach(rec => {
+            newHistorique.push({
+              eleve_id: nf.id, date: rec.date, domaine: rec.domaine, sous_domaine: rec.sous_domaine,
+              hypotheses: rec.hypotheses, recommandations: rec.recommandations, scores: rec.scores, diagnostic_id: rec.diagnostic_id,
+            });
+          });
+        });
+        if (newHistorique.length) await base44.entities.HistoriqueEDA.bulkCreate(newHistorique);
+
+        setReconduitCount(createdFiches.length);
+      } catch (e) {
+        console.error('Reconduction erreur:', e);
+      } finally {
+        setSaving(false);
+      }
     }
     setStep(2);
   };
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ background: '#fff', borderRadius: 20, maxWidth: 440, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
+      <div style={{ background: '#fff', borderRadius: 20, maxWidth: 460, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
         {/* Header */}
         <div style={{ background: '#1A3353', padding: '22px 24px 18px' }}>
           <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>
@@ -34,36 +119,59 @@ function AssistantRentree({ annee, ecolesPrecedentes, onClose }) {
         <div style={{ padding: '24px' }}>
           {step === 1 && (
             <>
-              <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7, marginBottom: 20 }}>
-                L'année <strong>{annee?.libelle}</strong> est maintenant active.<br />
-                Voulez-vous reconduire les <strong>{ecolesPrecedentes.length} école{ecolesPrecedentes.length !== 1 ? 's' : ''}</strong> de l'année précédente ?
+              <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7, marginBottom: 16 }}>
+                L'année <strong>{annee?.libelle}</strong> est maintenant active.
               </p>
-              <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, marginBottom: 22, padding: '10px 14px', background: '#FEF0E4', borderRadius: 10 }}>
-                ⚠️ Les élèves ne sont <strong>pas reconduits automatiquement</strong>. Ils devront être importés via PDF pour cette nouvelle année.
-              </p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => handleReconduire(false)} disabled={saving}
-                  style={{ flex: 1, padding: '12px', border: '1px solid #D8E1EE', borderRadius: 10, background: '#fff', color: '#566880', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
-                  Non, pas maintenant
-                </button>
-                <button onClick={() => handleReconduire(true)} disabled={saving}
-                  style={{ flex: 1, padding: '12px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                  {saving ? 'En cours…' : 'Oui, reconduire'}
-                </button>
-              </div>
+              {fichesAReconduire.length > 0 ? (
+                <>
+                  <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7, marginBottom: 16 }}>
+                    Voulez-vous reconduire les <strong>{fichesAReconduire.length} élève{fichesAReconduire.length !== 1 ? 's' : ''}</strong> suivi{fichesAReconduire.length !== 1 ? 's' : ''} de l'année précédente ({prevLibelle}) ?
+                  </p>
+                  <div style={{ fontSize: 12, color: '#566880', lineHeight: 1.6, marginBottom: 20, padding: '10px 14px', background: '#EAF2FB', borderRadius: 10, borderLeft: '3px solid #3B82C4' }}>
+                    📋 Chaque fiche est recopiée intégralement : motif, problématiques, intervenants, séances, documents et historique.
+                    Seul le statut est remis à <strong>« Nouveau »</strong> pour la nouvelle année.
+                    Les {ecolesPrecedentes.length} école{ecolesPrecedentes.length !== 1 ? 's' : ''} sont conservées automatiquement.
+                  </div>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button onClick={() => handleReconduire(false)} disabled={saving}
+                      style={{ flex: 1, padding: '12px', border: '1px solid #D8E1EE', borderRadius: 10, background: '#fff', color: '#566880', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+                      Non, pas maintenant
+                    </button>
+                    <button onClick={() => handleReconduire(true)} disabled={saving}
+                      style={{ flex: 1, padding: '12px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                      {saving ? 'Reconduction…' : `Oui, reconduire (${fichesAReconduire.length})`}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize: 14, color: '#566880', lineHeight: 1.7, marginBottom: 20, padding: '12px 14px', background: '#F8FAFD', borderRadius: 10 }}>
+                    Aucun élève suivi à reconduire depuis {prevLibelle || 'l\'année précédente'}. Les écoles sont conservées automatiquement.
+                  </p>
+                  <button onClick={() => handleReconduire(false)}
+                    style={{ width: '100%', padding: '12px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                    Continuer
+                  </button>
+                </>
+              )}
             </>
           )}
 
           {step === 2 && (
             <>
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: 40, marginBottom: 10 }}>{reconduireEcoles ? '🏫' : '✅'}</div>
+              <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                <div style={{ fontSize: 40, marginBottom: 10 }}>{reconduire && reconduitCount > 0 ? '🎓' : '✅'}</div>
                 <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7 }}>
-                  {reconduireEcoles
-                    ? `Les écoles ont bien été conservées pour ${annee?.libelle}.`
-                    : 'Parfait. Vous pouvez gérer vos écoles depuis le menu dédié.'}
+                  {reconduire && reconduitCount > 0
+                    ? <>Les fiches complètes de <strong>{reconduitCount} élève{reconduitCount !== 1 ? 's' : ''}</strong> ont été recopiées pour {annee?.libelle}. Le statut de chaque suivi a été remis à « Nouveau ».</>
+                    : 'Parfait. Les écoles sont conservées pour cette nouvelle année.'}
                 </p>
               </div>
+              {reconduire && reconduitCount > 0 && (
+                <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, marginBottom: 16, padding: '10px 14px', background: '#FEF0E4', borderRadius: 10 }}>
+                  ℹ️ Pensez à mettre à jour l'école ou la classe des élèves ayant changé d'affectation.
+                </p>
+              )}
               <p style={{ fontSize: 13.5, color: '#182840', fontWeight: 600, marginBottom: 14 }}>
                 Voulez-vous importer les nouvelles listes de classes en PDF ?
               </p>
@@ -648,6 +756,12 @@ export default function Parametres() {
         <AssistantRentree
           annee={assistantAnnee}
           ecolesPrecedentes={ecoles}
+          fiches={fiches}
+          elevesR={elevesR}
+          diags={diags}
+          annees={annees}
+          currentUserName={userMembre ? `${userMembre.prenom} ${userMembre.nom}` : (user?.full_name || '')}
+          currentUserProfession={user?.profession || userMembre?.profession || ''}
           onClose={() => { setAssistantAnnee(null); load(); }}
         />
       )}
