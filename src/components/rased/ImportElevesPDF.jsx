@@ -215,6 +215,7 @@ Retourne uniquement un objet JSON valide.`,
               date_naissance: el.date_naissance || existe.date_naissance,
               ecole_id: ecoleId || existe.ecole_id,
               classe_id: classeId || existe.classe_id,
+              origine_import_pdf: true,
             });
           } else {
             await base44.entities.EleveRased.create({
@@ -222,6 +223,7 @@ Retourne uniquement un objet JSON valide.`,
               date_naissance: el.date_naissance || null,
               classe_id: classeId || null, ecole_id: ecoleId || null,
               statut: 'Nouveau',
+              origine_import_pdf: true,
             });
           }
           ok++;

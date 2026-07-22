@@ -243,12 +243,11 @@ export default function Dashboard() {
   const finAnnee = anneeSelectionnee?.date_fin
     ? new Date(anneeSelectionnee.date_fin)
     : (anneeSelectionnee ? new Date(`${(anneeSelectionnee.libelle.split('-')[1] || String(parseInt(anneeSelectionnee.libelle.split('-')[0]) + 1))}-07-15`) : null);
-  const fichesFiltreesIds = new Set(fichesFiltrees.map(f => f.id));
   // "Élèves du secteur (imports PDF)" : ne compte que les élèves effectivement
-  // rattachés à un import PDF réalisé (marqueur origine_import_pdf), pour l'année sélectionnée.
+  // importés via un PDF (marqueur origine_import_pdf), rattachés à l'année par
+  // leur date d'import — indépendamment des fiches élèves (suivi).
   const elevesAnnee = elevesR.filter(e => {
     if (!e.origine_import_pdf) return false;
-    if (e.fiche_eleve_id) return fichesFiltreesIds.has(e.fiche_eleve_id);
     if (!debutAnnee || !finAnnee) return true;
     const d = new Date(e.created_date);
     return d >= debutAnnee && d <= finAnnee;
