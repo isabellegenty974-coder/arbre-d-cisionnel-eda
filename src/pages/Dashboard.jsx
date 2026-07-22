@@ -243,7 +243,14 @@ export default function Dashboard() {
   // "Suivis clôturés" = fiches au statut "Clôturé" pour l'année en cours.
   // Les deux dérivent de fichesFiltrees (abonné en temps réel via FicheEleve.subscribe),
   // donc ils se rafraîchissent automatiquement dès qu'un statut est modifié.
-  const totalEleves    = fichesFiltrees.filter(f => f.statut !== 'Clôturé').length;
+  // "Élèves suivis" : fiches non clôturées ET complètes (école + classe renseignées)
+  const totalEleves    = fichesFiltrees.filter(f => f.statut !== 'Clôturé' && f.ecole && f.classe).length;
+  // "Qui fait quoi en ce moment" : élèves en suivi actif dont la fiche est complète (école + classe)
+  const suivisActifsComplets = elevesR.filter(e => {
+    if (e.statut !== 'Suivi actif') return false;
+    const f = fiches.find(x => x.id === e.fiche_eleve_id);
+    return f && f.ecole && f.classe;
+  });
   const alertesFiches  = fichesFiltrees.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
   const elevesClotured = fichesFiltrees.filter(f => f.statut === 'Clôturé').length;
 
@@ -597,7 +604,7 @@ export default function Dashboard() {
                   <span style={S.cardTitle}>Qui fait quoi en ce moment</span>
                   <Link to="/liste-eleves" style={S.cardLink}>Voir tous →</Link>
                 </div>
-                {elevesR.filter(e => e.statut === 'Suivi actif').slice(0, 4).map((e, i, arr) => {
+                {suivisActifsComplets.slice(0, 4).map((e, i, arr) => {
                   const fiche = fiches.find(f => f.id === e.fiche_eleve_id);
                   const prof = fiche?.createdByProfession || 'Psy EN EDA';
                   const bg = PROF_COLOR[prof] || '#3B82C4';
@@ -605,7 +612,7 @@ export default function Dashboard() {
                   const pillMap = { 'Suivi actif': { bg: '#E4F4ED', c: '#1E7A52', lbl: 'Suivi actif' }, 'En attente': { bg: '#FEF0E4', c: '#B85C1A', lbl: 'En attente' }, 'Nouveau': { bg: '#EAF2FB', c: '#3B82C4', lbl: 'Hypothèses' } };
                   const pill = pillMap[e.statut] || { bg: '#EEE9FF', c: '#5B3FA6', lbl: e.statut };
                   const shortProf = prof === 'Psy EN EDA' ? 'Psy-EN EDA' : prof;
-                  const classe = fiche?.classe || e.classe || '';
+                  const classe = (fiche?.classe || e.classe || '').replace(/\s*Salle\s+\S+/gi, '').trim();
                   const ecoleName = titleCase(fiche?.ecole || '');
                   return (
                     <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < arr.length - 1 ? '1px solid #F0F3F8' : 'none' }}
@@ -622,7 +629,7 @@ export default function Dashboard() {
                     </div>
                   );
                 })}
-                {elevesR.filter(e => e.statut === 'Suivi actif').length === 0 && (
+                {suivisActifsComplets.length === 0 && (
                   <p style={{ textAlign: 'center', padding: '28px 0', fontSize: 13, color: '#566880' }}>Aucun suivi actif</p>
                 )}
               </div>
