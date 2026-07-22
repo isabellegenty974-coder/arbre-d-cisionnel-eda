@@ -93,9 +93,9 @@ export default function MesEcoles() {
     };
   };
 
-  const totalSuivis = eleves.filter(e => e.statut === 'Suivi actif').length;
-  const totalNouveaux = eleves.filter(e => e.statut === 'Nouveau').length;
-  const totalClotured = eleves.filter(e => e.statut === 'Clôturé').length;
+  const totalImportes = eleves.length;
+  const totalSuivis = fiches.filter(f => f.statut !== 'Clôturé').length;
+  const totalClotured = fiches.filter(f => f.statut === 'Clôturé').length;
   const totalStale = ecoles.filter(isStale).length;
 
   const filteredEcoles = ecoles.filter(e =>
@@ -181,10 +181,10 @@ export default function MesEcoles() {
           {/* Stat cards */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: 'Élèves suivis', value: totalSuivis, icon: Users, color: '#16a34a', bg: '#dcfce7' },
-              { label: 'Nouveaux dossiers', value: totalNouveaux, icon: Plus, color: '#2563eb', bg: '#dbeafe' },
-              { label: 'Sans MAJ +30j', value: totalStale, icon: AlertTriangle, color: totalStale > 0 ? '#d97706' : '#6b7280', bg: totalStale > 0 ? '#fef3c7' : '#f3f4f6' },
-              { label: 'Clôturés', value: totalClotured, icon: CheckCircle, color: '#6b7280', bg: '#f3f4f6' },
+               { label: 'Élèves importés', value: totalImportes, icon: FileText, color: '#2563eb', bg: '#dbeafe' },
+               { label: 'Élèves suivis', value: totalSuivis, icon: Users, color: '#16a34a', bg: '#dcfce7' },
+               { label: 'Sans MAJ +30j', value: totalStale, icon: AlertTriangle, color: totalStale > 0 ? '#d97706' : '#6b7280', bg: totalStale > 0 ? '#fef3c7' : '#f3f4f6' },
+               { label: 'Clôturés', value: totalClotured, icon: CheckCircle, color: '#6b7280', bg: '#f3f4f6' },
             ].map(({ label, value, icon: Icon, color, bg }) => (
               <div key={label} className="bg-white rounded-2xl border border-gray-200 p-4 flex flex-col gap-2">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: bg }}>
