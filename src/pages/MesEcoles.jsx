@@ -291,10 +291,6 @@ export default function MesEcoles() {
                     <div className="px-4 py-3 flex items-center justify-between gap-3">
                       <div className="flex gap-3">
                         <div className="text-center">
-                          <p className="text-lg font-bold text-blue-600">{stats.nouveau}</p>
-                          <p className="text-[10px] text-gray-500">Nouveaux</p>
-                        </div>
-                        <div className="text-center">
                           <p className="text-lg font-bold text-green-600">{stats.actif}</p>
                           <p className="text-[10px] text-gray-500">Actifs</p>
                         </div>
