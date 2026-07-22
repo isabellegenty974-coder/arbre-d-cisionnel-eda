@@ -86,6 +86,16 @@ function AssistantRentree({ annee, ecolesPrecedentes, onClose }) {
 }
 
 // ── Formulaire ajout année ──────────────────────────────────────────────────
+// Dates par défaut pour La Réunion : 15 août (rentrée) → 15 juillet (été) l'année suivante
+function libelleToDates(lib) {
+  const startYear = parseInt((lib || '').split('-')[0]);
+  if (isNaN(startYear)) return { date_debut: '', date_fin: '' };
+  return {
+    date_debut: `${startYear}-08-15`,
+    date_fin: `${startYear + 1}-07-15`,
+  };
+}
+
 function FormAjoutAnnee({ onSave, onCancel, saving, anneesExistantes = [] }) {
   // Propose l'année suivante la plus haute existante, ou l'an prochain par défaut
   const suggestLibelle = () => {
@@ -101,11 +111,24 @@ function FormAjoutAnnee({ onSave, onCancel, saving, anneesExistantes = [] }) {
 
   const [libelle, setLibelle] = useState(suggestLibelle);
   const [statut, setStatut]   = useState('a_venir');
+  const [dates, setDates]     = useState(() => libelleToDates(suggestLibelle()));
   const valid = libelle.trim().length > 0;
+
+  const handleLibelleChange = (val) => {
+    setLibelle(val);
+    setDates(libelleToDates(val));
+  };
 
   const handleSubmit = () => {
     if (!valid) return;
-    onSave({ libelle: libelle.trim(), statut, est_active: false, active: false });
+    onSave({
+      libelle: libelle.trim(),
+      statut,
+      est_active: false,
+      active: false,
+      date_debut: dates.date_debut,
+      date_fin: dates.date_fin,
+    });
   };
 
   return (
@@ -114,10 +137,24 @@ function FormAjoutAnnee({ onSave, onCancel, saving, anneesExistantes = [] }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Libellé *</label>
-          <input autoFocus value={libelle} onChange={e => setLibelle(e.target.value)}
+          <input autoFocus value={libelle} onChange={e => handleLibelleChange(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
             placeholder="Ex : 2026-2027"
             style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+        </div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Début (rentrée)</label>
+            <input type="date" value={dates.date_debut}
+              onChange={e => setDates(d => ({ ...d, date_debut: e.target.value }))}
+              style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Fin (vacances d'été)</label>
+            <input type="date" value={dates.date_fin}
+              onChange={e => setDates(d => ({ ...d, date_fin: e.target.value }))}
+              style={{ width: '100%', padding: '9px 12px', border: '1px solid #D8E1EE', borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
         </div>
         <div>
           <label style={{ fontSize: 11.5, fontWeight: 600, color: '#566880', display: 'block', marginBottom: 5 }}>Statut</label>
@@ -241,15 +278,23 @@ export default function Parametres() {
 
   const computeStatut = (a) => {
     const today = new Date();
-    const month = today.getMonth(); // 0 = jan, 7 = août
-    const year  = today.getFullYear();
-    const anneeScolaireActive = month >= 7
-      ? `${year}-${year + 1}`
-      : `${year - 1}-${year}`;
-    if (a.libelle === anneeScolaireActive) return 'en_cours';
-    const startYear       = parseInt(a.libelle.split('-')[0]);
-    const activeStartYear = parseInt(anneeScolaireActive.split('-')[0]);
-    return startYear < activeStartYear ? 'passee' : 'a_venir';
+    today.setHours(0, 0, 0, 0);
+    // Statut basé sur les dates réelles de l'année (calendrier La Réunion : 15/08 → 15/07)
+    if (a.date_debut && a.date_fin) {
+      const debut = new Date(a.date_debut);
+      const fin = new Date(a.date_fin);
+      if (today >= debut && today <= fin) return 'en_cours';
+      if (today > fin) return 'passee';
+      return 'a_venir';
+    }
+    // Fallback : 15/08 → 15/07 déduit du libellé
+    const startYear = parseInt(a.libelle.split('-')[0]);
+    if (isNaN(startYear)) return 'a_venir';
+    const debut = new Date(`${startYear}-08-15`);
+    const fin = new Date(`${startYear + 1}-07-15`);
+    if (today >= debut && today <= fin) return 'en_cours';
+    if (today > fin) return 'passee';
+    return 'a_venir';
   };
 
   const isActive = (a) => computeStatut(a) === 'en_cours';
