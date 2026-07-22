@@ -296,6 +296,9 @@ const AuthenticatedApp = () => {
         <Route path="/edit-eleve" element={<EditEleve />} />
         <Route path="/items-professionnels" element={<ItemsProfessionnels />} />
         <Route path="/hypotheses-eleve" element={<DiagnosticEleve />} />
+        <Route path="/DetailEleve" element={<Navigate to="/detail-eleve" replace />} />
+        <Route path="/AnalyseMaths" element={<Navigate to="/apprentissage/maths" replace />} />
+        <Route path="/AnalyseEcriture" element={<Navigate to="/apprentissage/ecriture" replace />} />
         <Route path="/tableau-synthese" element={<TableauSynthese />} />
         <Route path="/invite-users" element={<InviteUsers />} />
         <Route path="/equipe-rased" element={<EquipeRased />} />

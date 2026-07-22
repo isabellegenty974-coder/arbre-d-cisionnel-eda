@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Upload, Loader, Check, Search, AlertCircle, ChevronDown, ChevronRight, Users } from 'lucide-react';
+import { titleCase } from '@/lib/utils';
 
 export default function ImportElevesPDF({ onDone }) {
   const [step, setStep] = useState('upload'); // upload | parsing | validate | importing | done
@@ -297,7 +298,7 @@ Retourne uniquement un objet JSON valide.`,
       {/* École détectée */}
       <div style={{ background: '#EAF2FB', border: '1px solid #BFD9F2', borderRadius: 12, padding: '14px 18px', marginBottom: 18 }}>
         <p style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', margin: '0 0 4px', fontWeight: 600 }}>École détectée</p>
-        <p style={{ fontSize: 15, fontWeight: 700, color: '#182840', margin: 0 }}>{extracted?.nom_ecole || <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>Non détectée</span>}</p>
+        <p style={{ fontSize: 15, fontWeight: 700, color: '#182840', margin: 0 }}>{extracted?.nom_ecole ? titleCase(extracted.nom_ecole) : <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>Non détectée</span>}</p>
       </div>
 
       {/* Doublons entre classes */}
@@ -460,7 +461,7 @@ Retourne uniquement un objet JSON valide.`,
           Total : {stats?.classes.length} classe{stats?.classes.length !== 1 ? 's' : ''} · {stats?.totalOk} élève{stats?.totalOk !== 1 ? 's' : ''} importé{stats?.totalOk !== 1 ? 's' : ''}
         </p>
         {stats?.totalErr > 0 && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#B85C1A' }}>{stats.totalErr} erreur{stats.totalErr > 1 ? 's' : ''}</p>}
-        {stats?.ecole && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#566880' }}>École : {stats.ecole}</p>}
+        {stats?.ecole && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#566880' }}>École : {titleCase(stats.ecole)}</p>}
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
