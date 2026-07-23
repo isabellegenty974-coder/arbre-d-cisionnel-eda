@@ -185,7 +185,7 @@ export default function Dashboard() {
       setUser(u); setFiches(f); setEcoles(ec);
       setElevesR(el); setMembres(mb); setNotifs(no);
       setAnnees(an);
-      const active = an.find(a => a.active) || an[0] || null;
+      const active = an.find(a => a.est_active || a.active) || null;
       setAnneeActive(active?.id || null);
       setLoading(false);
     }
