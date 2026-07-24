@@ -303,9 +303,18 @@ export default function Dashboard() {
     .sort((a, b) => new Date(a.updated_date || a.created_date) - new Date(b.updated_date || b.created_date))
     .slice(0, 5);
 
+  // Badge d'alerte par école : compte uniquement les FicheEleve (statut "Suivi
+  // actif" ou "En attente") sans activité depuis 30 jours rattachées à cette
+  // école — jamais les simples élèves importés (EleveRased) sans action.
+  const normEcole = (s) => (s || '').trim().toLowerCase();
   const ecolesStats = ecoles.map(ec => {
     const nbEl = elevesR.filter(e => e.ecole_id === ec.id).length;
-    const nbAl = elevesR.filter(e => e.ecole_id === ec.id && (now - new Date(e.date_derniere_action || e.created_date).getTime()) > MS30).length;
+    const ficheIdsForEcole = new Set(
+      elevesR.filter(e => e.ecole_id === ec.id && e.fiche_eleve_id).map(e => e.fiche_eleve_id)
+    );
+    const nbAl = alertesFichesRefined.filter(f =>
+      ficheIdsForEcole.has(f.id) || normEcole(f.ecole) === normEcole(ec.nom)
+    ).length;
     return { ...ec, nbEl, nbAl };
   });
 
