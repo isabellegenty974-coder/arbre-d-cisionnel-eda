@@ -46,6 +46,8 @@ import DetailEcole from './pages/DetailEcole';
 import ImportPDF from './pages/ImportPDF';
 import Parametres from './pages/Parametres';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Notifications from './pages/Notifications.jsx';
 
 // Pages orphelines déplacées aux bons chemins
@@ -264,7 +266,7 @@ const AuthenticatedApp = () => {
   }
 
   // Allow /register and /login pages without authentication
-  const publicPages = ['/register', '/login'];
+  const publicPages = ['/register', '/login', '/forgot-password', '/reset-password'];
   const isPublicPage = publicPages.some(page => location.pathname.startsWith(page));
 
   if (authError && !isPublicPage && authError.type === 'user_not_registered') {
@@ -281,6 +283,8 @@ const AuthenticatedApp = () => {
         <Route path="/accueil" element={<Accueil />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/resume" element={<Navigate to="/dashboard" replace />} />
         <Route path="/fiche-eleve" element={<FicheEleve />} />
         <Route path="/dashboard" element={<Dashboard />} />

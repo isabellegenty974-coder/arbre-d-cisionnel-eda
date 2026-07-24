@@ -1,353 +1,199 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { motion } from 'framer-motion';
-import { CheckCircle, Loader, AlertCircle } from 'lucide-react';
+import { CheckCircle, Loader2, AlertCircle, Lock } from 'lucide-react';
+import AuthCard from '@/components/auth/AuthCard';
+
+const PROFESSIONS = [
+  { value: 'Psy EN EDA', label: "Psychologue de l'Éducation Nationale · Spécialité EDA" },
+  { value: 'MaDR', label: 'Maître à Dominante Relationnelle (MaDR)' },
+  { value: 'MaDP', label: 'Maître à Dominante Pédagogique (MaDP)' },
+];
 
 export default function Register() {
-  const navigate = useNavigate();
-  const [inviteToken, setInviteToken] = useState(null);
-  const [email, setEmail] = useState('');
-  const [nom, setNom] = useState('');
+  const params = new URLSearchParams(window.location.search);
+  const [email, setEmail] = useState(params.get('email') || '');
   const [prenom, setPrenom] = useState('');
-  const [profession, setProfession] = useState('');
+  const [nom, setNom] = useState('');
+  const [profession, setProfession] = useState(params.get('role') || '');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [invalidToken, setInvalidToken] = useState(false);
-
-  useEffect(() => {
-    const initializeForm = async () => {
-      // Extraire le token d'invitation de l'URL
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token') || params.get('invitation_token');
-      
-      if (token) {
-        setInviteToken(token);
-        // Valider le token en essayant de récupérer le profil utilisateur
-        try {
-          // Le token est déjà défini dans les headers par le SDK
-          const currentUser = await base44.auth.me();
-          if (currentUser) {
-            setEmail(currentUser.email || '');
-            setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
-            setPrenom(currentUser.full_name?.split(' ')[0] || '');
-            setProfession(currentUser.profession || '');
-          }
-        } catch (err) {
-          // Token invalide ou expiré
-          console.error('Token invalide:', err);
-          setInvalidToken(true);
-        }
-      } else {
-        // Pas de token, vérifier si utilisateur connecté
-        try {
-          const currentUser = await base44.auth.me();
-          if (currentUser) {
-            setEmail(currentUser.email || '');
-            setNom(currentUser.full_name?.split(' ').slice(1).join(' ') || '');
-            setPrenom(currentUser.full_name?.split(' ')[0] || '');
-            setProfession(currentUser.profession || '');
-          }
-        } catch (err) {
-          console.log('Utilisateur non authentifié');
-        }
-      }
-      
-      setLoading(false);
-    };
-    
-    initializeForm();
-  }, []);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validation
-    if (!email.trim() || !nom.trim() || !prenom.trim() || !profession || !password.trim()) {
+    setError(null);
+    if (!email.trim() || !prenom.trim() || !nom.trim() || !profession || !password) {
       setError('Tous les champs sont requis');
       return;
     }
-    
-    if (password !== passwordConfirm) {
-      setError('Les mots de passe ne correspondent pas');
-      return;
-    }
-    
     if (password.length < 8) {
       setError('Le mot de passe doit contenir au moins 8 caractères');
       return;
     }
+    if (password !== passwordConfirm) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
 
     setSaving(true);
-    setError(null);
     try {
-      // Mettre à jour le profil utilisateur avec le rôle (profession)
-      const updateData = {
-        full_name: `${prenom.trim()} ${nom.trim()}`,
-        profession, // Stocker le rôle RASED
-        role: 'user', // Rôle système (non-admin par défaut)
-        first_login_seen: false, // Force réaffichage du message de bienvenue
-      };
-      
-      await base44.auth.updateMe(updateData);
-      
-      // Créer/Mettre à jour le profil MembreEquipe
-      try {
-        await base44.entities.MembreEquipe.create({
-          prenom: prenom.trim(),
-          nom: nom.trim(),
-          profession,
-          email: email.trim(),
-          actif: true,
-        });
-      } catch (err) {
-        console.log('Profil équipe existe peut-être déjà');
-      }
-      
-      // Mapper profession pour l'email
-      const professionLabels = {
-        'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA',
-        'MaDR': 'Maître à Dominante Relationnelle (MaDR)',
-        'MaDP': 'Maître à Dominante Pédagogique (MaDP)',
-      };
-      const profLabel = professionLabels[profession] || profession;
-      
-      // Envoyer email de confirmation au nouveau membre
-      const appUrl = window.location.origin;
-      const emailBody = `Bonjour ${prenom.trim()},
+      const mail = email.trim().toLowerCase();
+      const fullName = `${prenom.trim()} ${nom.trim()}`;
 
-Votre compte a bien été créé sur l'application Suivis RASED de l'équipe RASED de la Circonscription de La Possession.
+      // 1. Création du compte avec mot de passe
+      await base44.auth.register({ email: mail, password, full_name: fullName });
 
-Vos informations :
-· Nom : ${prenom.trim()} ${nom.trim()}
-· Rôle : ${profLabel}
-· Email : ${email.trim()}
-
-Vous pouvez dès maintenant vous connecter à l'application :
-${appUrl}
-
-Bienvenue dans l'équipe !
-
-RASED · Circonscription de La Possession
-La Réunion`;
-
-      await base44.integrations.Core.SendEmail({
-        to: email.trim(),
-        subject: 'Confirmation de votre compte Suivis RASED · La Possession',
-        body: emailBody,
-        from_name: 'RASED La Possession',
+      // 2. Authentification puis enregistrement du rôle RASED sur le profil
+      await base44.auth.loginViaEmailPassword(mail, password);
+      await base44.auth.updateMe({
+        full_name: fullName,
+        profession,
+        role: 'user',
+        first_login_seen: false,
       });
 
-      // Notifier les administratrices (Psy-EN)
+      // 3. Profil MembreEquipe (équipe RASED) : met à jour l'invitation en attente
+      // s'il y en a une, sinon crée le profil.
       try {
-        const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-        for (const admin of admins) {
-          await base44.asServiceRole.entities.Notification.create({
-            type: 'membre_rejoint',
-            titre: '👋 Nouveau membre',
-            message: `${prenom.trim()} ${nom.trim()} a rejoint l'équipe en tant que ${profLabel}`,
-            destinataire_email: admin.email,
-            lu: false,
+        const existing = await base44.entities.MembreEquipe.filter({ email: mail }).catch(() => []);
+        if (existing.length > 0) {
+          await base44.entities.MembreEquipe.update(existing[0].id, {
+            prenom: prenom.trim(),
+            nom: nom.trim(),
+            profession,
+            actif: true,
+          });
+        } else {
+          await base44.entities.MembreEquipe.create({
+            prenom: prenom.trim(),
+            nom: nom.trim(),
+            profession,
+            email: mail,
+            actif: true,
           });
         }
-      } catch (err) {
-        console.log('Erreur lors de la création de la notification admin:', err);
+      } catch (e) {
+        // Profil existant ou erreur non bloquante
       }
 
-      // Afficher le message de succès
-      setError(null);
+      setSuccess(true);
       setTimeout(() => {
         window.location.href = '/dashboard?first_login=true';
-      }, 2000);
+      }, 1500);
     } catch (err) {
-      setError(err.message || 'Erreur lors de l\'inscription');
+      const m = (err?.response?.data?.detail || err?.message || '').toLowerCase();
+      if (m.includes('not enabled')) {
+        setError("L'authentification par mot de passe n'est pas encore activée. L'administrateur doit l'activer dans le tableau de bord Base44 (Overview → App visibility → Public → Enable custom auth), puis publier.");
+      } else if (m.includes('already') || m.includes('exist')) {
+        setError('Un compte existe déjà avec cet email. Connectez-vous ou utilisez « Mot de passe oublié ».');
+      } else {
+        setError(err?.response?.data?.detail || err?.message || "Erreur lors de la création du compte.");
+      }
       setSaving(false);
     }
   };
 
-  if (loading) {
+  // Pas d'email dans l'URL = pas de lien d'invitation → accès refusé
+  if (!email) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader className="w-8 h-8 text-primary animate-spin" />
-      </div>
+      <AuthCard
+        emoji="🔒"
+        title="Accès par invitation"
+        subtitle="La création de compte se fait uniquement via un lien d'invitation envoyé par votre administrateur RASED."
+      >
+        <Link to="/login" className="block text-center text-sm text-primary hover:underline">
+          ← Retour à la connexion
+        </Link>
+      </AuthCard>
     );
   }
 
-  if (invalidToken) {
+  if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
-          <div className="bg-white rounded-2xl border border-border shadow-sm p-8 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-red-100 flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-red-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground mb-4">Lien expiré</h1>
-            <p className="text-muted-foreground mb-6">
-              Ce lien d'invitation n'est plus valide. Contactez votre administrateur pour recevoir une nouvelle invitation.
-            </p>
-            <Button onClick={() => navigate('/')} className="w-full">
-              Retour à l'accueil
-            </Button>
-          </div>
-        </motion.div>
-      </div>
+      <AuthCard emoji="✅" title="Compte créé !">
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+          <p className="text-sm text-green-800">
+            Bienvenue {prenom} ! Redirection vers votre tableau de bord…
+          </p>
+        </div>
+      </AuthCard>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">👤</span>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Créer votre compte</h1>
-            <p className="text-sm text-muted-foreground">
-              Outil de suivi collaboratif de l&apos;équipe RASED · Circonscription de La Possession · La Réunion
-            </p>
+    <AuthCard
+      emoji="👤"
+      title="Créer votre compte"
+      subtitle="Outil de suivi collaboratif de l'équipe RASED · Circonscription de La Possession · La Réunion"
+      footer="Vos données sont sécurisées et conformes au RGPD"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Email pré-rempli non modifiable */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+          <div className="flex items-center gap-2">
+            <Input type="email" value={email} disabled className="bg-muted/40 cursor-not-allowed" />
+            <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Prénom */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Prénom
-              </label>
-              <Input
-                type="text"
-                placeholder="Ex: Jean"
-                value={prenom}
-                onChange={(e) => setPrenom(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Nom */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Nom
-              </label>
-              <Input
-                type="text"
-                placeholder="Ex: Dupont"
-                value={nom}
-                onChange={(e) => setNom(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Profession */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Rôle dans l'équipe
-              </label>
-              <select
-                value={profession}
-                onChange={(e) => setProfession(e.target.value)}
-                required
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                <option value="">Sélectionner un rôle</option>
-                <option value="Psy EN EDA">Psychologue de l'Éducation Nationale · Spécialité EDA</option>
-                <option value="MaDR">Maître à Dominante Relationnelle (MaDR)</option>
-                <option value="MaDP">Maître à Dominante Pédagogique (MaDP)</option>
-              </select>
-            </div>
-
-            {/* Mot de passe */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Mot de passe
-              </label>
-              <Input
-                type="password"
-                placeholder="Au moins 8 caractères"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Confirmer mot de passe */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Confirmer le mot de passe
-              </label>
-              <Input
-                type="password"
-                placeholder="Confirmez votre mot de passe"
-                value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* Success Message */}
-            {saving && !error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-green-50 border border-green-200 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-green-800">Compte créé !</p>
-                    <p className="text-sm text-green-700 mt-1">Un email de confirmation a été envoyé à <strong>{email.trim()}</strong></p>
-                    <p className="text-xs text-green-600 mt-2">Redirection en cours...</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Error */}
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-
-            {/* Submit */}
-            <Button
-              type="submit"
-              disabled={saving}
-              className="w-full gap-2"
-            >
-              {saving ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  Inscription...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  Créer mon compte
-                </>
-              )}
-            </Button>
-          </form>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          Vos données sont sécurisées et conformes au RGPD
-        </p>
-      </motion.div>
-    </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">Prénom</label>
+            <Input type="text" placeholder="Ex: Isabelle" value={prenom} onChange={(e) => setPrenom(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">Nom</label>
+            <Input type="text" placeholder="Ex: Genty" value={nom} onChange={(e) => setNom(e.target.value)} required />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Rôle dans l'équipe</label>
+          <select
+            value={profession}
+            onChange={(e) => setProfession(e.target.value)}
+            required
+            className="w-full h-10 px-3 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">Sélectionner un rôle</option>
+            {PROFESSIONS.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Mot de passe</label>
+          <Input type="password" placeholder="Au moins 8 caractères" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Confirmer le mot de passe</label>
+          <Input type="password" placeholder="Confirmez votre mot de passe" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} required />
+        </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
+
+        <Button type="submit" disabled={saving} className="w-full gap-2">
+          {saving ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Création…</>
+          ) : (
+            <><CheckCircle className="w-4 h-4" /> Créer mon compte</>
+          )}
+        </Button>
+      </form>
+    </AuthCard>
   );
 }
