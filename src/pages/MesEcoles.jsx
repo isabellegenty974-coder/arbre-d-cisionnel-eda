@@ -93,15 +93,20 @@ export default function MesEcoles() {
   const fichesAnnee = fiches.filter(ficheDansAnnee);
   const elevesAnnee = eleves.filter(eleveImporteDansAnnee);
 
-  const isStale = (ecole) => {
-    const elevesDEcole = elevesAnnee.filter(el => el.ecole_id === ecole.id);
-    const last = elevesDEcole.reduce((latest, el) => {
-      const d = el.date_derniere_action || el.created_date;
-      return d > latest ? d : latest;
-    }, ecole.created_date);
-    if (!last) return false;
-    return (Date.now() - new Date(last).getTime()) > 30 * 24 * 3600 * 1000;
+  // Alerte "sans mise à jour depuis 30 jours" : basée sur les FicheEleve (et non
+  // les EleveRased). Une fiche déclenche l'alerte si son statut est "Suivi actif"
+  // ou "En attente" (jamais "Nouveau" ni "Clôturé") et que sa dernière activité
+  // (mise à jour ou intervention) remonte à plus de 30 jours.
+  const MS30 = 30 * 24 * 3600 * 1000;
+  const now = Date.now();
+  const lastActivityFiche = (f) => {
+    const lastUpdate = new Date(f.updated_date || f.created_date).getTime();
+    const lastIntervention = f.interventions?.length > 0 ? Math.max(...f.interventions.map(i => new Date(i.date).getTime())) : 0;
+    return Math.max(lastUpdate, lastIntervention);
   };
+  const isFicheAlerte = (f) =>
+    ['Suivi actif', 'En attente'].includes(f.statut) &&
+    (now - lastActivityFiche(f)) > MS30;
 
   const getEcoleStats = (ecoleId) => {
     const ecole = ecoles.find(e => e.id === ecoleId);
@@ -120,13 +125,14 @@ export default function MesEcoles() {
       actif: fichesEcole.filter(f => f.statut === 'Suivi actif').length,
       attente: fichesEcole.filter(f => f.statut === 'En attente').length,
       cloture: fichesEcole.filter(f => f.statut === 'Clôturé').length,
+      alertes: fichesEcole.filter(isFicheAlerte).length,
     };
   };
 
   const totalImportes = elevesAnnee.length;
   const totalSuivis = fichesAnnee.filter(f => f.statut !== 'Clôturé').length;
   const totalClotured = fichesAnnee.filter(f => f.statut === 'Clôturé').length;
-  const totalStale = ecoles.filter(isStale).length;
+  const totalStale = fichesAnnee.filter(isFicheAlerte).length;
 
   const filteredEcoles = ecoles.filter(e =>
     e.nom?.toLowerCase().includes(search.toLowerCase()) ||
@@ -262,7 +268,6 @@ export default function MesEcoles() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredEcoles.map((ecole, i) => {
                 const stats = getEcoleStats(ecole.id);
-                const stale = isStale(ecole);
                 return (
                   <motion.div
                     key={ecole.id}
@@ -287,9 +292,9 @@ export default function MesEcoles() {
                         <div className="flex-1 min-w-0 pr-8">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-bold text-[#0F172A] truncate">{titleCase(ecole.nom)}</h3>
-                            {stale && (
+                            {stats.alertes > 0 && (
                               <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                                <AlertTriangle className="w-3 h-3" /> +30j
+                                <AlertTriangle className="w-3 h-3" /> {stats.alertes} alerte{stats.alertes > 1 ? 's' : ''}
                               </span>
                             )}
                           </div>

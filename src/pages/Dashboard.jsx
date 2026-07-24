@@ -263,17 +263,15 @@ export default function Dashboard() {
   const alertesFiches  = fichesFiltrees.filter(e => (now - new Date(e.updated_date || e.created_date).getTime()) > MS30);
   const elevesClotured = fichesFiltrees.filter(f => f.statut === 'Clôturé').length;
 
-  // Critères pour alertes : fiche, notes ou interventions non mise à jour depuis 30j
-  // Filtrer sur statut "Suivi actif" ou "En attente" seulement
+  // Alerte "sans mise à jour depuis 30 jours" : uniquement les FicheEleve dont le
+  // statut est "Suivi actif" ou "En attente" (jamais "Nouveau" ni "Clôturé") et dont
+  // la dernière activité (mise à jour ou intervention) remonte à plus de 30 jours.
+  // On itère sur les fiches : pas d'alerte possible sans FicheEleve.
   const alertesFichesRefined = fichesFiltrees.filter(f => {
-    const eleveLinked = elevesR.find(e => e.fiche_eleve_id === f.id);
-    if (!eleveLinked || !['Suivi actif', 'En attente'].includes(eleveLinked.statut)) return false;
-
+    if (!['Suivi actif', 'En attente'].includes(f.statut)) return false;
     const lastUpdate = new Date(f.updated_date || f.created_date).getTime();
-    const lastIntervention = f.interventions?.length > 0 ? new Date(Math.max(...f.interventions.map(i => new Date(i.date).getTime()))).getTime() : 0;
-    const lastNote = f.notes ? lastUpdate : 0;
-
-    const mostRecentActivity = Math.max(lastUpdate, lastIntervention, lastNote);
+    const lastIntervention = f.interventions?.length > 0 ? Math.max(...f.interventions.map(i => new Date(i.date).getTime())) : 0;
+    const mostRecentActivity = Math.max(lastUpdate, lastIntervention);
     return (now - mostRecentActivity) > MS30;
   });
 
@@ -455,7 +453,7 @@ export default function Dashboard() {
             {[
                { val: elevesAnnee.length, lbl: 'Élèves du secteur',     ico: '🏫', ibg: '#EAF2FB', trend: 'imports PDF',            warn: false, to: '/mes-ecoles' },
                { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#E4F4ED', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
-              { val: alertesFiches.length, lbl: 'Fiches sans mise à jour depuis 30 jours', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
+              { val: alertesFichesRefined.length, lbl: 'Fiches sans mise à jour depuis 30 jours', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
             ].map((c, i) => (
               <Link key={i} to={c.to} style={{ textDecoration: 'none' }}>
@@ -488,7 +486,7 @@ export default function Dashboard() {
                   const mostRecentActivity = Math.max(lastUpdate, lastIntervention);
                   const days = Math.floor((now - mostRecentActivity) / 86400000);
                   return (
-                    <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < Math.min(5, alertesFiches.length) - 1 ? '1px solid #F0F3F8' : 'none' }}>
+                    <div key={e.id} className="db-row" style={{ ...S.row, borderBottom: i < Math.min(5, alertesFichesRefined.length) - 1 ? '1px solid #F0F3F8' : 'none' }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{e.prenom} {e.nom}</div>
                         <div style={{ fontSize: 11, color: '#566880', marginTop: 1 }}>{[cleanClassName(e.classe), titleCase(e.ecole)].filter(Boolean).join(' · ') || '—'}</div>
