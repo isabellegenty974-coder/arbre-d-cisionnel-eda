@@ -5,106 +5,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Calendar, Check, X, LogOut } from 'lucide-react';
 
 // ── Assistant de rentrée ────────────────────────────────────────────────────
-function AssistantRentree({ annee, ecolesPrecedentes, fiches = [], elevesR = [], diags = [], annees = [], currentUserName, currentUserProfession, onClose }) {
-  const [step, setStep] = useState(1);
-  const [reconduire, setReconduire] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [reconduitCount, setReconduitCount] = useState(0);
-
-  // Année précédente (libellé)
-  const newLibelle = annee?.libelle;
-  const prevStartYear = newLibelle ? parseInt(newLibelle.split('-')[0]) - 1 : null;
-  const prevLibelle = prevStartYear ? `${prevStartYear}-${prevStartYear + 1}` : null;
-  const prevAnnee = annees.find(a => a.libelle === prevLibelle);
-
-  // Élèves à reconduire : fiches de l'année précédente non clôturées
-  const fichesAReconduire = fiches.filter(f => {
-    if (f.statut === 'Clôturé') return false;
-    if (!prevAnnee) return false;
-    if (f.annee_scolaire) return f.annee_scolaire === prevLibelle;
-    const d = new Date(f.created_date);
-    const debut = new Date(prevAnnee.date_debut || `${prevStartYear}-08-15`);
-    const fin = new Date(prevAnnee.date_fin || `${prevStartYear + 1}-07-15`);
-    return d >= debut && d <= fin;
-  });
-
-  const handleReconduire = async (oui) => {
-    setReconduire(oui);
-    if (oui) {
-      setSaving(true);
-      try {
-        const today = new Date().toISOString().slice(0, 10);
-
-        // 1. Copie complète des fiches élèves (statut remis à "Nouveau")
-        const newFichesData = fichesAReconduire.map(f => ({
-          nom: f.nom, prenom: f.prenom, classe: f.classe, ecole: f.ecole, age: f.age,
-          date_naissance: f.date_naissance,
-          observations: f.observations, notes: f.notes,
-          interventions: f.interventions || [],
-          intervenants: f.intervenants || [],
-          score_apprentissages: f.score_apprentissages,
-          score_comportement: f.score_comportement,
-          score_developpement: f.score_developpement,
-          score_contexte: f.score_contexte,
-          hypotheses: f.hypotheses || [],
-          recommandations: f.recommandations || [],
-          date: today,
-          annee_scolaire: newLibelle,
-          createdByName: currentUserName,
-          createdByProfession: currentUserProfession,
-          photo_ee_url: f.photo_ee_url,
-          rapport: f.rapport,
-          statut: 'Nouveau',
-          documents: f.documents || [],
-          problematiques: f.problematiques || {},
-          responsable1: f.responsable1,
-          responsable2: f.responsable2,
-          langue_maison: f.langue_maison,
-          autorisation_parentale: f.autorisation_parentale,
-          date_autorisation: f.date_autorisation,
-        }));
-        const createdFiches = newFichesData.length
-          ? await base44.entities.FicheEleve.bulkCreate(newFichesData)
-          : [];
-
-        // 2. Copie des EleveRased liés (motif conservé, statut "Nouveau")
-        const newElevesData = createdFiches.map((nf, i) => {
-          const oldFiche = fichesAReconduire[i];
-          const oldEleve = elevesR.find(e => e.fiche_eleve_id === oldFiche.id);
-          return {
-            nom: nf.nom, prenom: nf.prenom, date_naissance: nf.date_naissance,
-            classe_id: oldEleve?.classe_id,
-            ecole_id: oldEleve?.ecole_id,
-            statut: 'Nouveau',
-            fiche_eleve_id: nf.id,
-            motif_signalement: oldEleve?.motif_signalement,
-          };
-        }).filter(e => e.fiche_eleve_id);
-        if (newElevesData.length) await base44.entities.EleveRased.bulkCreate(newElevesData);
-
-        // 3. Copie de l'historique EDA (conservé et accessible dans la nouvelle année)
-        const newHistorique = [];
-        createdFiches.forEach((nf, i) => {
-          const oldFiche = fichesAReconduire[i];
-          diags.filter(d => d.eleve_id === oldFiche.id).forEach(rec => {
-            newHistorique.push({
-              eleve_id: nf.id, date: rec.date, domaine: rec.domaine, sous_domaine: rec.sous_domaine,
-              hypotheses: rec.hypotheses, recommandations: rec.recommandations, scores: rec.scores, diagnostic_id: rec.diagnostic_id,
-            });
-          });
-        });
-        if (newHistorique.length) await base44.entities.HistoriqueEDA.bulkCreate(newHistorique);
-
-        setReconduitCount(createdFiches.length);
-      } catch (e) {
-        console.error('Reconduction erreur:', e);
-      } finally {
-        setSaving(false);
-      }
-    }
-    setStep(2);
-  };
-
+function AssistantRentree({ annee, ecolesPrecedentes = [], onClose }) {
+  // À l'activation d'une nouvelle année :
+  //  • les écoles (EcoleRased) sont des entités globales, non rattachées à une année :
+  //    elles persistent automatiquement (nom, adresse, téléphone, email, directeur) ;
+  //  • les classes et les listes d'élèves ne sont JAMAIS reconduites : chaque année
+  //    repart de zéro et les listes doivent être réimportées via PDF ;
+  //  • les fiches de suivi de l'année précédente ne sont pas recréées : elles
+  //    restent consultables en sélectionnant l'année précédente dans le sélecteur.
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ background: '#fff', borderRadius: 20, maxWidth: 460, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.2)' }}>
@@ -117,76 +25,35 @@ function AssistantRentree({ annee, ecolesPrecedentes, fiches = [], elevesR = [],
         </div>
 
         <div style={{ padding: '24px' }}>
-          {step === 1 && (
-            <>
-              <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7, marginBottom: 16 }}>
-                L'année <strong>{annee?.libelle}</strong> est maintenant active.
-              </p>
-              {fichesAReconduire.length > 0 ? (
-                <>
-                  <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7, marginBottom: 16 }}>
-                    Voulez-vous reconduire les <strong>{fichesAReconduire.length} élève{fichesAReconduire.length !== 1 ? 's' : ''}</strong> suivi{fichesAReconduire.length !== 1 ? 's' : ''} de l'année précédente ({prevLibelle}) ?
-                  </p>
-                  <div style={{ fontSize: 12, color: '#566880', lineHeight: 1.6, marginBottom: 20, padding: '10px 14px', background: '#EAF2FB', borderRadius: 10, borderLeft: '3px solid #3B82C4' }}>
-                    📋 Chaque fiche est recopiée intégralement : motif, problématiques, intervenants, séances, documents et historique.
-                    Seul le statut est remis à <strong>« Nouveau »</strong> pour la nouvelle année.
-                    Les {ecolesPrecedentes.length} école{ecolesPrecedentes.length !== 1 ? 's' : ''} sont conservées automatiquement.
-                  </div>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => handleReconduire(false)} disabled={saving}
-                      style={{ flex: 1, padding: '12px', border: '1px solid #D8E1EE', borderRadius: 10, background: '#fff', color: '#566880', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
-                      Non, pas maintenant
-                    </button>
-                    <button onClick={() => handleReconduire(true)} disabled={saving}
-                      style={{ flex: 1, padding: '12px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                      {saving ? 'Reconduction…' : `Oui, reconduire (${fichesAReconduire.length})`}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p style={{ fontSize: 14, color: '#566880', lineHeight: 1.7, marginBottom: 20, padding: '12px 14px', background: '#F8FAFD', borderRadius: 10 }}>
-                    Aucun élève suivi à reconduire depuis {prevLibelle || 'l\'année précédente'}. Les écoles sont conservées automatiquement.
-                  </p>
-                  <button onClick={() => handleReconduire(false)}
-                    style={{ width: '100%', padding: '12px', background: '#1A3353', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                    Continuer
-                  </button>
-                </>
-              )}
-            </>
-          )}
+          <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7, marginBottom: 16 }}>
+            L'année <strong>{annee?.libelle}</strong> est maintenant active.
+          </p>
 
-          {step === 2 && (
-            <>
-              <div style={{ textAlign: 'center', marginBottom: 18 }}>
-                <div style={{ fontSize: 40, marginBottom: 10 }}>{reconduire && reconduitCount > 0 ? '🎓' : '✅'}</div>
-                <p style={{ fontSize: 14, color: '#182840', lineHeight: 1.7 }}>
-                  {reconduire && reconduitCount > 0
-                    ? <>Les fiches complètes de <strong>{reconduitCount} élève{reconduitCount !== 1 ? 's' : ''}</strong> ont été recopiées pour {annee?.libelle}. Le statut de chaque suivi a été remis à « Nouveau ».</>
-                    : 'Parfait. Les écoles sont conservées pour cette nouvelle année.'}
-                </p>
-              </div>
-              {reconduire && reconduitCount > 0 && (
-                <p style={{ fontSize: 12.5, color: '#566880', lineHeight: 1.6, marginBottom: 16, padding: '10px 14px', background: '#FEF0E4', borderRadius: 10 }}>
-                  ℹ️ Pensez à mettre à jour l'école ou la classe des élèves ayant changé d'affectation.
-                </p>
-              )}
-              <p style={{ fontSize: 13.5, color: '#182840', fontWeight: 600, marginBottom: 14 }}>
-                Voulez-vous importer les nouvelles listes de classes en PDF ?
-              </p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={onClose}
-                  style={{ flex: 1, padding: '12px', border: '1px solid #D8E1EE', borderRadius: 10, background: '#fff', color: '#566880', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
-                  Plus tard
-                </button>
-                <Link to="/import-pdf" onClick={onClose}
-                  style={{ flex: 1, padding: '12px', background: '#3B82C4', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  📄 Importer des listes
-                </Link>
-              </div>
-            </>
-          )}
+          {/* Écoles conservées automatiquement */}
+          <div style={{ fontSize: 12.5, color: '#1E7A52', lineHeight: 1.6, marginBottom: 14, padding: '12px 14px', background: '#E4F4ED', borderRadius: 10, borderLeft: '3px solid #1E7A52' }}>
+            🏫 Les <strong>{ecolesPrecedentes.length} école{ecolesPrecedentes.length !== 1 ? 's' : ''}</strong> sont conservées automatiquement (nom, adresse, téléphone, email, directeur).
+          </div>
+
+          {/* Classes et élèves non reconduits */}
+          <div style={{ fontSize: 12.5, color: '#B85C1A', lineHeight: 1.6, marginBottom: 14, padding: '12px 14px', background: '#FEF0E4', borderRadius: 10, borderLeft: '3px solid #B85C1A' }}>
+            📋 Les classes et les listes d'élèves ne sont <strong>pas</strong> reconduites depuis l'année précédente. Chaque année repart de zéro : importez les nouvelles listes via PDF.
+          </div>
+
+          {/* Fiches précédentes accessibles via le sélecteur */}
+          <div style={{ fontSize: 12.5, color: '#254D7A', lineHeight: 1.6, marginBottom: 20, padding: '12px 14px', background: '#EAF2FB', borderRadius: 10, borderLeft: '3px solid #3B82C4' }}>
+            📂 Les fiches de suivi de l'année précédente ne sont pas recréées. Elles restent accessibles en sélectionnant l'année précédente dans le sélecteur.
+          </div>
+
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={onClose}
+              style={{ flex: 1, padding: '12px', border: '1px solid #D8E1EE', borderRadius: 10, background: '#fff', color: '#566880', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+              Plus tard
+            </button>
+            <Link to="/import-pdf" onClick={onClose}
+              style={{ flex: 1, padding: '12px', background: '#3B82C4', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              📄 Importer les listes
+            </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -753,12 +620,6 @@ export default function Parametres() {
         <AssistantRentree
           annee={assistantAnnee}
           ecolesPrecedentes={ecoles}
-          fiches={fiches}
-          elevesR={elevesR}
-          diags={diags}
-          annees={annees}
-          currentUserName={userMembre ? `${userMembre.prenom} ${userMembre.nom}` : (user?.full_name || '')}
-          currentUserProfession={user?.profession || userMembre?.profession || ''}
           onClose={() => { setAssistantAnnee(null); load(); }}
         />
       )}
