@@ -9,10 +9,10 @@ import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import DocumentsSection from '@/components/rased/DocumentsSection';
 import ProblematiquesSection from '@/components/rased/ProblematiquesSection';
 import ResponsablesSection from '@/components/rased/ResponsablesSection';
-import ReportExportModal from '@/components/rased/ReportExportModal';
 import { usePresence } from '@/lib/usePresence';
 import { titleCase } from '@/lib/utils';
 import { generateReport, downloadReport } from '@/lib/reportGenerator';
+import { generateRapportSuivi } from '@/lib/rapportSuiviGenerator';
 import { jsPDF } from 'jspdf';
 
 const PROF_COLOR  = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
@@ -701,8 +701,8 @@ function TabHistorique({ fiche, interventions, historiqueEDA }) {
 }
 
 // ── Onglet Infos ──────────────────────────────────────────────────────────────
-function TabInfos({ fiche, ficheId, navigate, user, setFiche }) {
-  const [showReportModal, setShowReportModal] = useState(false);
+function TabInfos({ fiche, ficheId, navigate, user, setFiche, membres }) {
+  const [generating, setGenerating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   
@@ -717,6 +717,31 @@ function TabInfos({ fiche, ficheId, navigate, user, setFiche }) {
       console.error('Erreur suppression:', error);
       setDeleting(false);
       setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleGenerateRapport = async () => {
+    if (generating) return;
+    setGenerating(true);
+    try {
+      let enseignant = '';
+      if (fiche.ecole && fiche.classe) {
+        const ecoles = await base44.entities.EcoleRased.filter({ nom: fiche.ecole }).catch(() => []);
+        const ecole = ecoles[0];
+        if (ecole) {
+          const classes = await base44.entities.ClasseEcole.filter({ ecole_id: ecole.id }).catch(() => []);
+          const target = cleanClassName(fiche.classe).toLowerCase();
+          const cls = classes.find(c => c.nom && cleanClassName(c.nom).toLowerCase() === target);
+          if (cls && cls.enseignant) enseignant = cls.enseignant;
+        }
+      }
+      const doc = await generateRapportSuivi({ fiche, user, enseignant, membres });
+      downloadReport(doc, `Rapport_suivi_${fiche.prenom}_${fiche.nom}_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (e) {
+      console.error('Erreur génération rapport:', e);
+      alert('Erreur lors de la génération du rapport.');
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -787,20 +812,19 @@ function TabInfos({ fiche, ficheId, navigate, user, setFiche }) {
 
       <Card>
         <CardHead icon="📤" title="Exporter" />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: 14 }}>
-          {[
-            { ico: '📄', lbl: 'Rapport de suivi', sub: 'Générer un PDF officiel', action: () => setShowReportModal(true) },
-          ].map((opt, i) => (
-            <div key={i} onClick={opt.action} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: 'pointer', transition: 'all .14s', background: '#fff' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#D8E1EE'; e.currentTarget.style.background = '#fff'; }}>
-              <span style={{ fontSize: 22 }}>{opt.ico}</span>
-              <div>
-                <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>{opt.lbl}</div>
-                <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{opt.sub}</div>
-              </div>
+        <div style={{ padding: 14 }}>
+          <div onClick={generating ? undefined : handleGenerateRapport} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #D8E1EE', borderRadius: 9, padding: '12px', cursor: generating ? 'wait' : 'pointer', transition: 'all .14s', background: generating ? '#F8FAFD' : '#fff', opacity: generating ? 0.7 : 1 }}
+            onMouseEnter={e => { if (!generating) { e.currentTarget.style.borderColor = '#3B82C4'; e.currentTarget.style.background = '#EAF2FB'; } }}
+            onMouseLeave={e => { if (!generating) { e.currentTarget.style.borderColor = '#D8E1EE'; e.currentTarget.style.background = '#fff'; } }}>
+            <span style={{ fontSize: 22 }}>{generating ? '⏳' : '📄'}</span>
+            <div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: '#182840' }}>Rapport de suivi</div>
+              <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{generating ? 'Génération du PDF…' : 'Générer un PDF officiel'}</div>
             </div>
-          ))}
+          </div>
+          <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 10, lineHeight: 1.5, margin: '10px 0 0' }}>
+            Le PDF regroupe automatiquement l'identité de l'élève, les intervenants, le motif, l'historique des séances, les synthèses EE/ESS et le statut du suivi.
+          </p>
         </div>
       </Card>
 
@@ -847,14 +871,6 @@ function TabInfos({ fiche, ficheId, navigate, user, setFiche }) {
         )}
       </AnimatePresence>
 
-      {/* Modal d'export de rapport */}
-      <ReportExportModal
-        isOpen={showReportModal}
-        onClose={() => setShowReportModal(false)}
-        eleve={fiche}
-        user={user}
-        reportType="synthese"
-      />
     </div>
   );
 }
@@ -953,7 +969,7 @@ export default function DetailFiche() {
               <TabHistorique fiche={fiche} interventions={interventions} historiqueEDA={historiqueEDA} />
             )}
             {activeTab === 'infos' && (
-              <TabInfos fiche={fiche} ficheId={ficheId} navigate={navigate} user={user} setFiche={setFiche} />
+              <TabInfos fiche={fiche} ficheId={ficheId} navigate={navigate} user={user} setFiche={setFiche} membres={membres} />
             )}
           </motion.div>
         </AnimatePresence>
