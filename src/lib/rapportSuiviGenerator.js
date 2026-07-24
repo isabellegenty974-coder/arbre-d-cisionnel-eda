@@ -140,21 +140,12 @@ export async function generateRapportSuivi({ fiche, user, enseignant, membres = 
   doc.text('Rapport de suivi de l\'élève', pageWidth / 2, 16.5, { align: 'center' });
   y = 30;
 
-  // Date + rédacteur
+  // Date de génération (le rédacteur apparaît dans la section Signature)
   doc.setFont('Calibri', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
   doc.text(`Généré le ${dateGeneration}`, M, y);
   y += 6;
-  doc.text(`Rédacteur : ${redacteurNom}`, M, y);
-  y += 5;
-  const redLines = doc.splitTextToSize(redacteurTitre, contentWidth);
-  redLines.forEach((line) => {
-    ensure(5);
-    doc.text(line, M, y);
-    y += 5;
-  });
-  y += 3;
   doc.setDrawColor(180, 180, 180);
   doc.setLineWidth(0.3);
   doc.line(M, y, pageWidth - M, y);
