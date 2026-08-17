@@ -47,12 +47,25 @@ const NAV = [
   { label: 'Statistiques',    ico: '📊', to: '/stats-annuelles' },
   { label: 'Export annuel',   ico: '📥', to: '/export-annuel' },
   { label: 'Paramètres',      ico: '⚙️', to: '/parametres' },
+  { section: 'Administration' },
+  { label: 'Sauvegarde',      ico: '💾', to: '/sauvegarde', adminOnly: true },
 ];
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 
-function Sidebar({ membres, notifications, membresEnLigne = [], loading = false, totalAlertes = 0 }) {
+function Sidebar({ membres, notifications, membresEnLigne = [], loading = false, totalAlertes = 0, user = null }) {
   const location = window.location.pathname;
+  const isAdmin = user?.role === 'admin';
+
+  // Un item adminOnly n'est visible que pour l'administratrice ; un en-tête de
+  // section n'est conservé que s'il précède au moins un item visible.
+  const visibleNav = NAV.filter((item, i) => {
+    if (!item.section) return !item.adminOnly || isAdmin;
+    for (let j = i + 1; j < NAV.length && !NAV[j].section; j++) {
+      if (!NAV[j].adminOnly || isAdmin) return true;
+    }
+    return false;
+  });
 
   return (
     <aside style={{
@@ -72,7 +85,7 @@ function Sidebar({ membres, notifications, membresEnLigne = [], loading = false,
 
       {/* Nav */}
       <nav style={{ padding: '12px 10px', flex: 1, minHeight: 0, overflowY: 'auto' }}>
-        {NAV.map((item, i) => {
+        {visibleNav.map((item, i) => {
           if (item.section) {
              return (
                <div key={i} style={{ fontSize: 9.5, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,.28)', padding: '14px 8px 4px' }}>
@@ -359,7 +372,7 @@ export default function Dashboard() {
 
       {/* SIDEBAR */}
       <div className="db-sidebar">
-        <Sidebar membres={membres} notifications={notifs.length} membresEnLigne={membresEnLigne} loading={loading} totalAlertes={totalAlertes} />
+        <Sidebar membres={membres} notifications={notifs.length} membresEnLigne={membresEnLigne} loading={loading} totalAlertes={totalAlertes} user={user} />
       </div>
 
       {/* MAIN */}

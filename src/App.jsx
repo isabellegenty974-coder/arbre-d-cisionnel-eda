@@ -49,6 +49,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Notifications from './pages/Notifications.jsx';
+import Sauvegarde from './pages/Sauvegarde.jsx';
 
 // Pages orphelines déplacées aux bons chemins
 import ActionsAnxieteSit from './pages/ActionsAnxieteSit';
@@ -316,6 +317,7 @@ const AuthenticatedApp = () => {
         <Route path="/import-pdf" element={<ImportPDF />} />
         <Route path="/parametres" element={<Parametres />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/sauvegarde" element={<Sauvegarde />} />
 
         {/* Redirections des anciennes routes en doublon */}
         <Route path="/DetailEleve" element={<RedirectWithQuery to="/detail-eleve" />} />
