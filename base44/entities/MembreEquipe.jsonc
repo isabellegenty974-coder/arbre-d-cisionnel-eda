@@ -2,6 +2,14 @@
   "name": "MembreEquipe",
   "type": "object",
   "properties": {
+    "civilite": {
+      "type": "string",
+      "enum": [
+        "Mme",
+        "M."
+      ],
+      "description": "Civilit\u00e9 du membre"
+    },
     "prenom": {
       "type": "string",
       "description": "Pr\u00e9nom du membre"
@@ -30,6 +38,7 @@
     }
   },
   "required": [
+    "civilite",
     "prenom",
     "nom",
     "profession"

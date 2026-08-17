@@ -1,19 +1,26 @@
 import { jsPDF } from 'jspdf';
 import { titleCase } from './utils';
 
-// ── Équipe RASED réelle ──────────────────────────────────────────────────────
-const EQUIPE = [
-  { civilite: 'Mme', prenom: 'Isabelle', nom: 'GENTY', profession: 'Psy EN EDA' },
-  { civilite: 'Mme', prenom: 'Laurence', nom: 'PETIT', profession: 'MaDR' },
-  { civilite: 'Mme', prenom: 'Véronique', nom: 'CARO', profession: 'MaDP' },
-];
-
 const COLORS = { 'Psy EN EDA': '#1A3353', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
 const TITRES = {
   'Psy EN EDA': "Psychologue de l'Éducation Nationale · EDA",
   'MaDR': 'Maître à Dominante Relationnelle (MaDR)',
   'MaDP': 'Maître à Dominante Pédagogique (MaDP)',
 };
+
+// ── Helpers équipe (lecture dynamique depuis MembreEquipe) ──────────────────
+function nomAffiche(m) {
+  return `${m.civilite || ''} ${(m.nom || '').toUpperCase()} ${m.prenom}`.replace(/\s+/g, ' ').trim();
+}
+function membresProfession(equipe, profession) {
+  return (equipe || []).filter(m => m.profession === profession);
+}
+function listeNoms(membres, { maj = false } = {}) {
+  const noms = membres.map(m => maj ? nomAffiche(m).toUpperCase() : nomAffiche(m));
+  if (noms.length === 0) return null;
+  if (noms.length === 1) return noms[0];
+  return `${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]}`;
+}
 const TYPE_COLORS = { 'Apprentissage': '#3B82C4', 'Comportement': '#1E7A52', 'Handicap': '#B85C1A' };
 const DIFFICULTE_COLORS = {
   'Anxiété / Inhibition': '#1E7A52',
@@ -289,44 +296,56 @@ function analyseVueEnsemble(s) {
   return lignes;
 }
 
-function analysePsy(s) {
+function analysePsy(s, membres) {
   const p = s.psy;
   const cycleDom = Object.entries(p.parCycle).sort((a, b) => b[1] - a[1])[0];
-  return [
-    `Mme GENTY Isabelle a réalisé ${p.entretiensEleves} entretien${p.entretiensEleves > 1 ? 's' : ''} avec des élèves, ${p.passationsPsycho} passation${p.passationsPsycho > 1 ? 's' : ''} psychométrique${p.passationsPsycho > 1 ? 's' : ''} et ${p.observationsClasse} observation${p.observationsClasse > 1 ? 's' : ''} en classe.`,
-    cycleDom && cycleDom[1] > 0
-      ? `Les situations suivies concernent prioritairement le ${cycleDom[0]} (${pct(cycleDom[1], p.total)} % des dossiers).`
-      : `Aucune tendance de cycle significative ne se dégage sur la période.`,
-    (p.orientationsExternes > 0 || p.dossiersMDPH > 0)
-      ? `${p.orientationsExternes} orientation${p.orientationsExternes > 1 ? 's' : ''} externe${p.orientationsExternes > 1 ? 's' : ''} et ${p.dossiersMDPH} dossier${p.dossiersMDPH > 1 ? 's' : ''} MDPH ont été instruits, illustrant le travail de liaison avec les partenaires extérieurs au secteur.`
-      : `Aucune orientation externe ni dossier MDPH n'a été enregistré sur la période.`,
-  ];
+  const lignes = [];
+  if (membres.length > 0) {
+    const sujet = listeNoms(membres);
+    const verbe = membres.length > 1 ? 'ont réalisé' : 'a réalisé';
+    lignes.push(`${sujet} ${verbe} ${p.entretiensEleves} entretien${p.entretiensEleves > 1 ? 's' : ''} avec des élèves, ${p.passationsPsycho} passation${p.passationsPsycho > 1 ? 's' : ''} psychométrique${p.passationsPsycho > 1 ? 's' : ''} et ${p.observationsClasse} observation${p.observationsClasse > 1 ? 's' : ''} en classe.`);
+  }
+  lignes.push(cycleDom && cycleDom[1] > 0
+    ? `Les situations suivies concernent prioritairement le ${cycleDom[0]} (${pct(cycleDom[1], p.total)} % des dossiers).`
+    : `Aucune tendance de cycle significative ne se dégage sur la période.`);
+  lignes.push((p.orientationsExternes > 0 || p.dossiersMDPH > 0)
+    ? `${p.orientationsExternes} orientation${p.orientationsExternes > 1 ? 's' : ''} externe${p.orientationsExternes > 1 ? 's' : ''} et ${p.dossiersMDPH} dossier${p.dossiersMDPH > 1 ? 's' : ''} MDPH ont été instruits, illustrant le travail de liaison avec les partenaires extérieurs au secteur.`
+    : `Aucune orientation externe ni dossier MDPH n'a été enregistré sur la période.`);
+  return lignes;
 }
 
-function analyseMadr(s) {
+function analyseMadr(s, membres) {
   const m = s.madr;
   const diffDom = Object.entries(m.difficultes).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0];
   const tauxCloture = pct(m.clotureees, m.elevesEnCharge);
-  return [
-    `Mme PETIT Laurence a pris en charge ${m.elevesEnCharge} élève${m.elevesEnCharge > 1 ? 's' : ''} sur l'année, pour ${m.seancesReeducation} séance${m.seancesReeducation > 1 ? 's' : ''} de rééducation (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`,
-    diffDom
-      ? `La difficulté la plus fréquemment traitée est « ${diffDom[0]} », concernant ${diffDom[1]} situation${diffDom[1] > 1 ? 's' : ''}.`
-      : `Aucune difficulté n'a pu être catégorisée précisément sur la période.`,
-    `${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesEnCharge} a${m.elevesEnCharge > 1 ? 'ont' : ''} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`,
-  ];
+  const lignes = [];
+  if (membres.length > 0) {
+    const sujet = listeNoms(membres);
+    const verbe = membres.length > 1 ? 'ont pris' : 'a pris';
+    lignes.push(`${sujet} ${verbe} en charge ${m.elevesEnCharge} élève${m.elevesEnCharge > 1 ? 's' : ''} sur l'année, pour ${m.seancesReeducation} séance${m.seancesReeducation > 1 ? 's' : ''} de rééducation (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`);
+  }
+  lignes.push(diffDom
+    ? `La difficulté la plus fréquemment traitée est « ${diffDom[0]} », concernant ${diffDom[1]} situation${diffDom[1] > 1 ? 's' : ''}.`
+    : `Aucune difficulté n'a pu être catégorisée précisément sur la période.`);
+  lignes.push(`${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesEnCharge} ${m.clotureees > 1 ? 'ont' : 'a'} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`);
+  return lignes;
 }
 
-function analyseMadp(s) {
+function analyseMadp(s, membres) {
   const m = s.madp;
   const domDom = Object.entries(m.domaines).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0];
   const tauxCloture = pct(m.clotureees, m.elevesAccompagnes);
-  return [
-    `Mme CARO Véronique a accompagné ${m.elevesAccompagnes} élève${m.elevesAccompagnes > 1 ? 's' : ''} sur l'année, pour ${m.seancesAide} séance${m.seancesAide > 1 ? 's' : ''} d'aide pédagogique (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`,
-    domDom
-      ? `Le domaine le plus travaillé est « ${domDom[0]} », concernant ${domDom[1]} situation${domDom[1] > 1 ? 's' : ''}.`
-      : `Aucun domaine n'a pu être catégorisé précisément sur la période.`,
-    `${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesAccompagnes} a${m.elevesAccompagnes > 1 ? 'ont' : ''} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`,
-  ];
+  const lignes = [];
+  if (membres.length > 0) {
+    const sujet = listeNoms(membres);
+    const verbe = membres.length > 1 ? 'ont accompagné' : 'a accompagné';
+    lignes.push(`${sujet} ${verbe} ${m.elevesAccompagnes} élève${m.elevesAccompagnes > 1 ? 's' : ''} sur l'année, pour ${m.seancesAide} séance${m.seancesAide > 1 ? 's' : ''} d'aide pédagogique (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`);
+  }
+  lignes.push(domDom
+    ? `Le domaine le plus travaillé est « ${domDom[0]} », concernant ${domDom[1]} situation${domDom[1] > 1 ? 's' : ''}.`
+    : `Aucun domaine n'a pu être catégorisé précisément sur la période.`);
+  lignes.push(`${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesAccompagnes} ${m.clotureees > 1 ? 'ont' : 'a'} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`);
+  return lignes;
 }
 
 function perspectivesPsy(s, anneeN1) {
@@ -554,7 +573,7 @@ function addTextBlock(doc, { x, y, width, lines, fontSize = 10, lineHeight = 5.2
 }
 
 // ── Génération du PDF complet ───────────────────────────────────────────────
-export async function generateRapportAnnuel({ anneeScolaire, fiches, historique, eleves, ecoles }) {
+export async function generateRapportAnnuel({ anneeScolaire, fiches, historique, eleves, ecoles, equipe = [] }) {
   const libelle = anneeScolaire?.libelle || anneeScolaire;
   const anneeN1 = anneeSuivante(libelle);
   const s = computeStats({ fiches, historique: historique || [], eleves: eleves || [], libelle });
@@ -575,16 +594,19 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   doc.text(libelle, pageWidth / 2, 82, { align: 'center' });
   doc.text('Circonscription de La Possession · La Réunion', pageWidth / 2, 90, { align: 'center' });
 
-  const yTeam = 115; const teamWidth = (pageWidth - 2 * margin - 20) / 3;
-  EQUIPE.forEach((m, i) => {
-    const xPos = margin + i * (teamWidth + 10);
-    setFill(doc, COLORS[m.profession]);
-    doc.rect(xPos, yTeam, teamWidth, 38, 'F');
-    setText(doc, '#FFFFFF'); doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
-    doc.text(`${m.civilite} ${m.nom} ${m.prenom}`, xPos + 4, yTeam + 12, { maxWidth: teamWidth - 8 });
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
-    doc.text(TITRES[m.profession], xPos + 4, yTeam + 22, { maxWidth: teamWidth - 8 });
-  });
+  const yTeam = 115;
+  if (equipe.length > 0) {
+    const teamWidth = (pageWidth - 2 * margin - 10 * (equipe.length - 1)) / equipe.length;
+    equipe.forEach((m, i) => {
+      const xPos = margin + i * (teamWidth + 10);
+      setFill(doc, COLORS[m.profession] || '#566880');
+      doc.rect(xPos, yTeam, teamWidth, 38, 'F');
+      setText(doc, '#FFFFFF'); doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+      doc.text(nomAffiche(m), xPos + 4, yTeam + 12, { maxWidth: teamWidth - 8 });
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+      doc.text(TITRES[m.profession] || m.profession, xPos + 4, yTeam + 22, { maxWidth: teamWidth - 8 });
+    });
+  }
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10); setText(doc, '#FFFFFF');
@@ -711,7 +733,8 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   // ───────────────────────── SECTION 3 — PSY-EN (pages suivantes) ──────────
   doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 3, title: 'PSY-EN EDA · MME GENTY ISABELLE', color: COLORS['Psy EN EDA'] });
+  const membresPsy = membresProfession(equipe, 'Psy EN EDA');
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 3, title: `PSY-EN EDA · ${listeNoms(membresPsy, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['Psy EN EDA'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['Psy EN EDA'], perRow: 4,
     items: [
@@ -741,7 +764,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   let y3 = 105;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['Psy EN EDA']);
   doc.text('Analyse qualitative', margin, y3); y3 += 6;
-  y3 = addTextBlock(doc, { x: margin, y: y3, width: contentWidth, lines: analysePsy(s) });
+  y3 = addTextBlock(doc, { x: margin, y: y3, width: contentWidth, lines: analysePsy(s, membresPsy) });
 
   const perspPsy = perspectivesPsy(s, anneeN1);
   y3 += 4;
@@ -753,7 +776,8 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   // ───────────────────────── SECTION 4 — MaDR ───────────────────────────────
   doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 4, title: 'MADR · MME PETIT LAURENCE', color: COLORS['MaDR'] });
+  const membresMadr = membresProfession(equipe, 'MaDR');
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 4, title: `MADR · ${listeNoms(membresMadr, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['MaDR'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDR'], perRow: 4,
     items: [
@@ -786,7 +810,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   let y4 = y + 72;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['MaDR']);
   doc.text('Analyse qualitative', margin, y4); y4 += 6;
-  y4 = addTextBlock(doc, { x: margin, y: y4, width: contentWidth, lines: analyseMadr(s) });
+  y4 = addTextBlock(doc, { x: margin, y: y4, width: contentWidth, lines: analyseMadr(s, membresMadr) });
 
   const perspMadr = perspectivesMadr(s, anneeN1);
   y4 += 4;
@@ -798,7 +822,8 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   // ───────────────────────── SECTION 5 — MaDP ───────────────────────────────
   doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 5, title: 'MADP · MME CARO VÉRONIQUE', color: COLORS['MaDP'] });
+  const membresMadp = membresProfession(equipe, 'MaDP');
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 5, title: `MADP · ${listeNoms(membresMadp, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['MaDP'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDP'], perRow: 4,
     items: [
@@ -833,7 +858,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   let y5 = y + 65;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['MaDP']);
   doc.text('Analyse qualitative', margin, y5); y5 += 6;
-  y5 = addTextBlock(doc, { x: margin, y: y5, width: contentWidth, lines: analyseMadp(s) });
+  y5 = addTextBlock(doc, { x: margin, y: y5, width: contentWidth, lines: analyseMadp(s, membresMadp) });
 
   const perspMadp = perspectivesMadp(s, anneeN1);
   y5 += 4;
@@ -904,11 +929,15 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   doc.text(`Fait à La Possession, le ${dateSignature}`, margin, 46);
 
   let ySig = 64;
-  EQUIPE.forEach(m => {
-    setText(doc, COLORS[m.profession]); doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
-    doc.text(`${m.civilite} ${m.nom} ${m.prenom}`, margin, ySig);
+  if (equipe.length === 0) {
+    setText(doc, '#94A3B8'); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.text("Aucun membre renseigné dans l'équipe RASED.", margin, ySig);
+  }
+  equipe.forEach(m => {
+    setText(doc, COLORS[m.profession] || '#566880'); doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+    doc.text(nomAffiche(m), margin, ySig);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); setText(doc, '#566880');
-    doc.text(TITRES[m.profession], margin, ySig + 6);
+    doc.text(TITRES[m.profession] || m.profession, margin, ySig + 6);
     setDraw(doc, '#94A3B8');
     doc.line(margin, ySig + 22, margin + 70, ySig + 22);
     setText(doc, '#94A3B8'); doc.setFontSize(8);

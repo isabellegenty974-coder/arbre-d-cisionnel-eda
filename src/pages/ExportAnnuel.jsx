@@ -14,11 +14,11 @@ function currentAnneeScolaire() {
   return m >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`;
 }
 
-const MEMBRES = [
-  { nom: 'Mme GENTY Isabelle',   role: "Psychologue de l'Éducation Nationale · EDA", color: '#1A3353', profession: 'Psy EN EDA' },
-  { nom: 'Mme PETIT Laurence',   role: 'Maître à Dominante Relationnelle (MaDR)',     color: '#1E7A52', profession: 'MaDR' },
-  { nom: 'Mme CARO Véronique',   role: 'Maître à Dominante Pédagogique (MaDP)',       color: '#B85C1A', profession: 'MaDP' },
-];
+const PROFESSION_META = {
+  'Psy EN EDA': { role: "Psychologue de l'Éducation Nationale · EDA", color: '#1A3353' },
+  'MaDR':       { role: 'Maître à Dominante Relationnelle (MaDR)',     color: '#1E7A52' },
+  'MaDP':       { role: 'Maître à Dominante Pédagogique (MaDP)',       color: '#B85C1A' },
+};
 
 export default function ExportAnnuel() {
   const navigate  = useNavigate();
@@ -34,7 +34,8 @@ export default function ExportAnnuel() {
       base44.entities.EleveRased.list('-created_date', 500),
       base44.entities.EcoleRased.list('-nom', 100),
       base44.entities.AnneeScolaire.list('-libelle', 20),
-    ]).then(([fiches, historique, eleves, ecoles, annees]) => {
+      base44.entities.MembreEquipe.list(),
+    ]).then(([fiches, historique, eleves, ecoles, annees, equipe]) => {
       const fichesAnnee = fiches.filter(f => f.annee_scolaire === libelle);
       const anneeCourante = annees.find(a => a.libelle === libelle) || { libelle };
 
@@ -53,7 +54,7 @@ export default function ExportAnnuel() {
         ecoleMap[f.ecole][cl] = (ecoleMap[f.ecole][cl] || 0) + 1;
       });
 
-      setData({ fiches, historique, eleves, ecoles, annees, anneeCourante, libelle,
+      setData({ fiches, historique, eleves, ecoles, annees, equipe, anneeCourante, libelle,
         fichesAnnee, overview: { nbEleves, nbEcoles, nbNouvelles, nbClotures, nbSeances }, ecoleMap });
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -69,6 +70,7 @@ export default function ExportAnnuel() {
         historique:    data.historique,
         eleves:        data.eleves,
         ecoles:        data.ecoles,
+        equipe:        data.equipe,
       });
       doc.save(`Rapport_RASED_${libelle}.pdf`);
     } finally {
@@ -171,19 +173,24 @@ export default function ExportAnnuel() {
                 Section 3 — Séances par membre
               </div>
               <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 14 }}>Détail complet des actes dans le rapport PDF</div>
-              {MEMBRES.map(({ nom, role, color, profession }) => {
+              {data.equipe.length === 0 && (
+                <div style={{ fontSize: 12.5, color: '#94A3B8', padding: '8px 0' }}>Aucun membre renseigné dans l'équipe RASED.</div>
+              )}
+              {data.equipe.map((m) => {
+                const meta = PROFESSION_META[m.profession] || { role: m.profession, color: '#566880' };
+                const nom = `${m.civilite || ''} ${(m.nom || '').toUpperCase()} ${m.prenom}`.replace(/\s+/g, ' ').trim();
                 const actes = data.fichesAnnee.flatMap(f =>
-                  (f.interventions || []).filter(iv => iv.profession === profession)
+                  (f.interventions || []).filter(iv => iv.profession === m.profession)
                 );
                 return (
-                  <div key={nom} style={{ borderRadius: 10, border: `1px solid ${color}30`, padding: '12px 14px', marginBottom: 8 }}>
+                  <div key={m.id} style={{ borderRadius: 10, border: `1px solid ${meta.color}30`, padding: '12px 14px', marginBottom: 8 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color }}>{nom}</div>
-                        <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{role}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: meta.color }}>{nom}</div>
+                        <div style={{ fontSize: 11, color: '#566880', marginTop: 2 }}>{meta.role}</div>
                       </div>
                       <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 12 }}>
-                        <div style={{ fontSize: 18, fontWeight: 700, color }}>{actes.length}</div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: meta.color }}>{actes.length}</div>
                         <div style={{ fontSize: 10, color: '#566880' }}>acte{actes.length > 1 ? 's' : ''}</div>
                       </div>
                     </div>

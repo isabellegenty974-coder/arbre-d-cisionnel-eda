@@ -29,6 +29,7 @@ export default function EquipeRased() {
   const [prenom, setPrenom] = useState('');
   const [nom, setNom] = useState('');
   const [profession, setProfession] = useState('');
+  const [civilite, setCivilite] = useState('');
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -59,6 +60,7 @@ export default function EquipeRased() {
     setPrenom('');
     setNom('');
     setProfession('');
+    setCivilite('');
     setShowForm(true);
   };
 
@@ -67,17 +69,18 @@ export default function EquipeRased() {
     setPrenom(member.prenom || '');
     setNom(member.nom || '');
     setProfession(member.profession || '');
+    setCivilite(member.civilite || '');
     setShowForm(true);
   };
 
   const handleSave = async () => {
-    if (!prenom.trim() || !nom.trim() || !profession) return;
+    if (!prenom.trim() || !nom.trim() || !profession || !civilite) return;
     setSaving(true);
     try {
       if (editingMember) {
-        await base44.entities.MembreEquipe.update(editingMember.id, { prenom: prenom.trim(), nom: nom.trim(), profession });
+        await base44.entities.MembreEquipe.update(editingMember.id, { civilite, prenom: prenom.trim(), nom: nom.trim(), profession });
       } else {
-        await base44.entities.MembreEquipe.create({ prenom: prenom.trim(), nom: nom.trim(), profession });
+        await base44.entities.MembreEquipe.create({ civilite, prenom: prenom.trim(), nom: nom.trim(), profession });
       }
       await loadMembers();
       setShowForm(false);
@@ -267,6 +270,18 @@ export default function EquipeRased() {
             </h2>
             <div className="space-y-4">
               <div>
+                <label className="block text-sm font-medium text-[#0F172A] mb-2">Civilité</label>
+                <select
+                  value={civilite}
+                  onChange={(e) => setCivilite(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-[#D4A574]/50 bg-white text-[#0F172A] text-sm focus:outline-none focus:ring-1 focus:ring-[#D4A574]"
+                >
+                  <option value="">Sélectionner une civilité</option>
+                  <option value="Mme">Mme</option>
+                  <option value="M.">M.</option>
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-[#0F172A] mb-2">Prénom</label>
                 <Input
                   type="text"
@@ -303,7 +318,7 @@ export default function EquipeRased() {
             <div className="flex gap-2 mt-6">
               <Button
                 onClick={handleSave}
-                disabled={saving || !prenom.trim() || !nom.trim() || !profession}
+                disabled={saving || !prenom.trim() || !nom.trim() || !profession || !civilite}
                 className="flex-1 bg-[#D4A574] hover:bg-[#C49464] text-[#0F172A] border-0 font-semibold"
               >
                 {saving ? 'Sauvegarde...' : 'Valider'}
