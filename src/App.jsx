@@ -11,6 +11,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { DiagnosticProvider } from '@/lib/DiagnosticContext';
 import ResumeButton from '@/components/tree/ResumeButton';
 import BottomBar from '@/components/Navigation/BottomBar';
+import ReconnectButton from '@/components/ReconnectButton';
 import WelcomeModal from '@/components/WelcomeModal';
 
 // Pages
@@ -279,6 +280,7 @@ const AuthenticatedApp = () => {
       {showWelcome && <WelcomeModal onClose={handleWelcomeClose} />}
       <ResumeButton />
       <BottomBar />
+      <ReconnectButton />
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/accueil" element={<Accueil />} />
