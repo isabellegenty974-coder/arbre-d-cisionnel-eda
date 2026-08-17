@@ -1,7 +1,7 @@
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useLocation } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import GoogleIcon from '@/components/GoogleIcon';
 
 const PUBLIC_PAGES = ['/login', '/register', '/forgot-password', '/reset-password'];
 
@@ -23,7 +23,10 @@ export default function ReconnectButton() {
     // aujourd'hui — pour que ce bandeau ne se retrouve jamais collé sous la
     // zone de geste (encoche/barre d'accueil) sur mobile.
     <button
-      onClick={() => base44.auth.redirectToLogin(window.location.href)}
+      // Authentification par mot de passe désactivée côté Base44 : la
+      // reconnexion passe directement par Google plutôt que par /login
+      // (qui n'affiche plus de formulaire fonctionnel — voir Login.jsx).
+      onClick={() => base44.auth.loginWithProvider('google', window.location.pathname + window.location.search)}
       style={{
         position: 'fixed',
         left: 0,
@@ -33,7 +36,7 @@ export default function ReconnectButton() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 7,
+        gap: 9,
         width: '100%',
         padding: '10px 16px',
         background: '#1A3353',
@@ -45,7 +48,10 @@ export default function ReconnectButton() {
         cursor: 'pointer',
       }}
     >
-      <LogIn size={15} /> Se connecter
+      <span style={{ background: '#fff', borderRadius: 4, width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <GoogleIcon className="w-3.5 h-3.5" />
+      </span>
+      Se connecter avec Google
     </button>
   );
 }
