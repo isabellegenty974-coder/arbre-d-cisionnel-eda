@@ -16,25 +16,33 @@ export default function ReconnectButton() {
   if (PUBLIC_PAGES.some((p) => location.pathname.startsWith(p))) return null;
 
   return (
+    // Bandeau pleine largeur, empilé juste au-dessus de la BottomBar (h-16 =
+    // 4rem) plutôt qu'en superposition d'un contenu existant (ex: l'année
+    // scolaire affichée en haut de l'écran). Le safe-area-inset-bottom est
+    // ajouté à l'offset — même si BottomBar ne le respecte pas elle-même
+    // aujourd'hui — pour que ce bandeau ne se retrouve jamais collé sous la
+    // zone de geste (encoche/barre d'accueil) sur mobile.
     <button
       onClick={() => base44.auth.redirectToLogin(window.location.href)}
       style={{
         position: 'fixed',
-        top: 14,
-        right: 16,
-        zIndex: 100,
+        left: 0,
+        right: 0,
+        bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+        zIndex: 40,
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 7,
-        padding: '9px 16px',
+        width: '100%',
+        padding: '10px 16px',
         background: '#1A3353',
         color: '#fff',
         border: 'none',
-        borderRadius: 10,
+        borderTop: '1px solid rgba(255,255,255,.1)',
         fontSize: 13,
         fontWeight: 600,
         cursor: 'pointer',
-        boxShadow: '0 2px 12px rgba(26,51,83,.25)',
       }}
     >
       <LogIn size={15} /> Se connecter
