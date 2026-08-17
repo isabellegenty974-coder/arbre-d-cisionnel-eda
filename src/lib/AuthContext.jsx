@@ -113,10 +113,23 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(false);
       setAuthChecked(true);
     } catch (error) {
-      // La session persiste indéfiniment : un échec de vérification (réseau, jeton
-      // momentanément refusé côté serveur) ne déconnecte jamais l'utilisateur.
-      // Seul un appel explicite à logout() peut le faire.
       console.error('User auth check failed:', error);
+      const status = error?.status ?? error?.response?.status;
+      // Vrai 401 serveur : le jeton est invalide ou périmé. On nettoie le
+      // jeton local et on redirige vers l'écran de connexion natif Base44.
+      // Tout autre échec (hors connexion, timeout, 5xx, réseau coupé dans
+      // une école sans couverture) est ignoré : on conserve le jeton et
+      // l'état courant pour ne pas perdre les saisies en attente de sync
+      // ni rendre le mode hors ligne inutilisable.
+      if (status === 401) {
+        clearStoredToken();
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoadingAuth(false);
+        setAuthChecked(true);
+        base44.auth.redirectToLogin(window.location.href);
+        return;
+      }
       setIsLoadingAuth(false);
       setAuthChecked(true);
     }
