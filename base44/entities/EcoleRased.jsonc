@@ -35,6 +35,10 @@
       "type": "string",
       "description": "Nom du directeur / de la directrice"
     },
+    "jour_decharge_directeur": {
+      "type": "string",
+      "description": "Jour(s) de décharge du directeur / de la directrice, en texte libre (ex: 'lundi matin et jeudi')"
+    },
     "nombre_classes": {
       "type": "number",
       "description": "Nombre de classes"

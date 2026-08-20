@@ -13,6 +13,7 @@ const EMPTY_FORM = {
   telephone: '',
   email: '',
   directeur: '',
+  jour_decharge_directeur: '',
   nombre_classes: '',
   membres_rased: [],
 };
@@ -34,6 +35,7 @@ export default function AddEcoleModal({ open, onClose, membres, onSaved, ecole =
           telephone: ecole.telephone || '',
           email: ecole.email || '',
           directeur: ecole.directeur || '',
+          jour_decharge_directeur: ecole.jour_decharge_directeur || '',
           nombre_classes: ecole.nombre_classes || '',
           membres_rased: ecole.membres_rased || [],
         });
@@ -176,6 +178,18 @@ export default function AddEcoleModal({ open, onClose, membres, onSaved, ecole =
                 className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
+          </div>
+
+          {/* Jour(s) de décharge du directeur */}
+          <div>
+            <label className="text-sm font-semibold text-gray-700 block mb-1.5">Jour(s) de décharge du directeur</label>
+            <input
+              type="text"
+              value={form.jour_decharge_directeur}
+              onChange={e => setForm(f => ({ ...f, jour_decharge_directeur: e.target.value }))}
+              placeholder="Ex : lundi matin et jeudi"
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
           </div>
 
           {/* Membres RASED */}

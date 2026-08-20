@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Plus, Download, AlertTriangle, Loader, FileText,
-  Phone, Mail, User, MapPin, Pencil, School, Trash2
+  Phone, Mail, User, MapPin, Pencil, School, Trash2, CalendarClock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddEleveModal from '@/components/rased/AddEleveModal';
@@ -186,6 +186,15 @@ export default function DetailEcole() {
                 </div>
               </div>
             )}
+            {ecole.jour_decharge_directeur && (
+              <div className="flex items-start gap-2.5">
+                <CalendarClock className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Jour(s) de décharge du directeur</p>
+                  <p className="text-sm text-gray-800 font-medium">{ecole.jour_decharge_directeur}</p>
+                </div>
+              </div>
+            )}
             {ecole.telephone && (
               <div className="flex items-start gap-2.5">
                 <Phone className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
@@ -234,7 +243,7 @@ export default function DetailEcole() {
           )}
 
           {/* Placeholder si aucune info */}
-          {!ecole.directeur && !ecole.telephone && !ecole.email && !ecole.adresse && (
+          {!ecole.directeur && !ecole.jour_decharge_directeur && !ecole.telephone && !ecole.email && !ecole.adresse && (
             <div className="text-center py-3">
               <p className="text-sm text-gray-400">Aucune information de contact renseignée.</p>
               <button onClick={() => setShowEditEcole(true)} className="text-blue-500 text-sm hover:underline mt-1">+ Compléter la fiche école</button>
