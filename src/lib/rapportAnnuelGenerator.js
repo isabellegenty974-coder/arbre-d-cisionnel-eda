@@ -540,7 +540,6 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
       ['Psy-EN EDA', s.parCategorie['Psy-EN'], `${pct(s.parCategorie['Psy-EN'], s.totalDemandes)} %`],
       ['MaDR', s.parCategorie['MaDR'], `${pct(s.parCategorie['MaDR'], s.totalDemandes)} %`],
       ['MaDP', s.parCategorie['MaDP'], `${pct(s.parCategorie['MaDP'], s.totalDemandes)} %`],
-      ['Aménagements', s.parCategorie['Aménagements'], `${pct(s.parCategorie['Aménagements'], s.totalDemandes)} %`],
       ['TOTAL', s.totalDemandes, '100 %'],
     ],
   });
