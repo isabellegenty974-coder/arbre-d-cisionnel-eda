@@ -150,7 +150,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   const [showMotifSuccess, setShowMotifSuccess] = useState(false);
   const [addingIntervention, setAddingIntervention] = useState(false);
   const [editingInterventionId, setEditingInterventionId] = useState(null);
-  const [newIntervention, setNewIntervention] = useState({ date: '', nom: '', description: '', profession: '', commentaire: '' });
+  const [newIntervention, setNewIntervention] = useState({ date: '', membre_id: '', nom: '', description: '', profession: '', commentaire: '' });
   const [showRapport, setShowRapport] = useState(false);
   const [addingSynthese, setAddingSynthese] = useState(false);
   const [newSynthese, setNewSynthese] = useState({ date: '', membres: '', decisions: '', fichier_url: '' });
@@ -159,10 +159,10 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
 
   // Pré-sélectionner le membre connecté
   useEffect(() => {
-    if (membres.length > 0 && user && addingIntervention && !newIntervention.nom) {
+    if (membres.length > 0 && user && addingIntervention && !newIntervention.membre_id) {
       const membreUser = membres.find(m => m.prenom === user.full_name?.split(' ')[0]);
       if (membreUser) {
-        setNewIntervention(prev => ({ ...prev, nom: `${membreUser.prenom} ${membreUser.nom}`, profession: membreUser.profession }));
+        setNewIntervention(prev => ({ ...prev, membre_id: membreUser.id, nom: `${membreUser.prenom} ${membreUser.nom}`, profession: membreUser.profession }));
       }
     }
   }, [addingIntervention, membres, user]);
@@ -218,7 +218,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
   };
 
   const addIntervention = async () => {
-    if (!newIntervention.date) return;
+    if (!newIntervention.date || !newIntervention.membre_id) return;
     let updated;
     if (editingInterventionId !== null) {
       updated = interventions.map((iv, idx) => idx === editingInterventionId ? newIntervention : iv);
@@ -228,7 +228,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
     await base44.entities.FicheEleve.update(ficheId, { interventions: updated });
     setFiche(f => ({ ...f, interventions: updated }));
     setInterventions(updated);
-    setNewIntervention({ date: '', nom: '', description: '', profession: '', commentaire: '' });
+    setNewIntervention({ date: '', membre_id: '', nom: '', description: '', profession: '', commentaire: '' });
     setAddingIntervention(false);
     setEditingInterventionId(null);
   };
@@ -243,7 +243,11 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
 
   const editIntervention = (idx) => {
     setEditingInterventionId(idx);
-    setNewIntervention(interventions[idx]);
+    const iv = interventions[idx];
+    // Interventions enregistrées avant ce correctif : pas de membre_id stocké,
+    // on le retrouve par correspondance de nom pour que le select l'affiche.
+    const membreId = iv.membre_id || membres.find(m => `${m.prenom} ${m.nom}` === iv.nom)?.id || '';
+    setNewIntervention({ ...iv, membre_id: membreId });
     setAddingIntervention(true);
   };
 
@@ -361,7 +365,7 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
       <Card>
         <CardHead icon="📋" title="Séances et interventions"
           action={addingIntervention ? undefined : '+ Ajouter'}
-          onAction={() => { setAddingIntervention(true); setEditingInterventionId(null); setNewIntervention({ date: '', nom: '', description: '', profession: '', commentaire: '' }); }} />
+          onAction={() => { setAddingIntervention(true); setEditingInterventionId(null); setNewIntervention({ date: '', membre_id: '', nom: '', description: '', profession: '', commentaire: '' }); }} />
         <div style={{ padding: 14 }}>
           {addingIntervention && (
             <div style={{ background: '#F8FAFD', borderRadius: 10, padding: 14, marginBottom: 14, border: '1px solid #D8E1EE', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -369,10 +373,10 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                 { label: 'Date', content: <input type="date" value={newIntervention.date} onChange={e => setNewIntervention({...newIntervention, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
                 { label: 'Professionnel de l\'équipe RASED', content: (
                   <div>
-                    <select value={newIntervention.nom} onChange={e => {
+                    <select value={newIntervention.membre_id} onChange={e => {
                       const membreId = e.target.value;
                       const membre = membres.find(m => m.id === membreId);
-                      setNewIntervention({...newIntervention, nom: membre ? `${membre.prenom} ${membre.nom}` : '', profession: membre?.profession || ''});
+                      setNewIntervention({...newIntervention, membre_id: membreId, nom: membre ? `${membre.prenom} ${membre.nom}` : '', profession: membre?.profession || ''});
                     }} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', boxSizing: 'border-box', height: 36 }}>
                       <option value="">— Sélectionner un professionnel —</option>
                       {membres.map(m => (
@@ -431,8 +435,8 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                 </div>
               ))}
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => { setAddingIntervention(false); setEditingInterventionId(null); setNewIntervention({ date: '', nom: '', description: '', profession: '', commentaire: '' }); }} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
-                <button onClick={addIntervention} disabled={!newIntervention.date} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: !newIntervention.date ? 0.5 : 1 }}>{editingInterventionId !== null ? 'Mettre à jour' : 'Ajouter'}</button>
+                <button onClick={() => { setAddingIntervention(false); setEditingInterventionId(null); setNewIntervention({ date: '', membre_id: '', nom: '', description: '', profession: '', commentaire: '' }); }} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: 'transparent', border: '1px solid #D8E1EE', cursor: 'pointer', color: '#566880' }}>Annuler</button>
+                <button onClick={addIntervention} disabled={!newIntervention.date || !newIntervention.membre_id} style={{ padding: '7px 14px', fontSize: 12.5, borderRadius: 7, background: '#1A3353', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, opacity: (!newIntervention.date || !newIntervention.membre_id) ? 0.5 : 1 }}>{editingInterventionId !== null ? 'Mettre à jour' : 'Ajouter'}</button>
               </div>
             </div>
           )}
