@@ -92,6 +92,8 @@ const ACTES = {
     liaisonEnseignant: "Liaison avec l'enseignant·e",
     orientationExterne: 'Orientation externe (Psy-EN)',
     dossierMDPH: 'Dossier MDPH (Psy-EN)',
+    reunionEquipe: "Réunion d'équipe RASED",
+    autre: 'Autre',
   },
   'MaDR': {
     entretienEleve: "Entretien avec l'élève (MaDR)",
@@ -103,6 +105,8 @@ const ACTES = {
     participationEE: 'Participation à une EE (MaDR)',
     liaisonEnseignant: "Liaison avec l'enseignant·e (MaDR)",
     orientationExterne: 'Orientation externe (MaDR)',
+    reunionEquipe: "Réunion d'équipe RASED",
+    autre: 'Autre',
   },
   'MaDP': {
     entretienEleve: "Entretien avec l'élève (MaDP)",
@@ -114,13 +118,12 @@ const ACTES = {
     participationEE: 'Participation à une EE (MaDP)',
     liaisonEnseignant: "Liaison avec l'enseignant·e (MaDP)",
     orientationExterne: 'Orientation externe (MaDP)',
+    reunionEquipe: "Réunion d'équipe RASED",
+    autre: 'Autre',
   },
 };
 function compteActe(actes, description) {
   return actes.filter(a => a.description === description).length;
-}
-function compteActeParmi(actes, descriptions) {
-  return actes.filter(a => descriptions.includes(a.description)).length;
 }
 function anneeSuivante(libelle) {
   const m = /^(\d{4})-(\d{4})$/.exec(libelle || '');
@@ -184,9 +187,12 @@ function computeStats({ fiches, eleves, libelle }) {
     observationsClasse: compteActe(actesPsy, APsy.observationClasse),
     comptesRendus: actesPsy.filter(a => a.commentaire && a.commentaire.trim()).length,
     entretiensFamilles: compteActe(actesPsy, APsy.entretienFamille),
-    participationsESSEE: compteActeParmi(actesPsy, [APsy.participationESS, APsy.participationEE]),
+    participationsESS: compteActe(actesPsy, APsy.participationESS),
+    participationsEE: compteActe(actesPsy, APsy.participationEE),
     orientationsExternes: compteActe(actesPsy, APsy.orientationExterne),
     dossiersMDPH: compteActe(actesPsy, APsy.dossierMDPH),
+    reunionEquipe: compteActe(actesPsy, APsy.reunionEquipe),
+    autre: compteActe(actesPsy, APsy.autre),
     liaisonsEnseignants: compteActe(actesPsy, APsy.liaisonEnseignant),
     parCycle: parCyclePsy,
     total: fichesPsy.length,
@@ -215,6 +221,8 @@ function computeStats({ fiches, eleves, libelle }) {
     liaisonsEnseignants: compteActe(actesMadr, AMadr.liaisonEnseignant),
     participationsEE: compteActe(actesMadr, AMadr.participationEE),
     orientationsExternes: compteActe(actesMadr, AMadr.orientationExterne),
+    reunionEquipe: compteActe(actesMadr, AMadr.reunionEquipe),
+    autre: compteActe(actesMadr, AMadr.autre),
     parCycle: parCycleMadr,
     total: fichesMadr.length,
   };
@@ -241,6 +249,8 @@ function computeStats({ fiches, eleves, libelle }) {
     entretiensFamilles: compteActe(actesMadp, AMadp.entretienFamille),
     participationsEE: compteActe(actesMadp, AMadp.participationEE),
     orientationsExternes: compteActe(actesMadp, AMadp.orientationExterne),
+    reunionEquipe: compteActe(actesMadp, AMadp.reunionEquipe),
+    autre: compteActe(actesMadp, AMadp.autre),
     parCycle: parCycleMadp,
     total: fichesMadp.length,
   };
@@ -702,16 +712,20 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['Psy EN EDA'], perRow: 4,
     items: [
-      { label: 'Entretiens élèves', value: s.psy.entretiensEleves },
-      { label: 'Passations psychométriques', value: s.psy.passationsPsycho },
-      { label: 'Observations en classe', value: s.psy.observationsClasse },
-      { label: 'Entretiens avec notes', value: s.psy.comptesRendus },
-      { label: 'Entretiens familles', value: s.psy.entretiensFamilles },
-      { label: 'Participations ESS/EE', value: s.psy.participationsESSEE },
-      { label: 'Orientations externes', value: s.psy.orientationsExternes },
-      { label: 'Dossiers MDPH instruits', value: s.psy.dossiersMDPH },
-      { label: 'Liaisons enseignant·es', value: s.psy.liaisonsEnseignants },
+      { label: "Entretien avec l'élève", value: s.psy.entretiensEleves },
+      { label: 'Passation psychométrique', value: s.psy.passationsPsycho },
+      { label: 'Observation en classe', value: s.psy.observationsClasse },
+      { label: 'Entretien avec la famille', value: s.psy.entretiensFamilles },
+      { label: 'Participation à une ESS', value: s.psy.participationsESS },
+      { label: 'Participation à une EE', value: s.psy.participationsEE },
+      { label: "Liaison avec l'enseignant·e", value: s.psy.liaisonsEnseignants },
+      { label: 'Orientation externe', value: s.psy.orientationsExternes },
+      { label: 'Dossier MDPH', value: s.psy.dossiersMDPH },
+      { label: "Réunion d'équipe RASED", value: s.psy.reunionEquipe },
+      { label: 'Autre', value: s.psy.autre },
       { label: 'Élèves suivis (total)', value: s.psy.total },
+      { label: 'Prises en charge clôturées', value: s.psy.clotures },
+      { label: 'Entretiens avec notes', value: s.psy.comptesRendus },
     ],
   });
   addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
@@ -745,18 +759,20 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDR'], perRow: 4,
     items: [
+      { label: "Entretien avec l'élève", value: s.madr.entretiensEleves },
+      { label: 'Séance de rééducation', value: s.madr.seancesReeducation },
+      { label: 'Suivi individuel', value: s.madr.suivisIndividuels },
+      { label: 'Suivi en groupe', value: s.madr.suivisGroupe },
+      { label: 'Observation en classe', value: s.madr.observationsClasse },
+      { label: 'Entretien avec la famille', value: s.madr.entretiensFamilles },
+      { label: 'Participation à une EE', value: s.madr.participationsEE },
+      { label: "Liaison avec l'enseignant·e", value: s.madr.liaisonsEnseignants },
+      { label: 'Orientation externe', value: s.madr.orientationsExternes },
+      { label: "Réunion d'équipe RASED", value: s.madr.reunionEquipe },
+      { label: 'Autre', value: s.madr.autre },
       { label: 'Élèves pris en charge', value: s.madr.elevesEnCharge },
-      { label: 'Entretiens élèves', value: s.madr.entretiensEleves },
-      { label: 'Séances de rééducation', value: s.madr.seancesReeducation },
-      { label: 'Suivis individuels', value: s.madr.suivisIndividuels },
-      { label: 'Suivis en groupe', value: s.madr.suivisGroupe },
-      { label: 'Observations en classe', value: s.madr.observationsClasse },
-      { label: 'Entretiens avec notes', value: s.madr.comptesRendus },
       { label: 'Prises en charge clôturées', value: s.madr.clotureees },
-      { label: 'Entretiens familles', value: s.madr.entretiensFamilles },
-      { label: 'Liaisons enseignant·es', value: s.madr.liaisonsEnseignants },
-      { label: 'Participations EE', value: s.madr.participationsEE },
-      { label: 'Orientations externes', value: s.madr.orientationsExternes },
+      { label: 'Entretiens avec notes', value: s.madr.comptesRendus },
     ],
   });
   addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
@@ -784,18 +800,20 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDP'], perRow: 4,
     items: [
+      { label: "Entretien avec l'élève", value: s.madp.entretiensEleves },
+      { label: "Séance d'aide pédagogique", value: s.madp.seancesAide },
+      { label: 'Suivi individuel', value: s.madp.suivisIndividuels },
+      { label: 'Suivi en groupe', value: s.madp.suivisGroupe },
+      { label: 'Observation en classe', value: s.madp.observationsClasse },
+      { label: 'Entretien avec la famille', value: s.madp.entretiensFamilles },
+      { label: 'Participation à une EE', value: s.madp.participationsEE },
+      { label: "Liaison avec l'enseignant·e", value: s.madp.liaisonsEnseignants },
+      { label: 'Orientation externe', value: s.madp.orientationsExternes },
+      { label: "Réunion d'équipe RASED", value: s.madp.reunionEquipe },
+      { label: 'Autre', value: s.madp.autre },
       { label: 'Élèves accompagnés', value: s.madp.elevesAccompagnes },
-      { label: 'Entretiens élèves', value: s.madp.entretiensEleves },
-      { label: "Séances d'aide pédagogique", value: s.madp.seancesAide },
-      { label: 'Suivis individuels', value: s.madp.suivisIndividuels },
-      { label: 'Suivis en groupe', value: s.madp.suivisGroupe },
-      { label: 'Observations en classe', value: s.madp.observationsClasse },
-      { label: 'Entretiens avec notes', value: s.madp.comptesRendus },
       { label: 'Prises en charge clôturées', value: s.madp.clotureees },
-      { label: 'Liaisons enseignant·es', value: s.madp.liaisonsEnseignants },
-      { label: 'Entretiens familles', value: s.madp.entretiensFamilles },
-      { label: 'Participations EE', value: s.madp.participationsEE },
-      { label: 'Orientations externes', value: s.madp.orientationsExternes },
+      { label: 'Entretiens avec notes', value: s.madp.comptesRendus },
     ],
   });
   addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
