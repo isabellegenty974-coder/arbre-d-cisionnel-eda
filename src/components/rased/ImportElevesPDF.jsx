@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Upload, Loader, Check, Search, AlertCircle, ChevronDown, ChevronRight, Users } from 'lucide-react';
 import { titleCase } from '@/lib/utils';
 
-export default function ImportElevesPDF({ onDone }) {
+export default function ImportElevesPDF({ ecoleId: ecoleIdConnue, onDone }) {
   const [step, setStep] = useState('upload'); // upload | parsing | validate | importing | done
   const [dragging, setDragging] = useState(false);
   const [extracted, setExtracted] = useState(null); // { nom_ecole, classes: [{ nom_classe, enseignant, eleves }] }
@@ -157,15 +157,21 @@ Retourne uniquement un objet JSON valide.`,
     const annees = await base44.entities.AnneeScolaire.list('-libelle', 50).catch(() => []);
     const anneeActive = annees.find(a => a.est_active || a.active) || annees[0] || null;
 
-    // 2. Créer ou retrouver l'école (commune à toutes les classes)
-    let ecoleId = null;
-    const ecoles = await base44.entities.EcoleRased.list('-nom', 200).catch(() => []);
-    const ecoleExistante = ecoles.find(e => e.nom?.toLowerCase() === nomEcole.toLowerCase());
-    if (ecoleExistante) {
-      ecoleId = ecoleExistante.id;
-    } else if (nomEcole) {
-      const nouvelleEcole = await base44.entities.EcoleRased.create({ nom: nomEcole });
-      ecoleId = nouvelleEcole.id;
+    // 2. École déjà connue (import lancé depuis sa fiche) : on la réutilise
+    // directement, sans passer par le matching par nom — le nom extrait du PDF
+    // par l'IA peut légèrement différer (accents, espaces) du nom déjà en base
+    // et créer un doublon d'école sinon. Sans ecoleId connu (import générique
+    // depuis /import-pdf), on retrouve ou crée l'école par nom comme avant.
+    let ecoleId = ecoleIdConnue || null;
+    if (!ecoleId) {
+      const ecoles = await base44.entities.EcoleRased.list('-nom', 200).catch(() => []);
+      const ecoleExistante = ecoles.find(e => e.nom?.toLowerCase() === nomEcole.toLowerCase());
+      if (ecoleExistante) {
+        ecoleId = ecoleExistante.id;
+      } else if (nomEcole) {
+        const nouvelleEcole = await base44.entities.EcoleRased.create({ nom: nomEcole });
+        ecoleId = nouvelleEcole.id;
+      }
     }
 
     let totalOk = 0, totalErr = 0;

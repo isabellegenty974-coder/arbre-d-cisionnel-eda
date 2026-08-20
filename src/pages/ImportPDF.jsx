@@ -34,7 +34,7 @@ export default function ImportPDF() {
       </div>
 
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '28px 20px 60px' }}>
-        <ImportElevesPDF onDone={handleDone} />
+        <ImportElevesPDF ecoleId={ecoleId} onDone={handleDone} />
       </div>
     </div>
   );
