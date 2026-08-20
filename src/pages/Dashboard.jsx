@@ -168,19 +168,19 @@ function Sidebar({ membres, notifications, membresEnLigne = [], loading = false,
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────
 
-const ELEVES_PAGE_SIZE = 500;
+const PAGE_SIZE = 500;
 
 // Le SDK Base44 n'expose pas de count() : list() est plafonné par le serveur
 // (500 par appel), donc on pagine avec skip jusqu'à une page incomplète pour
-// charger tous les EleveRased, pas seulement les 500 plus récents.
-async function fetchAllElevesRased() {
+// charger la collection entière plutôt que le plafond du premier appel.
+async function fetchAllPages(entityName, sort) {
   const all = [];
   let skip = 0;
   for (;;) {
-    const page = await base44.entities.EleveRased.list('-created_date', ELEVES_PAGE_SIZE, skip).catch(() => []);
+    const page = await base44.entities[entityName].list(sort, PAGE_SIZE, skip).catch(() => []);
     all.push(...page);
-    if (page.length < ELEVES_PAGE_SIZE) break;
-    skip += ELEVES_PAGE_SIZE;
+    if (page.length < PAGE_SIZE) break;
+    skip += PAGE_SIZE;
   }
   return all;
 }
@@ -205,9 +205,9 @@ export default function Dashboard() {
     async function load() {
       const [u, f, ec, el, mb, no, an] = await Promise.all([
         base44.auth.me().catch(() => null),
-        base44.entities.FicheEleve.list('-updated_date', 200).catch(() => []),
+        fetchAllPages('FicheEleve', '-updated_date'),
         base44.entities.EcoleRased.list('-created_date', 100).catch(() => []),
-        fetchAllElevesRased(),
+        fetchAllPages('EleveRased', '-created_date'),
         base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
         base44.entities.Notification.filter({ lu: false }).catch(() => []),
         base44.entities.AnneeScolaire.list('-libelle', 20).catch(() => []),
@@ -224,7 +224,9 @@ export default function Dashboard() {
     // Souscription temps réel sur FicheEleve (fil d'activité live)
     const unsub = base44.entities.FicheEleve.subscribe((event) => {
       if (event.type === 'create') {
-        setFiches(prev => [event.data, ...prev].slice(0, 200));
+        // Pas de .slice(0, 200) ici : tronquer réintroduirait le plafond que
+        // fetchAllPages() vient d'éliminer au chargement initial.
+        setFiches(prev => [event.data, ...prev]);
       } else if (event.type === 'update') {
         setFiches(prev => prev.map(f => f.id === event.data.id ? { ...f, ...event.data } : f));
       } else if (event.type === 'delete') {
