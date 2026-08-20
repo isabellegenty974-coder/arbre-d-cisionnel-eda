@@ -25,6 +25,11 @@ function listeNoms(membres, { maj = false } = {}) {
 const TYPE_COLORS = { 'Apprentissage': '#3B82C4', 'Comportement': '#1E7A52', 'Handicap': '#B85C1A', 'Non renseigné': '#94A3B8' };
 
 const CYCLES = ['Cycle 1', 'Cycle 2', 'Cycle 3'];
+// Cycles affichés dans le tableau et le graphique cycle × type : ajoute une
+// ligne « Cycle non déterminé » pour que le total corresponde toujours au
+// nombre de fiches, y compris celles dont la classe ne permet pas d'identifier
+// un cycle (ex. « ULIS », classe non renseignée).
+const CYCLES_TABLEAU = [...CYCLES, 'Cycle non déterminé'];
 // Types utilisés pour le motif dominant de l'analyse qualitative : seuls les
 // motifs réels, « Non renseigné » n'est jamais un motif à mettre en avant.
 const TYPES = ['Apprentissage', 'Comportement', 'Handicap'];
@@ -42,15 +47,23 @@ function setFill(doc, hex) { doc.setFillColor(...hexToRgb(hex)); }
 function setText(doc, hex) { doc.setTextColor(...hexToRgb(hex)); }
 function setDraw(doc, hex) { doc.setDrawColor(...hexToRgb(hex)); }
 function pct(n, total) { return total > 0 ? Math.round((n / total) * 1000) / 10 : 0; }
-function norm(s) { return (s || '').toString().toLowerCase(); }
 
 // ── Helpers données ──────────────────────────────────────────────────────────
+const CYCLE_PAR_NIVEAU = {
+  tps: 'Cycle 1', ps: 'Cycle 1', ms: 'Cycle 1', gs: 'Cycle 1',
+  cp: 'Cycle 2', ce1: 'Cycle 2', ce2: 'Cycle 2',
+  cm1: 'Cycle 3', cm2: 'Cycle 3',
+};
+// Cherche un niveau connu n'importe où dans le libellé de classe (pas
+// seulement en préfixe), pour tolérer les formats réels observés : « CE2-CM1 »,
+// « CP-CE1 », « 01 - CP B », « TPS/PS », « MS GS »… Renvoie le premier niveau
+// rencontré de gauche à droite ; renvoie null si aucun niveau connu n'apparaît
+// (ex. « ULIS », classe vide) — l'appelant doit alors prévoir un repli explicite
+// plutôt que d'écarter silencieusement la fiche.
+const NIVEAU_REGEX = /\b(tps|ps|ms|gs|cp|ce1|ce2|cm1|cm2)\b/i;
 function getCycle(classe) {
-  const c = norm(classe);
-  if (/^(tps|ps|ms|gs)\b/.test(c)) return 'Cycle 1';
-  if (/^(cp|ce1|ce2)\b/.test(c)) return 'Cycle 2';
-  if (/^(cm1|cm2)\b/.test(c)) return 'Cycle 3';
-  return null;
+  const m = NIVEAU_REGEX.exec(classe || '');
+  return m ? CYCLE_PAR_NIVEAU[m[1].toLowerCase()] : null;
 }
 
 // Classification lue directement sur les problématiques cochées (fiche élève),
@@ -167,10 +180,10 @@ function computeStats({ fiches, eleves, libelle }) {
 
   // Répartition cycle x type
   const matrice = {};
-  CYCLES.forEach(c => { matrice[c] = { Apprentissage: 0, Comportement: 0, Handicap: 0, 'Non renseigné': 0 }; });
+  CYCLES_TABLEAU.forEach(c => { matrice[c] = { Apprentissage: 0, Comportement: 0, Handicap: 0, 'Non renseigné': 0 }; });
   fichesAnnee.forEach(f => {
-    const cy = getCycle(f.classe);
-    if (cy) matrice[cy][getTypeFiche(f)]++;
+    const cy = getCycle(f.classe) || 'Cycle non déterminé';
+    matrice[cy][getTypeFiche(f)]++;
   });
 
   // ── PSY-EN EDA ──
@@ -285,7 +298,7 @@ function analyseVueEnsemble(s) {
   const cycleDom = Object.entries(s.matrice)
     .map(([c, t]) => [c, t.Apprentissage + t.Comportement + t.Handicap + t['Non renseigné']])
     .sort((a, b) => b[1] - a[1])[0];
-  const totauxType = TYPES.map(t => [t, CYCLES.reduce((sum, c) => sum + s.matrice[c][t], 0)]);
+  const totauxType = TYPES.map(t => [t, CYCLES_TABLEAU.reduce((sum, c) => sum + s.matrice[c][t], 0)]);
   const typeDom = totauxType.sort((a, b) => b[1] - a[1])[0];
   const partCycle1 = pct(s.matrice['Cycle 1'].Apprentissage + s.matrice['Cycle 1'].Comportement + s.matrice['Cycle 1'].Handicap + s.matrice['Cycle 1']['Non renseigné'], s.totalDemandes);
 
@@ -564,13 +577,13 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   y += 10;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, '#1A3353');
   doc.text('Répartition par cycle et type d\'intervention', margin, y); y += 4;
-  const totauxParType = t => CYCLES.reduce((sum, c) => sum + s.matrice[c][t], 0);
+  const totauxParType = t => CYCLES_TABLEAU.reduce((sum, c) => sum + s.matrice[c][t], 0);
   const colWCycleType = contentWidth / (TYPES_TABLEAU.length + 1);
   y = drawTable(doc, {
     x: margin, y, colWidths: Array(TYPES_TABLEAU.length + 1).fill(colWCycleType),
     headers: ['Cycle', ...TYPES_TABLEAU],
     rows: [
-      ...CYCLES.map(c => [c, ...TYPES_TABLEAU.map(t => s.matrice[c][t])]),
+      ...CYCLES_TABLEAU.map(c => [c, ...TYPES_TABLEAU.map(t => s.matrice[c][t])]),
       ['TOTAL', ...TYPES_TABLEAU.map(t => totauxParType(t))],
     ],
   });
@@ -582,8 +595,8 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, '#1A3353');
   doc.text("Répartition par cycle et type d'intervention (graphique)", margin, 26);
   drawGroupedBarChart(doc, {
-    x: margin, y: 34, width: contentWidth, height: 60, groups: CYCLES,
-    series: TYPES_TABLEAU.map(t => ({ label: t, color: TYPE_COLORS[t], values: CYCLES.map(c => s.matrice[c][t]) })),
+    x: margin, y: 34, width: contentWidth, height: 60, groups: CYCLES_TABLEAU,
+    series: TYPES_TABLEAU.map(t => ({ label: t, color: TYPE_COLORS[t], values: CYCLES_TABLEAU.map(c => s.matrice[c][t]) })),
   });
 
   let y2 = 112;
