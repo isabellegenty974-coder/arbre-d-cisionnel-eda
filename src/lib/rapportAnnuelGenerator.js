@@ -22,10 +22,16 @@ function listeNoms(membres, { maj = false } = {}) {
   if (noms.length === 1) return noms[0];
   return `${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]}`;
 }
-const TYPE_COLORS = { 'Apprentissage': '#3B82C4', 'Comportement': '#1E7A52', 'Handicap': '#B85C1A' };
+const TYPE_COLORS = { 'Apprentissage': '#3B82C4', 'Comportement': '#1E7A52', 'Handicap': '#B85C1A', 'Non renseigné': '#94A3B8' };
 
 const CYCLES = ['Cycle 1', 'Cycle 2', 'Cycle 3'];
+// Types utilisés pour le motif dominant de l'analyse qualitative : seuls les
+// motifs réels, « Non renseigné » n'est jamais un motif à mettre en avant.
 const TYPES = ['Apprentissage', 'Comportement', 'Handicap'];
+// Types affichés dans le tableau et le graphique cycle × type : ajoute la
+// colonne « Non renseigné » pour que le total corresponde toujours au nombre
+// de fiches, y compris celles sans aucune problématique cochée.
+const TYPES_TABLEAU = [...TYPES, 'Non renseigné'];
 
 // ── Helpers géométrie / couleur ──────────────────────────────────────────────
 function hexToRgb(hex) {
@@ -54,6 +60,7 @@ function getTypeFiche(f) {
   if ((p.autre || []).includes('Situation de handicap')) return 'Handicap';
   const nbComportement = (p.comportement || []).length;
   const nbApprentissages = (p.apprentissages || []).length;
+  if (nbComportement === 0 && nbApprentissages === 0) return 'Non renseigné';
   return nbComportement > nbApprentissages ? 'Comportement' : 'Apprentissage';
 }
 
@@ -157,7 +164,7 @@ function computeStats({ fiches, eleves, libelle }) {
 
   // Répartition cycle x type
   const matrice = {};
-  CYCLES.forEach(c => { matrice[c] = { Apprentissage: 0, Comportement: 0, Handicap: 0 }; });
+  CYCLES.forEach(c => { matrice[c] = { Apprentissage: 0, Comportement: 0, Handicap: 0, 'Non renseigné': 0 }; });
   fichesAnnee.forEach(f => {
     const cy = getCycle(f.classe);
     if (cy) matrice[cy][getTypeFiche(f)]++;
@@ -266,11 +273,11 @@ function computeStats({ fiches, eleves, libelle }) {
 // ── Génération des analyses qualitatives automatiques ───────────────────────
 function analyseVueEnsemble(s) {
   const cycleDom = Object.entries(s.matrice)
-    .map(([c, t]) => [c, t.Apprentissage + t.Comportement + t.Handicap])
+    .map(([c, t]) => [c, t.Apprentissage + t.Comportement + t.Handicap + t['Non renseigné']])
     .sort((a, b) => b[1] - a[1])[0];
   const totauxType = TYPES.map(t => [t, CYCLES.reduce((sum, c) => sum + s.matrice[c][t], 0)]);
   const typeDom = totauxType.sort((a, b) => b[1] - a[1])[0];
-  const partCycle1 = pct(s.matrice['Cycle 1'].Apprentissage + s.matrice['Cycle 1'].Comportement + s.matrice['Cycle 1'].Handicap, s.totalDemandes);
+  const partCycle1 = pct(s.matrice['Cycle 1'].Apprentissage + s.matrice['Cycle 1'].Comportement + s.matrice['Cycle 1'].Handicap + s.matrice['Cycle 1']['Non renseigné'], s.totalDemandes);
 
   const lignes = [];
   if (cycleDom && cycleDom[1] > 0) {
@@ -548,12 +555,13 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, '#1A3353');
   doc.text('Répartition par cycle et type d\'intervention', margin, y); y += 4;
   const totauxParType = t => CYCLES.reduce((sum, c) => sum + s.matrice[c][t], 0);
+  const colWCycleType = contentWidth / (TYPES_TABLEAU.length + 1);
   y = drawTable(doc, {
-    x: margin, y, colWidths: [contentWidth / 4, contentWidth / 4, contentWidth / 4, contentWidth / 4],
-    headers: ['Cycle', 'Apprentissage', 'Comportement', 'Handicap'],
+    x: margin, y, colWidths: Array(TYPES_TABLEAU.length + 1).fill(colWCycleType),
+    headers: ['Cycle', ...TYPES_TABLEAU],
     rows: [
-      ...CYCLES.map(c => [c, s.matrice[c].Apprentissage, s.matrice[c].Comportement, s.matrice[c].Handicap]),
-      ['TOTAL', totauxParType('Apprentissage'), totauxParType('Comportement'), totauxParType('Handicap')],
+      ...CYCLES.map(c => [c, ...TYPES_TABLEAU.map(t => s.matrice[c][t])]),
+      ['TOTAL', ...TYPES_TABLEAU.map(t => totauxParType(t))],
     ],
   });
 
@@ -565,7 +573,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   doc.text("Répartition par cycle et type d'intervention (graphique)", margin, 26);
   drawGroupedBarChart(doc, {
     x: margin, y: 34, width: contentWidth, height: 60, groups: CYCLES,
-    series: TYPES.map(t => ({ label: t, color: TYPE_COLORS[t], values: CYCLES.map(c => s.matrice[c][t]) })),
+    series: TYPES_TABLEAU.map(t => ({ label: t, color: TYPE_COLORS[t], values: CYCLES.map(c => s.matrice[c][t]) })),
   });
 
   let y2 = 112;
