@@ -142,7 +142,7 @@ function CardHead({ icon, title, action, onAction }) {
 }
 
 // ── Onglet Suivi ──────────────────────────────────────────────────────────────
-function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField, membres, showCommentModal, setShowCommentModal }) {
+function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, user, highlightField, membres, membresError, onRetryMembres, showCommentModal, setShowCommentModal }) {
   const [statut, setStatut] = useState(fiche.statut || 'Nouveau');
   const [savingStatut, setSavingStatut] = useState(false);
   const [motif, setMotif] = useState(fiche.observations || '');
@@ -368,16 +368,24 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
               {[
                 { label: 'Date', content: <input type="date" value={newIntervention.date} onChange={e => setNewIntervention({...newIntervention, date: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none' }} /> },
                 { label: 'Professionnel de l\'équipe RASED', content: (
-                  <select value={newIntervention.nom} onChange={e => {
-                    const membreId = e.target.value;
-                    const membre = membres.find(m => m.id === membreId);
-                    setNewIntervention({...newIntervention, nom: membre ? `${membre.prenom} ${membre.nom}` : '', profession: membre?.profession || ''});
-                  }} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', boxSizing: 'border-box', height: 36 }}>
-                    <option value="">— Sélectionner un professionnel —</option>
-                    {membres.map(m => (
-                      <option key={m.id} value={m.id}>{m.prenom} {m.nom} · {m.profession === 'Psy EN EDA' ? 'Psy-EN EDA' : m.profession}</option>
-                    ))}
-                  </select>
+                  <div>
+                    <select value={newIntervention.nom} onChange={e => {
+                      const membreId = e.target.value;
+                      const membre = membres.find(m => m.id === membreId);
+                      setNewIntervention({...newIntervention, nom: membre ? `${membre.prenom} ${membre.nom}` : '', profession: membre?.profession || ''});
+                    }} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', boxSizing: 'border-box', height: 36 }}>
+                      <option value="">— Sélectionner un professionnel —</option>
+                      {membres.map(m => (
+                        <option key={m.id} value={m.id}>{m.prenom} {m.nom} · {m.profession === 'Psy EN EDA' ? 'Psy-EN EDA' : m.profession}</option>
+                      ))}
+                    </select>
+                    {membresError && membres.length === 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, fontSize: 12, color: '#B85C1A' }}>
+                        <span>⚠️ Échec du chargement de la liste des professionnels.</span>
+                        <button type="button" onClick={onRetryMembres} style={{ color: '#3B82C4', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontWeight: 600, fontSize: 12 }}>Réessayer</button>
+                      </div>
+                    )}
+                  </div>
                 ) },
                 { label: 'Acte accompli', content: (
                   <select value={newIntervention.description} onChange={e => setNewIntervention({...newIntervention, description: e.target.value})} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1px solid #D8E1EE', fontSize: 13, outline: 'none', boxSizing: 'border-box', height: 36 }}>
@@ -887,10 +895,29 @@ export default function DetailFiche() {
   const [showSuccess, setShowSuccess] = useState(searchParams.get('success') === 'true');
   const [highlightField, setHighlightField] = useState(searchParams.get('highlight') || null);
   const [membres, setMembres] = useState([]);
+  const [membresError, setMembresError] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(null);
 
   const ficheId = searchParams.get('id');
   const { onFiche } = usePresence(ficheId);
+
+  // Chargement de MembreEquipe isolé de la fiche : un échec de FicheEleve.get,
+  // HistoriqueEDA.filter ou auth.me ne doit jamais vider la liste des
+  // professionnels, et un échec propre à MembreEquipe doit être visible
+  // (logué + affiché) plutôt qu'avalé en silence.
+  const loadMembres = () => {
+    setMembresError(false);
+    base44.entities.MembreEquipe.list()
+      .then(setMembres)
+      .catch((err) => {
+        console.error('Erreur chargement MembreEquipe (fiche élève):', err);
+        setMembresError(true);
+      });
+  };
+
+  useEffect(() => {
+    loadMembres();
+  }, []);
 
   useEffect(() => {
     if (showSuccess) {
@@ -912,13 +939,11 @@ export default function DetailFiche() {
       base44.entities.FicheEleve.get(ficheId),
       base44.entities.HistoriqueEDA.filter({ eleve_id: ficheId }).catch(() => []),
       base44.auth.me().catch(() => null),
-      base44.entities.MembreEquipe.list().catch(() => []),
-    ]).then(([ficheData, histo, userData, membresData]) => {
+    ]).then(([ficheData, histo, userData]) => {
       setFiche(ficheData);
       setInterventions(ficheData?.interventions || []);
       setHistoriqueEDA(histo.sort((a, b) => new Date(b.date || b.created_date) - new Date(a.date || a.created_date)));
       setUser(userData);
-      setMembres(membresData);
     }).catch(() => setFiche(null)).finally(() => setLoading(false));
   }, [ficheId]);
 
@@ -962,7 +987,7 @@ export default function DetailFiche() {
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
             {activeTab === 'suivi' && (
-              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} membres={membres} showCommentModal={showCommentModal} setShowCommentModal={setShowCommentModal} />
+              <TabSuivi fiche={fiche} ficheId={ficheId} setFiche={setFiche} interventions={interventions} setInterventions={setInterventions} user={user} highlightField={highlightField} membres={membres} membresError={membresError} onRetryMembres={loadMembres} showCommentModal={showCommentModal} setShowCommentModal={setShowCommentModal} />
             )}
             {activeTab === 'historique' && (
               <TabHistorique fiche={fiche} interventions={interventions} historiqueEDA={historiqueEDA} />
