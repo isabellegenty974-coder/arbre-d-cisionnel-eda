@@ -46,12 +46,6 @@ function getCycle(classe) {
   return null;
 }
 
-function ficheTexte(f) {
-  return [f.observations, f.notes, f.rapport, ...(f.recommandations || []), ...(f.hypotheses || []),
-    ...((f.interventions || []).flatMap(i => [i.description, i.commentaire]))]
-    .filter(Boolean).join(' ').toLowerCase();
-}
-
 // Classification lue directement sur les problématiques cochées (fiche élève),
 // plutôt que sur des scores numériques ou une recherche de mots-clés.
 function getTypeFiche(f) {
@@ -74,14 +68,51 @@ function actesDe(fiches, profession) {
     .filter(iv => iv.profession === profession)
     .map(iv => ({ ...iv, fiche: f })));
 }
-function compte(actes, ...mots) {
-  return actes.filter(a => mots.some(m => norm(a.description).includes(m))).length;
+
+// Chaînes exactes du menu « Acte accompli » (DetailFiche.jsx) : chaque acte
+// est une valeur figée de <select>, jamais du texte libre. On compte donc les
+// actes par égalité stricte sur leur type réellement sélectionné, jamais par
+// recherche de mots dans une description ou un commentaire.
+const ACTES = {
+  'Psy EN EDA': {
+    entretienEleve: "Entretien avec l'élève (Psy-EN)",
+    passationPsycho: 'Passation psychométrique (Psy-EN)',
+    observationClasse: 'Observation en classe (Psy-EN)',
+    entretienFamille: 'Entretien avec la famille',
+    participationESS: 'Participation à une ESS',
+    participationEE: 'Participation à une EE',
+    liaisonEnseignant: "Liaison avec l'enseignant·e",
+    orientationExterne: 'Orientation externe (Psy-EN)',
+    dossierMDPH: 'Dossier MDPH (Psy-EN)',
+  },
+  'MaDR': {
+    entretienEleve: "Entretien avec l'élève (MaDR)",
+    seance: 'Séance de rééducation (MaDR)',
+    suiviIndividuel: 'Suivi individuel (MaDR)',
+    suiviGroupe: 'Suivi en groupe (MaDR)',
+    observationClasse: 'Observation en classe (MaDR)',
+    entretienFamille: 'Entretien avec la famille (MaDR)',
+    participationEE: 'Participation à une EE (MaDR)',
+    liaisonEnseignant: "Liaison avec l'enseignant·e (MaDR)",
+    orientationExterne: 'Orientation externe (MaDR)',
+  },
+  'MaDP': {
+    entretienEleve: "Entretien avec l'élève (MaDP)",
+    seance: "Séance d'aide pédagogique (MaDP)",
+    suiviIndividuel: 'Suivi individuel (MaDP)',
+    suiviGroupe: 'Suivi en groupe (MaDP)',
+    observationClasse: 'Observation en classe (MaDP)',
+    entretienFamille: 'Entretien avec la famille (MaDP)',
+    participationEE: 'Participation à une EE (MaDP)',
+    liaisonEnseignant: "Liaison avec l'enseignant·e (MaDP)",
+    orientationExterne: 'Orientation externe (MaDP)',
+  },
+};
+function compteActe(actes, description) {
+  return actes.filter(a => a.description === description).length;
 }
-function compteRegex(actes, regex) {
-  return actes.filter(a => regex.test(a.description || '')).length;
-}
-function compteTexteFiches(fiches, ...mots) {
-  return fiches.filter(f => mots.some(m => ficheTexte(f).includes(m))).length;
+function compteActeParmi(actes, descriptions) {
+  return actes.filter(a => descriptions.includes(a.description)).length;
 }
 function anneeSuivante(libelle) {
   const m = /^(\d{4})-(\d{4})$/.exec(libelle || '');
@@ -115,16 +146,17 @@ function computeStats({ fiches, eleves, libelle }) {
   CYCLES.forEach(c => { parCyclePsy[c] = 0; });
   fichesPsy.forEach(f => { const c = getCycle(f.classe); if (c) parCyclePsy[c]++; });
 
+  const APsy = ACTES['Psy EN EDA'];
   const psy = {
-    entretiensEleves: compte(actesPsy, "entretien avec l'élève"),
-    passationsPsycho: compte(actesPsy, 'passation psychométrique'),
-    observationsClasse: compte(actesPsy, 'observation en classe'),
+    entretiensEleves: compteActe(actesPsy, APsy.entretienEleve),
+    passationsPsycho: compteActe(actesPsy, APsy.passationPsycho),
+    observationsClasse: compteActe(actesPsy, APsy.observationClasse),
     comptesRendus: actesPsy.filter(a => a.commentaire && a.commentaire.trim()).length,
-    entretiensFamilles: compte(actesPsy, 'entretien avec la famille'),
-    participationsESSEE: compte(actesPsy, 'ess'),
-    orientationsExternes: compteTexteFiches(fichesPsy, 'orientation'),
-    dossiersMDPH: compteTexteFiches(fichesPsy, 'mdph'),
-    liaisonsEnseignants: compte(actesPsy, "liaison avec l'enseignant"),
+    entretiensFamilles: compteActe(actesPsy, APsy.entretienFamille),
+    participationsESSEE: compteActeParmi(actesPsy, [APsy.participationESS, APsy.participationEE]),
+    orientationsExternes: compteActe(actesPsy, APsy.orientationExterne),
+    dossiersMDPH: compteActe(actesPsy, APsy.dossierMDPH),
+    liaisonsEnseignants: compteActe(actesPsy, APsy.liaisonEnseignant),
     parCycle: parCyclePsy,
     total: fichesPsy.length,
     clotures: fichesPsy.filter(f => f.statut === 'Clôturé').length,
@@ -134,48 +166,52 @@ function computeStats({ fiches, eleves, libelle }) {
   const actesMadr = actesDe(fichesAnnee, 'MaDR');
   const idsActeMadr = new Set(actesMadr.map(a => a.fiche.id));
   const fichesMadr = fichesAnnee.filter(f => f.createdByProfession === 'MaDR' || idsActeMadr.has(f.id));
-  const seancesMadr = actesMadr.filter(a => norm(a.description).includes('séance de rééducation'));
-  const suivisGroupeMadr = seancesMadr.filter(a => norm(a.commentaire).includes('groupe')).length;
   const parCycleMadr = {};
   CYCLES.forEach(c => { parCycleMadr[c] = 0; });
   fichesMadr.forEach(f => { const c = getCycle(f.classe); if (c) parCycleMadr[c]++; });
 
+  const AMadr = ACTES['MaDR'];
   const madr = {
     elevesEnCharge: fichesMadr.length,
-    seancesReeducation: seancesMadr.length,
-    suivisIndividuels: seancesMadr.length - suivisGroupeMadr,
-    suivisGroupe: suivisGroupeMadr,
+    entretiensEleves: compteActe(actesMadr, AMadr.entretienEleve),
+    seancesReeducation: compteActe(actesMadr, AMadr.seance),
+    suivisIndividuels: compteActe(actesMadr, AMadr.suiviIndividuel),
+    suivisGroupe: compteActe(actesMadr, AMadr.suiviGroupe),
+    observationsClasse: compteActe(actesMadr, AMadr.observationClasse),
+    comptesRendus: actesMadr.filter(a => a.commentaire && a.commentaire.trim()).length,
     clotureees: fichesMadr.filter(f => f.statut === 'Clôturé').length,
-    entretiensFamilles: compte(actesMadr, 'entretien avec la famille'),
-    liaisonsEnseignants: compte(actesMadr, "liaison avec l'enseignant"),
-    participationsEE: compteRegex(actesMadr, /\bee\b/i),
+    entretiensFamilles: compteActe(actesMadr, AMadr.entretienFamille),
+    liaisonsEnseignants: compteActe(actesMadr, AMadr.liaisonEnseignant),
+    participationsEE: compteActe(actesMadr, AMadr.participationEE),
+    orientationsExternes: compteActe(actesMadr, AMadr.orientationExterne),
     parCycle: parCycleMadr,
     total: fichesMadr.length,
-    actesTotal: actesMadr.length,
   };
 
   // ── MaDP ──
   const actesMadp = actesDe(fichesAnnee, 'MaDP');
   const idsActeMadp = new Set(actesMadp.map(a => a.fiche.id));
   const fichesMadp = fichesAnnee.filter(f => f.createdByProfession === 'MaDP' || idsActeMadp.has(f.id));
-  const seancesMadp = actesMadp.filter(a => norm(a.description).includes("séance d'aide pédagogique"));
-  const suivisGroupeMadp = seancesMadp.filter(a => norm(a.commentaire).includes('groupe')).length;
   const parCycleMadp = {};
   CYCLES.forEach(c => { parCycleMadp[c] = 0; });
   fichesMadp.forEach(f => { const c = getCycle(f.classe); if (c) parCycleMadp[c]++; });
 
+  const AMadp = ACTES['MaDP'];
   const madp = {
     elevesAccompagnes: fichesMadp.length,
-    seancesAide: seancesMadp.length,
-    suivisIndividuels: seancesMadp.length - suivisGroupeMadp,
-    suivisGroupe: suivisGroupeMadp,
+    entretiensEleves: compteActe(actesMadp, AMadp.entretienEleve),
+    seancesAide: compteActe(actesMadp, AMadp.seance),
+    suivisIndividuels: compteActe(actesMadp, AMadp.suiviIndividuel),
+    suivisGroupe: compteActe(actesMadp, AMadp.suiviGroupe),
+    observationsClasse: compteActe(actesMadp, AMadp.observationClasse),
+    comptesRendus: actesMadp.filter(a => a.commentaire && a.commentaire.trim()).length,
     clotureees: fichesMadp.filter(f => f.statut === 'Clôturé').length,
-    liaisonsEnseignants: compte(actesMadp, "liaison avec l'enseignant"),
-    entretiensFamilles: compte(actesMadp, 'entretien avec la famille'),
-    participationsEE: compteRegex(actesMadp, /\bee\b/i),
+    liaisonsEnseignants: compteActe(actesMadp, AMadp.liaisonEnseignant),
+    entretiensFamilles: compteActe(actesMadp, AMadp.entretienFamille),
+    participationsEE: compteActe(actesMadp, AMadp.participationEE),
+    orientationsExternes: compteActe(actesMadp, AMadp.orientationExterne),
     parCycle: parCycleMadp,
     total: fichesMadp.length,
-    actesTotal: actesMadp.length,
   };
 
   // Répartition par école et par classe
@@ -606,13 +642,17 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDR'], perRow: 4,
     items: [
       { label: 'Élèves pris en charge', value: s.madr.elevesEnCharge },
+      { label: 'Entretiens élèves', value: s.madr.entretiensEleves },
       { label: 'Séances de rééducation', value: s.madr.seancesReeducation },
       { label: 'Suivis individuels', value: s.madr.suivisIndividuels },
       { label: 'Suivis en groupe', value: s.madr.suivisGroupe },
+      { label: 'Observations en classe', value: s.madr.observationsClasse },
+      { label: 'Entretiens avec notes', value: s.madr.comptesRendus },
       { label: 'Prises en charge clôturées', value: s.madr.clotureees },
       { label: 'Entretiens familles', value: s.madr.entretiensFamilles },
       { label: 'Liaisons enseignant·es', value: s.madr.liaisonsEnseignants },
       { label: 'Participations EE', value: s.madr.participationsEE },
+      { label: 'Orientations externes', value: s.madr.orientationsExternes },
     ],
   });
   addFooter(doc, pageWidth, pageHeight, margin, 6, 0);
@@ -641,13 +681,17 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDP'], perRow: 4,
     items: [
       { label: 'Élèves accompagnés', value: s.madp.elevesAccompagnes },
+      { label: 'Entretiens élèves', value: s.madp.entretiensEleves },
       { label: "Séances d'aide pédagogique", value: s.madp.seancesAide },
       { label: 'Suivis individuels', value: s.madp.suivisIndividuels },
       { label: 'Suivis en groupe', value: s.madp.suivisGroupe },
+      { label: 'Observations en classe', value: s.madp.observationsClasse },
+      { label: 'Entretiens avec notes', value: s.madp.comptesRendus },
       { label: 'Prises en charge clôturées', value: s.madp.clotureees },
       { label: 'Liaisons enseignant·es', value: s.madp.liaisonsEnseignants },
       { label: 'Entretiens familles', value: s.madp.entretiensFamilles },
       { label: 'Participations EE', value: s.madp.participationsEE },
+      { label: 'Orientations externes', value: s.madp.orientationsExternes },
     ],
   });
   addFooter(doc, pageWidth, pageHeight, margin, 8, 0);
