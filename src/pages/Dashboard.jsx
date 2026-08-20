@@ -6,6 +6,7 @@ import { X, Search } from 'lucide-react';
 import { usePresence } from '@/lib/usePresence';
 import { titleCase } from '@/lib/utils';
 import { timeAgo } from '@/lib/time';
+import { fetchAllPages } from '@/lib/fetchAllPages';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -167,23 +168,6 @@ function Sidebar({ membres, notifications, membresEnLigne = [], loading = false,
 }
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 500;
-
-// Le SDK Base44 n'expose pas de count() : list() est plafonné par le serveur
-// (500 par appel), donc on pagine avec skip jusqu'à une page incomplète pour
-// charger la collection entière plutôt que le plafond du premier appel.
-async function fetchAllPages(entityName, sort) {
-  const all = [];
-  let skip = 0;
-  for (;;) {
-    const page = await base44.entities[entityName].list(sort, PAGE_SIZE, skip).catch(() => []);
-    all.push(...page);
-    if (page.length < PAGE_SIZE) break;
-    skip += PAGE_SIZE;
-  }
-  return all;
-}
 
 export default function Dashboard() {
   const navigate = useNavigate();
