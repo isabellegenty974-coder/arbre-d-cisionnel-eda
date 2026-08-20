@@ -190,8 +190,8 @@ function computeStats({ fiches, eleves, libelle }) {
   const fichesPsy = fichesAnnee.filter(f => f.createdByProfession === 'Psy EN EDA');
   const actesPsy = actesDe(fichesAnnee, 'Psy EN EDA');
   const parCyclePsy = {};
-  CYCLES.forEach(c => { parCyclePsy[c] = 0; });
-  fichesPsy.forEach(f => { const c = getCycle(f.classe); if (c) parCyclePsy[c]++; });
+  CYCLES_TABLEAU.forEach(c => { parCyclePsy[c] = 0; });
+  fichesPsy.forEach(f => { parCyclePsy[getCycle(f.classe) || 'Cycle non déterminé']++; });
 
   const APsy = ACTES['Psy EN EDA'];
   const psy = {
@@ -217,8 +217,8 @@ function computeStats({ fiches, eleves, libelle }) {
   const idsActeMadr = new Set(actesMadr.map(a => a.fiche.id));
   const fichesMadr = fichesAnnee.filter(f => f.createdByProfession === 'MaDR' || idsActeMadr.has(f.id));
   const parCycleMadr = {};
-  CYCLES.forEach(c => { parCycleMadr[c] = 0; });
-  fichesMadr.forEach(f => { const c = getCycle(f.classe); if (c) parCycleMadr[c]++; });
+  CYCLES_TABLEAU.forEach(c => { parCycleMadr[c] = 0; });
+  fichesMadr.forEach(f => { parCycleMadr[getCycle(f.classe) || 'Cycle non déterminé']++; });
 
   const AMadr = ACTES['MaDR'];
   const madr = {
@@ -245,8 +245,8 @@ function computeStats({ fiches, eleves, libelle }) {
   const idsActeMadp = new Set(actesMadp.map(a => a.fiche.id));
   const fichesMadp = fichesAnnee.filter(f => f.createdByProfession === 'MaDP' || idsActeMadp.has(f.id));
   const parCycleMadp = {};
-  CYCLES.forEach(c => { parCycleMadp[c] = 0; });
-  fichesMadp.forEach(f => { const c = getCycle(f.classe); if (c) parCycleMadp[c]++; });
+  CYCLES_TABLEAU.forEach(c => { parCycleMadp[c] = 0; });
+  fichesMadp.forEach(f => { parCycleMadp[getCycle(f.classe) || 'Cycle non déterminé']++; });
 
   const AMadp = ACTES['MaDP'];
   const madp = {
@@ -748,8 +748,8 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['Psy EN EDA']);
   doc.text('Répartition par cycle', margin, 26);
   drawGroupedBarChart(doc, {
-    x: margin, y: 34, width: contentWidth, height: 55, groups: CYCLES,
-    series: [{ label: 'Psy-EN EDA', color: COLORS['Psy EN EDA'], values: CYCLES.map(c => s.psy.parCycle[c]) }],
+    x: margin, y: 34, width: contentWidth, height: 55, groups: CYCLES_TABLEAU,
+    series: [{ label: 'Psy-EN EDA', color: COLORS['Psy EN EDA'], values: CYCLES_TABLEAU.map(c => s.psy.parCycle[c]) }],
   });
 
   let y3 = 105;
