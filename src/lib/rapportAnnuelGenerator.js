@@ -22,21 +22,6 @@ function listeNoms(membres, { maj = false } = {}) {
   return `${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]}`;
 }
 const TYPE_COLORS = { 'Apprentissage': '#3B82C4', 'Comportement': '#1E7A52', 'Handicap': '#B85C1A' };
-const DIFFICULTE_COLORS = {
-  'Anxiété / Inhibition': '#1E7A52',
-  'Difficultés relationnelles': '#3B82C4',
-  'Comportement oppositionnel': '#B85C1A',
-  'Impulsivité': '#D4A574',
-  'Autre': '#94A3B8',
-};
-const DOMAINE_COLORS = {
-  'Lecture / Décodage': '#B85C1A',
-  'Écriture / Graphisme': '#D4A574',
-  'Maths / Numération': '#3B82C4',
-  'Méthodes de travail': '#5B4FA4',
-  'Production écrite': '#1E7A52',
-  'Autre': '#94A3B8',
-};
 
 const CYCLES = ['Cycle 1', 'Cycle 2', 'Cycle 3'];
 const TYPES = ['Apprentissage', 'Comportement', 'Handicap'];
@@ -49,10 +34,6 @@ function hexToRgb(hex) {
 function setFill(doc, hex) { doc.setFillColor(...hexToRgb(hex)); }
 function setText(doc, hex) { doc.setTextColor(...hexToRgb(hex)); }
 function setDraw(doc, hex) { doc.setDrawColor(...hexToRgb(hex)); }
-function polar(cx, cy, r, angleDeg) {
-  const rad = (angleDeg * Math.PI) / 180;
-  return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
-}
 function pct(n, total) { return total > 0 ? Math.round((n / total) * 1000) / 10 : 0; }
 function norm(s) { return (s || '').toString().toLowerCase(); }
 
@@ -65,18 +46,20 @@ function getCycle(classe) {
   return null;
 }
 
-const MOTS_HANDICAP = ['mdph', 'handicap', 'aeeh', 'pps ', 'avs', 'ash', 'ulis'];
-
 function ficheTexte(f) {
   return [f.observations, f.notes, f.rapport, ...(f.recommandations || []), ...(f.hypotheses || []),
     ...((f.interventions || []).flatMap(i => [i.description, i.commentaire]))]
     .filter(Boolean).join(' ').toLowerCase();
 }
 
+// Classification lue directement sur les problématiques cochées (fiche élève),
+// plutôt que sur des scores numériques ou une recherche de mots-clés.
 function getTypeFiche(f) {
-  const txt = ficheTexte(f);
-  if (MOTS_HANDICAP.some(m => txt.includes(m))) return 'Handicap';
-  return (f.score_comportement || 0) > (f.score_apprentissages || 0) ? 'Comportement' : 'Apprentissage';
+  const p = f.problematiques || {};
+  if ((p.autre || []).includes('Situation de handicap')) return 'Handicap';
+  const nbComportement = (p.comportement || []).length;
+  const nbApprentissages = (p.apprentissages || []).length;
+  return nbComportement > nbApprentissages ? 'Comportement' : 'Apprentissage';
 }
 
 function getCategorieDemande(f) {
@@ -100,43 +83,15 @@ function compteRegex(actes, regex) {
 function compteTexteFiches(fiches, ...mots) {
   return fiches.filter(f => mots.some(m => ficheTexte(f).includes(m))).length;
 }
-function bucketDifficulte(sousDomaine) {
-  const s = norm(sousDomaine);
-  if (s.includes('anxi') || s.includes('inhibition')) return 'Anxiété / Inhibition';
-  if (s.includes('interaction') || s.includes('relation')) return 'Difficultés relationnelles';
-  if (s.includes('opposition')) return 'Comportement oppositionnel';
-  if (s.includes('impulsiv')) return 'Impulsivité';
-  return 'Autre';
-}
-function bucketDomaine(sousDomaine) {
-  const s = norm(sousDomaine);
-  if (s.includes('lecture') || s.includes('codage')) return 'Lecture / Décodage';
-  if (s.includes('criture') || s.includes('graphisme')) return 'Écriture / Graphisme';
-  if (s.includes('math') || s.includes('num') || s.includes('calcul')) return 'Maths / Numération';
-  if (s.includes('thode')) return 'Méthodes de travail';
-  if (s.includes('production')) return 'Production écrite';
-  return 'Autre';
-}
 function anneeSuivante(libelle) {
   const m = /^(\d{4})-(\d{4})$/.exec(libelle || '');
   return m ? `${Number(m[1]) + 1}-${Number(m[2]) + 1}` : '';
 }
-function moisScolaires(libelle) {
-  const m = /^(\d{4})-(\d{4})$/.exec(libelle || '');
-  const y1 = m ? Number(m[1]) : new Date().getFullYear();
-  const noms = ['Sept', 'Oct', 'Nov', 'Déc', 'Janv', 'Fév', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août'];
-  return noms.map((label, i) => ({
-    label,
-    month: (8 + i) % 12,
-    year: y1 + Math.floor((8 + i) / 12),
-  }));
-}
 
 // ── Calcul de l'ensemble des indicateurs réels ──────────────────────────────
-function computeStats({ fiches, historique, eleves, libelle }) {
+function computeStats({ fiches, eleves, libelle }) {
   const fichesAnnee = fiches.filter(f => f.annee_scolaire === libelle);
   const ficheById = new Map(fichesAnnee.map(f => [f.id, f]));
-  const histAnnee = historique.filter(h => ficheById.has(h.eleve_id));
 
   const effectifSecteur = eleves.length;
   const totalDemandes = fichesAnnee.length;
@@ -156,7 +111,6 @@ function computeStats({ fiches, historique, eleves, libelle }) {
   // ── PSY-EN EDA ──
   const fichesPsy = fichesAnnee.filter(f => f.createdByProfession === 'Psy EN EDA');
   const actesPsy = actesDe(fichesAnnee, 'Psy EN EDA');
-  const histPsy = histAnnee.filter(h => ficheById.get(h.eleve_id)?.createdByProfession === 'Psy EN EDA');
   const parCyclePsy = {};
   CYCLES.forEach(c => { parCyclePsy[c] = 0; });
   fichesPsy.forEach(f => { const c = getCycle(f.classe); if (c) parCyclePsy[c]++; });
@@ -186,13 +140,6 @@ function computeStats({ fiches, historique, eleves, libelle }) {
   CYCLES.forEach(c => { parCycleMadr[c] = 0; });
   fichesMadr.forEach(f => { const c = getCycle(f.classe); if (c) parCycleMadr[c]++; });
 
-  const difficultesMadr = {};
-  Object.keys(DIFFICULTE_COLORS).forEach(k => { difficultesMadr[k] = 0; });
-  histAnnee
-    .filter(h => norm(h.domaine).includes('comport') &&
-      (ficheById.get(h.eleve_id)?.createdByProfession === 'MaDR' || idsActeMadr.has(h.eleve_id)))
-    .forEach(h => { difficultesMadr[bucketDifficulte(h.sous_domaine)]++; });
-
   const madr = {
     elevesEnCharge: fichesMadr.length,
     seancesReeducation: seancesMadr.length,
@@ -203,7 +150,6 @@ function computeStats({ fiches, historique, eleves, libelle }) {
     liaisonsEnseignants: compte(actesMadr, "liaison avec l'enseignant"),
     participationsEE: compteRegex(actesMadr, /\bee\b/i),
     parCycle: parCycleMadr,
-    difficultes: difficultesMadr,
     total: fichesMadr.length,
     actesTotal: actesMadr.length,
   };
@@ -218,13 +164,6 @@ function computeStats({ fiches, historique, eleves, libelle }) {
   CYCLES.forEach(c => { parCycleMadp[c] = 0; });
   fichesMadp.forEach(f => { const c = getCycle(f.classe); if (c) parCycleMadp[c]++; });
 
-  const domainesMadp = {};
-  Object.keys(DOMAINE_COLORS).forEach(k => { domainesMadp[k] = 0; });
-  histAnnee
-    .filter(h => norm(h.domaine).includes('apprentissage') &&
-      (ficheById.get(h.eleve_id)?.createdByProfession === 'MaDP' || idsActeMadp.has(h.eleve_id)))
-    .forEach(h => { domainesMadp[bucketDomaine(h.sous_domaine)]++; });
-
   const madp = {
     elevesAccompagnes: fichesMadp.length,
     seancesAide: seancesMadp.length,
@@ -235,22 +174,9 @@ function computeStats({ fiches, historique, eleves, libelle }) {
     entretiensFamilles: compte(actesMadp, 'entretien avec la famille'),
     participationsEE: compteRegex(actesMadp, /\bee\b/i),
     parCycle: parCycleMadp,
-    domaines: domainesMadp,
     total: fichesMadp.length,
     actesTotal: actesMadp.length,
   };
-
-  // ── Évolution mensuelle (toutes professions) ──
-  const mois = moisScolaires(libelle);
-  const evolution = { 'Psy EN EDA': mois.map(() => 0), 'MaDR': mois.map(() => 0), 'MaDP': mois.map(() => 0) };
-  fichesAnnee.forEach(f => {
-    (f.interventions || []).forEach(iv => {
-      if (!iv.date || !evolution[iv.profession]) return;
-      const d = new Date(iv.date);
-      const idx = mois.findIndex(m => m.month === d.getMonth() && m.year === d.getFullYear());
-      if (idx >= 0) evolution[iv.profession][idx]++;
-    });
-  });
 
   // Répartition par école et par classe
   const parEcoleClasse = {};
@@ -267,7 +193,7 @@ function computeStats({ fiches, historique, eleves, libelle }) {
 
   return {
     libelle, effectifSecteur, totalDemandes, parCategorie, matrice,
-    psy, madr, madp, evolution, moisLabels: mois.map(m => m.label),
+    psy, madr, madp,
     parEcoleClasse, nbEcolesCouvertes, nbClotures, nbNouvelles, totalSeances,
   };
 }
@@ -316,7 +242,6 @@ function analysePsy(s, membres) {
 
 function analyseMadr(s, membres) {
   const m = s.madr;
-  const diffDom = Object.entries(m.difficultes).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0];
   const tauxCloture = pct(m.clotureees, m.elevesEnCharge);
   const lignes = [];
   if (membres.length > 0) {
@@ -324,16 +249,12 @@ function analyseMadr(s, membres) {
     const verbe = membres.length > 1 ? 'ont pris' : 'a pris';
     lignes.push(`${sujet} ${verbe} en charge ${m.elevesEnCharge} élève${m.elevesEnCharge > 1 ? 's' : ''} sur l'année, pour ${m.seancesReeducation} séance${m.seancesReeducation > 1 ? 's' : ''} de rééducation (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`);
   }
-  lignes.push(diffDom
-    ? `La difficulté la plus fréquemment traitée est « ${diffDom[0]} », concernant ${diffDom[1]} situation${diffDom[1] > 1 ? 's' : ''}.`
-    : `Aucune difficulté n'a pu être catégorisée précisément sur la période.`);
   lignes.push(`${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesEnCharge} ${m.clotureees > 1 ? 'ont' : 'a'} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`);
   return lignes;
 }
 
 function analyseMadp(s, membres) {
   const m = s.madp;
-  const domDom = Object.entries(m.domaines).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0];
   const tauxCloture = pct(m.clotureees, m.elevesAccompagnes);
   const lignes = [];
   if (membres.length > 0) {
@@ -341,9 +262,6 @@ function analyseMadp(s, membres) {
     const verbe = membres.length > 1 ? 'ont accompagné' : 'a accompagné';
     lignes.push(`${sujet} ${verbe} ${m.elevesAccompagnes} élève${m.elevesAccompagnes > 1 ? 's' : ''} sur l'année, pour ${m.seancesAide} séance${m.seancesAide > 1 ? 's' : ''} d'aide pédagogique (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`);
   }
-  lignes.push(domDom
-    ? `Le domaine le plus travaillé est « ${domDom[0]} », concernant ${domDom[1]} situation${domDom[1] > 1 ? 's' : ''}.`
-    : `Aucun domaine n'a pu être catégorisé précisément sur la période.`);
   lignes.push(`${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesAccompagnes} ${m.clotureees > 1 ? 'ont' : 'a'} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`);
   return lignes;
 }
@@ -370,11 +288,7 @@ function perspectivesMadr(s, anneeN1) {
 }
 function perspectivesMadp(s, anneeN1) {
   const m = s.madp;
-  const domDom = Object.entries(m.domaines).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0];
   const items = [];
-  items.push(domDom
-    ? `Continuer à prioriser le domaine « ${domDom[0]} », identifié comme le plus sollicité cette année.`
-    : "Affiner le repérage des domaines d'apprentissage à prioriser pour l'année suivante.");
   items.push(`Maintenir le lien école-RASED via les ${m.liaisonsEnseignants} liaisons enseignant·es réalisées.`);
   items.push('Poursuivre le développement des suivis de groupe lorsque les besoins des élèves convergent.');
   return { titre: `Perspectives ${anneeN1}`, items };
@@ -438,96 +352,6 @@ function drawGroupedBarChart(doc, { x, y, width, height, groups, series }) {
   });
 }
 
-function drawPieChart(doc, { cx, cy, radius, slices }) {
-  const total = slices.reduce((s, d) => s + d.value, 0) || 1;
-  let startAngle = -90;
-  slices.forEach(slice => {
-    const sweep = (slice.value / total) * 360;
-    if (sweep <= 0) return;
-    setFill(doc, slice.color);
-    const steps = Math.max(1, Math.ceil(sweep / 3));
-    for (let i = 0; i < steps; i++) {
-      const a0 = startAngle + (sweep * i) / steps;
-      const a1 = startAngle + (sweep * (i + 1)) / steps;
-      const p0 = polar(cx, cy, radius, a0);
-      const p1 = polar(cx, cy, radius, a1);
-      doc.triangle(cx, cy, p0[0], p0[1], p1[0], p1[1], 'F');
-    }
-    startAngle += sweep;
-  });
-  setDraw(doc, '#FFFFFF'); doc.setLineWidth(0.6); doc.circle(cx, cy, radius, 'S');
-
-  let ly = cy - radius;
-  slices.forEach(slice => {
-    setFill(doc, slice.color); doc.rect(cx + radius + 10, ly - 2.6, 3, 3, 'F');
-    setText(doc, '#182840'); doc.setFontSize(7.5);
-    doc.text(`${slice.label} — ${slice.value} (${pct(slice.value, total)} %)`, cx + radius + 15, ly);
-    ly += 6;
-  });
-}
-
-function drawClosedPolyline(doc, pts) {
-  for (let i = 0; i < pts.length; i++) {
-    const a = pts[i], b = pts[(i + 1) % pts.length];
-    doc.line(a[0], a[1], b[0], b[1]);
-  }
-}
-
-function drawRadarChart(doc, { cx, cy, radius, axes, datasets }) {
-  const angleFor = i => -90 + i * (360 / axes.length);
-  setDraw(doc, '#E1E7F0'); doc.setLineWidth(0.3);
-  [0.25, 0.5, 0.75, 1].forEach(f => drawClosedPolyline(doc, axes.map((_, i) => polar(cx, cy, radius * f, angleFor(i)))));
-  axes.forEach((label, i) => {
-    const p = polar(cx, cy, radius, angleFor(i));
-    doc.line(cx, cy, p[0], p[1]);
-    const lp = polar(cx, cy, radius + 9, angleFor(i));
-    doc.setFontSize(6.8); setText(doc, '#566880');
-    doc.text(label, lp[0], lp[1], { align: 'center', maxWidth: 26 });
-  });
-  datasets.forEach(ds => {
-    const pts = axes.map((_, i) => polar(cx, cy, radius * Math.max(0, Math.min(1, ds.values[i])), angleFor(i)));
-    setDraw(doc, ds.color); doc.setLineWidth(1);
-    drawClosedPolyline(doc, pts);
-    pts.forEach(p => { setFill(doc, ds.color); doc.circle(p[0], p[1], 0.9, 'F'); });
-  });
-  let lx = cx - radius; const ly = cy + radius + 16;
-  doc.setFontSize(7.5);
-  datasets.forEach(ds => {
-    setFill(doc, ds.color); doc.rect(lx, ly - 2.6, 3, 3, 'F');
-    setText(doc, '#566880'); doc.text(ds.label, lx + 4.5, ly);
-    lx += doc.getTextWidth(ds.label) + 16;
-  });
-}
-
-function drawLineChart(doc, { x, y, width, height, labels, series }) {
-  const max = Math.max(1, ...series.flatMap(s => s.values));
-  setDraw(doc, '#C8D2E2'); doc.setLineWidth(0.3);
-  doc.line(x, y + height, x + width, y + height);
-  doc.line(x, y, x, y + height);
-  const stepX = width / Math.max(1, labels.length - 1);
-  for (let g = 1; g <= 4; g++) {
-    const gy = y + height - (height * g) / 4;
-    setDraw(doc, '#F0F3F8'); doc.line(x, gy, x + width, gy);
-    doc.setFontSize(6); setText(doc, '#94A3B8');
-    doc.text(String(Math.round((max * g) / 4)), x - 2, gy + 1, { align: 'right' });
-  }
-  series.forEach(s => {
-    const pts = s.values.map((v, i) => [x + i * stepX, y + height - (v / max) * height]);
-    setDraw(doc, s.color); doc.setLineWidth(1.1);
-    for (let i = 0; i < pts.length - 1; i++) doc.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
-    pts.forEach(p => { setFill(doc, s.color); doc.circle(p[0], p[1], 0.8, 'F'); });
-  });
-  doc.setFontSize(6.5); setText(doc, '#566880');
-  labels.forEach((lbl, i) => doc.text(lbl, x + i * stepX, y + height + 5, { align: 'center' }));
-  let lx = x; const ly = y - 4;
-  doc.setFontSize(7.5);
-  series.forEach(s => {
-    setFill(doc, s.color); doc.rect(lx, ly - 2.4, 3, 3, 'F');
-    setText(doc, '#566880'); doc.text(s.label, lx + 4.5, ly);
-    lx += doc.getTextWidth(s.label) + 16;
-  });
-}
-
 function kpiGrid(doc, { x, y, width, items, color, perRow = 4 }) {
   const gap = 4;
   const cardW = (width - gap * (perRow - 1)) / perRow;
@@ -573,10 +397,10 @@ function addTextBlock(doc, { x, y, width, lines, fontSize = 10, lineHeight = 5.2
 }
 
 // ── Génération du PDF complet ───────────────────────────────────────────────
-export async function generateRapportAnnuel({ anneeScolaire, fiches, historique, eleves, ecoles, equipe = [] }) {
+export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, ecoles, equipe = [] }) {
   const libelle = anneeScolaire?.libelle || anneeScolaire;
   const anneeN1 = anneeSuivante(libelle);
-  const s = computeStats({ fiches, historique: historique || [], eleves: eleves || [], libelle });
+  const s = computeStats({ fiches, eleves: eleves || [], libelle });
 
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -618,7 +442,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
     "3. Psychologue de l'Éducation Nationale · EDA",
     '4. Maître à Dominante Relationnelle (MaDR)',
     '5. Maître à Dominante Pédagogique (MaDP)',
-    '6. Synthèse comparative et signatures',
+    '6. Signatures',
   ].forEach((t, i) => doc.text(t, margin, 183 + i * 6));
 
   doc.setFontSize(10); setText(doc, '#C8D2E2');
@@ -795,19 +619,8 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   doc.addPage();
   addHeader(doc, pageWidth, margin, libelle);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['MaDR']);
-  doc.text('Répartition des difficultés traitées', margin, 26); y = 30;
-  y = drawTable(doc, {
-    x: margin, y, colWidths: [contentWidth - 60, 60],
-    headers: ['Difficulté', 'Nb situations'],
-    rows: Object.entries(s.madr.difficultes).map(([k, v]) => [k, v]),
-  });
-  drawPieChart(doc, {
-    cx: margin + 30, cy: y + 35, radius: 24,
-    slices: Object.entries(s.madr.difficultes).map(([k, v]) => ({ label: k, value: v, color: DIFFICULTE_COLORS[k] })),
-  });
 
-  let y4 = y + 72;
+  let y4 = 30;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['MaDR']);
   doc.text('Analyse qualitative', margin, y4); y4 += 6;
   y4 = addTextBlock(doc, { x: margin, y: y4, width: contentWidth, lines: analyseMadr(s, membresMadr) });
@@ -841,21 +654,8 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
 
   doc.addPage();
   addHeader(doc, pageWidth, margin, libelle);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['MaDP']);
-  doc.text('Répartition des domaines travaillés', margin, 26); y = 30;
-  const domainesAffiches = Object.entries(s.madp.domaines).filter(([k, v]) => v > 0 || k !== 'Autre');
-  y = drawTable(doc, {
-    x: margin, y, colWidths: [contentWidth - 60, 60],
-    headers: ['Domaine', 'Nb situations'],
-    rows: domainesAffiches.map(([k, v]) => [k, v]),
-  });
-  drawGroupedBarChart(doc, {
-    x: margin, y: y + 8, width: contentWidth, height: 45,
-    groups: domainesAffiches.map(([k]) => k),
-    series: [{ label: 'MaDP', color: COLORS['MaDP'], values: domainesAffiches.map(([, v]) => v) }],
-  });
 
-  let y5 = y + 65;
+  let y5 = 30;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLORS['MaDP']);
   doc.text('Analyse qualitative', margin, y5); y5 += 6;
   y5 = addTextBlock(doc, { x: margin, y: y5, width: contentWidth, lines: analyseMadp(s, membresMadp) });
@@ -867,56 +667,6 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
   addTextBlock(doc, { x: margin, y: y5, width: contentWidth, lines: perspMadp.items.map(l => `• ${l}`) });
 
   addFooter(doc, pageWidth, pageHeight, margin, 9, 0);
-
-  // ───────────────────────── SECTION 6 — SYNTHÈSE ──────────────────────────
-  doc.addPage();
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 6, title: 'SYNTHÈSE COMPARATIVE', color: '#1A3353' });
-
-  const comparatif = [
-    ['Élèves suivis', s.psy.total, s.madr.elevesEnCharge, s.madp.elevesAccompagnes],
-    ['Actes / entretiens réalisés', s.psy.entretiensEleves + s.psy.observationsClasse + s.psy.passationsPsycho, s.madr.actesTotal, s.madp.actesTotal],
-    ['Entretiens familles', s.psy.entretiensFamilles, s.madr.entretiensFamilles, s.madp.entretiensFamilles],
-    ['Liaisons enseignant·es', s.psy.liaisonsEnseignants, s.madr.liaisonsEnseignants, s.madp.liaisonsEnseignants],
-    ['Participations ESS/EE', s.psy.participationsESSEE, s.madr.participationsEE, s.madp.participationsEE],
-    ['Prises en charge clôturées', s.psy.clotures, s.madr.clotureees, s.madp.clotureees],
-  ];
-  y = drawTable(doc, {
-    x: margin, y: 40, colWidths: [contentWidth - 120, 40, 40, 40],
-    headers: ['Indicateur', 'Psy-EN EDA', 'MaDR', 'MaDP'],
-    rows: comparatif,
-  });
-  addFooter(doc, pageWidth, pageHeight, margin, 10, 0);
-
-  doc.addPage();
-  addHeader(doc, pageWidth, margin, libelle);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, '#1A3353');
-  doc.text("Comparaison de l'activité (graphique radar)", margin, 26);
-
-  const axes = comparatif.map(r => r[0]);
-  const radarDatasets = [
-    { label: 'Psy-EN EDA', color: COLORS['Psy EN EDA'], idx: 1 },
-    { label: 'MaDR', color: COLORS['MaDR'], idx: 2 },
-    { label: 'MaDP', color: COLORS['MaDP'], idx: 3 },
-  ].map(d => ({
-    label: d.label, color: d.color,
-    values: comparatif.map(row => {
-      const max = Math.max(row[1], row[2], row[3], 1);
-      return row[d.idx] / max;
-    }),
-  }));
-  drawRadarChart(doc, { cx: pageWidth / 2, cy: 80, radius: 38, axes, datasets: radarDatasets });
-
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, '#1A3353');
-  doc.text("Évolution mensuelle de l'activité", margin, 145);
-  drawLineChart(doc, {
-    x: margin, y: 155, width: contentWidth, height: 50, labels: s.moisLabels,
-    series: [
-      { label: 'Psy-EN EDA', color: COLORS['Psy EN EDA'], values: s.evolution['Psy EN EDA'] },
-      { label: 'MaDR', color: COLORS['MaDR'], values: s.evolution['MaDR'] },
-      { label: 'MaDP', color: COLORS['MaDP'], values: s.evolution['MaDP'] },
-    ],
-  });
-  addFooter(doc, pageWidth, pageHeight, margin, 11, 0);
 
   // PAGE — SIGNATURES
   doc.addPage();
@@ -944,7 +694,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, historique,
     doc.text('Signature', margin, ySig + 27);
     ySig += 40;
   });
-  addFooter(doc, pageWidth, pageHeight, margin, 12, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 10, 0);
 
   // ── Numérotation finale (total réel des pages, hors couverture) ──
   const totalPages = doc.getNumberOfPages();

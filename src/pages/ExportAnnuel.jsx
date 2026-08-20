@@ -30,12 +30,11 @@ export default function ExportAnnuel() {
   useEffect(() => {
     Promise.all([
       base44.entities.FicheEleve.list('-created_date', 1000),
-      base44.entities.HistoriqueEDA.list('-date', 1000),
       base44.entities.EleveRased.list('-created_date', 500),
       base44.entities.EcoleRased.list('-nom', 100),
       base44.entities.AnneeScolaire.list('-libelle', 20),
       base44.entities.MembreEquipe.list(),
-    ]).then(([fiches, historique, eleves, ecoles, annees, equipe]) => {
+    ]).then(([fiches, eleves, ecoles, annees, equipe]) => {
       const fichesAnnee = fiches.filter(f => f.annee_scolaire === libelle);
       const anneeCourante = annees.find(a => a.libelle === libelle) || { libelle };
 
@@ -54,7 +53,7 @@ export default function ExportAnnuel() {
         ecoleMap[f.ecole][cl] = (ecoleMap[f.ecole][cl] || 0) + 1;
       });
 
-      setData({ fiches, historique, eleves, ecoles, annees, equipe, anneeCourante, libelle,
+      setData({ fiches, eleves, ecoles, annees, equipe, anneeCourante, libelle,
         fichesAnnee, overview: { nbEleves, nbEcoles, nbNouvelles, nbClotures, nbSeances }, ecoleMap });
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -67,7 +66,6 @@ export default function ExportAnnuel() {
       const doc = await generateRapportAnnuel({
         anneeScolaire: data.anneeCourante,
         fiches:        data.fiches,
-        historique:    data.historique,
         eleves:        data.eleves,
         ecoles:        data.ecoles,
         equipe:        data.equipe,

@@ -32,14 +32,13 @@ export default function RapportAnnuel() {
 
     try {
       const annee = annees.find(a => a.id === anneeActive);
-      const [fiches, historique, eleves, ecoles] = await Promise.all([
+      const [fiches, eleves, ecoles] = await Promise.all([
         base44.entities.FicheEleve.list('-created_date', 1000),
-        base44.entities.HistoriqueEDA.list('-date', 2000),
         base44.entities.EleveRased.list('-created_date', 1000),
         base44.entities.EcoleRased.list('-created_date', 100),
       ]);
 
-      const doc = await generateRapportAnnuel({ anneeScolaire: annee, fiches, historique, eleves, ecoles });
+      const doc = await generateRapportAnnuel({ anneeScolaire: annee, fiches, eleves, ecoles });
       doc.save(`rapport_annuel_RASED_${annee.libelle.replace('-', '_')}.pdf`);
     } catch (error) {
       console.error('Erreur génération rapport:', error);
