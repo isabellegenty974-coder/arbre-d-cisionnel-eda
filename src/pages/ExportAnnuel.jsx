@@ -197,12 +197,12 @@ export default function ExportAnnuel() {
               })}
             </div>
 
-            {/* ── SECTIONS 4-6 : aperçu ── */}
+            {/* ── SECTIONS 3-7 : aperçu ── */}
             <div style={{ background: '#F8FAFD', borderRadius: 14, padding: '14px 18px', border: '1px dashed #D8E1EE', fontSize: 12.5, color: '#566880', lineHeight: 1.7 }}>
-              Le rapport PDF inclut également :<br />
-              <strong style={{ color: '#182840' }}>Section 4</strong> — Répartition par cycle (C1 / C2 / C3) × type de difficulté<br />
-              <strong style={{ color: '#182840' }}>Section 5</strong> — Évolution mensuelle des interventions<br />
-              <strong style={{ color: '#182840' }}>Section 6</strong> — Page de signatures
+              Le rapport PDF complet inclut également :<br />
+              <strong style={{ color: '#182840' }}>Section 3</strong> — Répartition des problématiques (par catégorie, secteur entier et par école)<br />
+              <strong style={{ color: '#182840' }}>Sections 4 à 6</strong> — Détail par profession (Psy-EN EDA, MaDR, MaDP) : actes, analyse qualitative, perspectives<br />
+              <strong style={{ color: '#182840' }}>Section 7</strong> — Page de signatures
             </div>
 
             {/* ── BOUTON EXPORT ── */}
