@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { fetchAllPages } from '@/lib/fetchAllPages';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ export default function RapportAnnuel() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.AnneeScolaire.list('-libelle', 20),
+      fetchAllPages('AnneeScolaire', '-libelle'),
     ]).then(([ans]) => {
       setAnnees(ans);
       const active = ans.find(a => a.est_active || a.active) || ans[0];
@@ -33,9 +33,9 @@ export default function RapportAnnuel() {
     try {
       const annee = annees.find(a => a.id === anneeActive);
       const [fiches, eleves, ecoles] = await Promise.all([
-        base44.entities.FicheEleve.list('-created_date', 1000),
-        base44.entities.EleveRased.list('-created_date', 1000),
-        base44.entities.EcoleRased.list('-created_date', 100),
+        fetchAllPages('FicheEleve', '-created_date'),
+        fetchAllPages('EleveRased', '-created_date'),
+        fetchAllPages('EcoleRased', '-created_date'),
       ]);
 
       const doc = await generateRapportAnnuel({ anneeScolaire: annee, fiches, eleves, ecoles });

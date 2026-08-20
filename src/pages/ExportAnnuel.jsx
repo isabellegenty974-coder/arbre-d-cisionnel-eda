@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { fetchAllPages } from "@/lib/fetchAllPages";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { FileDown, ArrowLeft, Loader2, Users, Building2, TrendingDown, Activity, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
@@ -29,11 +29,11 @@ export default function ExportAnnuel() {
 
   useEffect(() => {
     Promise.all([
-      base44.entities.FicheEleve.list('-created_date', 1000),
-      base44.entities.EleveRased.list('-created_date', 500),
-      base44.entities.EcoleRased.list('-nom', 100),
-      base44.entities.AnneeScolaire.list('-libelle', 20),
-      base44.entities.MembreEquipe.list(),
+      fetchAllPages('FicheEleve', '-created_date'),
+      fetchAllPages('EleveRased', '-created_date'),
+      fetchAllPages('EcoleRased', '-nom'),
+      fetchAllPages('AnneeScolaire', '-libelle'),
+      fetchAllPages('MembreEquipe'),
     ]).then(([fiches, eleves, ecoles, annees, equipe]) => {
       const fichesAnnee = fiches.filter(f => f.annee_scolaire === libelle);
       const anneeCourante = annees.find(a => a.libelle === libelle) || { libelle };
