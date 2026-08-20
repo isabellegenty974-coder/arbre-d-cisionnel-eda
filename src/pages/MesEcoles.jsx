@@ -28,11 +28,29 @@ const PROF_CONFIG = {
   'MaDR': { color: '#EC6B8A', bg: '#FCE8EE', label: 'Maître E' },
 };
 
+const ELEVES_PAGE_SIZE = 500;
+
+// Le SDK Base44 n'expose pas de count() : on pagine avec skip/limit jusqu'à
+// une page incomplète pour rester exact même si une école dépasse la limite
+// par défaut du serveur.
+async function fetchAllElevesEcole(ecoleId) {
+  const all = [];
+  let skip = 0;
+  for (;;) {
+    const page = await base44.entities.EleveRased.filter({ ecole_id: ecoleId }, '-created_date', ELEVES_PAGE_SIZE, skip).catch(() => []);
+    all.push(...page);
+    if (page.length < ELEVES_PAGE_SIZE) break;
+    skip += ELEVES_PAGE_SIZE;
+  }
+  return all;
+}
+
 export default function MesEcoles() {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState('ecoles');
   const [ecoles, setEcoles] = useState([]);
-  const [eleves, setEleves] = useState([]);
+  const [elevesParEcole, setElevesParEcole] = useState({});
+  const [countsLoading, setCountsLoading] = useState(true);
   const [fiches, setFiches] = useState([]);
   const [membres, setMembres] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,30 +64,40 @@ export default function MesEcoles() {
 
   const canDelete = currentUser?.profession === 'Psy EN EDA' || currentUser?.role === 'admin';
 
+  const loadElevesCounts = async (ecolesList) => {
+    setCountsLoading(true);
+    const entries = await Promise.all(
+      ecolesList.map(async (ecole) => [ecole.id, await fetchAllElevesEcole(ecole.id)])
+    );
+    setElevesParEcole(Object.fromEntries(entries));
+    setCountsLoading(false);
+  };
+
   const load = async () => {
-    const [e, el, f, m, u, an] = await Promise.all([
+    const [e, f, m, u, an] = await Promise.all([
       base44.entities.EcoleRased.list('-created_date', 200).catch(() => []),
-      base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
       base44.entities.FicheEleve.list('-created_date', 500).catch(() => []),
       base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
       base44.auth.me().catch(() => null),
       base44.entities.AnneeScolaire.list('-libelle', 20).catch(() => []),
     ]);
     setEcoles(e);
-    setEleves(el);
     setFiches(f);
     setMembres(m);
     setCurrentUser(u);
     setAnnees(an);
     setAnneeActiveId(prev => prev || (an.find(a => a.est_active || a.active)?.id || an[0]?.id || null));
     setLoading(false);
+    loadElevesCounts(e);
   };
 
   useEffect(() => { load(); }, []);
 
-  // ── Filtrage par année scolaire sélectionnée ──
-  // Les données des années passées sont figées : les compteurs ne sont calculés
-  // qu'à partir des fiches/élèves appartenant à l'année actuellement sélectionnée.
+  // ── Filtrage par année scolaire sélectionnée (fiches uniquement) ──
+  // Les données des années passées sont figées : les statuts de suivi ne sont
+  // comptés que pour les fiches appartenant à l'année actuellement sélectionnée.
+  // Le total d'élèves par école (stats.total) n'est PAS filtré par année : il
+  // reflète tous les EleveRased rattachés à l'école, comme sur la page école.
   const anneeSelectionnee = annees.find(a => a.id === anneeActiveId);
   const anneeLibelle = anneeSelectionnee?.libelle;
   const debutAnnee = anneeSelectionnee?.date_debut ? new Date(anneeSelectionnee.date_debut) : null;
@@ -83,15 +111,8 @@ export default function MesEcoles() {
     const d = new Date(f.created_date);
     return d >= debutAnnee && d <= finAnnee;
   };
-  const eleveImporteDansAnnee = (e) => {
-    if (!e.origine_import_pdf) return false;
-    if (!debutAnnee || !finAnnee) return false;
-    const d = new Date(e.created_date);
-    return d >= debutAnnee && d <= finAnnee;
-  };
 
   const fichesAnnee = fiches.filter(ficheDansAnnee);
-  const elevesAnnee = eleves.filter(eleveImporteDansAnnee);
 
   // Alerte "sans mise à jour depuis 30 jours" : basée sur les FicheEleve (et non
   // les EleveRased). Une fiche déclenche l'alerte si son statut est "Suivi actif"
@@ -111,8 +132,8 @@ export default function MesEcoles() {
   const getEcoleStats = (ecoleId) => {
     const ecole = ecoles.find(e => e.id === ecoleId);
     const ecoleNom = (ecole?.nom || '').trim().toLowerCase();
-    // Total élèves = élèves importés (EleveRased) rattachés à cette école pour l'année sélectionnée
-    const elevesEcole = elevesAnnee.filter(e => e.ecole_id === ecoleId);
+    // Total élèves = tous les EleveRased rattachés à cette école (import PDF ou ajout manuel)
+    const elevesEcole = elevesParEcole[ecoleId] || [];
     // Statuts = FicheEleve.statut pour les fiches de l'année sélectionnée rattachées à cette école
     const fichesEcole = fichesAnnee.filter(f => {
       if (elevesEcole.some(el => el.fiche_eleve_id === f.id)) return true;
@@ -129,7 +150,9 @@ export default function MesEcoles() {
     };
   };
 
-  const totalImportes = elevesAnnee.length;
+  const totalImportes = countsLoading
+    ? null
+    : Object.values(elevesParEcole).reduce((sum, arr) => sum + arr.length, 0);
   const totalSuivis = fichesAnnee.filter(f => f.statut !== 'Clôturé').length;
   const totalClotured = fichesAnnee.filter(f => f.statut === 'Clôturé').length;
   const totalStale = fichesAnnee.filter(isFicheAlerte).length;
@@ -239,7 +262,9 @@ export default function MesEcoles() {
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: bg }}>
                   <Icon className="w-5 h-5" style={{ color }} />
                 </div>
-                <p className="text-2xl font-bold text-[#0F172A]">{value}</p>
+                <p className="text-2xl font-bold text-[#0F172A]">
+                  {value === null ? <span className="inline-block w-4 h-4 border-2 border-gray-200 border-t-blue-400 rounded-full animate-spin" /> : value}
+                </p>
                 <p className="text-xs text-gray-500 font-medium">{label}</p>
               </div>
             ))}
@@ -353,7 +378,9 @@ export default function MesEcoles() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-[#0F172A]">{stats.total}</p>
+                        <p className="text-2xl font-bold text-[#0F172A]">
+                          {countsLoading ? <span className="inline-block w-4 h-4 border-2 border-gray-200 border-t-blue-400 rounded-full animate-spin" /> : stats.total}
+                        </p>
                         <p className="text-[10px] text-gray-500">élèves</p>
                       </div>
                     </div>
