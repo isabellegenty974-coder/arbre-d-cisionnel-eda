@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { titleCase } from './utils';
+import { computeIndicateursRased } from './indicateursRased';
 
 const COLORS = { 'Psy EN EDA': '#1A3353', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
 const TITRES = {
@@ -119,6 +120,29 @@ function anneeSuivante(libelle) {
   return m ? `${Number(m[1]) + 1}-${Number(m[2]) + 1}` : '';
 }
 
+// Ordre et libellés des 5 catégories de ProblematiquesSection.jsx (fiche élève).
+const CATEGORIES_PROBLEMATIQUES = ['apprentissages', 'comportement', 'developpement', 'contexte', 'autre'];
+const CATEGORIE_LABELS = {
+  apprentissages: 'Apprentissages',
+  comportement: 'Comportement',
+  developpement: 'Développement',
+  contexte: 'Contexte',
+  autre: 'Autre',
+};
+const NOTE_PROBLEMATIQUES = "Un même élève peut relever de plusieurs problématiques : le total des items cochés est donc supérieur au nombre d'élèves suivis.";
+
+// Lignes [Catégorie, Problématique, Élèves] pour drawTable, triées par
+// catégorie puis par effectif décroissant, en ne gardant que les items cochés
+// au moins une fois — aucune inférence, uniquement le comptage direct.
+function lignesProblematiques(counts) {
+  return CATEGORIES_PROBLEMATIQUES.flatMap(catKey =>
+    Object.entries(counts?.[catKey] || {})
+      .filter(([, v]) => v > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([item, v]) => [CATEGORIE_LABELS[catKey], item, v])
+  );
+}
+
 // ── Calcul de l'ensemble des indicateurs réels ──────────────────────────────
 function computeStats({ fiches, eleves, libelle }) {
   const fichesAnnee = fiches.filter(f => f.annee_scolaire === libelle);
@@ -227,10 +251,15 @@ function computeStats({ fiches, eleves, libelle }) {
   const nbNouvelles = fichesAnnee.filter(f => f.statut === 'Nouveau').length;
   const totalSeances = fichesAnnee.reduce((acc, f) => acc + (f.interventions || []).length, 0);
 
+  // Problématiques cochées (fiche élève) : réutilise le socle partagé avec la
+  // page Statistiques, sur les fiches déjà filtrées sur l'année.
+  const { problematiquesGlobales, problematiquesParEcole } = computeIndicateursRased({ fiches: fichesAnnee });
+
   return {
     libelle, effectifSecteur, totalDemandes, parCategorie, matrice,
     psy, madr, madp,
     parEcoleClasse, nbEcolesCouvertes, nbClotures, nbNouvelles, totalSeances,
+    problematiquesGlobales, problematiquesParEcole,
   };
 }
 
@@ -475,10 +504,11 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   [
     "1. Vue d'ensemble du dispositif RASED",
     "2. Répartition par école et par classe",
-    "3. Psychologue de l'Éducation Nationale · EDA",
-    '4. Maître à Dominante Relationnelle (MaDR)',
-    '5. Maître à Dominante Pédagogique (MaDP)',
-    '6. Signatures',
+    '3. Répartition des problématiques',
+    "4. Psychologue de l'Éducation Nationale · EDA",
+    '5. Maître à Dominante Relationnelle (MaDR)',
+    '6. Maître à Dominante Pédagogique (MaDP)',
+    '7. Signatures',
   ].forEach((t, i) => doc.text(t, margin, 183 + i * 6));
 
   doc.setFontSize(10); setText(doc, '#C8D2E2');
@@ -591,10 +621,77 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   }
   addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
-  // ───────────────────────── SECTION 3 — PSY-EN (pages suivantes) ──────────
+  // ───────────────────────── SECTION 3 — RÉPARTITION DES PROBLÉMATIQUES ───
+  doc.addPage();
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 3, title: 'RÉPARTITION DES PROBLÉMATIQUES', color: '#1A3353' });
+  let yProb = 40;
+  const probColWidths = [40, contentWidth - 70, 30];
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, '#1A3353');
+  doc.text('Répartition globale (ensemble du secteur)', margin, yProb); yProb += 4;
+  const lignesGlobales = lignesProblematiques(s.problematiquesGlobales);
+  if (lignesGlobales.length === 0) {
+    setText(doc, '#566880'); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.text('Aucune problématique cochée sur la période.', margin, yProb); yProb += 8;
+  } else {
+    yProb = drawTable(doc, {
+      x: margin, y: yProb, colWidths: probColWidths,
+      headers: ['Catégorie', 'Problématique', 'Élèves'],
+      rows: lignesGlobales,
+    });
+    yProb += 3;
+    setText(doc, '#94A3B8'); doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5);
+    doc.splitTextToSize(NOTE_PROBLEMATIQUES, contentWidth).forEach(l => { doc.text(l, margin, yProb); yProb += 3.5; });
+    yProb += 6;
+  }
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, '#1A3353');
+  doc.text('Répartition par école', margin, yProb); yProb += 6;
+
+  const ecolesProbEntries = Object.entries(s.problematiquesParEcole)
+    .map(([ecole, counts]) => [ecole, lignesProblematiques(counts)])
+    .filter(([, lignes]) => lignes.length > 0)
+    .sort((a, b) => {
+      const totA = a[1].reduce((sum, l) => sum + l[2], 0);
+      const totB = b[1].reduce((sum, l) => sum + l[2], 0);
+      return totB - totA;
+    });
+
+  if (ecolesProbEntries.length === 0) {
+    setText(doc, '#566880'); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.text('Aucune problématique cochée par école sur la période.', margin, yProb);
+  } else {
+    ecolesProbEntries.forEach(([ecole, lignes]) => {
+      const noteLines = doc.splitTextToSize(NOTE_PROBLEMATIQUES, contentWidth);
+      const blockH = 8 + 7 * (1 + lignes.length) + 3 + noteLines.length * 3.5 + 6;
+      if (yProb + blockH > pageHeight - 18) {
+        addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
+        doc.addPage();
+        addHeader(doc, pageWidth, margin, libelle);
+        yProb = 26;
+      }
+      setFill(doc, '#3B82C4'); setText(doc, '#FFFFFF');
+      doc.rect(margin, yProb, contentWidth, 8, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5);
+      doc.text(titleCase(ecole), margin + 3, yProb + 5.5);
+      yProb += 8;
+      yProb = drawTable(doc, {
+        x: margin, y: yProb, colWidths: probColWidths,
+        headers: ['Catégorie', 'Problématique', 'Élèves'], headerColor: '#566880', fontSize: 8,
+        rows: lignes,
+      });
+      yProb += 3;
+      setText(doc, '#94A3B8'); doc.setFont('helvetica', 'italic'); doc.setFontSize(7.5);
+      noteLines.forEach(l => { doc.text(l, margin, yProb); yProb += 3.5; });
+      yProb += 6;
+    });
+  }
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
+
+  // ───────────────────────── SECTION 4 — PSY-EN (pages suivantes) ──────────
   doc.addPage();
   const membresPsy = membresProfession(equipe, 'Psy EN EDA');
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 3, title: `PSY-EN EDA · ${listeNoms(membresPsy, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['Psy EN EDA'] });
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 4, title: `PSY-EN EDA · ${listeNoms(membresPsy, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['Psy EN EDA'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['Psy EN EDA'], perRow: 4,
     items: [
@@ -610,7 +707,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
       { label: 'Élèves suivis (total)', value: s.psy.total },
     ],
   });
-  addFooter(doc, pageWidth, pageHeight, margin, 4, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
   doc.addPage();
   addHeader(doc, pageWidth, margin, libelle);
@@ -632,12 +729,12 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   doc.text(perspPsy.titre, margin, y3); y3 += 6;
   addTextBlock(doc, { x: margin, y: y3, width: contentWidth, lines: perspPsy.items.map(l => `• ${l}`) });
 
-  addFooter(doc, pageWidth, pageHeight, margin, 5, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
-  // ───────────────────────── SECTION 4 — MaDR ───────────────────────────────
+  // ───────────────────────── SECTION 5 — MaDR ───────────────────────────────
   doc.addPage();
   const membresMadr = membresProfession(equipe, 'MaDR');
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 4, title: `MADR · ${listeNoms(membresMadr, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['MaDR'] });
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 5, title: `MADR · ${listeNoms(membresMadr, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['MaDR'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDR'], perRow: 4,
     items: [
@@ -655,7 +752,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
       { label: 'Orientations externes', value: s.madr.orientationsExternes },
     ],
   });
-  addFooter(doc, pageWidth, pageHeight, margin, 6, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
   doc.addPage();
   addHeader(doc, pageWidth, margin, libelle);
@@ -671,12 +768,12 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   doc.text(perspMadr.titre, margin, y4); y4 += 6;
   addTextBlock(doc, { x: margin, y: y4, width: contentWidth, lines: perspMadr.items.map(l => `• ${l}`) });
 
-  addFooter(doc, pageWidth, pageHeight, margin, 7, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
-  // ───────────────────────── SECTION 5 — MaDP ───────────────────────────────
+  // ───────────────────────── SECTION 6 — MaDP ───────────────────────────────
   doc.addPage();
   const membresMadp = membresProfession(equipe, 'MaDP');
-  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 5, title: `MADP · ${listeNoms(membresMadp, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['MaDP'] });
+  sectionBanner(doc, { x: margin, y: 22, width: contentWidth, num: 6, title: `MADP · ${listeNoms(membresMadp, { maj: true }) || 'POSTE NON POURVU'}`, color: COLORS['MaDP'] });
   y = kpiGrid(doc, {
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDP'], perRow: 4,
     items: [
@@ -694,7 +791,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
       { label: 'Orientations externes', value: s.madp.orientationsExternes },
     ],
   });
-  addFooter(doc, pageWidth, pageHeight, margin, 8, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
   doc.addPage();
   addHeader(doc, pageWidth, margin, libelle);
@@ -710,7 +807,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
   doc.text(perspMadp.titre, margin, y5); y5 += 6;
   addTextBlock(doc, { x: margin, y: y5, width: contentWidth, lines: perspMadp.items.map(l => `• ${l}`) });
 
-  addFooter(doc, pageWidth, pageHeight, margin, 9, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
   // PAGE — SIGNATURES
   doc.addPage();
@@ -738,7 +835,7 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
     doc.text('Signature', margin, ySig + 27);
     ySig += 40;
   });
-  addFooter(doc, pageWidth, pageHeight, margin, 10, 0);
+  addFooter(doc, pageWidth, pageHeight, margin, 0, 0);
 
   // ── Numérotation finale (total réel des pages, hors couverture) ──
   const totalPages = doc.getNumberOfPages();
