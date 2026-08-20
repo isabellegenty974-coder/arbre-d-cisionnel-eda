@@ -168,6 +168,23 @@ function Sidebar({ membres, notifications, membresEnLigne = [], loading = false,
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────
 
+const ELEVES_PAGE_SIZE = 500;
+
+// Le SDK Base44 n'expose pas de count() : list() est plafonné par le serveur
+// (500 par appel), donc on pagine avec skip jusqu'à une page incomplète pour
+// charger tous les EleveRased, pas seulement les 500 plus récents.
+async function fetchAllElevesRased() {
+  const all = [];
+  let skip = 0;
+  for (;;) {
+    const page = await base44.entities.EleveRased.list('-created_date', ELEVES_PAGE_SIZE, skip).catch(() => []);
+    all.push(...page);
+    if (page.length < ELEVES_PAGE_SIZE) break;
+    skip += ELEVES_PAGE_SIZE;
+  }
+  return all;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser]       = useState(null);
@@ -190,7 +207,7 @@ export default function Dashboard() {
         base44.auth.me().catch(() => null),
         base44.entities.FicheEleve.list('-updated_date', 200).catch(() => []),
         base44.entities.EcoleRased.list('-created_date', 100).catch(() => []),
-        base44.entities.EleveRased.list('-created_date', 500).catch(() => []),
+        fetchAllElevesRased(),
         base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
         base44.entities.Notification.filter({ lu: false }).catch(() => []),
         base44.entities.AnneeScolaire.list('-libelle', 20).catch(() => []),
@@ -249,23 +266,8 @@ export default function Dashboard() {
   // Les deux dérivent de fichesFiltrees (abonné en temps réel via FicheEleve.subscribe),
   // donc ils se rafraîchissent automatiquement dès qu'un statut est modifié.
   // "Élèves suivis" : fiches non clôturées ET complètes (école + classe renseignées)
-  // Élèves du secteur attribués à l'année sélectionnée (via la fiche liée ou la date de création)
-  const debutAnnee = anneeSelectionnee?.date_debut
-    ? new Date(anneeSelectionnee.date_debut)
-    : (anneeSelectionnee ? new Date(`${anneeSelectionnee.libelle.split('-')[0]}-08-15`) : null);
-  const finAnnee = anneeSelectionnee?.date_fin
-    ? new Date(anneeSelectionnee.date_fin)
-    : (anneeSelectionnee ? new Date(`${(anneeSelectionnee.libelle.split('-')[1] || String(parseInt(anneeSelectionnee.libelle.split('-')[0]) + 1))}-07-15`) : null);
-  // "Élèves du secteur (imports PDF)" : ne compte que les élèves effectivement
-  // importés via un PDF (marqueur origine_import_pdf), rattachés à l'année par
-  // leur date d'import — indépendamment des fiches élèves (suivi).
-  const elevesAnnee = elevesR.filter(e => {
-    if (!e.origine_import_pdf) return false;
-    if (!debutAnnee || !finAnnee) return false;
-    const d = new Date(e.created_date);
-    return d >= debutAnnee && d <= finAnnee;
-  });
-
+  // "Élèves du secteur" : tous les EleveRased connus (import PDF ou ajout manuel),
+  // sans filtre par année — même définition que stats.total sur Mes écoles.
   const totalEleves    = fichesFiltrees.filter(f => f.statut !== 'Clôturé' && f.ecole && f.classe).length;
   // "Qui fait quoi en ce moment" : élèves en suivi actif dont la fiche est complète (école + classe)
   const suivisActifsComplets = elevesR.filter(e => {
@@ -473,7 +475,7 @@ export default function Dashboard() {
           {/* STATS */}
           <div className="db-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 13, marginBottom: 20 }}>
             {[
-               { val: elevesAnnee.length, lbl: 'Élèves du secteur',     ico: '🏫', ibg: '#EAF2FB', trend: 'imports PDF',            warn: false, to: '/mes-ecoles' },
+               { val: elevesR.length, lbl: 'Élèves du secteur',        ico: '🏫', ibg: '#EAF2FB', trend: 'toutes écoles',          warn: false, to: '/mes-ecoles' },
                { val: totalEleves,        lbl: 'Élèves suivis',         ico: '👤', ibg: '#E4F4ED', trend: '↑ depuis août',        warn: false, to: '/liste-eleves' },
               { val: alertesFichesRefined.length, lbl: 'Fiches sans mise à jour depuis 30 jours', ico: '⏰', ibg: '#FEF0E4', trend: 'À relancer',           warn: true,  to: '/liste-eleves' },
               { val: elevesClotured,     lbl: 'Suivis clôturés',       ico: '✅', ibg: '#E4F4ED', trend: 'depuis août',           warn: false, to: '/mes-ecoles' },
