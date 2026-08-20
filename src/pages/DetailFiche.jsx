@@ -8,6 +8,7 @@ import InterventionItem from '@/components/rased/InterventionItem';
 import IntervenantsSection from '@/components/rased/IntervenantsSection';
 import DocumentsSection from '@/components/rased/DocumentsSection';
 import ProblematiquesSection from '@/components/rased/ProblematiquesSection';
+import RappelsSection from '@/components/rased/RappelsSection';
 import ResponsablesSection from '@/components/rased/ResponsablesSection';
 import { usePresence } from '@/lib/usePresence';
 import { titleCase } from '@/lib/utils';
@@ -520,6 +521,14 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
               </motion.div>
             </motion.div>
           )}
+        </div>
+      </Card>
+
+      {/* À faire */}
+      <Card>
+        <CardHead icon="✅" title="À faire" />
+        <div style={{ padding: 14 }}>
+          <RappelsSection ficheId={ficheId} fichePrenomNom={`${fiche.prenom} ${fiche.nom}`} user={user} />
         </div>
       </Card>
 

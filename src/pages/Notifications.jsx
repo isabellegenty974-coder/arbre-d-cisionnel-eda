@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fetchAllPages } from '@/lib/fetchAllPages';
 import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import { motion } from 'framer-motion';
@@ -9,7 +10,9 @@ const ICONS = {
   hypotheses_formulees: '🔍',
   eleve_assigne: '👤',
   sans_maj: '⏰',
-  nouveau_membre: '👋'
+  nouveau_membre: '👋',
+  rappel: '📌',
+  rappel_retard: '⏰',
 };
 
 const LABELS = {
@@ -17,13 +20,41 @@ const LABELS = {
   hypotheses_formulees: 'Hypothèses formulées',
   eleve_assigne: 'Élève assigné',
   sans_maj: 'Sans mise à jour',
-  nouveau_membre: 'Nouveau membre'
+  nouveau_membre: 'Nouveau membre',
+  rappel: 'Rappel',
+  rappel_retard: 'Rappel en retard',
 };
+
+function estEnRetard(rappel) {
+  if (!rappel.echeance) return false;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return new Date(rappel.echeance) < today;
+}
+
+// Transforme un rappel non fait en objet affichable comme une notification —
+// jamais persisté dans l'entité Notification, calculé à la volée à chaque
+// chargement pour rester toujours synchronisé avec l'état réel des rappels.
+function rappelVersNotification(r) {
+  const enRetard = estEnRetard(r);
+  return {
+    id: `rappel-${r.id}`,
+    __rappelId: r.id,
+    __enRetard: enRetard,
+    type: enRetard ? 'rappel_retard' : 'rappel',
+    titre: r.texte,
+    message: r.eleve_nom ? `Rappel pour ${r.eleve_nom}` : 'Rappel',
+    fiche_id: r.fiche_id,
+    eleve_nom: r.eleve_nom,
+    lu: false,
+    created_date: r.created_date,
+  };
+}
 
 export default function Notifications() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rappelsError, setRappelsError] = useState(null);
   const [filter, setFilter] = useState('toutes');
   const [selectedType, setSelectedType] = useState(null);
   const [selected, setSelected] = useState(new Set());
@@ -32,7 +63,22 @@ export default function Notifications() {
   useEffect(() => {
     async function load() {
       const notifs = await base44.entities.Notification.list('-created_date', 100).catch(() => []);
-      setNotifications(notifs);
+
+      let rappelNotifs = [];
+      try {
+        const rappels = await fetchAllPages('RappelEleve', '-echeance', { query: { fait: false }, throwOnError: true });
+        rappelNotifs = rappels.map(rappelVersNotification);
+        setRappelsError(null);
+      } catch (e) {
+        console.error('Erreur chargement des rappels:', e);
+        setRappelsError('Les rappels non faits n\'ont pas pu être chargés. Réessayez plus tard.');
+      }
+
+      const merged = [...notifs, ...rappelNotifs].sort((a, b) => {
+        if (!!a.__enRetard !== !!b.__enRetard) return a.__enRetard ? -1 : 1;
+        return new Date(b.created_date) - new Date(a.created_date);
+      });
+      setNotifications(merged);
       setLoading(false);
     }
     load();
@@ -54,42 +100,40 @@ export default function Notifications() {
 
   const handleMarkAllAsRead = async () => {
     await Promise.all(
-      notifications.filter(n => !n.lu).map(n =>
+      notifications.filter(n => !n.lu && !n.__rappelId).map(n =>
         base44.entities.Notification.update(n.id, { lu: true }).catch(() => null)
       )
     );
-    setNotifications(prev => prev.map(n => ({ ...n, lu: true })));
+    setNotifications(prev => prev.map(n => n.__rappelId ? n : { ...n, lu: true }));
   };
 
   const handleNotifClick = (notif) => {
-    handleMarkAsRead(notif.id);
+    if (!notif.__rappelId) handleMarkAsRead(notif.id);
     if (notif.fiche_id) {
       navigate(`/detail-fiche?id=${notif.fiche_id}`);
     }
   };
 
+  const deleteOne = (notif) => notif.__rappelId
+    ? base44.entities.RappelEleve.delete(notif.__rappelId).catch(() => null)
+    : base44.entities.Notification.delete(notif.id).catch(() => null);
+
   const handleDeleteNotif = async (id) => {
-    await base44.entities.Notification.delete(id).catch(() => null);
+    const notif = notifications.find(n => n.id === id);
+    if (notif) await deleteOne(notif);
     setNotifications(prev => prev.filter(n => n.id !== id));
     setSelected(prev => { const s = new Set(prev); s.delete(id); return s; });
   };
 
   const handleDeleteSelected = async () => {
-    await Promise.all(
-      Array.from(selected).map(id =>
-        base44.entities.Notification.delete(id).catch(() => null)
-      )
-    );
+    const toDelete = notifications.filter(n => selected.has(n.id));
+    await Promise.all(toDelete.map(deleteOne));
     setNotifications(prev => prev.filter(n => !selected.has(n.id)));
     setSelected(new Set());
   };
 
   const handleDeleteAll = async () => {
-    await Promise.all(
-      notifications.map(n =>
-        base44.entities.Notification.delete(n.id).catch(() => null)
-      )
-    );
+    await Promise.all(notifications.map(deleteOne));
     setNotifications([]);
     setSelected(new Set());
     setShowDeleteAllModal(false);
@@ -116,6 +160,11 @@ export default function Notifications() {
   return (
     <ScreenLayout title="Notifications" subtitle="Suivi des actions de l'équipe">
       <div style={{ maxWidth: 600, margin: '0 auto' }}>
+        {rappelsError && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', marginBottom: 16, borderRadius: 8, background: '#FEF0E4', border: '1px solid #F5CFA5', color: '#B85C1A', fontSize: 12.5, fontWeight: 500 }}>
+            <span>⚠️</span> {rappelsError}
+          </div>
+        )}
         {/* Filtres */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
           <button

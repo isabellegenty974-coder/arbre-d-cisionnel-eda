@@ -1,0 +1,36 @@
+{
+  "name": "RappelEleve",
+  "type": "object",
+  "properties": {
+    "fiche_id": {
+      "type": "string",
+      "description": "ID de la fiche élève concernée"
+    },
+    "eleve_nom": {
+      "type": "string",
+      "description": "Nom et prénom de l'élève (dénormalisé pour l'affichage dans les notifications)"
+    },
+    "texte": {
+      "type": "string",
+      "description": "Contenu du rappel"
+    },
+    "echeance": {
+      "type": "string",
+      "format": "date",
+      "description": "Date d'échéance facultative"
+    },
+    "fait": {
+      "type": "boolean",
+      "default": false,
+      "description": "Rappel marqué comme fait"
+    },
+    "auteur_nom": {
+      "type": "string",
+      "description": "Nom de la personne ayant créé le rappel"
+    }
+  },
+  "required": [
+    "fiche_id",
+    "texte"
+  ]
+}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fetchAllPages } from '@/lib/fetchAllPages';
 import { useNavigate } from 'react-router-dom';
-import { Bell, X, CheckCheck } from 'lucide-react';
+import { Bell, X, CheckCheck, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TYPE_CONFIG = {
@@ -9,13 +10,41 @@ const TYPE_CONFIG = {
   fiche_mise_a_jour: { emoji: '✏️', color: '#16a34a', bg: '#dcfce7' },
   eleve_sans_maj: { emoji: '⏰', color: '#d97706', bg: '#fef3c7' },
   diagnostic_termine: { emoji: '✅', color: '#7c3aed', bg: '#ede9fe' },
+  rappel: { emoji: '📌', color: '#B85C1A', bg: '#FEF0E4' },
+  rappel_retard: { emoji: '⏰', color: '#B42318', bg: '#FEE4E2' },
 };
+
+function estEnRetard(rappel) {
+  if (!rappel.echeance) return false;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return new Date(rappel.echeance) < today;
+}
+
+// Transforme un rappel non fait en objet affichable comme une notification —
+// jamais persisté dans l'entité Notification, calculé à la volée à chaque
+// chargement pour rester toujours synchronisé avec l'état réel des rappels.
+function rappelVersNotification(r) {
+  const enRetard = estEnRetard(r);
+  return {
+    id: `rappel-${r.id}`,
+    __rappelId: r.id,
+    __enRetard: enRetard,
+    type: enRetard ? 'rappel_retard' : 'rappel',
+    titre: r.texte,
+    message: r.eleve_nom ? `Rappel pour ${r.eleve_nom}` : 'Rappel',
+    fiche_id: r.fiche_id,
+    eleve_nom: r.eleve_nom,
+    lu: false,
+    created_date: r.created_date,
+  };
+}
 
 export default function NotificationsBadge() {
   const navigate = useNavigate();
   const [notifs, setNotifs] = useState([]);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [rappelsError, setRappelsError] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -25,7 +54,22 @@ export default function NotificationsBadge() {
       const all = await base44.entities.Notification.list('-created_date', 50).catch(() => []);
       // Filter for current user or broadcast
       const mine = all.filter(n => !n.destinataire_email || n.destinataire_email === user.email);
-      setNotifs(mine);
+
+      let rappelNotifs = [];
+      try {
+        const rappels = await fetchAllPages('RappelEleve', '-echeance', { query: { fait: false }, throwOnError: true });
+        rappelNotifs = rappels.map(rappelVersNotification);
+        setRappelsError(null);
+      } catch (e) {
+        console.error('Erreur chargement des rappels:', e);
+        setRappelsError('Rappels non chargés.');
+      }
+
+      const merged = [...mine, ...rappelNotifs].sort((a, b) => {
+        if (!!a.__enRetard !== !!b.__enRetard) return a.__enRetard ? -1 : 1;
+        return new Date(b.created_date) - new Date(a.created_date);
+      });
+      setNotifs(merged);
     };
     load();
     const unsub = base44.entities.Notification.subscribe(() => load());
@@ -36,9 +80,10 @@ export default function NotificationsBadge() {
 
   const markAllRead = async () => {
     for (const n of unread) {
+      if (n.__rappelId) continue; // pas de champ "lu" persisté pour un rappel
       await base44.entities.Notification.update(n.id, { lu: true }).catch(() => {});
     }
-    setNotifs(prev => prev.map(n => ({ ...n, lu: true })));
+    setNotifs(prev => prev.map(n => n.__rappelId ? n : { ...n, lu: true }));
   };
 
   const markRead = async (id) => {
@@ -47,7 +92,7 @@ export default function NotificationsBadge() {
   };
 
   const handleNotificationClick = async (notification) => {
-    await markRead(notification.id);
+    if (!notification.__rappelId) await markRead(notification.id);
     setOpen(false);
 
     // Navigation basée sur le type de notification
@@ -106,6 +151,13 @@ export default function NotificationsBadge() {
                   </button>
                 </div>
               </div>
+
+              {rappelsError && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border-b border-amber-100 text-amber-700 text-xs">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  {rappelsError}
+                </div>
+              )}
 
               <div className="max-h-80 overflow-y-auto">
                 {notifs.length === 0 ? (
