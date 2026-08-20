@@ -399,27 +399,35 @@ function TabSuivi({ fiche, ficheId, setFiche, interventions, setInterventions, u
                       <option>Passation psychométrique (Psy-EN)</option>
                       <option>Observation en classe (Psy-EN)</option>
                       <option>Entretien avec la famille</option>
-                      <option>Participation à une ESS/EE</option>
+                      <option>Participation à une ESS</option>
+                      <option>Participation à une EE</option>
                       <option>Liaison avec l'enseignant·e</option>
                       <option>Orientation externe (Psy-EN)</option>
                       <option>Dossier MDPH (Psy-EN)</option>
                     </optgroup>
                     <optgroup label="Actes MaDR">
+                      <option>Entretien avec l'élève (MaDR)</option>
                       <option>Séance de rééducation (MaDR)</option>
                       <option>Suivi individuel (MaDR)</option>
                       <option>Suivi en groupe (MaDR)</option>
                       <option>Observation en classe (MaDR)</option>
+                      <option>Entretien avec la famille (MaDR)</option>
+                      <option>Participation à une EE (MaDR)</option>
                       <option>Liaison avec l'enseignant·e (MaDR)</option>
+                      <option>Orientation externe (MaDR)</option>
                     </optgroup>
                     <optgroup label="Actes MaDP">
+                      <option>Entretien avec l'élève (MaDP)</option>
                       <option>Séance d'aide pédagogique (MaDP)</option>
                       <option>Suivi individuel (MaDP)</option>
                       <option>Suivi en groupe (MaDP)</option>
                       <option>Observation en classe (MaDP)</option>
+                      <option>Entretien avec la famille (MaDP)</option>
+                      <option>Participation à une EE (MaDP)</option>
                       <option>Liaison avec l'enseignant·e (MaDP)</option>
+                      <option>Orientation externe (MaDP)</option>
                     </optgroup>
                     <optgroup label="Commun">
-                      <option>Participation à une ESS/EE</option>
                       <option>Réunion d'équipe RASED</option>
                       <option>Autre</option>
                     </optgroup>
