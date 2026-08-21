@@ -1,5 +1,5 @@
 import { base44 } from '@/api/base44Client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import ScreenLayout from '@/components/tree/ScreenLayout';
 import { Button } from '@/components/ui/button';
@@ -13,17 +13,22 @@ import PhotoEEUpload from '@/components/PhotoEEUpload';
 export default function FicheEleve() {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
-  const urlParams = new URLSearchParams(window.location.search);
+  // Préremplissage transmis via l'état de navigation (React Router), jamais
+  // via l'URL : nom/prénom/date de naissance sont des données nominatives qui
+  // ne doivent pas se retrouver dans l'historique du navigateur. Un accès
+  // direct à /fiche-eleve (sans état, ex: "Nouvel élève" du menu) retombe sur
+  // un formulaire vierge.
+  const navState = useLocation().state || {};
   const [saved, setSaved] = useState(false);
   const [wasUpdated, setWasUpdated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [prenom, setPrenom] = useState(urlParams.get('prenom') || '');
-  const [nom, setNom] = useState(urlParams.get('nom') || '');
-  const [ecole, setEcole] = useState(urlParams.get('ecole') || '');
-  const [classe, setClasse] = useState(urlParams.get('classe') || '');
-  const [dateNaissance, setDateNaissance] = useState(urlParams.get('date_naissance') || '');
+  const [prenom, setPrenom] = useState(navState.prenom || '');
+  const [nom, setNom] = useState(navState.nom || '');
+  const [ecole, setEcole] = useState(navState.ecole || '');
+  const [classe, setClasse] = useState(navState.classe || '');
+  const [dateNaissance, setDateNaissance] = useState(navState.date_naissance || '');
   const [ageCalcule, setAgeCalcule] = useState(null);
   const [savedId, setSavedId] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
@@ -52,8 +57,8 @@ export default function FicheEleve() {
       if (annees.length > 0) setAnneeActive(annees[0].libelle);
     }).catch(() => {});
 
-    // Pré-remplir la date de naissance si elle est passée en paramètre
-    const dnParam = urlParams.get('date_naissance');
+    // Pré-remplir la date de naissance si elle est passée dans l'état de navigation
+    const dnParam = navState.date_naissance;
     if (dnParam) {
       const d = new Date(dnParam);
       setJourNaissance(String(d.getDate()));
@@ -66,12 +71,12 @@ export default function FicheEleve() {
 
   }, []);
 
-  // Debug: afficher les paramètres URL au montage
+  // Debug: afficher l'état de navigation au montage
   useEffect(() => {
-    console.log('[FicheEleve] URL params:', {
-      eleve_rased_id: urlParams.get('eleve_rased_id'),
-      classe: urlParams.get('classe'),
-      ecole: urlParams.get('ecole'),
+    console.log('[FicheEleve] État de navigation:', {
+      eleve_rased_id: navState.eleve_rased_id,
+      classe: navState.classe,
+      ecole: navState.ecole,
     });
   }, []);
 
@@ -199,7 +204,7 @@ export default function FicheEleve() {
         }
       }
 
-      const eleveRasedId = urlParams.get('eleve_rased_id');
+      const eleveRasedId = navState.eleve_rased_id;
 
       if (updatedExisting && targetId) {
         // Mettre à jour la fiche de l'année active en conservant tout l'historique.
@@ -353,7 +358,7 @@ export default function FicheEleve() {
                     {years.map(y => <option key={y} value={String(y)}>{y}</option>)}
                   </select>
                 </div>
-                {dateNaissance && urlParams.get('date_naissance') && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
+                {dateNaissance && navState.date_naissance && <p className="text-xs text-gray-500 mt-1">✓ Préremplie</p>}
               </div>
               <div>
                 <label className="text-sm font-semibold text-[#0F172A] block mb-2">Âge</label>
