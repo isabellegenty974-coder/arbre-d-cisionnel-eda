@@ -1,92 +1,76 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Shield, Database, Lock, Eye, UserCheck, Phone, Camera } from 'lucide-react';
+import { ArrowLeft, Shield, User, Database, Target, Eye, Server, Clock, UserCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HamburgerMenu from '@/components/Navigation/HamburgerMenu';
 
 const sections = [
   {
-    icon: Database,
+    icon: User,
     color: "#4A90E2",
     light: "#E8F0FB",
-    title: "Données collectées",
+    title: "Qui traite ces données",
     content: [
-      { type: "text", value: "L'application collecte uniquement les informations nécessaires à l'usage diagnostique :" },
+      { type: "text", value: "L'application « Suivis RASED » est utilisée par l'équipe RASED de la circonscription de La Possession pour le suivi des élèves des écoles du secteur. Elle a été développée par Isabelle Genty, psychologue de l'Éducation nationale, membre de cette équipe." },
+      { type: "text", value: "Une démarche de déclaration est en cours auprès du délégué à la protection des données de l'académie de La Réunion." },
+    ],
+  },
+  {
+    icon: Database,
+    color: "#8B5CF6",
+    light: "#F0EBFD",
+    title: "Quelles données",
+    content: [
       { type: "list", items: [
-        "Données de profil professionnel (nom, prénom, fonction)",
-        "Données relatives aux élèves (prénom, nom, âge, classe)",
-        "Sélections diagnostiques et hypothèses générées",
-        "Notes libres et observations saisies par le praticien",
+        "Pour l'ensemble des élèves du secteur : nom, prénom, date de naissance, école et classe, importés depuis les listes fournies par les écoles.",
+        "Pour les élèves faisant l'objet d'un suivi RASED : difficultés repérées, interventions réalisées, observations professionnelles, coordonnées des responsables légaux, documents joints.",
       ]},
+    ],
+  },
+  {
+    icon: Target,
+    color: "#34C48A",
+    light: "#E4F8F0",
+    title: "Pourquoi",
+    content: [
+      { type: "text", value: "Suivre les accompagnements conduits par l'équipe RASED, et produire le bilan annuel d'activité transmis à l'inspection. Aucune donnée n'est utilisée à d'autres fins, ni transmise à des tiers." },
     ],
   },
   {
     icon: Eye,
-    color: "#8B5CF6",
-    light: "#F0EBFD",
-    title: "Utilisation des données",
-    content: [
-      { type: "text", value: "Les données collectées ont pour unique finalité :" },
-      { type: "list", items: [
-        "Fournir un outil d'aide à la formulation d'hypothèses diagnostiques",
-        "Générer des rapports et recommandations personnalisés",
-        "Conserver l'historique des interventions RASED",
-        "Produire des statistiques anonymisées à usage interne",
-      ]},
-    ],
-  },
-  {
-    icon: Lock,
-    color: "#34C48A",
-    light: "#E4F8F0",
-    title: "Stockage et sécurité",
-    content: [
-      { type: "text", value: "La sécurité de vos données est une priorité absolue :" },
-      { type: "list", items: [
-        "Données hébergées sur des serveurs sécurisés conformes au RGPD",
-        "Accès restreint aux seuls membres de votre équipe RASED",
-        "Aucun partage avec des tiers sans consentement explicite",
-        "Chiffrement des données en transit et au repos",
-      ]},
-    ],
-  },
-  {
-    icon: Camera,
     color: "#F59E0B",
     light: "#FEF3DC",
-    title: "Autorisations requises",
+    title: "Qui y a accès",
     content: [
-      { type: "text", value: "L'application peut solliciter les autorisations suivantes :" },
-      { type: "list", items: [
-        "Accès à la caméra : pour photographier les évaluations EDA",
-        "Accès aux fichiers : pour importer et exporter des documents PDF",
-      ]},
-      { type: "text", value: "Ces autorisations sont facultatives et n'affectent pas les fonctionnalités principales." },
+      { type: "text", value: "Les trois membres de l'équipe RASED, sur authentification. Chacun accède à l'ensemble des dossiers du secteur, ce qui correspond au travail en équipe pluricatégorielle." },
+      { type: "text", value: "Les observations professionnelles sont couvertes par le secret professionnel." },
+    ],
+  },
+  {
+    icon: Server,
+    color: "#22D3EE",
+    light: "#E0FBFE",
+    title: "Où sont hébergées les données",
+    content: [
+      { type: "text", value: "Sur la plateforme Base44. L'application n'est pas accessible publiquement." },
+    ],
+  },
+  {
+    icon: Clock,
+    color: "#EC6B8A",
+    light: "#FCE8EE",
+    title: "Combien de temps",
+    content: [
+      { type: "text", value: "Les données sont conservées le temps du suivi de l'élève dans le secteur. La durée de conservation définitive est en cours de définition avec le délégué à la protection des données de l'académie." },
     ],
   },
   {
     icon: UserCheck,
-    color: "#EC6B8A",
-    light: "#FCE8EE",
-    title: "Vos droits (RGPD)",
-    content: [
-      { type: "text", value: "Conformément au Règlement Général sur la Protection des Données, vous disposez des droits suivants :" },
-      { type: "list", items: [
-        "Droit d'accès à l'ensemble de vos données personnelles",
-        "Droit de rectification en cas d'informations inexactes",
-        "Droit à l'effacement (« droit à l'oubli »)",
-        "Droit à la portabilité de vos données",
-        "Droit d'opposition au traitement de vos données",
-      ]},
-    ],
-  },
-  {
-    icon: Phone,
     color: "#D4A574",
     light: "#F8EEE0",
-    title: "Contact & exercice des droits",
+    title: "Vos droits",
     content: [
-      { type: "text", value: "Pour exercer vos droits ou pour toute question relative à cette politique, contactez l'administrateur de votre équipe RASED." },
-      { type: "text", value: "Vous pouvez également contacter la CNIL (Commission Nationale de l'Informatique et des Libertés) sur cnil.fr en cas de litige." },
+      { type: "text", value: "Les responsables légaux peuvent demander l'accès aux données concernant leur enfant, leur rectification ou leur effacement, et s'opposer au traitement. Ces demandes s'adressent à Isabelle Genty, psychologue de l'Éducation nationale, [ton adresse professionnelle], ou au délégué à la protection des données de l'académie de La Réunion : dpd@ac-reunion.fr." },
+      { type: "text", value: "En cas de difficulté, une réclamation peut être adressée à la CNIL (cnil.fr)." },
     ],
   },
 ];
@@ -112,19 +96,11 @@ export default function PolitiqueConfidentialite() {
               <Shield className="w-7 h-7 text-[#D4A574]" />
             </div>
             <div>
-              <h1 className="text-white font-bold text-2xl leading-tight">Politique de confidentialité</h1>
+              <h1 className="text-white font-bold text-2xl leading-tight">Information sur le traitement des données personnelles</h1>
               <p className="text-white/50 text-sm mt-1">
-                Mise à jour le {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                Mise à jour le 21 août 2026
               </p>
             </div>
-          </div>
-
-          {/* Badge RGPD */}
-          <div className="mt-5 flex items-center gap-2 bg-[#D4A574]/10 border border-[#D4A574]/20 rounded-xl px-4 py-3">
-            <div className="w-2 h-2 rounded-full bg-[#34C48A] animate-pulse shrink-0" />
-            <p className="text-white/80 text-xs leading-snug">
-              Cette application est <span className="text-[#D4A574] font-semibold">conforme au RGPD</span> — vos données et celles des élèves sont traitées dans le respect de la réglementation européenne.
-            </p>
           </div>
         </div>
       </div>
