@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { titleCase } from './utils';
 import { computeIndicateursRased } from './indicateursRased';
+import { ACTES } from './actesRased';
 
 const COLORS = { 'Psy EN EDA': '#1A3353', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
 const TITRES = {
@@ -90,51 +91,11 @@ function actesDe(fiches, profession) {
     .map(iv => ({ ...iv, fiche: f })));
 }
 
-// Chaînes exactes du menu « Acte accompli » (DetailFiche.jsx) : chaque acte
-// est une valeur figée de <select>, jamais du texte libre. On compte donc les
-// actes par égalité stricte sur leur type réellement sélectionné, jamais par
-// recherche de mots dans une description ou un commentaire.
-const ACTES = {
-  'Psy EN EDA': {
-    entretienEleve: "Entretien avec l'élève (Psy-EN)",
-    passationPsycho: 'Passation psychométrique (Psy-EN)',
-    observationClasse: 'Observation en classe (Psy-EN)',
-    entretienFamille: 'Entretien avec la famille',
-    participationESS: 'Participation à une ESS',
-    participationEE: 'Participation à une EE',
-    liaisonEnseignant: "Liaison avec l'enseignant·e",
-    orientationExterne: 'Orientation externe (Psy-EN)',
-    dossierMDPH: 'Dossier MDPH (Psy-EN)',
-    reunionEquipe: "Réunion d'équipe RASED",
-    autre: 'Autre',
-  },
-  'MaDR': {
-    entretienEleve: "Entretien avec l'élève (MaDR)",
-    seance: 'Séance de rééducation (MaDR)',
-    suiviIndividuel: 'Suivi individuel (MaDR)',
-    suiviGroupe: 'Suivi en groupe (MaDR)',
-    observationClasse: 'Observation en classe (MaDR)',
-    entretienFamille: 'Entretien avec la famille (MaDR)',
-    participationEE: 'Participation à une EE (MaDR)',
-    liaisonEnseignant: "Liaison avec l'enseignant·e (MaDR)",
-    orientationExterne: 'Orientation externe (MaDR)',
-    reunionEquipe: "Réunion d'équipe RASED",
-    autre: 'Autre',
-  },
-  'MaDP': {
-    entretienEleve: "Entretien avec l'élève (MaDP)",
-    seance: "Séance d'aide pédagogique (MaDP)",
-    suiviIndividuel: 'Suivi individuel (MaDP)',
-    suiviGroupe: 'Suivi en groupe (MaDP)',
-    observationClasse: 'Observation en classe (MaDP)',
-    entretienFamille: 'Entretien avec la famille (MaDP)',
-    participationEE: 'Participation à une EE (MaDP)',
-    liaisonEnseignant: "Liaison avec l'enseignant·e (MaDP)",
-    orientationExterne: 'Orientation externe (MaDP)',
-    reunionEquipe: "Réunion d'équipe RASED",
-    autre: 'Autre',
-  },
-};
+// Chaînes exactes du menu « Acte accompli » (DetailFiche.jsx), importées
+// depuis la source unique actesRased.js : chaque acte est une valeur figée de
+// <select>, jamais du texte libre. On compte donc les actes par égalité
+// stricte sur leur type réellement sélectionné, jamais par recherche de mots
+// dans une description ou un commentaire.
 function compteActe(actes, description) {
   return actes.filter(a => a.description === description).length;
 }
@@ -224,7 +185,6 @@ function computeStats({ fiches, eleves, libelle }) {
   const madr = {
     elevesEnCharge: fichesMadr.length,
     entretiensEleves: compteActe(actesMadr, AMadr.entretienEleve),
-    seancesReeducation: compteActe(actesMadr, AMadr.seance),
     suivisIndividuels: compteActe(actesMadr, AMadr.suiviIndividuel),
     suivisGroupe: compteActe(actesMadr, AMadr.suiviGroupe),
     observationsClasse: compteActe(actesMadr, AMadr.observationClasse),
@@ -252,7 +212,6 @@ function computeStats({ fiches, eleves, libelle }) {
   const madp = {
     elevesAccompagnes: fichesMadp.length,
     entretiensEleves: compteActe(actesMadp, AMadp.entretienEleve),
-    seancesAide: compteActe(actesMadp, AMadp.seance),
     suivisIndividuels: compteActe(actesMadp, AMadp.suiviIndividuel),
     suivisGroupe: compteActe(actesMadp, AMadp.suiviGroupe),
     observationsClasse: compteActe(actesMadp, AMadp.observationClasse),
@@ -342,7 +301,7 @@ function analyseMadr(s, membres) {
   if (membres.length > 0) {
     const sujet = listeNoms(membres);
     const verbe = membres.length > 1 ? 'ont pris' : 'a pris';
-    lignes.push(`${sujet} ${verbe} en charge ${m.elevesEnCharge} élève${m.elevesEnCharge > 1 ? 's' : ''} sur l'année, pour ${m.seancesReeducation} séance${m.seancesReeducation > 1 ? 's' : ''} de rééducation (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`);
+    lignes.push(`${sujet} ${verbe} en charge ${m.elevesEnCharge} élève${m.elevesEnCharge > 1 ? 's' : ''} sur l'année, avec ${m.suivisIndividuels} suivi${m.suivisIndividuels > 1 ? 's' : ''} individuel${m.suivisIndividuels > 1 ? 's' : ''} et ${m.suivisGroupe} suivi${m.suivisGroupe > 1 ? 's' : ''} en groupe.`);
   }
   lignes.push(`${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesEnCharge} ${m.clotureees > 1 ? 'ont' : 'a'} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`);
   return lignes;
@@ -355,7 +314,7 @@ function analyseMadp(s, membres) {
   if (membres.length > 0) {
     const sujet = listeNoms(membres);
     const verbe = membres.length > 1 ? 'ont accompagné' : 'a accompagné';
-    lignes.push(`${sujet} ${verbe} ${m.elevesAccompagnes} élève${m.elevesAccompagnes > 1 ? 's' : ''} sur l'année, pour ${m.seancesAide} séance${m.seancesAide > 1 ? 's' : ''} d'aide pédagogique (${m.suivisIndividuels} en individuel, ${m.suivisGroupe} en groupe).`);
+    lignes.push(`${sujet} ${verbe} ${m.elevesAccompagnes} élève${m.elevesAccompagnes > 1 ? 's' : ''} sur l'année, avec ${m.suivisIndividuels} suivi${m.suivisIndividuels > 1 ? 's' : ''} individuel${m.suivisIndividuels > 1 ? 's' : ''} et ${m.suivisGroupe} suivi${m.suivisGroupe > 1 ? 's' : ''} en groupe.`);
   }
   lignes.push(`${m.clotureees} prise${m.clotureees > 1 ? 's' : ''} en charge sur ${m.elevesAccompagnes} ${m.clotureees > 1 ? 'ont' : 'a'} été clôturée${m.clotureees > 1 ? 's' : ''} (${tauxCloture} %), pour ${m.liaisonsEnseignants} liaison${m.liaisonsEnseignants > 1 ? 's' : ''} avec les enseignant·es.`);
   return lignes;
@@ -377,7 +336,7 @@ function perspectivesMadr(s, anneeN1) {
   items.push(m.suivisGroupe < m.suivisIndividuels
     ? "Étudier la possibilité de développer des suivis en petit groupe pour les difficultés relationnelles les plus fréquentes."
     : "Poursuivre l'équilibre actuel entre suivis individuels et suivis de groupe.");
-  items.push(`Maintenir le rythme des ${m.seancesReeducation} séances de rééducation et le lien avec les ${m.liaisonsEnseignants} liaisons enseignant·es établies.`);
+  items.push(`Maintenir le rythme des suivis individuels et de groupe et le lien avec les ${m.liaisonsEnseignants} liaisons enseignant·es établies.`);
   items.push('Poursuivre la coordination avec la Psy-EN EDA pour les situations à double composante relationnelle et cognitive.');
   return { titre: `Perspectives ${anneeN1}`, items };
 }
@@ -773,7 +732,6 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDR'], perRow: 4,
     items: [
       { label: "Entretien avec l'élève", value: s.madr.entretiensEleves },
-      { label: 'Séance de rééducation', value: s.madr.seancesReeducation },
       { label: 'Suivi individuel', value: s.madr.suivisIndividuels },
       { label: 'Suivi en groupe', value: s.madr.suivisGroupe },
       { label: 'Observation en classe', value: s.madr.observationsClasse },
@@ -814,7 +772,6 @@ export async function generateRapportAnnuel({ anneeScolaire, fiches, eleves, eco
     x: margin, y: 40, width: contentWidth, color: COLORS['MaDP'], perRow: 4,
     items: [
       { label: "Entretien avec l'élève", value: s.madp.entretiensEleves },
-      { label: "Séance d'aide pédagogique", value: s.madp.seancesAide },
       { label: 'Suivi individuel', value: s.madp.suivisIndividuels },
       { label: 'Suivi en groupe', value: s.madp.suivisGroupe },
       { label: 'Observation en classe', value: s.madp.observationsClasse },

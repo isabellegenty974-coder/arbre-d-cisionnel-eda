@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportStatsPDF } from "@/lib/statsExport";
+import { ACTES } from "@/lib/actesRased";
 import { titleCase } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -327,36 +328,39 @@ export default function StatsAnnuelles() {
         byProf[p].push(d);
       });
     });
-    const count = (acts, keyword) => acts.filter(d => d.includes(keyword)).length;
+    // Compte par égalité stricte sur le libellé exact du menu « Acte
+    // accompli » (source unique : actesRased.js), jamais par mot-clé libre —
+    // un acte renommé ou supprimé du menu ne peut plus rester référencé ici
+    // sans que ce fichier soit mis à jour en même temps.
+    const count = (acts, label) => acts.filter(d => d === label).length;
     const psy  = byProf['Psy EN EDA'] || [];
     const madr = byProf['MaDR'] || [];
     const madp = byProf['MaDP'] || [];
+    const APsy = ACTES['Psy EN EDA'], AMadr = ACTES['MaDR'], AMadp = ACTES['MaDP'];
     return {
       psy: [
-        { label: 'Entretiens élèves',          n: count(psy, "Entretien avec l'élève") },
-        { label: 'Passations psychométriques',  n: count(psy, 'Passation psychométrique') },
-        { label: 'Observations en classe',      n: count(psy, 'Observation en classe (Psy') },
-        { label: 'Entretiens familles',         n: count(psy, 'Entretien avec la famille') },
-        { label: 'Participations ESS/EE',       n: count(psy, 'ESS/EE') },
-        { label: 'Liaisons enseignants',        n: count(psy, "Liaison avec l'enseignant") },
-        { label: 'Orientations externes',       n: count(psy, 'Orientation externe') },
-        { label: 'Dossiers MDPH',              n: count(psy, 'Dossier MDPH') },
+        { label: 'Entretiens élèves',          n: count(psy, APsy.entretienEleve) },
+        { label: 'Passations psychométriques',  n: count(psy, APsy.passationPsycho) },
+        { label: 'Observations en classe',      n: count(psy, APsy.observationClasse) },
+        { label: 'Entretiens familles',         n: count(psy, APsy.entretienFamille) },
+        { label: 'Participations ESS/EE',       n: count(psy, APsy.participationESS) + count(psy, APsy.participationEE) },
+        { label: 'Liaisons enseignants',        n: count(psy, APsy.liaisonEnseignant) },
+        { label: 'Orientations externes',       n: count(psy, APsy.orientationExterne) },
+        { label: 'Dossiers MDPH',              n: count(psy, APsy.dossierMDPH) },
       ].filter(r => r.n > 0),
       madr: [
-        { label: 'Séances de rééducation',     n: count(madr, 'Séance de rééducation') },
-        { label: 'Suivis individuels',          n: count(madr, 'Suivi individuel') },
-        { label: 'Suivis en groupe',            n: count(madr, 'Suivi en groupe') },
-        { label: 'Observations en classe',      n: count(madr, 'Observation en classe') },
-        { label: 'Liaisons enseignants',        n: count(madr, 'Liaison') },
-        { label: 'Participations ESS/EE',       n: count(madr, 'ESS/EE') },
+        { label: 'Suivis individuels',          n: count(madr, AMadr.suiviIndividuel) },
+        { label: 'Suivis en groupe',            n: count(madr, AMadr.suiviGroupe) },
+        { label: 'Observations en classe',      n: count(madr, AMadr.observationClasse) },
+        { label: 'Liaisons enseignants',        n: count(madr, AMadr.liaisonEnseignant) },
+        { label: 'Participations à une EE',     n: count(madr, AMadr.participationEE) },
       ].filter(r => r.n > 0),
       madp: [
-        { label: "Séances d'aide pédagogique", n: count(madp, "Séance d'aide") },
-        { label: 'Suivis individuels',          n: count(madp, 'Suivi individuel') },
-        { label: 'Suivis en groupe',            n: count(madp, 'Suivi en groupe') },
-        { label: 'Observations en classe',      n: count(madp, 'Observation en classe') },
-        { label: 'Liaisons enseignants',        n: count(madp, 'Liaison') },
-        { label: 'Participations ESS/EE',       n: count(madp, 'ESS/EE') },
+        { label: 'Suivis individuels',          n: count(madp, AMadp.suiviIndividuel) },
+        { label: 'Suivis en groupe',            n: count(madp, AMadp.suiviGroupe) },
+        { label: 'Observations en classe',      n: count(madp, AMadp.observationClasse) },
+        { label: 'Liaisons enseignants',        n: count(madp, AMadp.liaisonEnseignant) },
+        { label: 'Participations à une EE',     n: count(madp, AMadp.participationEE) },
       ].filter(r => r.n > 0),
     };
   })();
