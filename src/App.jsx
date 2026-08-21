@@ -15,6 +15,7 @@ import ReconnectButton from '@/components/ReconnectButton';
 import WelcomeModal from '@/components/WelcomeModal';
 import { CryptoProvider } from '@/lib/CryptoContext';
 import CryptoDemo from './pages/CryptoDemo';
+import MigrationChiffrement from './pages/MigrationChiffrement';
 
 // Pages
 import Accueil from './pages/Accueil';
@@ -323,6 +324,7 @@ const AuthenticatedApp = () => {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/sauvegarde" element={<Sauvegarde />} />
         <Route path="/crypto-demo" element={<CryptoDemo />} />
+        <Route path="/migration-chiffrement" element={<MigrationChiffrement />} />
 
         {/* Redirections des anciennes routes en doublon */}
         <Route path="/DetailEleve" element={<RedirectWithQuery to="/detail-eleve" />} />
