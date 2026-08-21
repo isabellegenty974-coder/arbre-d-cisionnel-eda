@@ -13,6 +13,8 @@ import ResumeButton from '@/components/tree/ResumeButton';
 import BottomBar from '@/components/Navigation/BottomBar';
 import ReconnectButton from '@/components/ReconnectButton';
 import WelcomeModal from '@/components/WelcomeModal';
+import { CryptoProvider } from '@/lib/CryptoContext';
+import CryptoDemo from './pages/CryptoDemo';
 
 // Pages
 import Accueil from './pages/Accueil';
@@ -320,6 +322,7 @@ const AuthenticatedApp = () => {
         <Route path="/parametres" element={<Parametres />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/sauvegarde" element={<Sauvegarde />} />
+        <Route path="/crypto-demo" element={<CryptoDemo />} />
 
         {/* Redirections des anciennes routes en doublon */}
         <Route path="/DetailEleve" element={<RedirectWithQuery to="/detail-eleve" />} />
@@ -343,10 +346,12 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <DiagnosticProvider>
-          <Router>
-            <ConnectionIndicator />
-            <AuthenticatedApp />
-          </Router>
+          <CryptoProvider>
+            <Router>
+              <ConnectionIndicator />
+              <AuthenticatedApp />
+            </Router>
+          </CryptoProvider>
         </DiagnosticProvider>
         <Toaster />
       </QueryClientProvider>
