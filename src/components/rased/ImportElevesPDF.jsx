@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Upload, Loader, Check, Search, AlertCircle, ChevronDown, ChevronRight, Users } from 'lucide-react';
-import { titleCase } from '@/lib/utils';
+import { titleCase, normalizeName } from '@/lib/utils';
 
 export default function ImportElevesPDF({ ecoleId: ecoleIdConnue, onDone }) {
   const [step, setStep] = useState('upload'); // upload | parsing | validate | importing | done
@@ -148,6 +148,7 @@ Retourne uniquement un objet JSON valide.`,
   // ── Import de toutes les classes sélectionnées ─────────────────────────────
   const handleImport = async () => {
     setImporting(true);
+    setError(null);
     setStep('importing');
 
     const nomEcole = (extracted.nom_ecole || '').trim();
@@ -161,16 +162,28 @@ Retourne uniquement un objet JSON valide.`,
     // directement, sans passer par le matching par nom — le nom extrait du PDF
     // par l'IA peut légèrement différer (accents, espaces) du nom déjà en base
     // et créer un doublon d'école sinon. Sans ecoleId connu (import générique
-    // depuis /import-pdf), on retrouve ou crée l'école par nom comme avant.
+    // depuis /import-pdf), on retrouve l'école par nom normalisé (accents,
+    // casse, apostrophes, espaces) — et si rien ne correspond, on n'en crée
+    // PAS une nouvelle silencieusement : on bloque et on demande à
+    // l'utilisateur de relancer l'import depuis la fiche de l'école voulue,
+    // pour éviter de générer un doublon d'école à partir d'une simple
+    // variante de nom mal reconnue par l'IA.
     let ecoleId = ecoleIdConnue || null;
     if (!ecoleId) {
       const ecoles = await base44.entities.EcoleRased.list('-nom', 200).catch(() => []);
-      const ecoleExistante = ecoles.find(e => e.nom?.toLowerCase() === nomEcole.toLowerCase());
+      const nomEcoleNorm = normalizeName(nomEcole);
+      const ecoleExistante = ecoles.find(e => normalizeName(e.nom) === nomEcoleNorm);
       if (ecoleExistante) {
         ecoleId = ecoleExistante.id;
-      } else if (nomEcole) {
-        const nouvelleEcole = await base44.entities.EcoleRased.create({ nom: nomEcole });
-        ecoleId = nouvelleEcole.id;
+      } else {
+        setImporting(false);
+        setError(
+          nomEcole
+            ? `École « ${titleCase(nomEcole)} » introuvable parmi vos écoles enregistrées. Relancez l'import depuis la fiche de l'école concernée pour éviter de créer un doublon.`
+            : "Aucune école n'a pu être identifiée dans ce PDF. Relancez l'import depuis la fiche de l'école concernée."
+        );
+        setStep('validate');
+        return;
       }
     }
 
@@ -303,6 +316,12 @@ Retourne uniquement un objet JSON valide.`,
   // ── VALIDATE ─────────────────────────────────────────────────────────────
   if (step === 'validate') return (
     <div>
+      {error && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: '#FEF0E4', border: '1px solid #F5C6A0', borderRadius: 10, marginBottom: 16, fontSize: 13, color: '#B85C1A' }}>
+          <AlertCircle size={16} /> {error}
+        </div>
+      )}
+
       {/* École détectée */}
       <div style={{ background: '#EAF2FB', border: '1px solid #BFD9F2', borderRadius: 12, padding: '14px 18px', marginBottom: 18 }}>
         <p style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.07em', color: '#566880', margin: '0 0 4px', fontWeight: 600 }}>École détectée</p>
