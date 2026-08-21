@@ -1,5 +1,9 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { isInitialized, initializeCrypto, unlockCrypto, tryRestoreSession, lockCrypto, destroyCrypto } from './cryptoDb.js';
+import {
+  isInitialized, initializeCrypto, importCrypto, unlockCrypto,
+  tryRestoreSession, lockCrypto, destroyCrypto,
+} from './cryptoDb.js';
+import { createExportBundle, openExportBundle } from './crypto.js';
 
 const CryptoCtx = createContext(null);
 
@@ -21,6 +25,18 @@ export function CryptoProvider({ children }) {
     setError(null);
     try {
       await initializeCrypto(passphrase);
+      setStatus('unlocked');
+    } catch (e) {
+      setError(e.message);
+      throw e;
+    }
+  }, []);
+
+  const importKey = useCallback(async (bundle, exportPassphrase, memberPassphrase) => {
+    setError(null);
+    try {
+      const masterKey = await openExportBundle(bundle, exportPassphrase);
+      await importCrypto(masterKey, memberPassphrase);
       setStatus('unlocked');
     } catch (e) {
       setError(e.message);
@@ -50,7 +66,19 @@ export function CryptoProvider({ children }) {
   }, []);
 
   return (
-    <CryptoCtx.Provider value={{ status, error, setup, unlock, lock, destroy, isUnlocked: status === 'unlocked' }}>
+    <CryptoCtx.Provider
+      value={{
+        status,
+        error,
+        setup,
+        importKey,
+        unlock,
+        lock,
+        destroy,
+        createExportBundle,
+        isUnlocked: status === 'unlocked',
+      }}
+    >
       {children}
     </CryptoCtx.Provider>
   );
