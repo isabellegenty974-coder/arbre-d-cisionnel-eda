@@ -120,15 +120,18 @@ export default function CryptoUnlock() {
               <label className="text-sm font-medium text-foreground block mb-1.5">
                 Fichier de clé reçu
               </label>
-              <input
-                type="file"
-                accept=".json,application/json"
-                onChange={handleFile}
-                className="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground"
-              />
-              {fileName && (
-                <p className="text-xs text-muted-foreground mt-1">Sélectionné : {fileName}</p>
-              )}
+              <label className="flex items-center gap-3 w-full h-11 px-3 rounded-md border border-dashed border-input bg-muted/50 cursor-pointer hover:bg-muted transition-colors">
+                <Upload className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-sm text-muted-foreground truncate flex-1">
+                  {fileName || 'Toucher pour choisir le fichier…'}
+                </span>
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleFile}
+                  className="hidden"
+                />
+              </label>
             </div>
             <div>
               <label className="text-sm font-medium text-foreground block mb-1.5">
