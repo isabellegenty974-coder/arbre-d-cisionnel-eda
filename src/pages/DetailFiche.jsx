@@ -15,6 +15,7 @@ import { titleCase } from '@/lib/utils';
 import { generateReport, downloadReport } from '@/lib/reportGenerator';
 import { generateRapportSuivi } from '@/lib/rapportSuiviGenerator';
 import { MENU_ACTE_ACCOMPLI } from '@/lib/actesRased';
+import { countFicheDependents, deleteFicheCascade, FICHE_DEPENDENTS } from '@/lib/cascadeDelete';
 import { jsPDF } from 'jspdf';
 
 const PROF_COLOR  = { 'Psy EN EDA': '#3B82C4', 'MaDR': '#1E7A52', 'MaDP': '#B85C1A' };
@@ -703,18 +704,45 @@ function TabInfos({ fiche, ficheId, navigate, user, setFiche, membres }) {
   const [generating, setGenerating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  
+  const [deleteCounts, setDeleteCounts] = useState(null);
+  const [deleteCountsError, setDeleteCountsError] = useState(false);
+  const [loadingCounts, setLoadingCounts] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   const PROF_LABEL = { 'Psy EN EDA': 'Psychologue de l\'Éducation Nationale · Spécialité EDA', 'MaDR': 'Maître à Dominante Relationnelle (MaDR)', 'MaDP': 'Maître à Dominante Pédagogique (MaDP)' };
-  
+
+  // Calcule le volume de données liées AVANT d'ouvrir la confirmation, pour
+  // que l'utilisateur voie ce qui sera réellement supprimé plutôt qu'une
+  // phrase générique. Si le décompte échoue, la suppression reste bloquée
+  // (voir le bouton plus bas) : impossible d'annoncer fidèlement ce qui va
+  // disparaître, donc impossible de la confirmer en connaissance de cause.
+  const openDeleteConfirm = async () => {
+    setShowDeleteConfirm(true);
+    setDeleteError('');
+    setDeleteCounts(null);
+    setDeleteCountsError(false);
+    setLoadingCounts(true);
+    try {
+      const counts = await countFicheDependents(ficheId);
+      setDeleteCounts(counts);
+    } catch (error) {
+      console.error('Erreur calcul des données liées:', error);
+      setDeleteCountsError(true);
+    } finally {
+      setLoadingCounts(false);
+    }
+  };
+
   const handleDeleteFiche = async () => {
     setDeleting(true);
+    setDeleteError('');
     try {
-      await base44.entities.FicheEleve.delete(ficheId);
+      await deleteFicheCascade(ficheId);
       navigate('/dashboard');
     } catch (error) {
       console.error('Erreur suppression:', error);
+      setDeleteError(error.message || 'Une erreur est survenue pendant la suppression.');
       setDeleting(false);
-      setShowDeleteConfirm(false);
     }
   };
 
@@ -832,7 +860,7 @@ function TabInfos({ fiche, ficheId, navigate, user, setFiche, membres }) {
           <p style={{ fontSize: 13, color: '#B85C1A', marginBottom: 12, lineHeight: 1.5 }}>
             La suppression de cette fiche est définitive. Cette action ne peut pas être annulée.
           </p>
-          <button onClick={() => setShowDeleteConfirm(true)}
+          <button onClick={openDeleteConfirm}
             style={{ fontSize: 12.5, fontWeight: 600, padding: '8px 16px', borderRadius: 8, background: '#B85C1A', color: '#fff', border: 'none', cursor: 'pointer' }}>
             🗑️ Supprimer cette fiche
           </button>
@@ -847,20 +875,38 @@ function TabInfos({ fiche, ficheId, navigate, user, setFiche, membres }) {
             onClick={() => !deleting && setShowDeleteConfirm(false)}>
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              style={{ background: '#fff', borderRadius: 14, padding: '24px', maxWidth: 380, textAlign: 'center' }}>
+              style={{ background: '#fff', borderRadius: 14, padding: '24px', maxWidth: 400, textAlign: 'center' }}>
               <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
               <p style={{ fontSize: 15, fontWeight: 600, color: '#182840', marginBottom: 8 }}>Supprimer cette fiche ?</p>
-              <p style={{ fontSize: 13, color: '#566880', marginBottom: 20, lineHeight: 1.5 }}>
-                Êtes-vous sûr ? La fiche de <strong>{fiche.prenom} {fiche.nom}</strong> sera supprimée définitivement.
+              <p style={{ fontSize: 13, color: '#566880', marginBottom: 10, lineHeight: 1.5 }}>
+                Cette action est <strong>définitive et irréversible</strong>. Elle supprimera le dossier de <strong>{fiche.prenom} {fiche.nom}</strong>, ainsi que :
               </p>
+              {loadingCounts && (
+                <p style={{ fontSize: 12.5, color: '#94A3B8', marginBottom: 18 }}>Calcul des données liées…</p>
+              )}
+              {deleteCountsError && (
+                <p style={{ fontSize: 12.5, color: '#B85C1A', marginBottom: 18, lineHeight: 1.5 }}>
+                  Impossible de vérifier les données liées à cette fiche. La suppression reste bloquée tant que ce contrôle échoue.
+                </p>
+              )}
+              {deleteCounts && (
+                <ul style={{ textAlign: 'left', fontSize: 12.5, color: '#566880', margin: '0 0 18px', paddingLeft: 20, lineHeight: 1.8 }}>
+                  {FICHE_DEPENDENTS.map(({ entity, label }) => (
+                    <li key={entity}>{deleteCounts[entity]} {label}</li>
+                  ))}
+                </ul>
+              )}
+              {deleteError && (
+                <p style={{ fontSize: 12.5, color: '#B85C1A', marginBottom: 18, lineHeight: 1.5 }}>{deleteError}</p>
+              )}
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                 <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting}
                   style={{ padding: '9px 20px', borderRadius: 8, background: '#F0F3F8', color: '#182840', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
                   Annuler
                 </button>
-                <button onClick={handleDeleteFiche} disabled={deleting}
-                  style={{ padding: '9px 20px', borderRadius: 8, background: '#B85C1A', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13, opacity: deleting ? 0.6 : 1 }}>
-                  {deleting ? '⏳ Suppression...' : '🗑️ Supprimer'}
+                <button onClick={handleDeleteFiche} disabled={deleting || loadingCounts || deleteCountsError}
+                  style={{ padding: '9px 20px', borderRadius: 8, background: '#B85C1A', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13, opacity: (deleting || loadingCounts || deleteCountsError) ? 0.5 : 1 }}>
+                  {deleting ? '⏳ Suppression...' : '🗑️ Supprimer définitivement'}
                 </button>
               </div>
             </motion.div>

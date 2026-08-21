@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Trash2, Loader } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { titleCase } from '@/lib/utils';
+import { deleteEcoleCascade } from '@/lib/cascadeDelete';
 
-export default function DeleteEcoleModal({ ecole, eleveCount, onClose, onDeleted }) {
+export default function DeleteEcoleModal({ ecole, eleveCount, ficheCount, onClose, onDeleted }) {
   const [step, setStep] = useState(1);
   const [typedName, setTypedName] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -17,9 +17,7 @@ export default function DeleteEcoleModal({ ecole, eleveCount, onClose, onDeleted
     setDeleting(true);
     setError('');
     try {
-      await base44.entities.EleveRased.deleteMany({ ecole_id: ecole.id }).catch(() => {});
-      await base44.entities.ClasseEcole.deleteMany({ ecole_id: ecole.id }).catch(() => {});
-      await base44.entities.EcoleRased.delete(ecole.id);
+      await deleteEcoleCascade(ecole.id);
       onDeleted();
     } catch (err) {
       setError(err.message || 'Une erreur est survenue');
@@ -50,13 +48,20 @@ export default function DeleteEcoleModal({ ecole, eleveCount, onClose, onDeleted
               <AlertTriangle className="w-7 h-7 text-red-600" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-3">Supprimer cette école ?</h3>
-            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-              Vous allez supprimer l'école <strong className="text-gray-900">{titleCase(ecole?.nom)}</strong>
-              {' '}ainsi que toutes ses classes et les{' '}
-              <strong className="text-red-600">{eleveCount}</strong>
-              {' '}élève{eleveCount > 1 ? 's' : ''} associé{eleveCount > 1 ? 's' : ''}.
+            <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+              Vous allez supprimer l'école <strong className="text-gray-900">{titleCase(ecole?.nom)}</strong> et toutes ses classes, ainsi que :
             </p>
-            <p className="text-xs text-gray-400 mb-6">Cette action est irréversible.</p>
+            <ul className="text-sm text-gray-600 text-left mx-auto mb-4 pl-5 space-y-1 leading-relaxed max-w-[280px]">
+              <li>
+                <strong className="text-red-600">{eleveCount}</strong>{' '}
+                élève{eleveCount > 1 ? 's' : ''} du répertoire
+              </li>
+              <li>
+                <strong className="text-red-600">{ficheCount}</strong>{' '}
+                dossier{ficheCount > 1 ? 's' : ''} RASED complet{ficheCount > 1 ? 's' : ''} (identité, suivi, notes, historique, rappels…)
+              </li>
+            </ul>
+            <p className="text-xs font-semibold text-red-600 mb-6">Cette action est définitive et irréversible.</p>
             <div className="flex gap-3 justify-center">
               <Button variant="outline" onClick={handleClose} disabled={deleting}>
                 Annuler

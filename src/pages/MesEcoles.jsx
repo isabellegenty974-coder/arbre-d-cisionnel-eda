@@ -142,6 +142,11 @@ export default function MesEcoles() {
     });
     return {
       total: elevesEcole.length,
+      // Dossiers RASED complets rattachés à l'école (tous EleveRased avec un
+      // fiche_eleve_id, toutes années confondues) : c'est exactement ce que
+      // supprimerait deleteEcoleCascade, à ne pas confondre avec fichesEcole
+      // ci-dessus qui est filtré sur l'année scolaire sélectionnée.
+      ficheRased: elevesEcole.filter(el => el.fiche_eleve_id).length,
       nouveau: fichesEcole.filter(f => f.statut === 'Nouveau').length,
       actif: fichesEcole.filter(f => f.statut === 'Suivi actif').length,
       attente: fichesEcole.filter(f => f.statut === 'En attente').length,
@@ -419,6 +424,7 @@ export default function MesEcoles() {
         <DeleteEcoleModal
           ecole={ecoleToDelete}
           eleveCount={getEcoleStats(ecoleToDelete.id).total}
+          ficheCount={getEcoleStats(ecoleToDelete.id).ficheRased}
           onClose={() => setEcoleToDelete(null)}
           onDeleted={() => {
             setEcoleToDelete(null);
