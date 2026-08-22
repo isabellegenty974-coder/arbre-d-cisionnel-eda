@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { encryptEleveFields } from '@/lib/encryptedFields';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
@@ -36,7 +37,7 @@ export default function AddEleveModal({ open, onClose, ecoleId, classes, onSaved
       classeId = newClasse.id;
     }
 
-    await base44.entities.EleveRased.create({
+    await base44.entities.EleveRased.create(await encryptEleveFields({
       prenom: form.prenom.trim(),
       nom: form.nom.trim(),
       date_naissance: form.date_naissance || undefined,
@@ -46,7 +47,7 @@ export default function AddEleveModal({ open, onClose, ecoleId, classes, onSaved
       origine_import_pdf: false,
       motif_signalement: form.motif_signalement || undefined,
       date_derniere_action: new Date().toISOString().split('T')[0],
-    });
+    }));
 
     setSaving(false);
     setForm({ prenom: '', nom: '', date_naissance: '', classe_id: '', nouvelle_classe: '', motif_signalement: '', statut: 'Nouveau' });

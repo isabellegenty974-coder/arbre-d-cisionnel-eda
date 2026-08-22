@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Upload, Loader, Check, Search, AlertCircle, ChevronDown, ChevronRight, Users } from 'lucide-react';
 import { titleCase, normalizeName } from '@/lib/utils';
+import { decryptEleveList, encryptEleveFields } from '@/lib/encryptedFields';
 
 export default function ImportElevesPDF({ ecoleId: ecoleIdConnue, onDone }) {
   const [step, setStep] = useState('upload'); // upload | parsing | validate | importing | done
@@ -218,9 +219,10 @@ Retourne uniquement un objet JSON valide.`,
       }
 
       // Créer ou mettre à jour chaque élève
-      const elevesExistants = classeId
+      const elevesExistantsRaw = classeId
         ? await base44.entities.EleveRased.filter({ classe_id: classeId }).catch(() => [])
         : [];
+      const elevesExistants = await decryptEleveList(elevesExistantsRaw).catch(() => elevesExistantsRaw);
 
       for (const el of eleves) {
         try {
@@ -230,20 +232,22 @@ Retourne uniquement un objet JSON valide.`,
             e.nom?.toUpperCase() === nomNorm && e.prenom?.trim() === prenomNorm
           );
           if (existe) {
-            await base44.entities.EleveRased.update(existe.id, {
+            await base44.entities.EleveRased.update(existe.id, await encryptEleveFields({
+              nom: existe.nom,
+              prenom: existe.prenom,
               date_naissance: el.date_naissance || existe.date_naissance,
               ecole_id: ecoleId || existe.ecole_id,
               classe_id: classeId || existe.classe_id,
               origine_import_pdf: true,
-            });
+            }));
           } else {
-            await base44.entities.EleveRased.create({
+            await base44.entities.EleveRased.create(await encryptEleveFields({
               nom: nomNorm, prenom: prenomNorm,
               date_naissance: el.date_naissance || null,
               classe_id: classeId || null, ecole_id: ecoleId || null,
               statut: 'Nouveau',
               origine_import_pdf: true,
-            });
+            }));
           }
           ok++;
         } catch { err++; }
