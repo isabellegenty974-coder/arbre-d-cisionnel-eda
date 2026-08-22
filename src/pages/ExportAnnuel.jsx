@@ -6,6 +6,7 @@ import { FileDown, ArrowLeft, Loader2, Users, Building2, TrendingDown, Activity,
 import { motion } from "framer-motion";
 import { generateRapportAnnuel } from "@/lib/rapportAnnuelGenerator";
 import { titleCase } from "@/lib/utils";
+import { decryptEleveList } from "@/lib/encryptedFields";
 
 function currentAnneeScolaire() {
   const now = new Date();
@@ -34,7 +35,11 @@ export default function ExportAnnuel() {
       fetchAllPages('EcoleRased', '-nom'),
       fetchAllPages('AnneeScolaire', '-libelle'),
       fetchAllPages('MembreEquipe'),
-    ]).then(([fiches, eleves, ecoles, annees, equipe]) => {
+    ]).then(async ([fichesRaw, elevesRaw, ecoles, annees, equipe]) => {
+      const [fiches, eleves] = await Promise.all([
+        decryptEleveList(fichesRaw).catch(() => fichesRaw),
+        decryptEleveList(elevesRaw).catch(() => elevesRaw),
+      ]);
       const fichesAnnee = fiches.filter(f => f.annee_scolaire === libelle);
       const anneeCourante = annees.find(a => a.libelle === libelle) || { libelle };
 

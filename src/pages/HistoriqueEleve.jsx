@@ -6,6 +6,7 @@ import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { decryptEleveFields } from "@/lib/encryptedFields";
 
 const DOMAINE_COLORS = {
   apprentissage: "bg-blue-100 text-blue-700 border-blue-200",
@@ -120,9 +121,10 @@ export default function HistoriqueEleve() {
       base44.entities.HistoriqueEDA.filter({ eleve_id: eleveId }, "-date", 100),
       base44.entities.FicheEleve.get(eleveId).catch(() => null),
     ])
-      .then(([hist, fiche]) => {
+      .then(async ([hist, fiche]) => {
+        const ficheDec = await decryptEleveFields(fiche).catch(() => fiche);
         setHistorique(hist);
-        setEleve(fiche);
+        setEleve(ficheDec);
       })
       .finally(() => setLoading(false));
   }, [eleveId]);

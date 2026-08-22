@@ -4,6 +4,7 @@ import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { exportStatsPDF } from "@/lib/statsExport";
 import { ACTES } from "@/lib/actesRased";
 import { titleCase } from "@/lib/utils";
+import { decryptEleveList } from "@/lib/encryptedFields";
 import { Button } from "@/components/ui/button";
 import {
   Download, Users, ClipboardList, TrendingUp, BookOpen,
@@ -97,7 +98,8 @@ export default function StatsAnnuelles() {
       base44.entities.Diagnostic.list("-created_date", 500),
       base44.entities.FicheEleve.list("-created_date", 500),
       base44.entities.AnneeScolaire.list(),
-    ]).then(([diags, fich, annees]) => {
+    ]).then(async ([diags, fichRaw, annees]) => {
+      const fich = await decryptEleveList(fichRaw).catch(() => fichRaw);
       setDiagnostics(diags);
       setFiches(fich);
       setAnneesScolaires(annees);

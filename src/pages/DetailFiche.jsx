@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { decryptEleveFields } from '@/lib/encryptedFields';
 import { Loader, ArrowLeft, Search, Clock, Info, ClipboardList, Plus, Trash2, X, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RapportContent from '@/components/RapportContent';
@@ -975,9 +976,10 @@ export default function DetailFiche() {
       base44.entities.FicheEleve.get(ficheId),
       base44.entities.HistoriqueEDA.filter({ eleve_id: ficheId }).catch(() => []),
       base44.auth.me().catch(() => null),
-    ]).then(([ficheData, histo, userData]) => {
-      setFiche(ficheData);
-      setInterventions(ficheData?.interventions || []);
+    ]).then(async ([ficheData, histo, userData]) => {
+      const ficheDec = await decryptEleveFields(ficheData).catch(() => ficheData);
+      setFiche(ficheDec);
+      setInterventions(ficheDec?.interventions || []);
       setHistoriqueEDA(histo.sort((a, b) => new Date(b.date || b.created_date) - new Date(a.date || a.created_date)));
       setUser(userData);
     }).catch(() => setFiche(null)).finally(() => setLoading(false));

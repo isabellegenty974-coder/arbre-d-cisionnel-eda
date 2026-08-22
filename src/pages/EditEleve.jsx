@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { decryptEleveFields, encryptEleveFields } from "@/lib/encryptedFields";
 import ScreenLayout from "@/components/tree/ScreenLayout";
 import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
@@ -48,8 +49,8 @@ export default function EditEleve() {
 
   useEffect(() => {
     if (!id) { setLoading(false); return; }
-    base44.entities.FicheEleve.filter({ id }).then((results) => {
-      const rec = results[0];
+    base44.entities.FicheEleve.filter({ id }).then(async (results) => {
+      const rec = await decryptEleveFields(results[0]).catch(() => results[0]);
       if (rec) {
         setForm({
           nom: rec.nom || "",
@@ -82,14 +83,17 @@ export default function EditEleve() {
   const handleSave = async () => {
     setSaving(true);
     // annee_scolaire est immuable : on ne la renvoie jamais (rattachement permanent à l'année de création).
-    await base44.entities.FicheEleve.update(id, {
-      nom: form.nom,
-      prenom: form.prenom,
-      date_naissance: dateNaissance || undefined,
-      age: ageCalcule ?? undefined,
-      ecole: form.ecole,
-      classe: form.classe,
-    });
+    await base44.entities.FicheEleve.update(
+      id,
+      await encryptEleveFields({
+        nom: form.nom,
+        prenom: form.prenom,
+        date_naissance: dateNaissance || undefined,
+        age: ageCalcule ?? undefined,
+        ecole: form.ecole,
+        classe: form.classe,
+      })
+    );
     navigate(`/detail-fiche?id=${id}`);
   };
 

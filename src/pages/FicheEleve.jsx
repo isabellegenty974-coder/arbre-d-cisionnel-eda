@@ -1,4 +1,5 @@
 import { base44 } from '@/api/base44Client';
+import { decryptEleveList, encryptEleveFields } from '@/lib/encryptedFields';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import ScreenLayout from '@/components/tree/ScreenLayout';
@@ -171,7 +172,8 @@ export default function FicheEleve() {
       // Une fiche appartient de façon permanente et immuable à l'année pour laquelle
       // elle a été créée : on ne modifie JAMAIS les fiches des années passées.
       const norm = s => (s || '').toLowerCase().trim();
-      const existing = await base44.entities.FicheEleve.list('-created_date', 1000).catch(() => []);
+      const existingRaw = await base44.entities.FicheEleve.list('-created_date', 1000).catch(() => []);
+      const existing = await decryptEleveList(existingRaw).catch(() => existingRaw);
       const matches = existing.filter(f =>
         f.annee_scolaire === anneeActive &&
         norm(f.nom) === norm(nom.trim()) && norm(f.prenom) === norm(prenom.trim())
@@ -226,18 +228,20 @@ export default function FicheEleve() {
         setTimeout(() => navigate(`/detail-fiche?id=${targetId}&success=true`), 1500);
       } else {
         // Aucun doublon ou homonyme confirmé différent : créer une nouvelle fiche
-        const created = await base44.entities.FicheEleve.create({
-          nom: nom.trim(),
-          prenom: prenom.trim(),
-          age: ageCalcule !== null ? ageCalcule : undefined,
-          date_naissance: dateNaissance || undefined,
-          classe: classe || undefined,
-          ecole: ecole || undefined,
-          date: new Date().toISOString().split('T')[0],
-          annee_scolaire: anneeActive || undefined,
-          createdByName: fullName,
-          createdByProfession: profession,
-        });
+        const created = await base44.entities.FicheEleve.create(
+          await encryptEleveFields({
+            nom: nom.trim(),
+            prenom: prenom.trim(),
+            age: ageCalcule !== null ? ageCalcule : undefined,
+            date_naissance: dateNaissance || undefined,
+            classe: classe || undefined,
+            ecole: ecole || undefined,
+            date: new Date().toISOString().split('T')[0],
+            annee_scolaire: anneeActive || undefined,
+            createdByName: fullName,
+            createdByProfession: profession,
+          })
+        );
         setSavedId(created.id);
         if (eleveRasedId) {
           await base44.entities.EleveRased.update(eleveRasedId, {

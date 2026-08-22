@@ -7,6 +7,7 @@ import { usePresence } from '@/lib/usePresence';
 import { titleCase } from '@/lib/utils';
 import { timeAgo } from '@/lib/time';
 import { fetchAllPages } from '@/lib/fetchAllPages';
+import { decryptEleveList, decryptEleveFields } from '@/lib/encryptedFields';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -187,7 +188,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const [u, f, ec, el, mb, no, an] = await Promise.all([
+      const [u, fRaw, ec, elRaw, mb, no, an] = await Promise.all([
         base44.auth.me().catch(() => null),
         fetchAllPages('FicheEleve', '-updated_date'),
         base44.entities.EcoleRased.list('-created_date', 100).catch(() => []),
@@ -195,6 +196,10 @@ export default function Dashboard() {
         base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
         base44.entities.Notification.filter({ lu: false }).catch(() => []),
         base44.entities.AnneeScolaire.list('-libelle', 20).catch(() => []),
+      ]);
+      const [f, el] = await Promise.all([
+        decryptEleveList(fRaw).catch(() => fRaw),
+        decryptEleveList(elRaw).catch(() => elRaw),
       ]);
       setUser(u); setFiches(f); setEcoles(ec);
       setElevesR(el); setMembres(mb); setNotifs(no);
@@ -206,13 +211,15 @@ export default function Dashboard() {
     load();
 
     // Souscription temps réel sur FicheEleve (fil d'activité live)
-    const unsub = base44.entities.FicheEleve.subscribe((event) => {
+    const unsub = base44.entities.FicheEleve.subscribe(async (event) => {
       if (event.type === 'create') {
         // Pas de .slice(0, 200) ici : tronquer réintroduirait le plafond que
         // fetchAllPages() vient d'éliminer au chargement initial.
-        setFiches(prev => [event.data, ...prev]);
+        const dec = await decryptEleveFields(event.data).catch(() => event.data);
+        setFiches(prev => [dec, ...prev]);
       } else if (event.type === 'update') {
-        setFiches(prev => prev.map(f => f.id === event.data.id ? { ...f, ...event.data } : f));
+        const dec = await decryptEleveFields(event.data).catch(() => event.data);
+        setFiches(prev => prev.map(f => f.id === dec.id ? { ...f, ...dec } : f));
       } else if (event.type === 'delete') {
         setFiches(prev => prev.filter(f => f.id !== event.entity_id));
       }

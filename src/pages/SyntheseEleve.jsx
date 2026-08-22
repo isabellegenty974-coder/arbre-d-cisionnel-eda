@@ -5,6 +5,7 @@ import ScreenLayout from '@/components/tree/ScreenLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { decryptEleveFields } from '@/lib/encryptedFields';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
@@ -32,8 +33,9 @@ export default function SyntheseEleve() {
       base44.entities.FicheEleve.get(ficheId),
       base44.entities.HistoriqueEDA.filter({ eleve_id: ficheId }, '-date', 100),
     ])
-      .then(([ficheData, hist]) => {
-        setFiche(ficheData);
+      .then(async ([ficheData, hist]) => {
+        const ficheDec = await decryptEleveFields(ficheData).catch(() => ficheData);
+        setFiche(ficheDec);
         setHistorique(hist || []);
       })
       .catch(() => setFiche(null))

@@ -11,6 +11,7 @@ import AddEleveModal from '@/components/rased/AddEleveModal';
 import AddEcoleModal from '@/components/rased/AddEcoleModal';
 import DeleteEcoleModal from '@/components/rased/DeleteEcoleModal';
 import { titleCase } from '@/lib/utils';
+import { decryptEleveList } from '@/lib/encryptedFields';
 
 const STATUS_CONFIG = {
   'Suivi actif': { color: '#16a34a', bg: '#dcfce7', label: 'Suivi actif' },
@@ -45,12 +46,13 @@ export default function DetailEcole() {
 
   const load = async () => {
     if (!ecoleId) { setLoading(false); return; }
-    const [ec, cls, el, mb] = await Promise.all([
+    const [ec, cls, elRaw, mb] = await Promise.all([
       base44.entities.EcoleRased.get(ecoleId).catch(() => null),
       base44.entities.ClasseEcole.filter({ ecole_id: ecoleId }).catch(() => []),
       base44.entities.EleveRased.filter({ ecole_id: ecoleId }).catch(() => []),
       base44.entities.MembreEquipe.list('-created_date', 100).catch(() => []),
     ]);
+    const el = await decryptEleveList(elRaw).catch(() => elRaw);
     setEcole(ec);
     setMembres(mb);
     const sorted = [...cls].sort((a, b) => {

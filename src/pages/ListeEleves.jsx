@@ -6,6 +6,7 @@ import HamburgerMenu from "@/components/Navigation/HamburgerMenu";
 import { Button } from "@/components/ui/button";
 import { Plus, User, Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { decryptEleveList } from "@/lib/encryptedFields";
 
 export default function ListeEleves() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function ListeEleves() {
 
   useEffect(() => {
     base44.entities.FicheEleve.list("-created_date", 100)
+      .then(records => decryptEleveList(records).catch(() => records))
       .then(setEleves)
       .finally(() => setLoading(false));
   }, []);
