@@ -13,7 +13,8 @@ import ResumeButton from '@/components/tree/ResumeButton';
 import BottomBar from '@/components/Navigation/BottomBar';
 import ReconnectButton from '@/components/ReconnectButton';
 import WelcomeModal from '@/components/WelcomeModal';
-import { CryptoProvider } from '@/lib/CryptoContext';
+import { CryptoProvider, useCrypto } from '@/lib/CryptoContext';
+import CryptoUnlock from '@/components/CryptoUnlock';
 import CryptoDemo from './pages/CryptoDemo';
 import MigrationChiffrement from './pages/MigrationChiffrement';
 
@@ -216,6 +217,7 @@ function AutoRegister() {
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user } = useAuth();
+  const { status: cryptoStatus } = useCrypto();
   const [showWelcome, setShowWelcome] = useState(false);
   const location = useLocation();
 
@@ -276,6 +278,19 @@ const AuthenticatedApp = () => {
 
   if (authError && !isPublicPage && authError.type === 'user_not_registered') {
     return <AutoRegister />;
+  }
+
+  // Porte de verrouillage chiffrement : tant que la clé maîtresse n'est pas déverrouillée,
+  // on bloque l'accès à l'app (sauf pages publiques login/register).
+  if (!isPublicPage && cryptoStatus !== 'unlocked') {
+    if (cryptoStatus === 'loading') {
+      return (
+        <div className="fixed inset-0 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+    return <CryptoUnlock />;
   }
 
   return (
