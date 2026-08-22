@@ -15,7 +15,7 @@ export default function CryptoUnlock() {
   const [fileName, setFileName] = useState('');
 
   const isSetup = status === 'not_initialized';
-  const activeMode = mode || (isSetup ? null : null);
+  const activeMode = mode || (isSetup ? null : 'unlock');
 
   const handleFile = (e) => {
     const file = e.target.files?.[0];
